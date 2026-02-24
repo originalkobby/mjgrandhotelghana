@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 
 const navItems = [
-  { label: "Home", href: "#home" },
-  { label: "Rooms & Suites", href: "#rooms" },
-  { label: "Experiences", href: "#experiences" },
-  { label: "Dining", href: "#dining" },
-  { label: "Gallery", href: "#gallery" },
+  { label: "Home", href: "#home", isHash: true },
+  { label: "Rooms & Suites", href: "#rooms", isHash: true },
+  { label: "Experiences", href: "#experiences", isHash: true },
+  { label: "Menu", href: "/menu", isHash: false },
+  { label: "Gallery", href: "#gallery", isHash: true },
+  { label: "Policy", href: "/policy", isHash: false },
 ];
 
 const Navbar = () => {
@@ -31,28 +33,39 @@ const Navbar = () => {
         }`}
       >
         <div className="container mx-auto flex items-center justify-between px-6 lg:px-12">
-          <a href="#home" className="font-serif text-2xl tracking-wider text-cream">
+          <Link to="/" className="font-serif text-2xl tracking-wider text-cream">
             MJ Grand
-          </a>
+          </Link>
 
           {/* Desktop nav */}
           <div className="hidden lg:flex items-center gap-8">
-            {navItems.map((item) => (
-              <a
-                key={item.label}
-                href={item.href}
-                className="group relative text-sm font-sans font-medium tracking-wide text-cream/80 hover:text-cream transition-colors duration-300"
-              >
-                {item.label}
-                <span className="absolute -bottom-1 left-0 h-[1.5px] w-0 bg-gold transition-all duration-300 ease-[cubic-bezier(0.3,0,0.2,1)] group-hover:w-full" />
-              </a>
-            ))}
-            <a
-              href="#contact"
+            {navItems.map((item) =>
+              item.isHash ? (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  className="group relative text-sm font-sans font-medium tracking-wide text-cream/80 hover:text-cream transition-colors duration-300"
+                >
+                  {item.label}
+                  <span className="absolute -bottom-1 left-0 h-[1.5px] w-0 bg-gold transition-all duration-300 ease-[cubic-bezier(0.3,0,0.2,1)] group-hover:w-full" />
+                </a>
+              ) : (
+                <Link
+                  key={item.label}
+                  to={item.href}
+                  className="group relative text-sm font-sans font-medium tracking-wide text-cream/80 hover:text-cream transition-colors duration-300"
+                >
+                  {item.label}
+                  <span className="absolute -bottom-1 left-0 h-[1.5px] w-0 bg-gold transition-all duration-300 ease-[cubic-bezier(0.3,0,0.2,1)] group-hover:w-full" />
+                </Link>
+              )
+            )}
+            <Link
+              to="/contact"
               className="ml-2 border border-gold/60 px-5 py-2 text-sm font-sans font-medium tracking-wide text-cream hover:bg-gold hover:text-charcoal transition-all duration-300"
             >
-              Book Now
-            </a>
+              Contact
+            </Link>
           </div>
 
           {/* Mobile toggle */}
@@ -92,29 +105,49 @@ const Navbar = () => {
                 <X size={24} />
               </button>
               <div className="flex flex-col gap-6">
-                {navItems.map((item, i) => (
-                  <motion.a
-                    key={item.label}
-                    href={item.href}
-                    onClick={() => setMobileOpen(false)}
-                    initial={{ opacity: 0, x: 30 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.1 + i * 0.06 }}
-                    className="font-serif text-2xl text-cream/80 hover:text-gold transition-colors duration-300"
-                  >
-                    {item.label}
-                  </motion.a>
-                ))}
-                <motion.a
-                  href="#contact"
-                  onClick={() => setMobileOpen(false)}
+                {navItems.map((item, i) =>
+                  item.isHash ? (
+                    <motion.a
+                      key={item.label}
+                      href={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      initial={{ opacity: 0, x: 30 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 + i * 0.06 }}
+                      className="font-serif text-2xl text-cream/80 hover:text-gold transition-colors duration-300"
+                    >
+                      {item.label}
+                    </motion.a>
+                  ) : (
+                    <motion.div
+                      key={item.label}
+                      initial={{ opacity: 0, x: 30 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 + i * 0.06 }}
+                    >
+                      <Link
+                        to={item.href}
+                        onClick={() => setMobileOpen(false)}
+                        className="font-serif text-2xl text-cream/80 hover:text-gold transition-colors duration-300 block"
+                      >
+                        {item.label}
+                      </Link>
+                    </motion.div>
+                  )
+                )}
+                <motion.div
                   initial={{ opacity: 0, x: 30 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.4 }}
-                  className="mt-4 border border-gold/60 px-5 py-3 text-center font-sans font-medium tracking-wide text-cream hover:bg-gold hover:text-charcoal transition-all duration-300"
                 >
-                  Book Now
-                </motion.a>
+                  <Link
+                    to="/contact"
+                    onClick={() => setMobileOpen(false)}
+                    className="mt-4 border border-gold/60 px-5 py-3 text-center font-sans font-medium tracking-wide text-cream hover:bg-gold hover:text-charcoal transition-all duration-300 block"
+                  >
+                    Contact
+                  </Link>
+                </motion.div>
               </div>
             </motion.div>
           </>
