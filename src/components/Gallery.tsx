@@ -1,0 +1,69 @@
+import { useRef } from "react";
+import { motion, useInView } from "framer-motion";
+import galleryPool from "@/assets/gallery-pool.jpg";
+import galleryLobby from "@/assets/gallery-lobby.jpg";
+import galleryGarden from "@/assets/gallery-garden.jpg";
+import galleryBeach from "@/assets/gallery-beach.jpg";
+
+const images = [
+  { src: galleryPool, alt: "Infinity pool at sunset", span: "md:col-span-2" },
+  { src: galleryLobby, alt: "Grand lobby with chandelier", span: "" },
+  { src: galleryGarden, alt: "Garden terrace dining", span: "" },
+  { src: galleryBeach, alt: "Beach club with white cabanas", span: "md:col-span-2" },
+];
+
+const Gallery = () => {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-50px" });
+
+  return (
+    <section id="gallery" className="py-24 md:py-32 bg-background">
+      <div className="container mx-auto px-6 lg:px-12">
+        <motion.div
+          ref={ref}
+          initial={{ opacity: 0, y: 30 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
+          className="text-center mb-16"
+        >
+          <p className="font-sans text-sm uppercase tracking-[0.25em] text-accent mb-3">
+            Visual Story
+          </p>
+          <h2 className="font-serif text-4xl md:text-5xl text-foreground">
+            Gallery
+          </h2>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {images.map((img, i) => (
+            <GalleryImage key={img.alt} img={img} index={i} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const GalleryImage = ({ img, index }: { img: typeof images[0]; index: number }) => {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-80px" });
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={inView ? { opacity: 1, scale: 1 } : {}}
+      transition={{ duration: 0.7, delay: index * 0.1, ease: [0.3, 0, 0.2, 1] }}
+      className={`overflow-hidden ${img.span}`}
+    >
+      <img
+        src={img.src}
+        alt={img.alt}
+        className="w-full h-64 md:h-80 object-cover transition-transform duration-700 ease-[cubic-bezier(0.3,0,0.2,1)] hover:scale-105 cursor-pointer"
+        loading="lazy"
+      />
+    </motion.div>
+  );
+};
+
+export default Gallery;
