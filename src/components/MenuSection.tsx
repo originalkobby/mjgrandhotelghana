@@ -31,7 +31,7 @@ const MenuSection = ({ title, subtitle, items, image, imageAlt, reverse = false 
   return (
     <section className="py-16 md:py-24">
       <div
-        className={`flex flex-col ${reverse ? "lg:flex-row-reverse" : "lg:flex-row"} gap-10 lg:gap-16 items-start`}
+        className={`flex flex-col ${reverse ? "lg:flex-row-reverse" : "lg:flex-row"} gap-10 lg:gap-16 items-center`}
       >
         {/* Image */}
         <motion.div
