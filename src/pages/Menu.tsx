@@ -97,6 +97,9 @@ const Menu = () => {
       {/* Header */}
       <div className="sticky top-0 z-50 glass-nav py-4">
         <div className="container mx-auto px-6 lg:px-12 flex items-center justify-between">
+          <Link to="/" className="flex items-center">
+            <img src={logo} alt="MJ Grand Hotel" className="h-7 w-auto" />
+          </Link>
           <Link
             to="/"
             className="flex items-center gap-2 text-cream/80 hover:text-gold transition-colors duration-300 font-sans text-sm"
@@ -104,8 +107,6 @@ const Menu = () => {
             <ArrowLeft size={18} />
             Back to Home
           </Link>
-          <img src={logo} alt="MJ Grand Hotel" className="h-7 w-auto" />
-          <div className="w-24" />
         </div>
       </div>
 
