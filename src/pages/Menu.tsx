@@ -115,7 +115,7 @@ const Menu = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
           className="text-center mb-4"
         >
           <h1 className="font-serif text-4xl md:text-5xl text-cream mb-4">Our Kitchen Menu</h1>
@@ -154,10 +154,10 @@ const Menu = () => {
         {kidsMeals.length > 0 && (
           <div className="-mt-12 mb-16">
             <motion.div
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
             >
               <h3 className="font-serif text-2xl text-cream mb-2">Kids Meals</h3>
               <div className="w-12 h-[2px] bg-gold mb-6" />
@@ -194,10 +194,10 @@ const Menu = () => {
         {extras.length > 0 && (
           <div className="-mt-12 mb-16">
             <motion.div
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
             >
               <h3 className="font-serif text-2xl text-cream mb-2">Extras</h3>
               <div className="w-12 h-[2px] bg-gold mb-6" />

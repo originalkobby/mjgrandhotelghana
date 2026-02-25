@@ -26,7 +26,7 @@ const Contact = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
           className="text-center mb-16"
         >
           <h1 className="font-serif text-4xl md:text-5xl text-foreground mb-4">Get In Touch</h1>
@@ -39,9 +39,9 @@ const Contact = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Contact Info */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2, ease: [0.3, 0, 0.2, 1] }}
             className="space-y-8"
           >
             <div className="bg-card border border-border rounded-lg p-8">
@@ -93,9 +93,9 @@ const Contact = () => {
 
           {/* Contact Form */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3, ease: [0.3, 0, 0.2, 1] }}
             className="bg-card border border-border rounded-lg p-8"
           >
             <h2 className="font-serif text-2xl text-foreground mb-6">Send a Message</h2>

@@ -109,7 +109,7 @@ const Policy = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
           className="text-center mb-16"
         >
           <h1 className="font-serif text-4xl md:text-5xl text-foreground mb-4">
@@ -130,8 +130,8 @@ const Policy = () => {
                 key={section.title}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-30px" }}
-                transition={{ duration: 0.5, delay: i * 0.05 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.6, delay: i * 0.05, ease: [0.3, 0, 0.2, 1] }}
                 className="bg-card border border-border rounded-lg p-6 md:p-8"
               >
                 <div className="flex items-center gap-3 mb-5">

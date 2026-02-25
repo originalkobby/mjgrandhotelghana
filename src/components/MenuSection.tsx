@@ -23,8 +23,8 @@ const containerVariants = {
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.3, 0, 0.2, 1] as const } },
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.3, 0, 0.2, 1] as const } },
 };
 
 const MenuSection = ({ title, subtitle, items, image, imageAlt, reverse = false }: MenuSectionProps) => {
@@ -35,10 +35,10 @@ const MenuSection = ({ title, subtitle, items, image, imageAlt, reverse = false 
       >
         {/* Image */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.7, ease: [0.3, 0, 0.2, 1] }}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
           className="w-full lg:w-1/2 flex-shrink-0"
         >
           <div className="rounded-2xl overflow-hidden shadow-2xl">
@@ -56,8 +56,8 @@ const MenuSection = ({ title, subtitle, items, image, imageAlt, reverse = false 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-60px" }}
-            transition={{ duration: 0.5, ease: [0.3, 0, 0.2, 1] }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
             className="mb-8"
           >
             <h2 className="font-serif text-3xl md:text-4xl text-cream tracking-wide">{title}</h2>
@@ -71,7 +71,7 @@ const MenuSection = ({ title, subtitle, items, image, imageAlt, reverse = false 
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, margin: "-40px" }}
+            viewport={{ once: true, margin: "-50px" }}
             className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"
           >
             {items.map((item, i) => (
