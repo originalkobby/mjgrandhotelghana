@@ -167,3 +167,28 @@ export const takeOutPacks: MenuItem[] = [
   { name: "Aluminium Pack", description: "", price: "Ghc 50" },
   { name: "Paper Bag", description: "", price: "Ghc 15" },
 ];
+
+export const vegetarianDishes: MenuItem[] = [
+  { name: "Stir Fried Vegetables", description: "", price: "Ghc 90" },
+  { name: "Sauteed Vegetables and Chickpeas", description: "", price: "Ghc 100" },
+  { name: "Vegetable Soup", description: "", price: "Ghc 90" },
+  { name: "Vegetarian Egusi Stew", description: "", price: "Ghc 90" },
+  { name: "Pita Bread & Hummus", description: "", price: "Ghc 90" },
+  { name: "Mix Vegetable Stew", description: "", price: "Ghc 90" },
+  { name: "Beans Stew", description: "", price: "Ghc 120" },
+  { name: "Spaghetti Pomodoro", description: "", price: "Ghc 150" },
+];
+
+export const sideOrders: MenuItem[] = [
+  { name: "Fried Rice", description: "", price: "Ghc 50" },
+  { name: "Sauteed Potato", description: "", price: "Ghc 50" },
+  { name: "Kelewele", description: "", price: "Ghc 40" },
+  { name: "Jollof Rice", description: "", price: "Ghc 40" },
+  { name: "Plain Rice", description: "", price: "Ghc 40" },
+  { name: "Potato Chips", description: "", price: "Ghc 50" },
+  { name: "Vegetable Rice", description: "", price: "Ghc 50" },
+  { name: "Fried Plantain", description: "", price: "Ghc 40" },
+  { name: "Banku", description: "", price: "Ghc 30" },
+  { name: "Fried Yam", description: "", price: "Ghc 30" },
+  { name: "Fufu", description: "", price: "Ghc 30" },
+];
