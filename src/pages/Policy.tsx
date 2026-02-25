@@ -63,6 +63,14 @@ const sections = [
   },
   {
     icon: AlertTriangle,
+    title: "Cancellation & Amendments",
+    items: [
+      "Cancellations or amendments to your reservation must be made at least 72 hours before your arrival date. Refunds will incur a 30% charge, inclusive of any applicable prevailing government taxes.",
+      "In the event of a no-show, a 100% charge (inclusive of any applicable prevailing government taxes) will be applied to the account provided at the time of reservation.",
+    ],
+  },
+  {
+    icon: AlertTriangle,
     title: "Flying of Drones",
     items: ["Flying of drones is not permitted unless authorized by Management."],
   },
