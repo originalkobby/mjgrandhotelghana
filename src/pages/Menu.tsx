@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import MenuSection from "@/components/MenuSection";
+import logo from "@/assets/logo.png";
 
 import menuF1 from "@/assets/menu-f1.png";
 import menuF2 from "@/assets/menu-f2.png";
@@ -103,7 +104,7 @@ const Menu = () => {
             <ArrowLeft size={18} />
             Back to Home
           </Link>
-          <span className="font-serif text-xl tracking-wider text-cream">Kitchen Menu</span>
+          <img src={logo} alt="MJ Grand Hotel" className="h-10 w-auto" />
           <div className="w-24" />
         </div>
       </div>

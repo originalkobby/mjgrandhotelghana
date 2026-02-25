@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import logo from "@/assets/logo.png";
 
 const navItems = [
   { label: "Home", href: "#home", isHash: true },
@@ -33,8 +34,8 @@ const Navbar = () => {
         }`}
       >
         <div className="container mx-auto flex items-center justify-between px-6 lg:px-12">
-          <Link to="/" className="font-serif text-2xl tracking-wider text-cream">
-            MJ Grand
+          <Link to="/" className="flex items-center">
+            <img src={logo} alt="MJ Grand Hotel" className="h-12 w-auto" />
           </Link>
 
           {/* Desktop nav */}
