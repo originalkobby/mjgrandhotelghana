@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Shield, Clock, UtensilsCrossed, Key, Car, Waves, AlertTriangle, MessageSquare } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 const sections = [
   {
@@ -91,6 +92,9 @@ const Policy = () => {
       {/* Header */}
       <div className="sticky top-0 z-50 glass-nav py-4">
         <div className="container mx-auto px-6 lg:px-12 flex items-center justify-between">
+          <Link to="/" className="flex items-center">
+            <img src={logo} alt="MJ Grand Hotel" className="h-7 w-auto" />
+          </Link>
           <Link
             to="/"
             className="flex items-center gap-2 text-cream/80 hover:text-gold transition-colors duration-300 font-sans text-sm"
@@ -98,8 +102,6 @@ const Policy = () => {
             <ArrowLeft size={18} />
             Back to Home
           </Link>
-          <span className="font-serif text-xl tracking-wider text-cream">Guest Policies</span>
-          <div className="w-24" />
         </div>
       </div>
 
