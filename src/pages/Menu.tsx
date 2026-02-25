@@ -9,87 +9,51 @@ import menuF2 from "@/assets/menu-f2.png";
 import menuF3 from "@/assets/menu-f3.png";
 import menuF4 from "@/assets/menu-f4.png";
 import menuF5 from "@/assets/menu-f5.png";
+import menuF6 from "@/assets/menu-f6.jpg";
+import menuF7 from "@/assets/menu-f7.jpg";
+import menuF8 from "@/assets/menu-f8.jpg";
+import menuF9 from "@/assets/menu-f9.jpg";
+import menuF10 from "@/assets/menu-f10.jpg";
 
-const hotAppetizers = [
-  { name: "Spicy Chicken Wings", description: "Juicy fried chicken wings in hot green chilli sauce", price: "Ghc 90" },
-  { name: "Beef Cocktail Khebab", description: "Tender beef, khebab powder, grilled onions, bell pepper, fresh tomato", price: "Ghc 100" },
-  { name: "Beef Samosa", description: "Tender beef, khebab powder, grilled onions, bell pepper, fresh tomato", price: "Ghc 80" },
-  { name: "Hot Chilli Gizzard", description: "Chilli sauce, tender fried gizzard", price: "Ghc 85" },
-  { name: "Honey Glazed Chicken Wings", description: "Juicy fried chicken wings in spicy honey", price: "Ghc 90" },
-  { name: "Golden Fried Prawns", description: "Marinated prawns, bread crumbs, cocktail sauce", price: "Ghc 120" },
-  { name: "Goat Meat Pepper Soup", description: "Goat meat pieces, hot pepper soup stock (serve with bread rolls)", price: "Ghc 150" },
-  { name: "Chicken Cocktail Kebab", description: "Tender chicken, white pepper grilled bell pepper, onion & tomato", price: "Ghc 120" },
-  { name: "Shrimps Avocado Cocktail", description: "Spicy steamed shrimps, cocktail sauce, lettuce, cucumber, fresh tomato, celery", price: "Ghc 120" },
-  { name: "Chicken Pepper Soup", description: "Diced chicken, hot pepper soup stock (serve with bread rolls)", price: "Ghc 120" },
-  { name: "Mix Vegetable Soup", description: "Mushroom, carrot, french beans, zucchini, cabbage, pumpkin, vegetables stock, bouquet-garni (serve with bread rolls)", price: "Ghc 120" },
-  { name: "Pumpkin Soup", description: "Vegetables stock, pumpkin, bouquet (serve with bread rolls)", price: "Ghc 100" },
+import {
+  hotAppetizers, coldLarder, chickenMeals, kidsMeals, fishMeals,
+  beefMeals, extras, seafoodMeals, mjSpecials, localDishes,
+  burgersAndSandwiches, pizzaMeals, desserts, takeOutPacks,
+} from "@/data/menuData";
+
+const compactSectionItems = [
+  { title: "Kids Meals", items: kidsMeals },
+  { title: "Extras", items: extras },
+  { title: "Take Out Packs", items: takeOutPacks },
 ];
 
-const coldLarder = [
-  { name: "Chef's Salad", description: "Lettuce, tomato, carrot, cucumber, onions, chicken flakes, black olives, boiled egg, sliced apple", price: "Ghc 150" },
-  { name: "MJ Special Salad", description: "Lettuce, fresh tomato, carrot, cucumber, onions, chicken flakes, beef flakes, shrimps, boiled egg, black olives", price: "Ghc 200" },
-  { name: "Seafood Salad", description: "Prawns, squid, grouper fish, lettuce, fresh tomato, carrot, cucumber, onions, tartar sauce", price: "Ghc 250" },
-  { name: "Greek Salad", description: "Lettuce, fresh tomato, cucumber, onions, black olives, feta cheese, vinaigrette dressing", price: "Ghc 110" },
-  { name: "Ghanaian Salad", description: "Lettuce, carrot, cucumber, onions, boiled egg, baked beans, sardine, fresh tomato, black olives", price: "Ghc 200" },
-  { name: "Tuna Salad", description: "Chunk tuna, lettuce, fresh tomato, onions, cucumber, carrot, olive oil, white pepper, black olive", price: "Ghc 120" },
-  { name: "Potato Salad", description: "Potatoes, cucumber, carrot, green bell pepper, onions, egg", price: "Ghc 100" },
-  { name: "Chicken Caesar Salad", description: "Lettuce, sun-dried tomatoes, onions, grilled chicken flakes, black olives, parmesan cheese, croutons", price: "Ghc 120" },
-];
-
-const chickenMeals = [
-  { name: "Spicy Grilled Chicken", description: "", price: "Ghc 150" },
-  { name: "Hawaiian Chicken Khebeb", description: "", price: "Ghc 150" },
-  { name: "Chicken Alfredo", description: "", price: "Ghc 180" },
-  { name: "Chicken Khebab", description: "", price: "Ghc 130" },
-  { name: "Chicken Fried Rice", description: "", price: "Ghc 160" },
-  { name: "Chicken Soup", description: "", price: "Ghc 180" },
-  { name: "Spicy Turkey Wings", description: "", price: "Ghc 150" },
-  { name: "Grilled/Fried Chicken Breast", description: "", price: "Ghc 150" },
-  { name: "Chicken Breast Veg Stir Fry", description: "", price: "Ghc 150" },
-  { name: "Shredded Chicken Sauce", description: "", price: "Ghc 150" },
-  { name: "Chicken Provençal", description: "", price: "Ghc 180" },
-  { name: "Saucy Chicken Pasta", description: "", price: "Ghc 180" },
-];
-
-const kidsMeals = [
-  { name: "Crispy Chicken Fingers", description: "", price: "Ghc 100" },
-  { name: "Diced Chicken & Pasta in Tomato Sauce", description: "", price: "Ghc 150" },
-  { name: "Mini-Chicken & Rice", description: "", price: "Ghc 120" },
-];
-
-const fishMeals = [
-  { name: "Grilled/Fried Casava Fish", description: "Juicy fried chicken wings in hot green chilli sauce", price: "Ghc 170" },
-  { name: "Grilled/Fried Grouper Fillet", description: "Ginger, garlic, complete seasoning, lemon juice, mustard, fresh parsley. Side orders: potato chips, jollof rice, steamed rice, fried rice, sautéed potatoes, fried yam, fried plantain, mashed potatoes", price: "Ghc 200" },
-  { name: "Grilled/Fried Tilapia", description: "Black pepper, cayenne pepper, ginger, garlic, lemon juice, complete seasoning. M / L sizes. Side orders: banku, fried rice, fried yam, jollof rice, steamed rice, potato chips", price: "M: Ghc 150 / L: Ghc 200" },
-  { name: "Fish Fingers", description: "Shredded grouper fillet, ginger, garlic, white pepper, egg, breadcrumbs", price: "Ghc 200" },
-  { name: "Grilled/Fried Snapper Fish", description: "Cayenne pepper, ginger, garlic, lemon juice, complete seasoning. Side orders: potato chips, jollof rice, steamed rice, fried rice, fried yam, fried plantain", price: "Ghc 150" },
-  { name: "Fish Khebab", description: "Grouper fillet, ginger, garlic, white pepper, grilled onions, green bell pepper & tomato", price: "Ghc 200" },
-  { name: "Breaded Fish Fillet", description: "White pepper, ginger, garlic, breadcrumbs", price: "Ghc 200" },
-  { name: "Grilled/Fried Barracuba Fish", description: "Complete seasoning, lemon juice, mustard, ginger, garlic, white pepper. Side orders: potato chips, jollof rice, steamed rice, fried rice, fried yam, mashed potatoes", price: "Ghc 180" },
-  { name: "Tilapia Stew", description: "Tomato sauce, carrot, zucchini, bell pepper, white wine", price: "Ghc 200" },
-  { name: "Grouper Provençal", description: "", price: "Ghc 200" },
-  { name: "Snapper Provençal", description: "", price: "Ghc 150" },
-  { name: "Breaded Fish Fillet", description: "", price: "Ghc 200" },
-];
-
-const beefMeals = [
-  { name: "Beef Pepper Steak", description: "Beef fillet, mustard, black pepper, salt, grilled tomato, onion ring", price: "Ghc 190" },
-  { name: "MJ Mixed Grill", description: "Goat meat, beef, chicken, sausage, vegetable, fried egg", price: "Ghc 220" },
-  { name: "Beef Provençal", description: "Juicy fried beef, fresh tomato sauce, vegetables, red wine", price: "Ghc 200" },
-  { name: "Grilled T-Bone Steak", description: "Bone-in tenderloin, garlic/ginger powder, mustard, salt, black pepper", price: "Ghc 200" },
-  { name: "Shredded Beef Sauce", description: "Shredded beef fillet, carrot, onions, bell pepper, oyster sauce, butter, soy sauce", price: "Ghc 190" },
-  { name: "Grilled Goat", description: "", price: "Ghc 200" },
-  { name: "Assorted Meat Pot", description: "Goat, meat, beef", price: "Ghc 180" },
-  { name: "Hawaiian Beef Khebab", description: "", price: "Ghc 150" },
-  { name: "Beef Stroganoff", description: "", price: "Ghc 180" },
-  { name: "Saucy Beef Pasta", description: "", price: "Ghc 190" },
-];
-
-const extras = [
-  { name: "Extra Stew", description: "", price: "Ghc 30" },
-  { name: "Extra Vegetables", description: "", price: "Ghc 40" },
-  { name: "Extra Pepper", description: "", price: "Ghc 20" },
-];
+const CompactSection = ({ title, items }: { title: string; items: typeof kidsMeals }) => (
+  <div className="-mt-12 mb-16">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
+    >
+      <h3 className="font-serif text-2xl text-cream mb-2">{title}</h3>
+      <div className="w-12 h-[2px] bg-gold mb-6" />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {items.map((item, i) => (
+          <div
+            key={i}
+            className="p-4 rounded-xl border border-cream/5 bg-cream/[0.02] hover:bg-cream/[0.06] hover:border-gold/20 transition-all duration-300 hover:-translate-y-1"
+          >
+            <h4 className="font-serif text-sm font-bold text-gold tracking-wide uppercase">{item.name}</h4>
+            {item.description && (
+              <p className="font-sans text-[11px] text-cream/45 mt-1 leading-relaxed">{item.description}</p>
+            )}
+            <p className="font-sans text-sm font-bold text-gold/90 mt-2">{item.price}</p>
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  </div>
+);
 
 const Menu = () => {
   return (
@@ -151,30 +115,7 @@ const Menu = () => {
           items={chickenMeals}
         />
 
-        {kidsMeals.length > 0 && (
-          <div className="-mt-12 mb-16">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
-            >
-              <h3 className="font-serif text-2xl text-cream mb-2">Kids Meals</h3>
-              <div className="w-12 h-[2px] bg-gold mb-6" />
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {kidsMeals.map((item, i) => (
-                  <div
-                    key={i}
-                    className="p-4 rounded-xl border border-cream/5 bg-cream/[0.02] hover:bg-cream/[0.06] hover:border-gold/20 transition-all duration-300 hover:-translate-y-1"
-                  >
-                    <h4 className="font-serif text-sm font-bold text-gold tracking-wide uppercase">{item.name}</h4>
-                    <p className="font-sans text-sm font-bold text-gold/90 mt-2">{item.price}</p>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-        )}
+        <CompactSection title="Kids Meals" items={kidsMeals} />
 
         <MenuSection
           title="Fish Meals"
@@ -191,30 +132,49 @@ const Menu = () => {
           items={beefMeals}
         />
 
-        {extras.length > 0 && (
-          <div className="-mt-12 mb-16">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
-            >
-              <h3 className="font-serif text-2xl text-cream mb-2">Extras</h3>
-              <div className="w-12 h-[2px] bg-gold mb-6" />
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {extras.map((item, i) => (
-                  <div
-                    key={i}
-                    className="p-4 rounded-xl border border-cream/5 bg-cream/[0.02] hover:bg-cream/[0.06] hover:border-gold/20 transition-all duration-300 hover:-translate-y-1"
-                  >
-                    <h4 className="font-serif text-sm font-bold text-gold tracking-wide uppercase">{item.name}</h4>
-                    <p className="font-sans text-sm font-bold text-gold/90 mt-2">{item.price}</p>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-        )}
+        <CompactSection title="Extras" items={extras} />
+
+        <MenuSection
+          title="Sea Food"
+          image={menuF6}
+          imageAlt="Seafood food collage featuring lobster, prawns, and shrimps"
+          items={seafoodMeals}
+          reverse
+        />
+
+        <MenuSection
+          title="MJ Specials"
+          image={menuF7}
+          imageAlt="MJ Specials food collage featuring fried rice, jollof rice, and pasta"
+          items={mjSpecials}
+        />
+
+        <MenuSection
+          title="Local Dishes"
+          image={menuF8}
+          imageAlt="Local dishes food collage featuring light soup, okro soup, and garden eggs stew"
+          items={localDishes}
+          reverse
+        />
+
+        <MenuSection
+          title="Burgers | Sandwiches | Shawarma"
+          image={menuF9}
+          imageAlt="Burgers, sandwiches and pizza food collage"
+          items={burgersAndSandwiches}
+        />
+
+        <CompactSection title="Pizza" items={pizzaMeals} />
+
+        <MenuSection
+          title="Dessert"
+          image={menuF10}
+          imageAlt="Desserts food collage featuring fruit platter, ice cream, and pudding"
+          items={desserts}
+          reverse
+        />
+
+        <CompactSection title="Take Out Packs" items={takeOutPacks} />
       </div>
 
       {/* Footer CTA */}
