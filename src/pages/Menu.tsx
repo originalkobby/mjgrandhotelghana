@@ -19,7 +19,9 @@ import {
   hotAppetizers, coldLarder, chickenMeals, kidsMeals, fishMeals,
   beefMeals, extras, seafoodMeals, mjSpecials, localDishes,
   burgersAndSandwiches, pizzaMeals, desserts, takeOutPacks,
+  vegetarianDishes, sideOrders,
 } from "@/data/menuData";
+import menuF11 from "@/assets/menu-f11.jpg";
 
 const compactSectionItems = [
   { title: "Kids Meals", items: kidsMeals },
@@ -175,6 +177,15 @@ const Menu = () => {
         />
 
         <CompactSection title="Take Out Packs" items={takeOutPacks} />
+
+        <MenuSection
+          title="Vegetarian Dishes"
+          image={menuF11}
+          imageAlt="Vegetarian dishes food collage featuring stir fried vegetables, hummus, and vegetable soup"
+          items={vegetarianDishes}
+        />
+
+        <CompactSection title="Side Orders" items={sideOrders} />
       </div>
 
       {/* Footer CTA */}
