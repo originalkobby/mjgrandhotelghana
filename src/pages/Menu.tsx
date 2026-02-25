@@ -104,7 +104,7 @@ const Menu = () => {
             <ArrowLeft size={18} />
             Back to Home
           </Link>
-          <img src={logo} alt="MJ Grand Hotel" className="h-8 w-auto" />
+          <img src={logo} alt="MJ Grand Hotel" className="h-6 w-auto" />
           <div className="w-24" />
         </div>
       </div>
