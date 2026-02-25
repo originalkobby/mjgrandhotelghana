@@ -1,5 +1,4 @@
-import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 import expSpa from "@/assets/exp-spa.jpg";
 import expDining from "@/assets/exp-dining.jpg";
 import expRooftop from "@/assets/exp-rooftop.jpg";
@@ -13,16 +12,13 @@ const experiences = [
 ];
 
 const Experiences = () => {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-50px" });
-
   return (
     <section id="experiences" className="py-24 md:py-32 bg-secondary">
       <div className="container mx-auto px-6 lg:px-12">
         <motion.div
-          ref={ref}
-          initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
           className="text-center mb-16"
         >
@@ -45,15 +41,12 @@ const Experiences = () => {
 };
 
 const ExperienceCard = ({ exp, index }: { exp: typeof experiences[0]; index: number }) => {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
-
   return (
     <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 50 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.7, delay: index * 0.12, ease: [0.3, 0, 0.2, 1] }}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.6, delay: index * 0.12, ease: [0.3, 0, 0.2, 1] }}
       className="group min-w-[280px] snap-center flex-shrink-0 lg:min-w-0 cursor-pointer"
     >
       <div className="relative overflow-hidden aspect-[3/4]">

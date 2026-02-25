@@ -1,6 +1,4 @@
 import { motion } from "framer-motion";
-import { useInView } from "framer-motion";
-import { useRef } from "react";
 import roomSuite from "@/assets/room-suite.jpg";
 import roomDeluxe from "@/assets/room-deluxe.jpg";
 import roomPenthouse from "@/assets/room-penthouse.jpg";
@@ -27,15 +25,12 @@ const rooms = [
 ];
 
 const RoomCard = ({ room, index }: { room: typeof rooms[0]; index: number }) => {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-100px" });
-
   return (
     <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 60 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.7, delay: index * 0.15, ease: [0.3, 0, 0.2, 1] }}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.6, delay: index * 0.15, ease: [0.3, 0, 0.2, 1] }}
       className="group cursor-pointer"
     >
       <div className="relative overflow-hidden">
@@ -69,16 +64,13 @@ const RoomCard = ({ room, index }: { room: typeof rooms[0]; index: number }) => 
 };
 
 const RoomsPreview = () => {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-50px" });
-
   return (
     <section id="rooms" className="py-24 md:py-32 bg-background">
       <div className="container mx-auto px-6 lg:px-12">
         <motion.div
-          ref={ref}
-          initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
           className="text-center mb-16"
         >

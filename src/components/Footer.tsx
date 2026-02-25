@@ -1,19 +1,15 @@
-import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 import { Mail, Phone, MapPin } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 const Footer = () => {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-50px" });
-
   return (
     <footer id="contact" className="bg-charcoal py-20">
       <motion.div
-        ref={ref}
-        initial={{ opacity: 0, y: 40 }}
-        animate={inView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.7, ease: [0.3, 0, 0.2, 1] }}
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
         className="container mx-auto px-6 lg:px-12"
       >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">

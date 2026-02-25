@@ -1,5 +1,4 @@
-import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 import galleryPool from "@/assets/gallery-pool.jpg";
 import galleryLobby from "@/assets/gallery-lobby.jpg";
 import galleryGarden from "@/assets/gallery-garden.jpg";
@@ -13,16 +12,13 @@ const images = [
 ];
 
 const Gallery = () => {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-50px" });
-
   return (
     <section id="gallery" className="py-24 md:py-32 bg-background">
       <div className="container mx-auto px-6 lg:px-12">
         <motion.div
-          ref={ref}
-          initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
           className="text-center mb-16"
         >
@@ -45,15 +41,12 @@ const Gallery = () => {
 };
 
 const GalleryImage = ({ img, index }: { img: typeof images[0]; index: number }) => {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
-
   return (
     <motion.div
-      ref={ref}
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={inView ? { opacity: 1, scale: 1 } : {}}
-      transition={{ duration: 0.7, delay: index * 0.1, ease: [0.3, 0, 0.2, 1] }}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.6, delay: index * 0.1, ease: [0.3, 0, 0.2, 1] }}
       className={`overflow-hidden ${img.span}`}
     >
       <img
