@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import MenuSection from "@/components/MenuSection";
 import logo from "@/assets/logo.png";
 
@@ -104,8 +104,8 @@ const Menu = () => {
             to="/"
             className="flex items-center gap-2 text-cream/80 hover:text-gold transition-colors duration-300 font-sans text-sm"
           >
-            <ArrowLeft size={18} />
-            Back to Home
+            <ChevronLeft size={18} />
+            Go back
           </Link>
         </div>
       </div>

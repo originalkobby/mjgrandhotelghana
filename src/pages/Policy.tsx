@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Shield, Clock, UtensilsCrossed, Key, Car, Waves, AlertTriangle, MessageSquare } from "lucide-react";
+import { ChevronLeft, Shield, Clock, UtensilsCrossed, Key, Car, Waves, AlertTriangle, MessageSquare } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 const sections = [
@@ -99,8 +99,8 @@ const Policy = () => {
             to="/"
             className="flex items-center gap-2 text-cream/80 hover:text-gold transition-colors duration-300 font-sans text-sm"
           >
-            <ArrowLeft size={18} />
-            Back to Home
+            <ChevronLeft size={18} />
+            Go back
           </Link>
         </div>
       </div>
