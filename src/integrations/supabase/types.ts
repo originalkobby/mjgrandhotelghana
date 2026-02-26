@@ -14,7 +14,109 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      conversations: {
+        Row: {
+          created_at: string
+          guest_id: string | null
+          id: string
+          message: string
+          role: string
+          sentiment: string | null
+        }
+        Insert: {
+          created_at?: string
+          guest_id?: string | null
+          id?: string
+          message: string
+          role: string
+          sentiment?: string | null
+        }
+        Update: {
+          created_at?: string
+          guest_id?: string | null
+          id?: string
+          message?: string
+          role?: string
+          sentiment?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "guests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guests: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          preferences: Json | null
+          vip: boolean
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          preferences?: Json | null
+          vip?: boolean
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          preferences?: Json | null
+          vip?: boolean
+        }
+        Relationships: []
+      }
+      support_tickets: {
+        Row: {
+          created_at: string
+          guest_id: string | null
+          id: string
+          issue: string
+          reference_id: string
+          status: string
+          urgency: string
+        }
+        Insert: {
+          created_at?: string
+          guest_id?: string | null
+          id?: string
+          issue: string
+          reference_id: string
+          status?: string
+          urgency?: string
+        }
+        Update: {
+          created_at?: string
+          guest_id?: string | null
+          id?: string
+          issue?: string
+          reference_id?: string
+          status?: string
+          urgency?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "guests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
