@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Send, Loader2 } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -16,6 +17,7 @@ const QUICK_ACTIONS = [
 ];
 
 const MJChat = () => {
+  const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -195,7 +197,11 @@ const MJChat = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.3 }}
-            className="fixed bottom-6 right-6 z-[100] w-[380px] max-h-[600px] flex flex-col rounded-2xl shadow-2xl border border-border overflow-hidden bg-card"
+            className={`fixed z-[100] flex flex-col overflow-hidden bg-card ${
+              isMobile
+                ? "inset-0 rounded-none"
+                : "bottom-6 right-6 w-[380px] max-h-[600px] rounded-2xl shadow-2xl border border-border"
+            }`}
           >
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 bg-primary text-primary-foreground">
@@ -214,7 +220,7 @@ const MJChat = () => {
             </div>
 
             {/* Messages area */}
-            <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 min-h-[300px] max-h-[420px]">
+            <div ref={scrollRef} className={`flex-1 overflow-y-auto p-4 space-y-3 ${isMobile ? "min-h-0" : "min-h-[300px] max-h-[420px]"}`}>
               {showNamePrompt ? (
                 <div className="flex flex-col items-center justify-center h-full gap-4 py-8">
                   <div className="h-16 w-16 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-serif font-bold text-2xl">
