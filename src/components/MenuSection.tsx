@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
 type MenuItem = {
   name: string;
@@ -22,12 +23,38 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.3, 0, 0.2, 1] as const } },
+const ease = [0.3, 0, 0.2, 1] as const;
+
+const getItemVariants = (index: number, cols: number) => {
+  const col = index % cols;
+  const isLeft = col === 0 && cols > 1;
+  const isRight = col === cols - 1 && cols > 1;
+
+  const hidden = {
+    opacity: 0,
+    x: isLeft ? -40 : isRight ? 40 : 0,
+    y: isLeft || isRight ? 0 : 20,
+  };
+
+  return {
+    hidden,
+    visible: { opacity: 1, x: 0, y: 0, transition: { duration: 0.6, ease } },
+  };
 };
 
 const MenuSection = ({ title, subtitle, items, image, imageAlt, reverse = false }: MenuSectionProps) => {
+  const [cols, setCols] = useState(1);
+
+  useEffect(() => {
+    const update = () => {
+      const w = window.innerWidth;
+      setCols(w >= 1280 ? 3 : w >= 640 ? 2 : 1);
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
   return (
     <section className="py-16 md:py-24">
       <div
@@ -38,7 +65,7 @@ const MenuSection = ({ title, subtitle, items, image, imageAlt, reverse = false 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
+          transition={{ duration: 0.6, ease }}
           className="w-full lg:w-1/2 flex-shrink-0"
         >
           <div className="rounded-2xl overflow-hidden shadow-2xl">
@@ -57,7 +84,7 @@ const MenuSection = ({ title, subtitle, items, image, imageAlt, reverse = false 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
+            transition={{ duration: 0.6, ease }}
             className="mb-8"
           >
             <h2 className="font-serif text-3xl md:text-4xl text-cream tracking-wide">{title}</h2>
@@ -77,10 +104,10 @@ const MenuSection = ({ title, subtitle, items, image, imageAlt, reverse = false 
             {items.map((item, i) => (
               <motion.div
                 key={i}
-                variants={itemVariants}
+                variants={getItemVariants(i, cols)}
                 whileHover={{ scale: 1.04, y: -4 }}
                 whileTap={{ scale: 0.98 }}
-                transition={{ type: "tween", duration: 0.25, ease: [0.3, 0, 0.2, 1] }}
+                transition={{ type: "tween", duration: 0.25, ease }}
                 className="group p-4 rounded-xl border border-cream/5 bg-cream/[0.02] hover:bg-cream/[0.06] hover:border-gold/20 hover:shadow-[0_0_20px_rgba(212,175,55,0.08)] transition-colors duration-300 cursor-default"
               >
                 <h3 className="font-serif text-sm font-bold text-gold tracking-wide uppercase leading-tight">
