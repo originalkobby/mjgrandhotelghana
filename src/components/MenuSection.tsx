@@ -25,15 +25,22 @@ const containerVariants = {
 
 const ease = [0.3, 0, 0.2, 1] as const;
 
-const getItemVariants = (index: number, cols: number) => {
+export const getItemVariants = (index: number, cols: number) => {
+  if (cols <= 1) {
+    return {
+      hidden: { opacity: 0, y: 30 },
+      visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease } },
+    };
+  }
+
   const col = index % cols;
-  const isLeft = col === 0 && cols > 1;
-  const isRight = col === cols - 1 && cols > 1;
+  const isLeft = col === 0;
+  const isRight = col === cols - 1;
 
   const hidden = {
     opacity: 0,
-    x: isLeft ? -40 : isRight ? 40 : 0,
-    y: isLeft || isRight ? 0 : 20,
+    x: isLeft ? -60 : isRight ? 60 : 0,
+    y: !isLeft && !isRight ? 30 : 0,
   };
 
   return {

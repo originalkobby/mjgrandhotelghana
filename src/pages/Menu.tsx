@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
-import MenuSection from "@/components/MenuSection";
+import { useEffect, useState } from "react";
+import MenuSection, { getItemVariants } from "@/components/MenuSection";
 import logo from "@/assets/logo.png";
 
 import menuF1 from "@/assets/menu-f1.png";
@@ -23,39 +24,62 @@ import {
 } from "@/data/menuData";
 import menuF11 from "@/assets/menu-f11.jpg";
 
-const compactSectionItems = [
-  { title: "Kids Meals", items: kidsMeals },
-  { title: "Extras", items: extras },
-  { title: "Take Out Packs", items: takeOutPacks },
-];
+const containerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+};
 
-const CompactSection = ({ title, items }: { title: string; items: typeof kidsMeals }) => (
-  <div className="-mt-12 mb-16">
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
-    >
-      <h3 className="font-serif text-2xl text-cream mb-2">{title}</h3>
-      <div className="w-12 h-[2px] bg-gold mb-6" />
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+const CompactSection = ({ title, items }: { title: string; items: typeof kidsMeals }) => {
+  const [cols, setCols] = useState(1);
+
+  useEffect(() => {
+    const update = () => {
+      const w = window.innerWidth;
+      setCols(w >= 640 ? 3 : 1);
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
+  return (
+    <div className="-mt-12 mb-16">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
+      >
+        <h3 className="font-serif text-2xl text-cream mb-2">{title}</h3>
+        <div className="w-12 h-[2px] bg-gold mb-6" />
+      </motion.div>
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-50px" }}
+        className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+      >
         {items.map((item, i) => (
-          <div
+          <motion.div
             key={i}
-            className="p-4 rounded-xl border border-cream/5 bg-cream/[0.02] hover:bg-cream/[0.06] hover:border-gold/20 transition-all duration-300 hover:-translate-y-1"
+            variants={getItemVariants(i, cols)}
+            whileHover={{ scale: 1.04, y: -4 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ type: "tween", duration: 0.25, ease: [0.3, 0, 0.2, 1] }}
+            className="p-4 rounded-xl border border-cream/5 bg-cream/[0.02] hover:bg-cream/[0.06] hover:border-gold/20 hover:shadow-[0_0_20px_rgba(212,175,55,0.08)] transition-colors duration-300 cursor-default"
           >
             <h4 className="font-serif text-sm font-bold text-gold tracking-wide uppercase">{item.name}</h4>
             {item.description && (
               <p className="font-sans text-[11px] text-cream/45 mt-1 leading-relaxed">{item.description}</p>
             )}
             <p className="font-sans text-sm font-bold text-gold/90 mt-2">{item.price}</p>
-          </div>
+          </motion.div>
         ))}
-      </div>
-    </motion.div>
-  </div>
-);
+      </motion.div>
+    </div>
+  );
+};
 
 const Menu = () => {
   return (
