@@ -288,7 +288,56 @@ serve(async (req) => {
         });
       }
 
-      return new Response(secondResponse.body, {
+      // Read second response to log assistant reply, then re-stream
+      const secondReader = secondResponse.body!.getReader();
+      const secondDecoder = new TextDecoder();
+      let secondBuffer = "";
+      let secondContent = "";
+      const secondChunks: Uint8Array[] = [];
+
+      while (true) {
+        const { done, value } = await secondReader.read();
+        if (done) break;
+        secondChunks.push(value);
+        secondBuffer += secondDecoder.decode(value, { stream: true });
+        let ni;
+        while ((ni = secondBuffer.indexOf("\n")) !== -1) {
+          let ln = secondBuffer.slice(0, ni);
+          secondBuffer = secondBuffer.slice(ni + 1);
+          if (ln.endsWith("\r")) ln = ln.slice(0, -1);
+          if (!ln.startsWith("data: ")) continue;
+          const js = ln.slice(6).trim();
+          if (js === "[DONE]") continue;
+          try {
+            const p = JSON.parse(js);
+            if (p.choices?.[0]?.delta?.content) secondContent += p.choices[0].delta.content;
+          } catch {}
+        }
+      }
+
+      // Log assistant response
+      if (guest_id && secondContent) {
+        supabase.from("conversations").insert({
+          guest_id,
+          role: "assistant",
+          message: secondContent,
+        }).then(() => {});
+      }
+
+      // Re-stream collected chunks
+      const enc = new TextEncoder();
+      const reStream = new ReadableStream({
+        start(controller) {
+          const sseData = JSON.stringify({
+            choices: [{ delta: { content: secondContent }, finish_reason: "stop" }],
+          });
+          controller.enqueue(enc.encode(`data: ${sseData}\n\n`));
+          controller.enqueue(enc.encode("data: [DONE]\n\n"));
+          controller.close();
+        },
+      });
+
+      return new Response(reStream, {
         headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
       });
     }
