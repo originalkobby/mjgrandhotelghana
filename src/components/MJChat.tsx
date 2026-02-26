@@ -103,7 +103,7 @@ const MJChat = () => {
         assistantSoFar += chunk;
         setMessages((prev) => {
           const last = prev[prev.length - 1];
-          if (last?.role === "assistant" && prev.length > 1 && last.content !== messages[0]?.content) {
+          if (last?.role === "assistant" && last !== prev[0]) {
             return prev.map((m, i) =>
               i === prev.length - 1 ? { ...m, content: assistantSoFar } : m
             );
