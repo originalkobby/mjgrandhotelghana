@@ -250,9 +250,9 @@ const MJChat = () => {
                   <div className="h-16 w-16 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-serif font-bold text-2xl">
                     MJ
                   </div>
-                  <p className="text-center text-sm text-muted-foreground font-sans">
-                    Welcome! May I have your name to get started?
-                  </p>
+                  <p className="text-center text-sm text-muted-foreground font-sans">Hi! May I have your name to get started?
+
+              </p>
                   <form
                 onSubmit={(e) => {
                   e.preventDefault();
