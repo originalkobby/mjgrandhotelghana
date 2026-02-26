@@ -8,6 +8,7 @@ import Menu from "./pages/Menu";
 import Policy from "./pages/Policy";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
+import MJChat from "./components/MJChat";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <MJChat />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
