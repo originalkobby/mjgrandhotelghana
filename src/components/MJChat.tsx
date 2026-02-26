@@ -236,7 +236,6 @@ const MJChat = () => {
                 </div>
                 <div>
                   <p className="font-serif font-semibold text-sm">MJ Concierge</p>
-                  <p className="text-xs opacity-70">MJ Grand Hotel</p>
                 </div>
               </div>
               <button onClick={() => setOpen(false)} aria-label="Close chat">
