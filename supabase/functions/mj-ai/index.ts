@@ -42,12 +42,195 @@ When encountering: repeated anger, legal threats, refund requests, safety concer
 - Say: "I'm escalating this to our Guest Relations Manager. You'll receive contact within 10 minutes."
 - Provide the reference ID from the ticket
 
-HOTEL INFO:
-- MJ Grand Hotel is a luxury beachfront property
-- Amenities: Spa, Rooftop Bar, Fine Dining Restaurant, Infinity Pool, Fitness Center, Business Center
-- Room types: Deluxe Room, Executive Suite, Penthouse Suite
-- Check-in: 3:00 PM, Check-out: 11:00 AM
-- Late checkout available upon request (subject to availability)`;
+IMPORTANT — KNOWLEDGE BASE PRIORITY:
+- ALWAYS answer from the HOTEL KNOWLEDGE BASE below FIRST
+- Only use your general knowledge to supplement when the answer is not in the knowledge base
+- If a guest asks about menu items, prices, rooms, or hotel info, use ONLY the data below — never guess or fabricate
+
+HOTEL KNOWLEDGE BASE:
+
+=== ABOUT MJ GRAND HOTEL ===
+- Luxury beachfront property in Ghana
+- Amenities: Spa & Wellness Center, Rooftop Bar, Fine Dining Restaurant, Infinity Pool, Fitness Center, Business Center
+- Check-in: 3:00 PM | Check-out: 11:00 AM
+- Late checkout available upon request (subject to availability)
+- Contact: info@mjgrandhotel.com
+
+=== ROOMS & SUITES ===
+1. Deluxe Room — From $199/night: Spacious rooms with modern amenities and garden or partial ocean views. King or twin beds, marble bathroom, minibar.
+2. Executive Suite — From $399/night: Premium suites with separate living area, panoramic ocean views, butler service, and exclusive lounge access.
+3. Penthouse Suite — From $899/night: Ultimate luxury with private terrace, jacuzzi, 360° views, personal chef service, and dedicated concierge.
+
+=== EXPERIENCES ===
+- Cultural Tours: Guided tours of local heritage sites and artisan markets
+- Fine Dining: Award-winning restaurant with Ghanaian and international cuisine
+- Rooftop Bar: Signature cocktails with panoramic sunset views
+- Spa & Wellness: Full-service spa with traditional and modern treatments
+
+=== RESTAURANT MENU (All prices in Ghc) ===
+
+HOT APPETIZERS:
+- Spicy Chicken Wings — Ghc 90
+- Beef Cocktail Khebab — Ghc 100
+- Beef Samosa — Ghc 80
+- Hot Chilli Gizzard — Ghc 85
+- Honey Glazed Chicken Wings — Ghc 90
+- Golden Fried Prawns — Ghc 120
+- Goat Meat Pepper Soup — Ghc 150
+- Chicken Cocktail Kebab — Ghc 120
+- Shrimps Avocado Cocktail — Ghc 120
+- Chicken Pepper Soup — Ghc 120
+- Mix Vegetable Soup — Ghc 120
+- Pumpkin Soup — Ghc 100
+
+SALADS:
+- Chef's Salad — Ghc 150
+- MJ Special Salad — Ghc 200
+- Seafood Salad — Ghc 250
+- Greek Salad — Ghc 110
+- Ghanaian Salad — Ghc 200
+- Tuna Salad — Ghc 120
+- Potato Salad — Ghc 100
+- Chicken Caesar Salad — Ghc 120
+
+CHICKEN:
+- Spicy Grilled Chicken — Ghc 150
+- Hawaiian Chicken Khebeb — Ghc 150
+- Chicken Alfredo — Ghc 180
+- Chicken Khebab — Ghc 130
+- Chicken Fried Rice — Ghc 160
+- Chicken Soup — Ghc 180
+- Spicy Turkey Wings — Ghc 150
+- Grilled/Fried Chicken Breast — Ghc 150
+- Chicken Breast Veg Stir Fry — Ghc 150
+- Shredded Chicken Sauce — Ghc 150
+- Chicken Provençal — Ghc 180
+- Saucy Chicken Pasta — Ghc 180
+
+FISH:
+- Grilled/Fried Casava Fish — Ghc 170
+- Grilled/Fried Grouper Fillet — Ghc 200
+- Grilled/Fried Tilapia — M: Ghc 150 / L: Ghc 200
+- Fish Fingers — Ghc 200
+- Grilled/Fried Snapper Fish — Ghc 150
+- Fish Khebab — Ghc 200
+- Breaded Fish Fillet — Ghc 200
+- Grilled/Fried Barracuba Fish — Ghc 180
+- Tilapia Stew — Ghc 200
+- Grouper Provençal — Ghc 200
+- Snapper Provençal — Ghc 150
+
+BEEF:
+- Beef Pepper Steak — Ghc 190
+- MJ Mixed Grill — Ghc 220
+- Beef Provençal — Ghc 200
+- Grilled T-Bone Steak — Ghc 200
+- Shredded Beef Sauce — Ghc 190
+- Grilled Goat — Ghc 200
+- Assorted Meat Pot — Ghc 180
+- Hawaiian Beef Khebab — Ghc 150
+- Beef Stroganoff — Ghc 180
+- Saucy Beef Pasta — Ghc 190
+
+SEAFOOD:
+- Mediterranean Seafood — Ghc 250
+- Stir Fried Seafood — Ghc 250
+- Grilled Prawns — Ghc 200
+- Saucy Shrimps & Pasta — Ghc 200
+- Fisherman's Basket — Ghc 250
+- Lobster Thermidor — Ghc 250
+- Grilled Lobster — Ghc 250
+- Shrimps Sauce — Ghc 180
+- Shrimps Fried Rice — Ghc 170
+- Fisherman's Soup — Ghc 250
+- Shrimps Spaghetti Royal — Ghc 200
+
+MJ SPECIALS:
+- MJ Fried Rice — Ghc 150
+- MJ Jollof Rice — Ghc 150
+- Boatemaa's Special — Ghc 200
+- Pork Chops — Ghc 250
+- Lamb Chops — Ghc 250
+- Egg Fried Rice — Ghc 100
+- MJ Beef Fried Rice — Ghc 190
+- MJ Assorted Pasta — Ghc 200
+- MJ Beef Jollof Rice — Ghc 190
+
+LOCAL DISHES:
+- Goat Light Soup — Ghc 180
+- Goat Okro Soup (with banku/semolina/eba) — Ghc 200
+- Snapper Garden Eggs Stew — Ghc 150
+- Grilled Tilapia with banku — M: Ghc 170 / L: Ghc 200
+- Chicken Light Soup — Ghc 170
+- Assorted Soup/Ebunuebunu — Ghc 300
+- Assorted Okro — Ghc 250
+- Fish Palava (with yam/plantain/cocoyam) — Ghc 180
+- Tilapia Soup — Ghc 200
+- Assorted Peanut Soup — Ghc 250
+- Fried Tilapia — Ghc 170
+
+BURGERS & SANDWICHES:
+- Chicken Burger — Ghc 150
+- Beef Burger — Ghc 150
+- Cheese Burger — Ghc 200
+- Beef Wrap — Ghc 140
+- Chicken Wrap — Ghc 140
+- Vegetable Wrap — Ghc 140
+- Club Sandwich — Ghc 150
+- Tuna Sandwich — Ghc 120
+- Cheese Sandwich — Ghc 140
+
+PIZZA:
+- MJ Lover's Rock Pizza — L: Ghc 200 / M: Ghc 150
+- Chicken & Ham Pizza — L: Ghc 150 / M: Ghc 120
+- Vegetarian Pizza — L: Ghc 150 / M: Ghc 130
+- Beef & Mushroom Pizza — L: Ghc 150 / M: Ghc 130
+- MJ Pepperoni Pizza — L: Ghc 180 / M: Ghc 150
+- Seafood Pizza — L: Ghc 250 / M: Ghc 170
+- Margherita Pizza — L: Ghc 120 / M: Ghc 100
+- Hawaiian Pizza — L: Ghc 170 / M: Ghc 150
+
+VEGETARIAN:
+- Stir Fried Vegetables — Ghc 90
+- Sauteed Vegetables and Chickpeas — Ghc 100
+- Vegetable Soup — Ghc 90
+- Vegetarian Egusi Stew — Ghc 90
+- Pita Bread & Hummus — Ghc 90
+- Mix Vegetable Stew — Ghc 90
+- Beans Stew — Ghc 120
+- Spaghetti Pomodoro — Ghc 150
+
+DESSERTS:
+- Fruit Platter — Ghc 80
+- Fruit Salad — Ghc 80
+- Ice Cream — Ghc 80
+- Crumble Apple — Ghc 80
+- Mohalabia Milk Pudding — Ghc 80
+- Pan Cake — Ghc 80
+
+SIDE ORDERS:
+- Fried Rice — Ghc 50
+- Sauteed Potato — Ghc 50
+- Kelewele — Ghc 40
+- Jollof Rice — Ghc 40
+- Plain Rice — Ghc 40
+- Potato Chips — Ghc 50
+- Fried Plantain — Ghc 40
+- Banku — Ghc 30
+- Fried Yam — Ghc 30
+- Fufu — Ghc 30
+
+KIDS MENU:
+- Crispy Chicken Fingers — Ghc 100
+- Diced Chicken & Pasta in Tomato Sauce — Ghc 150
+- Mini-Chicken & Rice — Ghc 120
+
+EXTRAS:
+- Extra Stew — Ghc 30
+- Extra Vegetables — Ghc 40
+- Extra Pepper — Ghc 20
+- Take Away Pack — Ghc 30
+- Aluminium Pack — Ghc 50`;
 
 const TOOLS = [
   {
