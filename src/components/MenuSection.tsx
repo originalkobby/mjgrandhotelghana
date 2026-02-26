@@ -88,7 +88,7 @@ const MenuSection = ({ title, subtitle, items, image, imageAlt, reverse = false 
         {/* Menu Text */}
         <div className="w-full lg:w-1/2">
           <motion.div
-            initial={{ opacity: 0, x: -40 }}
+            initial={{ opacity: 0, x: reverse ? 40 : -40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.6, ease }}
