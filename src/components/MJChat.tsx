@@ -193,10 +193,16 @@ const MJChat = () => {
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            initial={{ opacity: 0, y: isMobile ? "100%" : 20, scale: isMobile ? 1 : 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            exit={{ opacity: 0, y: isMobile ? "100%" : 20, scale: isMobile ? 1 : 0.95 }}
             transition={{ duration: 0.3 }}
+            drag={isMobile ? "y" : false}
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0, bottom: 0.6 }}
+            onDragEnd={(_e, info) => {
+              if (info.offset.y > 100) setOpen(false);
+            }}
             className={`fixed z-[100] flex flex-col overflow-hidden bg-card ${
               isMobile
                 ? "inset-0 rounded-none"
@@ -204,6 +210,11 @@ const MJChat = () => {
             }`}
           >
             {/* Header */}
+            {isMobile && (
+              <div className="flex justify-center pt-2 pb-0 bg-primary">
+                <div className="w-10 h-1 rounded-full bg-primary-foreground/30" />
+              </div>
+            )}
             <div className="flex items-center justify-between px-5 py-4 bg-primary text-primary-foreground">
               <div className="flex items-center gap-3">
                 <div className="h-9 w-9 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-serif font-bold text-sm">
