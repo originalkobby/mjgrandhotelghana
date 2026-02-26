@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, Loader2 } from "lucide-react";
+import { MessageCircle, X, Send, Loader2, Star } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
 
 type Msg = { role: "user" | "assistant"; content: string };
+
+const FAREWELL_MARKER = "[[FAREWELL]]";
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/mj-ai`;
 
@@ -25,6 +27,10 @@ const MJChat = () => {
   const [guestId, setGuestId] = useState<string | null>(null);
   const [guestName, setGuestName] = useState("");
   const [showNamePrompt, setShowNamePrompt] = useState(true);
+  const [showRating, setShowRating] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [ratingSubmitted, setRatingSubmitted] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -103,14 +109,22 @@ const MJChat = () => {
 
       const upsert = (chunk: string) => {
         assistantSoFar += chunk;
+        // Check for farewell marker
+        const hasFarewell = assistantSoFar.includes(FAREWELL_MARKER);
+        const displayContent = assistantSoFar.replace(FAREWELL_MARKER, "").trim();
+        
+        if (hasFarewell) {
+          setTimeout(() => setShowRating(true), 500);
+        }
+        
         setMessages((prev) => {
           const last = prev[prev.length - 1];
           if (last?.role === "assistant" && last !== prev[0]) {
             return prev.map((m, i) =>
-              i === prev.length - 1 ? { ...m, content: assistantSoFar } : m
+              i === prev.length - 1 ? { ...m, content: displayContent } : m
             );
           }
-          return [...prev, { role: "assistant", content: assistantSoFar }];
+          return [...prev, { role: "assistant", content: displayContent }];
         });
       };
 
@@ -308,6 +322,68 @@ const MJChat = () => {
                         </button>
                       ))}
                     </div>
+                  )}
+                  {/* Rating prompt after farewell */}
+                  {showRating && !ratingSubmitted && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex flex-col items-center gap-3 py-4 px-3 bg-muted/50 rounded-2xl mt-2"
+                    >
+                      <p className="text-sm font-sans text-foreground font-medium">
+                        How was your experience with MJ?
+                      </p>
+                      <div className="flex gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            onClick={() => setRating(star)}
+                            onMouseEnter={() => setHoverRating(star)}
+                            onMouseLeave={() => setHoverRating(0)}
+                            className="p-1 transition-transform hover:scale-110"
+                          >
+                            <Star
+                              size={28}
+                              className={`transition-colors ${
+                                star <= (hoverRating || rating)
+                                  ? "fill-accent text-accent"
+                                  : "text-muted-foreground/40"
+                              }`}
+                            />
+                          </button>
+                        ))}
+                      </div>
+                      {rating > 0 && (
+                        <motion.button
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          onClick={async () => {
+                            setRatingSubmitted(true);
+                            if (guestId) {
+                              await supabase
+                                .from("guests")
+                                .update({
+                                  preferences: { last_chat_rating: rating },
+                                })
+                                .eq("id", guestId);
+                            }
+                          }}
+                          className="text-xs bg-accent text-accent-foreground rounded-full px-4 py-1.5 font-medium font-sans"
+                        >
+                          Submit Rating
+                        </motion.button>
+                      )}
+                    </motion.div>
+                  )}
+
+                  {ratingSubmitted && (
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="text-center text-sm text-muted-foreground font-sans py-2"
+                    >
+                      Thank you for your feedback! ⭐
+                    </motion.p>
                   )}
                 </>
               )}
