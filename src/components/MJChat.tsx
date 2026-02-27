@@ -366,7 +366,7 @@ const MJChat = () => {
                 send(input);
               }}
               className={`flex items-center gap-2 px-4 py-3 border-t border-border shrink-0 ${
-                isMobile ? "pb-[env(safe-area-inset-bottom,12px)]" : ""
+                isMobile ? "pb-[max(env(safe-area-inset-bottom,12px),16px)]" : ""
               }`}
             >
               <input
