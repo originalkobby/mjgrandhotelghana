@@ -24,7 +24,6 @@ const MJChat = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [guestId, setGuestId] = useState<string | null>(null);
-  const [guestName, setGuestName] = useState("");
   const [showRating, setShowRating] = useState(false);
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
@@ -73,7 +72,6 @@ const MJChat = () => {
         body: JSON.stringify({
           messages: userMessages,
           guest_id: guestId,
-          guest_name: guestName,
           gmt_hour: new Date().getUTCHours(),
         }),
       });
@@ -140,7 +138,7 @@ const MJChat = () => {
         }
       }
     },
-    [guestId, guestName, messages]
+    [guestId, messages]
   );
 
   const send = async (text: string) => {
@@ -151,10 +149,6 @@ const MJChat = () => {
     setInput("");
     setIsLoading(true);
 
-    // Store guest name from first message (server resolves the guest)
-    if (!guestName) {
-      setGuestName(text.trim());
-    }
 
     try {
       await streamChat(newMessages);
