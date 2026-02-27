@@ -15,40 +15,10 @@ const sections = [
   },
   {
     icon: Shield,
-    title: "Guest Conduct & Privacy",
+    title: "Guest Conduct, Privacy & Security",
     items: [
       "Guests who transact private business with our staff do so at their own risk. Guests are advised not to give out their details (including telephone numbers) to staff except at the Front Office.",
       "For business, investment, or any other enquiries about the Hotel, speak to Management.",
-    ],
-  },
-  {
-    icon: UtensilsCrossed,
-    title: "Dining & Room Service",
-    items: [
-      "Breakfast is between 6:30 am and 10:00 am; after this period, guests who wish to take breakfast must pay for the cost.",
-      "Our Restaurant and Bar services are available 24 hours, 7 days a week.",
-      "Room Service attracts an extra cost of GHC 20.00 per tray, either Breakfast, Lunch, Dinner, or Drinks.",
-    ],
-  },
-  {
-    icon: Key,
-    title: "Keys & Cards",
-    items: [
-      "Do not remove the keys from the key holder. Loss of key/card by guests will attract the cost of the lock and its fixing labor, payable to our hotel.",
-      "Please leave keys at the reception when going out or leaving the hotel premises.",
-    ],
-  },
-  {
-    icon: Car,
-    title: "Shuttle Services",
-    items: [
-      "Airport pick-up and drop-off are complimentary on a schedule every 2 hours from the hours of 5 AM to 9 PM every day.",
-    ],
-  },
-  {
-    icon: Shield,
-    title: "Security",
-    items: [
       "The hotel has 24-hour security guards on the premises. Feel free to move around any time you wish. Please lock any valuables in the safe provided in your room. The hotel is not liable for any valuable items lost in and around the hotel area.",
       "For any other safekeeping, kindly talk to Management.",
       "The perimeter fence of the facility is equipped with an alarm system; we got you covered.",
@@ -132,7 +102,7 @@ const Policy = () => {
           </motion.p>
         </motion.div>
 
-        <div className="space-y-12">
+        <div className="space-y-4">
           {sections.map((section, i) => {
             const Icon = section.icon;
             return (
