@@ -15,7 +15,7 @@ const sections = [
   },
   {
     icon: Shield,
-    title: "Guest Conduct, Privacy & Security",
+    title: "Privacy & Security",
     items: [
       "Guests who transact private business with our staff do so at their own risk. Guests are advised not to give out their details (including telephone numbers) to staff except at the Front Office.",
       "For business, investment, or any other enquiries about the Hotel, speak to Management.",
