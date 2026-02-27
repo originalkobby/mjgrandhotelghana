@@ -122,9 +122,14 @@ const Policy = () => {
           </motion.h1>
           <div className="w-20 h-[2px] bg-gold mx-auto mb-4" />
           <h2 className="font-serif text-2xl text-gold mb-6">Guest Policies</h2>
-          <p className="font-sans text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5, ease: [0.3, 0, 0.2, 1] }}
+            className="font-sans text-muted-foreground max-w-2xl mx-auto leading-relaxed"
+          >
             Thank you for choosing to stay at MJ Grand Hotel Ltd. Taking a room at our hotel means that you have accepted our terms and conditions and agree to the rate per night of our accommodation.
-          </p>
+          </motion.p>
         </motion.div>
 
         <div className="space-y-12">
