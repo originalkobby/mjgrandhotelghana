@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ChevronLeft, Shield, Clock, UtensilsCrossed, Key, Car, Waves, AlertTriangle, MessageSquare } from "lucide-react";
+import { ChevronLeft, Shield, Clock, UtensilsCrossed, Key, Car, Waves, CalendarX2, Ban, MessageSquare } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 const sections = [
@@ -63,7 +63,7 @@ const sections = [
     ],
   },
   {
-    icon: AlertTriangle,
+    icon: CalendarX2,
     title: "Cancellation & Amendments",
     items: [
       "Cancellations or amendments to your reservation must be made at least 72 hours before your arrival date. Refunds will incur a 30% charge, inclusive of any applicable prevailing government taxes.",
@@ -71,7 +71,7 @@ const sections = [
     ],
   },
   {
-    icon: AlertTriangle,
+    icon: Ban,
     title: "Flying of Drones",
     items: ["Flying of drones is not permitted unless authorized by Management."],
   },
