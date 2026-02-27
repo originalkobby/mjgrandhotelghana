@@ -106,12 +106,12 @@ const Contact = () => {
               >
                 Follow Us
               </motion.h3>
-              <div className="flex gap-4">
-                <a href="https://instagram.com/MJGRAND_HOTEL" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-muted-foreground hover:text-gold transition-colors font-sans text-sm">
-                  <Instagram size={18} /> @MJGRAND_HOTEL
+              <div className="flex gap-3 md:gap-4 flex-wrap">
+                <a href="https://instagram.com/MJGRAND_HOTEL" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 md:gap-2 text-muted-foreground hover:text-gold transition-colors font-sans text-xs md:text-sm">
+                  <Instagram size={14} className="md:w-[18px] md:h-[18px]" /> @MJGRAND_HOTEL
                 </a>
-                <a href="https://facebook.com/MJGrandHotel" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-muted-foreground hover:text-gold transition-colors font-sans text-sm">
-                  <Facebook size={18} /> MJ Grand Hotel
+                <a href="https://facebook.com/MJGrandHotel" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 md:gap-2 text-muted-foreground hover:text-gold transition-colors font-sans text-xs md:text-sm">
+                  <Facebook size={14} className="md:w-[18px] md:h-[18px]" /> MJ Grand Hotel
                 </a>
               </div>
             </div>
