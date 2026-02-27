@@ -77,7 +77,7 @@ const MJChat = () => {
     setMessages([
     {
       role: "assistant",
-      content: `Welcome to MJ Grand Hotel, ${name}! 🏨✨\n\nI'm **MJ**, your personal support assistant. I'm here to help with anything you need during your stay — from reservations and room upgrades to restaurant recommendations and local attractions.\n\nHow can I assist you today?`
+      content: `Welcome to MJ Grand Hotel, ${name}!\n\nI'm **MJ**, your personal support assistant. I'm here to help with anything you need during your stay — from reservations and room upgrades to restaurant recommendations and local attractions.\n\nHow can I assist you today?`
     }]
     );
   };
