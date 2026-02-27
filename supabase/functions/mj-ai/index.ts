@@ -487,7 +487,10 @@ serve(async (req) => {
       }
     }
 
-    const timeContext = gmt_hour !== undefined ? `\n\nCurrent GMT hour: ${gmt_hour}. Use this to determine the correct time-bound greeting.` : "";
+    const now = new Date();
+    const timeContext = gmt_hour !== undefined
+      ? `\n\nCurrent date and time: ${now.toISOString().slice(0, 10)} (GMT hour: ${gmt_hour}). Use the GMT hour to determine the correct time-bound greeting. Use the date for any date-related questions.`
+      : `\n\nCurrent date: ${now.toISOString().slice(0, 10)}.`;
     const systemPrompt = SYSTEM_PROMPT + memoryContext +
       (guest_name ? `\n\nThe guest's name is ${guest_name}.` : "") + timeContext;
 
