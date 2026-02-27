@@ -311,6 +311,85 @@ const TOOLS = [
   },
 ];
 
+// --- Input Validation ---
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function validateRequest(body: any): { valid: true; data: any } | { valid: false; error: string } {
+  const { messages, guest_id, guest_name, gmt_hour, rating } = body;
+
+  // Validate messages
+  if (!messages || !Array.isArray(messages)) {
+    return { valid: false, error: "Invalid messages format" };
+  }
+  if (messages.length > 50) {
+    return { valid: false, error: "Too many messages" };
+  }
+  for (const msg of messages) {
+    if (!msg.role || !["user", "assistant"].includes(msg.role)) {
+      return { valid: false, error: "Invalid message role" };
+    }
+    if (!msg.content || typeof msg.content !== "string") {
+      return { valid: false, error: "Invalid message content" };
+    }
+    if (msg.content.length > 5000) {
+      return { valid: false, error: "Message too long (max 5000 chars)" };
+    }
+  }
+
+  // Validate guest_id
+  if (guest_id !== undefined && guest_id !== null) {
+    if (typeof guest_id !== "string" || !UUID_RE.test(guest_id)) {
+      return { valid: false, error: "Invalid guest_id format" };
+    }
+  }
+
+  // Validate guest_name
+  if (guest_name !== undefined && guest_name !== null) {
+    if (typeof guest_name !== "string" || guest_name.length < 1 || guest_name.length > 100) {
+      return { valid: false, error: "Guest name must be 1-100 characters" };
+    }
+    if (/[<>"']/.test(guest_name)) {
+      return { valid: false, error: "Guest name contains invalid characters" };
+    }
+  }
+
+  // Validate gmt_hour
+  if (gmt_hour !== undefined && (typeof gmt_hour !== "number" || gmt_hour < 0 || gmt_hour > 23)) {
+    return { valid: false, error: "Invalid GMT hour" };
+  }
+
+  // Validate rating
+  if (rating !== undefined) {
+    if (typeof rating !== "number" || rating < 1 || rating > 5 || !Number.isInteger(rating)) {
+      return { valid: false, error: "Rating must be an integer 1-5" };
+    }
+  }
+
+  return { valid: true, data: { messages, guest_id: guest_id || null, guest_name: guest_name || null, gmt_hour, rating } };
+}
+
+// --- Guest Management (server-side) ---
+async function resolveGuest(supabase: any, guestName: string | null): Promise<string | null> {
+  if (!guestName) return null;
+
+  const { data: existing } = await supabase
+    .from("guests")
+    .select("id")
+    .eq("full_name", guestName)
+    .limit(1)
+    .maybeSingle();
+
+  if (existing) return existing.id;
+
+  const { data: newGuest } = await supabase
+    .from("guests")
+    .insert({ full_name: guestName })
+    .select("id")
+    .single();
+
+  return newGuest?.id || null;
+}
+
 async function createSupportTicket(
   supabase: any,
   guestId: string | null,
@@ -338,7 +417,18 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, guest_id, guest_name, gmt_hour } = await req.json();
+    const rawBody = await req.json();
+
+    // --- Input Validation ---
+    const validation = validateRequest(rawBody);
+    if (!validation.valid) {
+      return new Response(
+        JSON.stringify({ error: validation.error }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    const { messages, guest_name, gmt_hour, rating } = validation.data;
+    let { guest_id } = validation.data;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
@@ -346,6 +436,23 @@ serve(async (req) => {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // --- Handle rating-only requests ---
+    if (rating !== undefined && guest_id) {
+      await supabase
+        .from("guests")
+        .update({ preferences: { last_chat_rating: rating } })
+        .eq("id", guest_id);
+      return new Response(
+        JSON.stringify({ success: true }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // --- Resolve guest server-side ---
+    if (!guest_id && guest_name) {
+      guest_id = await resolveGuest(supabase, guest_name);
+    }
 
     // Fetch recent conversation history for context
     let memoryContext = "";
@@ -417,14 +524,13 @@ serve(async (req) => {
       throw new Error(`AI gateway error: ${aiResponse.status}`);
     }
 
-    // We need to handle tool calls — read the full stream, detect tool calls, execute, then re-stream
+    // Read the full stream, detect tool calls, execute, then re-stream
     const reader = aiResponse.body!.getReader();
     const decoder = new TextDecoder();
     let fullContent = "";
     let toolCalls: any[] = [];
     let buffer = "";
 
-    // First pass: collect everything to check for tool calls
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -525,17 +631,14 @@ serve(async (req) => {
         });
       }
 
-      // Read second response to log assistant reply, then re-stream
       const secondReader = secondResponse.body!.getReader();
       const secondDecoder = new TextDecoder();
       let secondBuffer = "";
       let secondContent = "";
-      const secondChunks: Uint8Array[] = [];
 
       while (true) {
         const { done, value } = await secondReader.read();
         if (done) break;
-        secondChunks.push(value);
         secondBuffer += secondDecoder.decode(value, { stream: true });
         let ni;
         while ((ni = secondBuffer.indexOf("\n")) !== -1) {
@@ -561,7 +664,6 @@ serve(async (req) => {
         }).then(() => {});
       }
 
-      // Re-stream collected chunks
       const enc = new TextEncoder();
       const reStream = new ReadableStream({
         start(controller) {
@@ -589,11 +691,9 @@ serve(async (req) => {
       });
     }
 
-    // Re-stream the content we already collected
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       start(controller) {
-        // Send the full content as a single SSE event
         const sseData = JSON.stringify({
           choices: [{ delta: { content: fullContent }, finish_reason: "stop" }],
         });
@@ -601,7 +701,6 @@ serve(async (req) => {
         controller.enqueue(encoder.encode("data: [DONE]\n\n"));
         controller.close();
 
-        // Log assistant response async
         if (guest_id) {
           supabase.from("conversations").insert({
             guest_id,

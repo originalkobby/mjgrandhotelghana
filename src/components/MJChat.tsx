@@ -1,9 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, Loader2, Star } from "lucide-react";
+import { MessageCircle, X, Send, Star } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ReactMarkdown from "react-markdown";
-import { supabase } from "@/integrations/supabase/client";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -17,8 +16,6 @@ const QUICK_ACTIONS = [
   "Request Late Checkout",
   "Report an Issue",
 ];
-
-// Time greeting removed — MJ handles greetings server-side
 
 const MJChat = () => {
   const isMobile = useIsMobile();
@@ -65,30 +62,6 @@ const MJChat = () => {
     }
   }, [open, isMobile]);
 
-  const initGuest = async (name: string) => {
-    setGuestName(name);
-
-    const { data: existing } = await supabase
-      .from("guests")
-      .select("id")
-      .eq("full_name", name)
-      .limit(1)
-      .maybeSingle();
-
-    let id: string;
-    if (existing) {
-      id = existing.id;
-    } else {
-      const { data: newGuest } = await supabase
-        .from("guests")
-        .insert({ full_name: name })
-        .select("id")
-        .single();
-      id = newGuest?.id || "";
-    }
-    setGuestId(id);
-  };
-
   const streamChat = useCallback(
     async (userMessages: Msg[]) => {
       const resp = await fetch(CHAT_URL, {
@@ -110,6 +83,9 @@ const MJChat = () => {
         throw new Error(errData.error || "Failed to connect to MJ");
       }
 
+      // Check if server returned a guest_id (for newly resolved guests)
+      const contentType = resp.headers.get("content-type") || "";
+      
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
       let textBuffer = "";
@@ -175,9 +151,9 @@ const MJChat = () => {
     setInput("");
     setIsLoading(true);
 
-    // If we don't have a guest yet, try to register the name from the first message
-    if (!guestId && !guestName) {
-      await initGuest(text.trim());
+    // Store guest name from first message (server resolves the guest)
+    if (!guestName) {
+      setGuestName(text.trim());
     }
 
     try {
@@ -194,6 +170,28 @@ const MJChat = () => {
       console.error("MJ Chat error:", e);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const submitRating = async (selectedRating: number) => {
+    setRatingSubmitted(true);
+    if (guestId) {
+      try {
+        await fetch(CHAT_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({
+            messages: [],
+            guest_id: guestId,
+            rating: selectedRating,
+          }),
+        });
+      } catch (e) {
+        console.error("Rating submission error:", e);
+      }
     }
   };
 
@@ -328,37 +326,29 @@ const MJChat = () => {
                   </p>
                   <div className="flex gap-1">
                     {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        onClick={() => setRating(star)}
-                        onMouseEnter={() => setHoverRating(star)}
-                        onMouseLeave={() => setHoverRating(0)}
-                        className="p-1 transition-transform hover:scale-110"
-                      >
-                        <Star
-                          size={28}
-                          className={`transition-colors ${
-                            star <= (hoverRating || rating)
-                              ? "fill-accent text-accent"
-                              : "text-muted-foreground/40"
-                          }`}
-                        />
-                      </button>
+                        <button
+                          key={star}
+                          onClick={() => setRating(star)}
+                          onMouseEnter={() => setHoverRating(star)}
+                          onMouseLeave={() => setHoverRating(0)}
+                          className="p-1 transition-transform hover:scale-110"
+                        >
+                          <Star
+                            size={28}
+                            className={`transition-colors ${
+                              star <= (hoverRating || rating)
+                                ? "fill-accent text-accent"
+                                : "text-muted-foreground/40"
+                            }`}
+                          />
+                        </button>
                     ))}
                   </div>
                   {rating > 0 && (
                     <motion.button
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      onClick={async () => {
-                        setRatingSubmitted(true);
-                        if (guestId) {
-                          await supabase
-                            .from("guests")
-                            .update({ preferences: { last_chat_rating: rating } })
-                            .eq("id", guestId);
-                        }
-                      }}
+                      onClick={() => submitRating(rating)}
                       className="text-xs bg-accent text-accent-foreground rounded-full px-4 py-1.5 font-medium font-sans"
                     >
                       Submit Rating
