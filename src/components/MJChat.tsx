@@ -252,7 +252,7 @@ const MJChat = () => {
                   <p className="font-serif font-semibold text-sm">MJ</p>
                   <p className="text-[10px] text-primary-foreground/70 flex items-center gap-1">
                     <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
-                    Online
+                    {isLoading ? "typing..." : "Online"}
                   </p>
                 </div>
               </div>
@@ -293,8 +293,10 @@ const MJChat = () => {
 
               {isLoading && messages[messages.length - 1]?.role === "user" && (
                 <div className="flex justify-start">
-                  <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3">
-                    <Loader2 size={16} className="animate-spin text-muted-foreground" />
+                  <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-1">
+                    <span className="h-2 w-2 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:0ms]" />
+                    <span className="h-2 w-2 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:150ms]" />
+                    <span className="h-2 w-2 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:300ms]" />
                   </div>
                 </div>
               )}
