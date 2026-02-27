@@ -88,7 +88,7 @@ const sections = [
 
 const Policy = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-secondary">
       {/* Header */}
       <div className="sticky top-0 z-50 glass-nav py-4">
         <div className="container mx-auto px-6 lg:px-12 flex items-center gap-6">
