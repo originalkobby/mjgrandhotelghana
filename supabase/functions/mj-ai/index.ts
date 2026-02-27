@@ -12,9 +12,15 @@ const SYSTEM_PROMPT = `You are MJ, the AI Guest Experience Concierge for MJ Gran
 IDENTITY:
 - Name: MJ
 - Role: AI Support Assistant & Concierge at MJ Grand Hotel
-- On the FIRST exchange, the guest's name may not be known yet. If the guest_name is not provided, your top priority is to warmly ask for their name so you can address them properly. Once you have their name, use it naturally throughout the conversation.
+- On the VERY FIRST response to the guest, you MUST greet them and introduce yourself briefly, then immediately ask for their name. Example: "Good morning! I'm MJ, your support assistant at MJ Grand Hotel. May I have your name so I can assist you better?"
 - After the first greeting, NEVER re-introduce yourself or say welcome again. Just respond naturally — like a human who already said hi.
-- Use time-appropriate greetings (Good morning, Good afternoon, Good evening) based on context. Keep greetings dynamic and varied.
+- Once you have the guest's name, use it naturally and professionally throughout the conversation.
+- TIME-BOUND GREETINGS (strictly enforced based on GMT):
+  * "Good morning" — ONLY from 00:00 to 11:59 GMT
+  * "Good afternoon" — ONLY from 12:00 to 16:59 GMT
+  * "Good evening" — ONLY from 17:00 to 23:59 GMT
+  * "Hi", "Hello" — can be used at any time (not time-bound)
+  * NEVER use a time-bound greeting outside its designated hours
 
 TONE:
 - Warm, natural, human-like — like texting a friendly hotel staff member
@@ -290,7 +296,7 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, guest_id, guest_name } = await req.json();
+    const { messages, guest_id, guest_name, gmt_hour } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
@@ -326,8 +332,9 @@ serve(async (req) => {
       }
     }
 
+    const timeContext = gmt_hour !== undefined ? `\n\nCurrent GMT hour: ${gmt_hour}. Use this to determine the correct time-bound greeting.` : "";
     const systemPrompt = SYSTEM_PROMPT + memoryContext +
-      (guest_name ? `\n\nThe guest's name is ${guest_name}.` : "");
+      (guest_name ? `\n\nThe guest's name is ${guest_name}.` : "") + timeContext;
 
     // Call Lovable AI Gateway
     const aiResponse = await fetch(

@@ -18,12 +18,7 @@ const QUICK_ACTIONS = [
   "Report an Issue",
 ];
 
-const getTimeGreeting = () => {
-  const hour = new Date().getHours();
-  if (hour < 12) return "Good morning";
-  if (hour < 17) return "Good afternoon";
-  return "Good evening";
-};
+// Time greeting removed — MJ handles greetings server-side
 
 const MJChat = () => {
   const isMobile = useIsMobile();
@@ -37,7 +32,6 @@ const MJChat = () => {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [ratingSubmitted, setRatingSubmitted] = useState(false);
-  const [greeted, setGreeted] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -48,22 +42,12 @@ const MJChat = () => {
     }
   }, [messages]);
 
-  // Focus input when chat opens & send initial greeting
+  // Focus input when chat opens
   useEffect(() => {
     if (open) {
       setTimeout(() => inputRef.current?.focus(), 300);
-      if (!greeted) {
-        setGreeted(true);
-        const greeting = getTimeGreeting();
-        setMessages([
-          {
-            role: "assistant",
-            content: `${greeting}! I'm **MJ**, your personal support assistant at MJ Grand Hotel. May I have your name so I can assist you better?`,
-          },
-        ]);
-      }
     }
-  }, [open, greeted]);
+  }, [open]);
 
   const initGuest = async (name: string) => {
     setGuestName(name);
@@ -101,6 +85,7 @@ const MJChat = () => {
           messages: userMessages,
           guest_id: guestId,
           guest_name: guestName,
+          gmt_hour: new Date().getUTCHours(),
         }),
       });
 
@@ -180,8 +165,7 @@ const MJChat = () => {
     }
 
     try {
-      // Exclude the initial local greeting from API messages
-      await streamChat(newMessages.filter((m) => m !== messages[0]));
+      await streamChat(newMessages);
     } catch (e: any) {
       setMessages((prev) => [
         ...prev,
@@ -298,8 +282,8 @@ const MJChat = () => {
                 </div>
               )}
 
-              {/* Quick actions — show after welcome only */}
-              {messages.length === 1 && !isLoading && (
+              {/* Quick actions — show when no messages yet */}
+              {messages.length === 0 && !isLoading && (
                 <div className="flex flex-wrap gap-2 mt-2">
                   {QUICK_ACTIONS.map((action) => (
                     <button
