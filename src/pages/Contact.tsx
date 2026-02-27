@@ -38,9 +38,14 @@ const Contact = () => {
             Get In Touch
           </motion.h1>
           <div className="w-20 h-[2px] bg-gold mx-auto mb-4" />
-          <p className="font-sans text-muted-foreground max-w-xl mx-auto">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5, ease: [0.3, 0, 0.2, 1] }}
+            className="font-sans text-muted-foreground max-w-xl mx-auto"
+          >
             We'd love to hear from you. Reach out for reservations, enquiries, or feedback.
-          </p>
+          </motion.p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
