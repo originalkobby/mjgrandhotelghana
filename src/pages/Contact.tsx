@@ -29,7 +29,14 @@ const Contact = () => {
           transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
           className="text-center mb-16"
         >
-          <h1 className="font-serif text-4xl md:text-5xl text-foreground mb-4">Get In Touch</h1>
+          <motion.h1
+            initial={{ opacity: 0, y: 30, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: [0.3, 0, 0.2, 1] }}
+            className="font-serif text-4xl md:text-5xl text-foreground mb-4"
+          >
+            Get In Touch
+          </motion.h1>
           <div className="w-20 h-[2px] bg-gold mx-auto mb-4" />
           <p className="font-sans text-muted-foreground max-w-xl mx-auto">
             We'd love to hear from you. Reach out for reservations, enquiries, or feedback.
