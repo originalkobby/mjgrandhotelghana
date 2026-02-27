@@ -172,7 +172,7 @@ const Policy = () => {
         >
           <p className="font-serif text-2xl text-gold mb-2">Thank you!!!</p>
           <p className="font-serif text-lg text-foreground mb-1">You are our Royal guest!!!</p>
-          <p className="font-sans text-sm text-muted-foreground uppercase tracking-wider mt-4">Management</p>
+          
         </motion.div>
       </div>
     </div>
