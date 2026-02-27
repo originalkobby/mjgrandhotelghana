@@ -219,7 +219,7 @@ const MJChat = () => {
           }}
           className={`fixed z-[100] flex flex-col overflow-hidden bg-card ${
           isMobile ?
-          "inset-0 w-full h-full rounded-none" :
+          "inset-0 rounded-none" :
           "bottom-6 right-6 w-[380px] max-h-[600px] rounded-2xl shadow-2xl border border-border"}`
           }>
 
@@ -235,7 +235,7 @@ const MJChat = () => {
                   MJ
                 </div>
                 <div>
-                  <p className="font-serif font-semibold text-sm">MJ Grand Hotel</p>
+                  <p className="font-serif font-semibold text-sm">MJ</p>
                   <p className="text-xs text-primary-foreground/70 flex items-center gap-1">
                     <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
                     Online
@@ -260,23 +260,20 @@ const MJChat = () => {
                   <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  if (input.trim()) {
-                    initGuest(input.trim());
-                    setInput("");
-                  }
+                  if (input.trim()) initGuest(input.trim());
                 }}
-                className={`flex gap-2 w-full px-4 ${isMobile ? "pb-[env(safe-area-inset-bottom,12px)]" : ""}`}>
+                className="flex gap-2 w-full px-4">
 
                     <input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Your name..."
-                  className="flex-1 min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                   autoFocus />
 
                     <button
                   type="submit"
-                  className="shrink-0 rounded-lg bg-accent text-accent-foreground px-4 py-2 text-sm font-medium">
+                  className="rounded-lg bg-accent text-accent-foreground px-4 py-2 text-sm font-medium">
 
                       Start
                     </button>
@@ -402,7 +399,7 @@ const MJChat = () => {
               e.preventDefault();
               send(input);
             }}
-            className={`flex items-center gap-2 px-4 py-3 border-t border-border shrink-0 ${isMobile ? "pb-[env(safe-area-inset-bottom,12px)]" : ""}`}>
+            className="flex items-center gap-2 px-4 py-3 border-t border-border">
 
                 <input
               ref={inputRef}
@@ -410,12 +407,12 @@ const MJChat = () => {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your message..."
               disabled={isLoading}
-              className="flex-1 min-w-0 bg-transparent text-sm focus:outline-none placeholder:text-muted-foreground font-sans" />
+              className="flex-1 bg-transparent text-sm focus:outline-none placeholder:text-muted-foreground font-sans" />
 
                 <button
               type="submit"
               disabled={isLoading || !input.trim()}
-              className="h-8 w-8 shrink-0 rounded-full bg-accent text-accent-foreground flex items-center justify-center disabled:opacity-40 transition-opacity"
+              className="h-8 w-8 rounded-full bg-accent text-accent-foreground flex items-center justify-center disabled:opacity-40 transition-opacity"
               aria-label="Send message">
 
                   <Send size={14} />
