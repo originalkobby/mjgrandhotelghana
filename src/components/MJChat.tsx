@@ -219,7 +219,7 @@ const MJChat = () => {
           }}
           className={`fixed z-[100] flex flex-col overflow-hidden bg-card ${
           isMobile ?
-          "inset-0 rounded-none" :
+          "inset-0 w-full h-full rounded-none" :
           "bottom-6 right-6 w-[380px] max-h-[600px] rounded-2xl shadow-2xl border border-border"}`
           }>
 
@@ -248,7 +248,7 @@ const MJChat = () => {
             </div>
 
             {/* Messages area */}
-            <div ref={scrollRef} className={`flex-1 overflow-y-auto p-4 space-y-3 ${isMobile ? "min-h-0" : "min-h-[300px] max-h-[420px]"}`}>
+            <div ref={scrollRef} className={`flex-1 overflow-y-auto p-4 space-y-3 ${isMobile ? "min-h-0 pb-safe" : "min-h-[300px] max-h-[420px]"}`}>
               {showNamePrompt ?
             <div className="flex flex-col items-center justify-center h-full gap-4 py-8">
                   <div className="h-16 w-16 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-serif font-bold text-2xl">
