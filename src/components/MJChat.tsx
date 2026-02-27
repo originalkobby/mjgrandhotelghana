@@ -251,7 +251,7 @@ const MJChat = () => {
                 <div>
                   <p className="font-serif font-semibold text-sm">MJ</p>
                   <p className="text-[10px] text-primary-foreground/70 flex items-center gap-1">
-                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
+                    {!isLoading && <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />}
                     {isLoading ? "typing..." : "Online"}
                   </p>
                 </div>
