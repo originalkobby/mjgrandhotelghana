@@ -431,7 +431,13 @@ serve(async (req) => {
     let { guest_id } = validation.data;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    if (!LOVABLE_API_KEY) {
+      console.error("LOVABLE_API_KEY is not configured");
+      return new Response(
+        JSON.stringify({ error: "Service temporarily unavailable" }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -521,7 +527,10 @@ serve(async (req) => {
       }
       const errText = await aiResponse.text();
       console.error("AI gateway error:", aiResponse.status, errText);
-      throw new Error(`AI gateway error: ${aiResponse.status}`);
+      return new Response(
+        JSON.stringify({ error: "Unable to process request" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     // Read the full stream, detect tool calls, execute, then re-stream
@@ -618,7 +627,10 @@ serve(async (req) => {
       if (!secondResponse.ok) {
         const errText = await secondResponse.text();
         console.error("Second AI call error:", secondResponse.status, errText);
-        throw new Error("Failed second AI call");
+        return new Response(
+          JSON.stringify({ error: "Unable to process request" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
 
       // Log the user message
@@ -717,7 +729,7 @@ serve(async (req) => {
   } catch (e) {
     console.error("mj-ai error:", e);
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
+      JSON.stringify({ error: "An error occurred. Please try again." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
