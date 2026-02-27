@@ -117,9 +117,14 @@ const Menu = () => {
             Our Kitchen Menu
           </motion.h1>
           <div className="w-20 h-[2px] bg-gold mx-auto mb-4" />
-          <p className="font-sans text-cream/60 max-w-xl mx-auto">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5, ease: [0.3, 0, 0.2, 1] }}
+            className="font-sans text-cream/60 max-w-xl mx-auto"
+          >
             Explore our carefully curated selection of dishes, from local Ghanaian delicacies to international favorites.
-          </p>
+          </motion.p>
         </motion.div>
       </div>
 
