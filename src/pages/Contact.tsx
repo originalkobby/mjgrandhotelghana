@@ -39,13 +39,20 @@ const Contact = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Contact Info */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, x: -60 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2, ease: [0.3, 0, 0.2, 1] }}
             className="space-y-8"
           >
             <div className="bg-card border border-border rounded-lg p-8">
-              <h2 className="font-serif text-2xl text-foreground mb-6">Contact Information</h2>
+              <motion.h2
+                initial={{ opacity: 0, x: -40 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.35, ease: [0.3, 0, 0.2, 1] }}
+                className="font-serif text-2xl text-foreground mb-6"
+              >
+                Contact Information
+              </motion.h2>
               <div className="space-y-5">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center shrink-0">
@@ -79,7 +86,14 @@ const Contact = () => {
             </div>
 
             <div className="bg-card border border-border rounded-lg p-8">
-              <h3 className="font-serif text-lg text-foreground mb-4">Follow Us</h3>
+              <motion.h3
+                initial={{ opacity: 0, x: -40 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.4, ease: [0.3, 0, 0.2, 1] }}
+                className="font-serif text-lg text-foreground mb-4"
+              >
+                Follow Us
+              </motion.h3>
               <div className="flex gap-4">
                 <a href="https://instagram.com/MJGRAND_HOTEL" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-muted-foreground hover:text-gold transition-colors font-sans text-sm">
                   <Instagram size={18} /> @MJGRAND_HOTEL
@@ -93,12 +107,19 @@ const Contact = () => {
 
           {/* Contact Form */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, x: 60 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.3, ease: [0.3, 0, 0.2, 1] }}
             className="bg-card border border-border rounded-lg p-8"
           >
-            <h2 className="font-serif text-2xl text-foreground mb-6">Send a Message</h2>
+            <motion.h2
+              initial={{ opacity: 0, x: 40 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.45, ease: [0.3, 0, 0.2, 1] }}
+              className="font-serif text-2xl text-foreground mb-6"
+            >
+              Send a Message
+            </motion.h2>
             <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
               <div>
                 <label className="font-sans text-sm text-muted-foreground block mb-1.5">Full Name</label>
