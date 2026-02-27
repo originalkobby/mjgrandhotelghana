@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import MenuSection, { getItemVariants } from "@/components/MenuSection";
-import logo from "@/assets/logo.png";
+
 
 import menuF1 from "@/assets/menu-f1.png";
 import menuF2 from "@/assets/menu-f2.png";
@@ -93,9 +93,6 @@ const Menu = () => {
           >
             <ChevronLeft size={18} />
             Go back
-          </Link>
-          <Link to="/" className="flex items-center">
-            <img src={logo} alt="MJ Grand Hotel" className="h-7 w-auto" />
           </Link>
         </div>
       </div>

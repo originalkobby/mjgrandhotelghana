@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ChevronLeft, Shield, Clock, UtensilsCrossed, Key, Car, Waves, CircleX, Ban, MessageSquare } from "lucide-react";
-import logo from "@/assets/logo.png";
+
 
 const sections = [
   {
@@ -68,9 +68,6 @@ const Policy = () => {
           >
             <ChevronLeft size={18} />
             Go back
-          </Link>
-          <Link to="/" className="flex items-center">
-            <img src={logo} alt="MJ Grand Hotel" className="h-7 w-auto" />
           </Link>
         </div>
       </div>
