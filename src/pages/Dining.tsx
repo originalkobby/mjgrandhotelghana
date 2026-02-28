@@ -125,30 +125,42 @@ const Dining = () => {
       {/* The Restaurant */}
       <section className="border-t border-cream/10 py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-12">
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-            className="max-w-3xl mx-auto text-center"
-          >
-            <motion.h2 variants={slideFromLeft} className="font-serif text-3xl md:text-4xl text-cream mb-4">
+          <div className="max-w-3xl mx-auto text-center">
+            <motion.h2
+              initial={{ opacity: 0, x: -60 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.7, ease }}
+              className="font-serif text-3xl md:text-4xl text-cream mb-4"
+            >
               The Restaurant
             </motion.h2>
-            <motion.div variants={fadeIn} className="w-12 h-[2px] bg-gold mx-auto mb-8" />
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.8, delay: 0.15, ease }}
+              className="w-12 h-[2px] bg-gold mx-auto mb-8"
+            />
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, x: 60 }}
+              whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6, delay: 0.3, ease }}
+              transition={{ duration: 0.7, delay: 0.2, ease }}
               className="font-sans text-cream/60 leading-relaxed mb-6"
             >
               Our signature restaurant offers a sophisticated yet welcoming setting — ideal for executive lunches, romantic dinners, and refined family gatherings.
             </motion.p>
-            <motion.p variants={slideFromLeft} className="font-sans text-cream/50 leading-relaxed">
+            <motion.p
+              initial={{ opacity: 0, x: -60 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.7, delay: 0.35, ease }}
+              className="font-sans text-cream/50 leading-relaxed"
+            >
               With stylish interiors, ambient lighting, and attentive service, our restaurant creates the perfect balance between modern luxury and cultural warmth.
             </motion.p>
-          </motion.div>
+          </div>
 
           {/* Opening Hours */}
           <motion.div
@@ -190,25 +202,33 @@ const Dining = () => {
       {/* Signature Highlights */}
       <section className="border-t border-cream/10 py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-12">
-          <motion.div
-            initial={{ opacity: 0, x: -60 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.7, ease }}
-            className="text-center mb-12"
-          >
-            <h2 className="font-serif text-3xl md:text-4xl text-cream mb-4">Ghanaian-Inspired, Globally Refined</h2>
-            <div className="w-12 h-[2px] bg-gold mx-auto mb-6" />
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+          <div className="text-center mb-12">
+            <motion.h2
+              initial={{ opacity: 0, x: 60 }}
+              whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6, delay: 0.3, ease }}
+              transition={{ duration: 0.7, ease }}
+              className="font-serif text-3xl md:text-4xl text-cream mb-4"
+            >
+              Ghanaian-Inspired, Globally Refined
+            </motion.h2>
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.8, delay: 0.15, ease }}
+              className="w-12 h-[2px] bg-gold mx-auto mb-6"
+            />
+            <motion.p
+              initial={{ opacity: 0, x: -60 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.7, delay: 0.25, ease }}
               className="font-sans text-cream/60 max-w-2xl mx-auto leading-relaxed"
             >
               Our menu celebrates Ghana's vibrant culinary heritage while incorporating international influences for a contemporary twist.
             </motion.p>
-          </motion.div>
+          </div>
 
           <motion.div
             variants={containerVariants}
@@ -249,25 +269,33 @@ const Dining = () => {
       {/* Bar & Lounge */}
       <section className="border-t border-cream/10 py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-12">
-          <motion.div
-            initial={{ opacity: 0, x: 60 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.7, ease }}
-            className="text-center mb-12"
-          >
-            <h2 className="font-serif text-3xl md:text-4xl text-cream mb-4">The Bar & Lounge</h2>
-            <div className="w-12 h-[2px] bg-gold mx-auto mb-6" />
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+          <div className="text-center mb-12">
+            <motion.h2
+              initial={{ opacity: 0, x: -60 }}
+              whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6, delay: 0.3, ease }}
+              transition={{ duration: 0.7, ease }}
+              className="font-serif text-3xl md:text-4xl text-cream mb-4"
+            >
+              The Bar & Lounge
+            </motion.h2>
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.8, delay: 0.15, ease }}
+              className="w-12 h-[2px] bg-gold mx-auto mb-6"
+            />
+            <motion.p
+              initial={{ opacity: 0, x: 60 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.7, delay: 0.25, ease }}
               className="font-sans text-cream/60 max-w-2xl mx-auto leading-relaxed"
             >
               Unwind in our elegant bar and lounge — a refined space designed for relaxation and conversation.
             </motion.p>
-          </motion.div>
+          </div>
 
           <motion.div
             variants={containerVariants}
@@ -307,27 +335,33 @@ const Dining = () => {
       {/* In-Room Dining */}
       <section className="border-t border-cream/10 py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-12">
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-            className="max-w-3xl mx-auto text-center"
-          >
-            <motion.h2 variants={slideFromLeft} className="font-serif text-3xl md:text-4xl text-cream mb-4">
+          <div className="max-w-3xl mx-auto text-center">
+            <motion.h2
+              initial={{ opacity: 0, x: 60 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.7, ease }}
+              className="font-serif text-3xl md:text-4xl text-cream mb-4"
+            >
               In-Room Dining
             </motion.h2>
-            <motion.div variants={fadeIn} className="w-12 h-[2px] bg-gold mx-auto mb-8" />
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.8, delay: 0.15, ease }}
+              className="w-12 h-[2px] bg-gold mx-auto mb-8"
+            />
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, x: -60 }}
+              whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6, delay: 0.3, ease }}
+              transition={{ duration: 0.7, delay: 0.25, ease }}
               className="font-sans text-cream/60 leading-relaxed mb-8"
             >
               For guests who prefer privacy, our in-room dining service delivers the full restaurant experience directly to your suite.
             </motion.p>
-          </motion.div>
+          </div>
 
           <motion.div
             variants={containerVariants}
@@ -367,25 +401,33 @@ const Dining = () => {
       {/* Private Dining & Events */}
       <section className="border-t border-cream/10 py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-12">
-          <motion.div
-            initial={{ opacity: 0, x: -60 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.7, ease }}
-            className="text-center mb-12"
-          >
-            <h2 className="font-serif text-3xl md:text-4xl text-cream mb-4">Private Dining & Events</h2>
-            <div className="w-12 h-[2px] bg-gold mx-auto mb-6" />
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+          <div className="text-center mb-12">
+            <motion.h2
+              initial={{ opacity: 0, x: -60 }}
+              whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6, delay: 0.3, ease }}
+              transition={{ duration: 0.7, ease }}
+              className="font-serif text-3xl md:text-4xl text-cream mb-4"
+            >
+              Private Dining & Events
+            </motion.h2>
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.8, delay: 0.15, ease }}
+              className="w-12 h-[2px] bg-gold mx-auto mb-6"
+            />
+            <motion.p
+              initial={{ opacity: 0, x: 60 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.7, delay: 0.25, ease }}
               className="font-sans text-cream/60 max-w-2xl mx-auto leading-relaxed"
             >
               MJ Grand Hotel offers tailored culinary experiences for every occasion.
             </motion.p>
-          </motion.div>
+          </div>
 
           <motion.div
             variants={containerVariants}
@@ -426,30 +468,42 @@ const Dining = () => {
       {/* Culinary Commitment */}
       <section className="border-t border-cream/10 py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-12">
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-            className="max-w-3xl mx-auto text-center"
-          >
-            <motion.h2 variants={slideFromLeft} className="font-serif text-3xl md:text-4xl text-cream mb-4">
+          <div className="max-w-3xl mx-auto text-center">
+            <motion.h2
+              initial={{ opacity: 0, x: -60 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.7, ease }}
+              className="font-serif text-3xl md:text-4xl text-cream mb-4"
+            >
               Our Culinary Commitment
             </motion.h2>
-            <motion.div variants={fadeIn} className="w-12 h-[2px] bg-gold mx-auto mb-8" />
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.8, delay: 0.15, ease }}
+              className="w-12 h-[2px] bg-gold mx-auto mb-8"
+            />
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, x: 60 }}
+              whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6, delay: 0.3, ease }}
+              transition={{ duration: 0.7, delay: 0.25, ease }}
               className="font-sans text-cream/60 leading-relaxed mb-4"
             >
               We prioritize freshness, hygiene, and excellence in every detail. Our chefs source high-quality ingredients and blend traditional Ghanaian flavors with international techniques to deliver innovative, memorable dishes.
             </motion.p>
-            <motion.p variants={slideFromLeft} className="font-sans text-gold/80 font-medium italic">
+            <motion.p
+              initial={{ opacity: 0, x: -60 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.7, delay: 0.4, ease }}
+              className="font-sans text-gold/80 font-medium italic"
+            >
               At MJ Grand Hotel, dining is not simply a service — it is an expression of culture, creativity, and refined taste.
             </motion.p>
-          </motion.div>
+          </div>
         </div>
       </section>
 
