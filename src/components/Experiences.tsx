@@ -1,10 +1,10 @@
 import { motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import Autoplay from "embla-carousel-autoplay";
 import expSpa from "@/assets/exp-spa.jpg";
 import expDining from "@/assets/exp-dining.jpg";
 import expRooftop from "@/assets/exp-rooftop.jpg";
 import expCulture from "@/assets/exp-culture.jpg";
-import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 
 const experiences = [
   { image: expSpa, title: "Spa & Wellness", desc: "Rejuvenate body and soul with our world-class treatments." },
@@ -14,28 +14,6 @@ const experiences = [
 ];
 
 const Experiences = () => {
-  const [api, setApi] = useState<CarouselApi>();
-  const [isHovered, setIsHovered] = useState(false);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  useEffect(() => {
-    if (!api) return;
-
-    const startAutoScroll = () => {
-      intervalRef.current = setInterval(() => {
-        if (!isHovered) {
-          api.scrollNext();
-        }
-      }, 3000);
-    };
-
-    startAutoScroll();
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [api, isHovered]);
-
   return (
     <section id="experiences" className="py-24 md:py-32 bg-secondary">
       <div className="container mx-auto px-6 lg:px-12">
@@ -54,24 +32,21 @@ const Experiences = () => {
           </h2>
         </motion.div>
 
-        <div
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
+        <Carousel
+          opts={{ align: "start", loop: true }}
+          plugins={[
+            Autoplay({ delay: 3000, stopOnInteraction: false, stopOnMouseEnter: true }),
+          ]}
+          className="w-full"
         >
-          <Carousel
-            setApi={setApi}
-            opts={{ align: "start", loop: true }}
-            className="w-full"
-          >
-            <CarouselContent className="-ml-5">
-              {experiences.map((exp, i) => (
-                <CarouselItem key={exp.title} className="pl-5 basis-[80%] sm:basis-1/2 lg:basis-1/4">
-                  <ExperienceCard exp={exp} index={i} />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Carousel>
-        </div>
+          <CarouselContent className="-ml-5">
+            {experiences.map((exp, i) => (
+              <CarouselItem key={exp.title} className="pl-5 basis-[80%] sm:basis-1/2 lg:basis-1/3">
+                <ExperienceCard exp={exp} index={i} />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
       </div>
     </section>
   );
