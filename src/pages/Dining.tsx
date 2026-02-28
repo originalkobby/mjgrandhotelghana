@@ -519,9 +519,15 @@ const Dining = () => {
           >
             <h2 className="font-serif text-3xl md:text-4xl text-cream mb-4">Reserve Your Table</h2>
             <div className="w-12 h-[2px] bg-gold mx-auto mb-6" />
-            <p className="font-sans text-cream/60 leading-relaxed mb-8">
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.6, delay: 0.3, ease }}
+              className="font-sans text-cream/60 leading-relaxed mb-8"
+            >
               We invite you to indulge in a dining experience that harmonizes tradition with modern elegance. For reservations or inquiries, please get in touch with our front desk.
-            </p>
+            </motion.p>
             <Link
               to="/contact"
               className="inline-block bg-gold px-8 py-3.5 font-sans text-sm font-semibold uppercase tracking-wider text-charcoal hover:shadow-lg hover:shadow-gold/20 transition-all duration-300"
