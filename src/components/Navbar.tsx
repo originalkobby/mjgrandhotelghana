@@ -8,6 +8,7 @@ const navItems = [
   { label: "About", href: "/about", isHash: false },
   { label: "Rooms & Suites", href: "#rooms", isHash: true },
   { label: "Experiences", href: "#experiences", isHash: true },
+  { label: "Dining", href: "/dining", isHash: false },
   { label: "Menu", href: "/menu", isHash: false },
   { label: "Gallery", href: "#gallery", isHash: true },
   { label: "Policy", href: "/policy", isHash: false },
