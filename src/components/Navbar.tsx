@@ -10,6 +10,7 @@ const navItems = [
   { label: "Experiences", href: "#experiences", isHash: true },
   { label: "Menu", href: "/menu", isHash: false },
   { label: "Gallery", href: "#gallery", isHash: true },
+  { label: "About", href: "/about", isHash: false },
   { label: "Policy", href: "/policy", isHash: false },
 ];
 
