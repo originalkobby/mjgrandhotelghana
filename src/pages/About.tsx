@@ -19,6 +19,16 @@ const fadeIn = {
   visible: { opacity: 1, transition: { duration: 0.8, ease } },
 };
 
+const slideFromLeft = {
+  hidden: { opacity: 0, x: -60 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease } },
+};
+
+const slideFromRight = {
+  hidden: { opacity: 0, x: 60 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease } },
+};
+
 const roomFeatures = [
   { icon: Bed, text: "Premium bedding and spacious interiors" },
   { icon: Wifi, text: "High-speed Wi-Fi" },
@@ -110,14 +120,14 @@ const About = () => {
           viewport={{ once: true, margin: "-80px" }}
           className="max-w-3xl mx-auto text-center"
         >
-          <motion.h2 variants={fadeUp} className="font-serif text-3xl md:text-4xl text-cream mb-4">
+          <motion.h2 variants={slideFromLeft} className="font-serif text-3xl md:text-4xl text-cream mb-4">
             Our Story
           </motion.h2>
           <motion.div variants={fadeIn} className="w-12 h-[2px] bg-gold mx-auto mb-8" />
-          <motion.p variants={fadeUp} className="font-sans text-cream/60 leading-relaxed mb-4">
+          <motion.p variants={slideFromRight} className="font-sans text-cream/60 leading-relaxed mb-4">
             MJ Grand Hotel was established with a clear vision — to redefine luxury hospitality by combining modern elegance with warm, attentive service. Every detail of our hotel has been thoughtfully designed to provide guests with a seamless and elevated experience.
           </motion.p>
-          <motion.p variants={fadeUp} className="font-sans text-cream/50 leading-relaxed">
+          <motion.p variants={slideFromLeft} className="font-sans text-cream/50 leading-relaxed">
             From our tastefully furnished interiors to our professional and courteous staff, we pride ourselves on creating an atmosphere where guests feel valued, relaxed, and truly at home.
           </motion.p>
         </motion.div>
@@ -127,10 +137,10 @@ const About = () => {
       <section className="border-t border-cream/10 py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-12">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, x: -60 }}
+            whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.6, ease }}
+            transition={{ duration: 0.7, ease }}
             className="text-center mb-12"
           >
             <h2 className="font-serif text-3xl md:text-4xl text-cream mb-4">Elegant Accommodation</h2>
@@ -147,18 +157,21 @@ const About = () => {
             viewport={{ once: true, margin: "-50px" }}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto"
           >
-            {roomFeatures.map((feature, i) => (
-              <motion.div
-                key={i}
-                variants={fadeUp}
-                whileHover={{ scale: 1.04, y: -4 }}
-                transition={{ type: "tween", duration: 0.25, ease }}
-                className="flex items-center gap-4 p-5 rounded-xl border border-cream/5 bg-cream/[0.02] hover:bg-cream/[0.06] hover:border-gold/20 hover:shadow-[0_0_20px_rgba(212,175,55,0.08)] transition-colors duration-300"
-              >
-                <feature.icon size={20} className="text-gold shrink-0" />
-                <span className="font-sans text-sm text-cream/70">{feature.text}</span>
-              </motion.div>
-            ))}
+            {roomFeatures.map((feature, i) => {
+              const isLeft = i % 3 === 0 || (i % 2 === 0);
+              return (
+                <motion.div
+                  key={i}
+                  variants={isLeft ? slideFromLeft : slideFromRight}
+                  whileHover={{ scale: 1.04, y: -4 }}
+                  transition={{ type: "tween", duration: 0.25, ease }}
+                  className="flex items-center gap-4 p-5 rounded-xl border border-cream/5 bg-cream/[0.02] hover:bg-cream/[0.06] hover:border-gold/20 hover:shadow-[0_0_20px_rgba(212,175,55,0.08)] transition-colors duration-300"
+                >
+                  <feature.icon size={20} className="text-gold shrink-0" />
+                  <span className="font-sans text-sm text-cream/70">{feature.text}</span>
+                </motion.div>
+              );
+            })}
           </motion.div>
 
           <motion.p
@@ -177,10 +190,10 @@ const About = () => {
       <section className="border-t border-cream/10 py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-12">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, x: 60 }}
+            whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.6, ease }}
+            transition={{ duration: 0.7, ease }}
             className="text-center mb-12"
           >
             <h2 className="font-serif text-3xl md:text-4xl text-cream mb-4">Exceptional Facilities & Services</h2>
@@ -197,18 +210,21 @@ const About = () => {
             viewport={{ once: true, margin: "-50px" }}
             className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-4xl mx-auto"
           >
-            {facilities.map((facility, i) => (
-              <motion.div
-                key={i}
-                variants={fadeUp}
-                whileHover={{ scale: 1.04, y: -4 }}
-                transition={{ type: "tween", duration: 0.25, ease }}
-                className="flex items-center gap-4 p-5 rounded-xl border border-cream/5 bg-cream/[0.02] hover:bg-cream/[0.06] hover:border-gold/20 hover:shadow-[0_0_20px_rgba(212,175,55,0.08)] transition-colors duration-300"
-              >
-                <facility.icon size={20} className="text-gold shrink-0" />
-                <span className="font-sans text-sm text-cream/70">{facility.text}</span>
-              </motion.div>
-            ))}
+            {facilities.map((facility, i) => {
+              const isLeft = i % 2 === 0;
+              return (
+                <motion.div
+                  key={i}
+                  variants={isLeft ? slideFromLeft : slideFromRight}
+                  whileHover={{ scale: 1.04, y: -4 }}
+                  transition={{ type: "tween", duration: 0.25, ease }}
+                  className="flex items-center gap-4 p-5 rounded-xl border border-cream/5 bg-cream/[0.02] hover:bg-cream/[0.06] hover:border-gold/20 hover:shadow-[0_0_20px_rgba(212,175,55,0.08)] transition-colors duration-300"
+                >
+                  <facility.icon size={20} className="text-gold shrink-0" />
+                  <span className="font-sans text-sm text-cream/70">{facility.text}</span>
+                </motion.div>
+              );
+            })}
           </motion.div>
 
           <motion.p
@@ -233,14 +249,14 @@ const About = () => {
             viewport={{ once: true, margin: "-80px" }}
             className="max-w-3xl mx-auto text-center"
           >
-            <motion.h2 variants={fadeUp} className="font-serif text-3xl md:text-4xl text-cream mb-4">
+            <motion.h2 variants={slideFromLeft} className="font-serif text-3xl md:text-4xl text-cream mb-4">
               Our Commitment to Excellence
             </motion.h2>
             <motion.div variants={fadeIn} className="w-12 h-[2px] bg-gold mx-auto mb-8" />
-            <motion.p variants={fadeUp} className="font-sans text-cream/60 leading-relaxed mb-4">
+            <motion.p variants={slideFromRight} className="font-sans text-cream/60 leading-relaxed mb-4">
               Our mission is simple: to provide exceptional luxury hospitality defined by comfort, security, and impeccable service. We are committed to maintaining the highest standards of cleanliness, professionalism, and guest satisfaction.
             </motion.p>
-            <motion.p variants={fadeUp} className="font-sans text-gold/80 font-medium italic">
+            <motion.p variants={slideFromLeft} className="font-sans text-gold/80 font-medium italic">
               At MJ Grand Hotel, your comfort is our priority, and your experience is our promise.
             </motion.p>
           </motion.div>
@@ -251,10 +267,10 @@ const About = () => {
       <section className="border-t border-cream/10 py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-12">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, x: -60 }}
+            whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.6, ease }}
+            transition={{ duration: 0.7, ease }}
             className="text-center mb-14"
           >
             <h2 className="font-serif text-3xl md:text-4xl text-cream mb-4">Core Values & Behaviors</h2>
@@ -271,22 +287,26 @@ const About = () => {
             viewport={{ once: true, margin: "-50px" }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto"
           >
-            {coreValues.map((value, i) => (
-              <motion.div
-                key={i}
-                variants={fadeUp}
-                whileHover={{ scale: 1.04, y: -4 }}
-                transition={{ type: "tween", duration: 0.25, ease }}
-                className="p-6 rounded-xl border border-cream/5 bg-cream/[0.02] hover:bg-cream/[0.06] hover:border-gold/20 hover:shadow-[0_0_20px_rgba(212,175,55,0.08)] transition-colors duration-300"
-              >
-                <value.icon size={24} className="text-gold mb-4" />
-                <h3 className="font-serif text-lg text-cream font-semibold">{value.title}</h3>
-                {value.subtitle && (
-                  <p className="font-sans text-[11px] uppercase tracking-wider text-gold/60 mt-1 mb-3">{value.subtitle}</p>
-                )}
-                <p className="font-sans text-sm text-cream/50 leading-relaxed mt-2">{value.desc}</p>
-              </motion.div>
-            ))}
+            {coreValues.map((value, i) => {
+              const col = i % 3;
+              const variant = col === 0 ? slideFromLeft : col === 2 ? slideFromRight : fadeUp;
+              return (
+                <motion.div
+                  key={i}
+                  variants={variant}
+                  whileHover={{ scale: 1.04, y: -4 }}
+                  transition={{ type: "tween", duration: 0.25, ease }}
+                  className="p-6 rounded-xl border border-cream/5 bg-cream/[0.02] hover:bg-cream/[0.06] hover:border-gold/20 hover:shadow-[0_0_20px_rgba(212,175,55,0.08)] transition-colors duration-300"
+                >
+                  <value.icon size={24} className="text-gold mb-4" />
+                  <h3 className="font-serif text-lg text-cream font-semibold">{value.title}</h3>
+                  {value.subtitle && (
+                    <p className="font-sans text-[11px] uppercase tracking-wider text-gold/60 mt-1 mb-3">{value.subtitle}</p>
+                  )}
+                  <p className="font-sans text-sm text-cream/50 leading-relaxed mt-2">{value.desc}</p>
+                </motion.div>
+              );
+            })}
           </motion.div>
         </div>
       </section>
