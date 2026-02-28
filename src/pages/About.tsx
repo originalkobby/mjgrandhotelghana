@@ -265,7 +265,13 @@ const About = () => {
               Our Commitment to Excellence
             </motion.h2>
             <motion.div variants={fadeIn} className="w-12 h-[2px] bg-gold mx-auto mb-8" />
-            <motion.p variants={slideFromRight} className="font-sans text-cream/60 leading-relaxed mb-4">
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.6, delay: 0.3, ease }}
+              className="font-sans text-cream/60 leading-relaxed mb-4"
+            >
               Our mission is simple: to provide exceptional luxury hospitality defined by comfort, security, and impeccable service. We are committed to maintaining the highest standards of cleanliness, professionalism, and guest satisfaction.
             </motion.p>
             <motion.p variants={slideFromLeft} className="font-sans text-gold/80 font-medium italic">
