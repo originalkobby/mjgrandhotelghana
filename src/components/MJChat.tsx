@@ -225,7 +225,7 @@ const MJChat = () => {
             className={`fixed z-[100] flex flex-col overflow-hidden bg-card ${
               isMobile
                 ? "inset-0 rounded-none touch-none overscroll-none"
-                : "bottom-6 right-6 w-[380px] max-h-[600px] rounded-2xl shadow-2xl border border-border"
+                : "bottom-6 right-6 w-[340px] max-h-[600px] rounded-2xl shadow-2xl border border-border"
             }`}
             style={isMobile ? { overflow: 'hidden' } : undefined}
           >
@@ -243,7 +243,6 @@ const MJChat = () => {
                 <div>
                   <p className="font-serif font-semibold text-sm">MJ</p>
                   <p className="text-[10px] text-primary-foreground/70 flex items-center gap-1">
-                    {!isLoading && <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />}
                     {isLoading ? "typing..." : "Online"}
                   </p>
                 </div>
