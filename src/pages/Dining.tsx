@@ -89,6 +89,12 @@ const Dining = () => {
             <ChevronLeft size={18} />
             Go back
           </Link>
+          <Link
+            to="/menu"
+            className="text-cream/80 hover:text-gold transition-colors duration-300 font-sans text-sm font-medium tracking-wide"
+          >
+            Menu
+          </Link>
         </div>
       </div>
 
