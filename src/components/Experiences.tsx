@@ -1,8 +1,10 @@
 import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import expSpa from "@/assets/exp-spa.jpg";
 import expDining from "@/assets/exp-dining.jpg";
 import expRooftop from "@/assets/exp-rooftop.jpg";
 import expCulture from "@/assets/exp-culture.jpg";
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
 
 const experiences = [
   { image: expSpa, title: "Spa & Wellness", desc: "Rejuvenate body and soul with our world-class treatments." },
@@ -12,6 +14,28 @@ const experiences = [
 ];
 
 const Experiences = () => {
+  const [api, setApi] = useState<CarouselApi>();
+  const [isHovered, setIsHovered] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (!api) return;
+
+    const startAutoScroll = () => {
+      intervalRef.current = setInterval(() => {
+        if (!isHovered) {
+          api.scrollNext();
+        }
+      }, 3000);
+    };
+
+    startAutoScroll();
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [api, isHovered]);
+
   return (
     <section id="experiences" className="py-24 md:py-32 bg-secondary">
       <div className="container mx-auto px-6 lg:px-12">
@@ -30,10 +54,23 @@ const Experiences = () => {
           </h2>
         </motion.div>
 
-        <div className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-6 px-6 lg:mx-0 lg:px-0 lg:grid lg:grid-cols-4 lg:overflow-visible">
-          {experiences.map((exp, i) => (
-            <ExperienceCard key={exp.title} exp={exp} index={i} />
-          ))}
+        <div
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          <Carousel
+            setApi={setApi}
+            opts={{ align: "start", loop: true }}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-5">
+              {experiences.map((exp, i) => (
+                <CarouselItem key={exp.title} className="pl-5 basis-[80%] sm:basis-1/2 lg:basis-1/4">
+                  <ExperienceCard exp={exp} index={i} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
         </div>
       </div>
     </section>
@@ -47,7 +84,7 @@ const ExperienceCard = ({ exp, index }: { exp: typeof experiences[0]; index: num
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.6, delay: index * 0.12, ease: [0.3, 0, 0.2, 1] }}
-      className="group min-w-[280px] snap-center flex-shrink-0 lg:min-w-0 cursor-pointer"
+      className="group cursor-pointer"
     >
       <div className="relative overflow-hidden aspect-[3/4]">
         <img
