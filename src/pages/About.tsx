@@ -293,9 +293,15 @@ const About = () => {
           >
             <h2 className="font-serif text-3xl md:text-4xl text-cream mb-4">Core Values & Behaviors</h2>
             <div className="w-12 h-[2px] bg-gold mx-auto mb-6" />
-            <p className="font-sans text-cream/60 max-w-2xl mx-auto leading-relaxed">
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.6, delay: 0.3, ease }}
+              className="font-sans text-cream/60 max-w-2xl mx-auto leading-relaxed"
+            >
               At MJ Grand Hotel, our culture is shaped by principles that guide our service delivery and define our standard of excellence.
-            </p>
+            </motion.p>
           </motion.div>
 
           <motion.div
