@@ -237,7 +237,7 @@ const MJChat = () => {
             )}
             <div className="flex items-center justify-between px-5 py-4 bg-primary text-primary-foreground">
               <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-serif font-bold text-sm">
+                <div className="relative h-9 w-9 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-serif font-bold text-sm ring-2 ring-green-400 animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite] ring-offset-1 ring-offset-primary">
                   MJ
                 </div>
                 <div>
