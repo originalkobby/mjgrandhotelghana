@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Send, Star } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ReactMarkdown from "react-markdown";
+import mjAvatar from "@/assets/mj-avatar.jpg";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -237,9 +238,7 @@ const MJChat = () => {
             )}
             <div className="flex items-center justify-between px-5 py-4 bg-primary text-primary-foreground">
               <div className="flex items-center gap-3">
-                <div className="relative h-9 w-9 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-serif font-bold text-sm ring-2 ring-green-400 animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite] ring-offset-1 ring-offset-primary">
-                  MJ
-                </div>
+                <img src={mjAvatar} alt="MJ" className="relative h-9 w-9 rounded-full object-cover ring-2 ring-green-400 animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite] ring-offset-1 ring-offset-primary" />
                 <div>
                   <p className="font-serif font-semibold text-sm">MJ</p>
                   <p className="text-[10px] text-primary-foreground/70 flex items-center gap-1">
