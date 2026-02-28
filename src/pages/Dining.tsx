@@ -6,6 +6,13 @@ import {
   Briefcase, PartyPopper, Heart, Leaf, ChefHat
 } from "lucide-react";
 
+import highlightChicken from "@/assets/highlight-chicken.jpg";
+import highlightSpecials from "@/assets/highlight-specials.jpg";
+import highlightLocal from "@/assets/highlight-local.jpg";
+import highlightSeafood from "@/assets/highlight-seafood.jpg";
+import highlightFish from "@/assets/highlight-fish.jpg";
+import highlightVegetarian from "@/assets/highlight-vegetarian.jpg";
+
 const ease = [0.3, 0, 0.2, 1] as const;
 
 const containerVariants = {
@@ -34,12 +41,12 @@ const slideFromRight = {
 };
 
 const signatureHighlights = [
-  { icon: Sparkles, text: "Elevated Jollof Rice served with grilled premium proteins" },
-  { icon: ChefHat, text: "Slow-cooked local stews with modern plating" },
-  { icon: Leaf, text: "Fresh seafood infused with West African spices" },
-  { icon: UtensilsCrossed, text: "Gourmet continental selections" },
-  { icon: Coffee, text: "International pasta and grilled specialties" },
-  { icon: Heart, text: "Vegetarian and health-conscious options" },
+  { image: highlightChicken, title: "Elevated Jollof Rice", description: "Served with grilled premium proteins" },
+  { image: highlightSpecials, title: "Slow-Cooked Local Stews", description: "With modern plating techniques" },
+  { image: highlightSeafood, title: "Fresh Seafood", description: "Infused with West African spices" },
+  { image: highlightFish, title: "Gourmet Continental", description: "International selections refined" },
+  { image: highlightLocal, title: "Pasta & Grilled Specialties", description: "International flavors, local heart" },
+  { image: highlightVegetarian, title: "Vegetarian Options", description: "Health-conscious and flavorful" },
 ];
 
 const barOfferings = [
@@ -235,7 +242,7 @@ const Dining = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-50px" }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto"
           >
             {signatureHighlights.map((item, i) => {
               const col = i % 3;
@@ -244,12 +251,34 @@ const Dining = () => {
                 <motion.div
                   key={i}
                   variants={variant}
-                  whileHover={{ scale: 1.04, y: -4 }}
-                  transition={{ type: "tween", duration: 0.25, ease }}
-                  className="flex items-center gap-4 p-5 rounded-xl border border-cream/5 bg-cream/[0.02] hover:bg-cream/[0.06] hover:border-gold/20 hover:shadow-[0_0_20px_rgba(212,175,55,0.08)] transition-colors duration-300"
+                  className="group cursor-pointer rounded-xl overflow-hidden border border-cream/5 bg-cream/[0.02] hover:border-gold/20 hover:shadow-[0_8px_30px_rgba(212,175,55,0.12)] transition-all duration-500"
                 >
-                  <item.icon size={20} className="text-gold shrink-0" />
-                  <span className="font-sans text-sm text-cream/70">{item.text}</span>
+                  <div className="relative overflow-hidden aspect-[4/3]">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.3,0,0.2,1)] group-hover:scale-110"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-charcoal/70 via-charcoal/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
+                    <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                      <h3 className="font-serif text-lg text-cream">{item.title}</h3>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-serif text-sm font-semibold text-gold tracking-wide uppercase group-hover:text-gold/80 transition-colors duration-300">
+                      {item.title}
+                    </h3>
+                    <p className="font-sans text-xs text-cream/50 mt-1 leading-relaxed">
+                      {item.description}
+                    </p>
+                    <Link
+                      to="/menu"
+                      className="inline-block mt-3 font-sans text-xs font-medium text-accent hover:text-gold transition-colors duration-300 underline underline-offset-4 decoration-accent/30 hover:decoration-accent"
+                    >
+                      See Details
+                    </Link>
+                  </div>
                 </motion.div>
               );
             })}
