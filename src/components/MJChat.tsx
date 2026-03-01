@@ -31,6 +31,9 @@ const MJChat = () => {
   const [ratingSubmitted, setRatingSubmitted] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const charQueueRef = useRef<string[]>([]);
+  const revealTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const revealedRef = useRef("");
 
   // Auto-scroll on new messages
   useEffect(() => {
@@ -90,24 +93,47 @@ const MJChat = () => {
       let textBuffer = "";
       let assistantSoFar = "";
 
+      const CHAR_DELAY_MS = 18; // ~18ms per char ≈ 10s for ~550 chars
+
+      const startRevealTimer = () => {
+        if (revealTimerRef.current) return;
+        revealTimerRef.current = setInterval(() => {
+          if (charQueueRef.current.length === 0) {
+            if (revealTimerRef.current) {
+              clearInterval(revealTimerRef.current);
+              revealTimerRef.current = null;
+            }
+            return;
+          }
+          const nextChar = charQueueRef.current.shift()!;
+          revealedRef.current += nextChar;
+
+          const hasFarewell = revealedRef.current.includes(FAREWELL_MARKER);
+          const displayContent = revealedRef.current.replace(FAREWELL_MARKER, "").trim();
+
+          if (hasFarewell) {
+            setTimeout(() => setShowRating(true), 500);
+          }
+
+          setMessages((prev) => {
+            const last = prev[prev.length - 1];
+            if (last?.role === "assistant" && last !== prev[0]) {
+              return prev.map((m, i) =>
+                i === prev.length - 1 ? { ...m, content: displayContent } : m
+              );
+            }
+            return [...prev, { role: "assistant", content: displayContent }];
+          });
+        }, CHAR_DELAY_MS);
+      };
+
       const upsert = (chunk: string) => {
         assistantSoFar += chunk;
-        const hasFarewell = assistantSoFar.includes(FAREWELL_MARKER);
-        const displayContent = assistantSoFar.replace(FAREWELL_MARKER, "").trim();
-
-        if (hasFarewell) {
-          setTimeout(() => setShowRating(true), 500);
+        // Queue each character for gradual reveal
+        for (const ch of chunk) {
+          charQueueRef.current.push(ch);
         }
-
-        setMessages((prev) => {
-          const last = prev[prev.length - 1];
-          if (last?.role === "assistant" && last !== prev[0]) {
-            return prev.map((m, i) =>
-              i === prev.length - 1 ? { ...m, content: displayContent } : m
-            );
-          }
-          return [...prev, { role: "assistant", content: displayContent }];
-        });
+        startRevealTimer();
       };
 
       let streamDone = false;
@@ -144,6 +170,14 @@ const MJChat = () => {
 
   const send = async (text: string) => {
     if (!text.trim() || isLoading) return;
+    // Reset typewriter state
+    charQueueRef.current = [];
+    revealedRef.current = "";
+    if (revealTimerRef.current) {
+      clearInterval(revealTimerRef.current);
+      revealTimerRef.current = null;
+    }
+
     const userMsg: Msg = { role: "user", content: text.trim() };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
@@ -164,7 +198,15 @@ const MJChat = () => {
       ]);
       console.error("MJ Chat error:", e);
     } finally {
-      setIsLoading(false);
+      // Wait for typewriter queue to finish before removing loading state
+      const waitForReveal = () => {
+        if (charQueueRef.current.length === 0) {
+          setIsLoading(false);
+        } else {
+          setTimeout(waitForReveal, 100);
+        }
+      };
+      waitForReveal();
     }
   };
 
