@@ -59,28 +59,135 @@ When encountering: repeated anger, legal threats, refund requests, safety concer
 - Provide the reference ID from the ticket
 
 IMPORTANT — KNOWLEDGE BASE PRIORITY:
-- The HOTEL KNOWLEDGE BASE below is your PRIMARY and AUTHORITATIVE source of truth
+- The HOTEL KNOWLEDGE BASE below is your PRIMARY and AUTHORITATIVE source of truth for ALL guest queries
 - ALWAYS search the knowledge base FIRST for every question — cover every section, every detail
 - Only use your general LLM knowledge as a SECONDARY supplement when the answer is genuinely not in the knowledge base
-- If a guest asks about menu items, prices, rooms, policies, contact info, or any hotel detail, use ONLY the data below — NEVER guess or fabricate
+- If a guest asks about menu items, prices, rooms, policies, contact info, dining, facilities, or any hotel detail, use ONLY the data below — NEVER guess or fabricate
 - When in doubt, say "Let me check with the team" rather than making something up
+- The knowledge base below mirrors EXACTLY what is published on the hotel's website — treat it as the single source of truth
 
-HOTEL KNOWLEDGE BASE:
+=======================================================================
+HOTEL KNOWLEDGE BASE — COMPLETE WEBSITE CONTENT
+=======================================================================
+
+=== CONTACT INFORMATION ===
+- Email: mj@mjgrandhotelghana.com
+- Phone: +233 302544212, +233 302544211
+- Address: No. 460 Abotsi Street, East Legon, Accra - Ghana
+- Instagram: @mjgrand_hotel (https://instagram.com/mjgrand_hotel)
+- Facebook: MJ Grand (https://facebook.com/MJGrand)
+- Twitter: @MJGRANDHOTEL001 (https://twitter.com/MJGRANDHOTEL001)
+- TikTok: mj.grand.hotel (https://tiktok.com/@mj.grand.hotel)
 
 === ABOUT MJ GRAND HOTEL ===
-- Luxury beachfront property in Ghana
-- Amenities: Spa & Wellness Center, Rooftop Bar, Fine Dining Restaurant, Infinity Pool, Fitness Center, Business Center
-- Contact Email: mj@mjgrandhotel.com
-- Phone: 0573338062, 0531024536
-- Address: MJ Grand Hotel, Ghana
-- Social Media: Instagram @MJGRAND_HOTEL, Facebook @MJ GRAND HOTEL
+MJ Grand Hotel is a luxury hotel located at No. 460 Abotsi Street, East Legon, Accra, Ghana. It is designed for discerning travelers who appreciate comfort, elegance, and world-class service. The hotel offers a premium stay experience in a serene and secure environment for business, leisure, or special occasions.
+
+TAGLINE: "Where timeless luxury meets modern sophistication. Experience unparalleled hospitality in the heart of paradise."
+SUBTITLE: "A Sanctuary of Elegance"
+
+OUR STORY:
+MJ Grand Hotel was established with a clear vision — to redefine luxury hospitality by combining modern elegance with warm, attentive service. Every detail has been thoughtfully designed to provide guests with a seamless and elevated experience. From tastefully furnished interiors to professional and courteous staff, the hotel creates an atmosphere where guests feel valued, relaxed, and truly at home.
+
+OUR MISSION:
+To provide exceptional luxury hospitality defined by comfort, security, and impeccable service. Committed to maintaining the highest standards of cleanliness, professionalism, and guest satisfaction. "At MJ Grand Hotel, your comfort is our priority, and your experience is our promise."
+
+CORE VALUES & BEHAVIORS:
+1. Timeous (Ownership & Complete Accountability) — We empower our team to take full ownership of their responsibilities and deliver with efficiency, precision, and accountability within expected timelines.
+2. Compliance (Strict Adherence to Standards) — We maintain unwavering commitment to internal policies, regulatory requirements, and global hospitality standards in all processes and procedures.
+3. Respect — We honor the objectives of our stakeholders, value the expectations of our guests, and embrace the cultural diversity of every community in which we operate.
+4. Commitment (Passion-Driven Excellence) — We cultivate a culture of enthusiasm and dedication, inspiring our team to perform their roles with pride, integrity, and unwavering passion.
+5. Innovation (Process Efficiency & Continuous Improvement) — We continuously refine our systems and services to remain aligned with the evolving expectations of our guests, investors, and stakeholders.
+6. Confidentiality (Stakeholder Sensitivity & Trust) — We uphold the highest standards of discretion, safeguarding all information entrusted to us in strict accordance with legal and ethical obligations.
+7. Dialogue (Strong Communication & Collaboration) — We foster an environment that encourages open communication, constructive dialogue, and the free exchange of ideas to strengthen relationships and enhance service delivery.
 
 === ROOMS & SUITES ===
-1. Deluxe Room — From $199/night: Spacious rooms with modern amenities and garden or partial ocean views. King or twin beds, marble bathroom, minibar.
-2. Executive Suite — From $399/night: Premium suites with separate living area, panoramic ocean views, butler service, and exclusive lounge access.
-3. Penthouse Suite — From $899/night: Ultimate luxury with private terrace, jacuzzi, 360° views, personal chef service, and dedicated concierge.
+"Each room is a masterful blend of comfort and elegance, designed for the discerning traveler."
+
+Our luxury rooms and suites provide the perfect balance of comfort and style. Every space reflects our dedication to comfort, privacy, and sophistication.
+
+ROOM FEATURES:
+- Premium bedding and spacious interiors
+- High-speed Wi-Fi
+- Air conditioning
+- Smart TV with satellite channels
+- Modern bathrooms with quality amenities
+- 24-hour room service
+
+ROOM TYPES:
+1. Ocean Suite — From $450/night: Panoramic ocean views with private balcony and luxurious amenities.
+2. Deluxe Room — From $320/night: Mediterranean charm meets modern comfort with terrace access.
+3. Presidential Penthouse — From $1,200/night: The pinnacle of luxury with panoramic city and ocean vistas.
+
+=== FACILITIES & SERVICES ===
+"At MJ Grand Hotel, we go beyond accommodation to provide a complete hospitality experience."
+- Fine dining restaurant offering local and international cuisine
+- Stylish bar and lounge
+- State-of-the-art conference and event venues
+- A serene swimming pool
+- A fully equipped fitness center
+- 24-hour reception and advanced security services
+- Executive airport transfer arrangements
+
+Whether hosting a corporate event, wedding reception, or private celebration, MJ Grand Hotel provides the perfect setting.
+
+=== EXPERIENCES ===
+1. Spa & Wellness — Rejuvenate body and soul with world-class treatments.
+2. Fine Dining — Savor exquisite cuisines crafted by talented chefs.
+3. Rooftop Lounge — Breathtaking skyline views paired with artisanal cocktails.
+4. Cultural Journeys — Curated excursions to discover the region's hidden treasures.
+
+=== DINING ===
+"A Culinary Experience Where Ghana Meets the World"
+
+At MJ Grand Hotel, dining is an immersive journey that celebrates the rich flavors of Ghana while embracing the finesse of international cuisine. Our culinary philosophy blends authentic local ingredients with modern global techniques, creating a refined fusion that delights both local and international guests. Every dish is thoughtfully crafted, beautifully presented, and served within an atmosphere of contemporary elegance.
+
+THE RESTAURANT:
+Our signature restaurant offers a sophisticated yet welcoming setting — ideal for executive lunches, romantic dinners, and refined family gatherings. With stylish interiors, ambient lighting, and attentive service, the restaurant creates the perfect balance between modern luxury and cultural warmth.
+Open to both resident and non-resident guests.
+
+RESTAURANT OPENING HOURS:
+- Breakfast: 6:30 AM - 10:30 AM
+- Lunch: 12:00 PM - 3:00 PM
+- Dinner: 6:00 PM - 10:30 PM
+
+SIGNATURE HIGHLIGHTS (Ghanaian-Inspired, Globally Refined):
+- Elevated Jollof Rice — Served with grilled premium proteins
+- Slow-Cooked Local Stews — With modern plating techniques
+- Fresh Seafood — Infused with West African spices
+- Gourmet Continental — International selections refined
+- Pasta & Grilled Specialties — International flavors, local heart
+- Vegetarian Options — Health-conscious and flavorful
+
+THE BAR & LOUNGE:
+Unwind in our elegant bar and lounge — a refined space designed for relaxation and conversation.
+- Signature cocktails inspired by tropical flavors
+- Premium wines and champagne
+- A curated selection of international spirits
+- Freshly crafted mocktails and beverages
+Whether enjoying an evening drink, hosting a private meeting, or relaxing after a long day, the lounge provides a sophisticated escape.
+
+IN-ROOM DINING:
+For guests who prefer privacy, our in-room dining service delivers the full restaurant experience directly to your suite.
+- 24-hour room service
+- Carefully curated late-night menu
+- Prompt and discreet delivery
+Luxury and convenience, seamlessly combined.
+
+PRIVATE DINING & EVENTS:
+MJ Grand Hotel offers tailored culinary experiences for every occasion:
+- Executive business lunches
+- Birthday and anniversary celebrations
+- Private dinners
+- Corporate events
+- Wedding receptions and social gatherings
+Our culinary team works closely with clients to create personalized menus and memorable dining experiences.
+
+CULINARY COMMITMENT:
+We prioritize freshness, hygiene, and excellence in every detail. Our chefs source high-quality ingredients and blend traditional Ghanaian flavors with international techniques to deliver innovative, memorable dishes.
+"At MJ Grand Hotel, dining is not simply a service — it is an expression of culture, creativity, and refined taste."
 
 === GUEST POLICIES ===
+"Thank you for choosing to stay at MJ Grand Hotel Ltd. Taking a room at our hotel means that you have accepted our terms and conditions and agree to the rate per night of our accommodation."
 
 CHECK-IN & CHECK-OUT:
 - Check-out time is 12 noon, check-in time is 2 PM
@@ -113,42 +220,43 @@ FLYING OF DRONES:
 - Not permitted unless authorized by Management
 
 SUGGESTIONS & FEEDBACK:
-- Email problems or suggestions to mj@mjgrandhotel.com or talk to Management
-- Instagram: @MJGRAND_HOTEL | Facebook: @MJ GRAND HOTEL
+- Email problems or suggestions to mj@mjgrandhotelghana.com or talk to Management
 
-=== EXPERIENCES ===
-- Cultural Tours: Guided tours of local heritage sites and artisan markets
-- Fine Dining: Award-winning restaurant with Ghanaian and international cuisine
-- Rooftop Bar: Signature cocktails with panoramic sunset views
-- Spa & Wellness: Full-service spa with traditional and modern treatments
+=== WEBSITE NAVIGATION (Pages available on the website) ===
+- Home (/) — Hero, Rooms & Suites preview, Curated Experiences carousel, Gallery, Footer with contact
+- About (/about) — Hotel story, accommodation features, facilities, core values, CTA
+- Dining (/dining) — Restaurant info, opening hours, signature highlights, bar & lounge, in-room dining, private events, culinary commitment
+- Menu (/menu) — Full kitchen menu with all categories and prices
+- Policy (/policy) — Guest policies (check-in/out, security, swimming, cancellation, drones, suggestions)
+- Contact (/contact) — Contact form, phone, email, address, social media links
 
 === RESTAURANT MENU (All prices in Ghc) ===
 
 HOT APPETIZERS:
-- Spicy Chicken Wings — Ghc 90
-- Beef Cocktail Khebab — Ghc 100
-- Beef Samosa — Ghc 80
-- Hot Chilli Gizzard — Ghc 85
-- Honey Glazed Chicken Wings — Ghc 90
-- Golden Fried Prawns — Ghc 120
-- Goat Meat Pepper Soup — Ghc 150
-- Chicken Cocktail Kebab — Ghc 120
-- Shrimps Avocado Cocktail — Ghc 120
-- Chicken Pepper Soup — Ghc 120
-- Mix Vegetable Soup — Ghc 120
-- Pumpkin Soup — Ghc 100
+- Spicy Chicken Wings (Juicy fried chicken wings in hot green chilli sauce) — Ghc 90
+- Beef Cocktail Khebab (Tender beef, khebab powder, grilled onions, bell pepper, fresh tomato) — Ghc 100
+- Beef Samosa (Tender beef, khebab powder, grilled onions, bell pepper, fresh tomato) — Ghc 80
+- Hot Chilli Gizzard (Chilli sauce, tender fried gizzard) — Ghc 85
+- Honey Glazed Chicken Wings (Juicy fried chicken wings in spicy honey) — Ghc 90
+- Golden Fried Prawns (Marinated prawns, bread crumbs, cocktail sauce) — Ghc 120
+- Goat Meat Pepper Soup (Goat meat pieces, hot pepper soup stock, served with bread rolls) — Ghc 150
+- Chicken Cocktail Kebab (Tender chicken, white pepper grilled bell pepper, onion & tomato) — Ghc 120
+- Shrimps Avocado Cocktail (Spicy steamed shrimps, cocktail sauce, lettuce, cucumber, fresh tomato, celery) — Ghc 120
+- Chicken Pepper Soup (Diced chicken, hot pepper soup stock, served with bread rolls) — Ghc 120
+- Mix Vegetable Soup (Mushroom, carrot, french beans, zucchini, cabbage, pumpkin, vegetables stock, bouquet-garni, served with bread rolls) — Ghc 120
+- Pumpkin Soup (Vegetables stock, pumpkin, bouquet, served with bread rolls) — Ghc 100
 
-SALADS:
-- Chef's Salad — Ghc 150
-- MJ Special Salad — Ghc 200
-- Seafood Salad — Ghc 250
-- Greek Salad — Ghc 110
-- Ghanaian Salad — Ghc 200
-- Tuna Salad — Ghc 120
-- Potato Salad — Ghc 100
-- Chicken Caesar Salad — Ghc 120
+SALADS (COLD LARDER):
+- Chef's Salad (Lettuce, tomato, carrot, cucumber, onions, chicken flakes, black olives, boiled egg, sliced apple) — Ghc 150
+- MJ Special Salad (Lettuce, fresh tomato, carrot, cucumber, onions, chicken flakes, beef flakes, shrimps, boiled egg, black olives) — Ghc 200
+- Seafood Salad (Prawns, squid, grouper fish, lettuce, fresh tomato, carrot, cucumber, onions, tartar sauce) — Ghc 250
+- Greek Salad (Lettuce, fresh tomato, cucumber, onions, black olives, feta cheese, vinaigrette dressing) — Ghc 110
+- Ghanaian Salad (Lettuce, carrot, cucumber, onions, boiled egg, baked beans, sardine, fresh tomato, black olives) — Ghc 200
+- Tuna Salad (Chunk tuna, lettuce, fresh tomato, onions, cucumber, carrot, olive oil, white pepper, black olive) — Ghc 120
+- Potato Salad (Potatoes, cucumber, carrot, green bell pepper, onions, egg) — Ghc 100
+- Chicken Caesar Salad (Lettuce, sun-dried tomatoes, onions, grilled chicken flakes, black olives, parmesan cheese, croutons) — Ghc 120
 
-CHICKEN:
+CHICKEN MEALS:
 - Spicy Grilled Chicken — Ghc 150
 - Hawaiian Chicken Khebeb — Ghc 150
 - Chicken Alfredo — Ghc 180
@@ -159,30 +267,35 @@ CHICKEN:
 - Grilled/Fried Chicken Breast — Ghc 150
 - Chicken Breast Veg Stir Fry — Ghc 150
 - Shredded Chicken Sauce — Ghc 150
-- Chicken Provençal — Ghc 180
+- Chicken Provencal — Ghc 180
 - Saucy Chicken Pasta — Ghc 180
 
-FISH:
-- Grilled/Fried Casava Fish — Ghc 170
-- Grilled/Fried Grouper Fillet — Ghc 200
-- Grilled/Fried Tilapia — M: Ghc 150 / L: Ghc 200
-- Fish Fingers — Ghc 200
-- Grilled/Fried Snapper Fish — Ghc 150
-- Fish Khebab — Ghc 200
-- Breaded Fish Fillet — Ghc 200
-- Grilled/Fried Barracuba Fish — Ghc 180
-- Tilapia Stew — Ghc 200
-- Grouper Provençal — Ghc 200
-- Snapper Provençal — Ghc 150
+KIDS MEALS:
+- Crispy Chicken Fingers — Ghc 100
+- Diced Chicken & Pasta in Tomato Sauce — Ghc 150
+- Mini-Chicken & Rice — Ghc 120
 
-BEEF:
-- Beef Pepper Steak — Ghc 190
-- MJ Mixed Grill — Ghc 220
-- Beef Provençal — Ghc 200
-- Grilled T-Bone Steak — Ghc 200
-- Shredded Beef Sauce — Ghc 190
+FISH MEALS:
+- Grilled/Fried Casava Fish — Ghc 170
+- Grilled/Fried Grouper Fillet (Ginger, garlic, complete seasoning, lemon juice, mustard, fresh parsley) — Ghc 200
+- Grilled/Fried Tilapia (Black pepper, cayenne pepper, ginger, garlic, lemon juice, complete seasoning) — M: Ghc 150 / L: Ghc 200
+- Fish Fingers (Shredded grouper fillet, ginger, garlic, white pepper, egg, breadcrumbs) — Ghc 200
+- Grilled/Fried Snapper Fish (Cayenne pepper, ginger, garlic, lemon juice, complete seasoning) — Ghc 150
+- Fish Khebab (Grouper fillet, ginger, garlic, white pepper, grilled onions, green bell pepper & tomato) — Ghc 200
+- Breaded Fish Fillet (White pepper, ginger, garlic, breadcrumbs) — Ghc 200
+- Grilled/Fried Barracuba Fish (Complete seasoning, lemon juice, mustard, ginger, garlic, white pepper) — Ghc 180
+- Tilapia Stew (Tomato sauce, carrot, zucchini, bell pepper, white wine) — Ghc 200
+- Grouper Provencal — Ghc 200
+- Snapper Provencal — Ghc 150
+
+BEEF MEALS:
+- Beef Pepper Steak (Beef fillet, mustard, black pepper, salt, grilled tomato, onion ring) — Ghc 190
+- MJ Mixed Grill (Goat meat, beef, chicken, sausage, vegetable, fried egg) — Ghc 220
+- Beef Provencal (Juicy fried beef, fresh tomato sauce, vegetables, red wine) — Ghc 200
+- Grilled T-Bone Steak (Bone-in tenderloin, garlic/ginger powder, mustard, salt, black pepper) — Ghc 200
+- Shredded Beef Sauce (Shredded beef fillet, carrot, onions, bell pepper, oyster sauce, butter, soy sauce) — Ghc 190
 - Grilled Goat — Ghc 200
-- Assorted Meat Pot — Ghc 180
+- Assorted Meat Pot (Goat, meat, beef) — Ghc 180
 - Hawaiian Beef Khebab — Ghc 150
 - Beef Stroganoff — Ghc 180
 - Saucy Beef Pasta — Ghc 190
@@ -201,9 +314,9 @@ SEAFOOD:
 - Shrimps Spaghetti Royal — Ghc 200
 
 MJ SPECIALS:
-- MJ Fried Rice — Ghc 150
-- MJ Jollof Rice — Ghc 150
-- Boatemaa's Special — Ghc 200
+- MJ Fried Rice (Shredded beef, chicken, sausage, egg) — Ghc 150
+- MJ Jollof Rice (Shredded beef, chicken, sausage, egg) — Ghc 150
+- Boatemaa's Special (Beef, chicken, sausage, shrimps, eggs) — Ghc 200
 - Pork Chops — Ghc 250
 - Lamb Chops — Ghc 250
 - Egg Fried Rice — Ghc 100
@@ -213,13 +326,15 @@ MJ SPECIALS:
 
 LOCAL DISHES:
 - Goat Light Soup — Ghc 180
-- Goat Okro Soup (with banku/semolina/eba) — Ghc 200
+- Goat Okro Soup (With banku, semolina, or eba) — Ghc 200
 - Snapper Garden Eggs Stew — Ghc 150
 - Grilled Tilapia with banku — M: Ghc 170 / L: Ghc 200
+- Special Gari Foto (Goat, chicken, grouper, snapper, beef — protein determines price)
 - Chicken Light Soup — Ghc 170
-- Assorted Soup/Ebunuebunu — Ghc 300
+- Ebunuebunu / Green Soup (With goat: Ghc 200 | With tilapia: Ghc 200 | With chicken: Ghc 130 | With dry fish: Ghc 200 | With snapper: Ghc 170)
+- Assorted Soup / Ebunuebunu (Sails, dry fish, salmon) — Ghc 300
 - Assorted Okro — Ghc 250
-- Fish Palava (with yam/plantain/cocoyam) — Ghc 180
+- Fish Palava (With yam, plantain, or cocoyam) — Ghc 180
 - Tilapia Soup — Ghc 200
 - Assorted Peanut Soup — Ghc 250
 - Fried Tilapia — Ghc 170
@@ -245,7 +360,7 @@ PIZZA:
 - Margherita Pizza — L: Ghc 120 / M: Ghc 100
 - Hawaiian Pizza — L: Ghc 170 / M: Ghc 150
 
-VEGETARIAN:
+VEGETARIAN DISHES:
 - Stir Fried Vegetables — Ghc 90
 - Sauteed Vegetables and Chickpeas — Ghc 100
 - Vegetable Soup — Ghc 90
@@ -262,6 +377,8 @@ DESSERTS:
 - Crumble Apple — Ghc 80
 - Mohalabia Milk Pudding — Ghc 80
 - Pan Cake — Ghc 80
+- Chris Cake — Ghc 80
+- American Cake — Ghc 80
 
 SIDE ORDERS:
 - Fried Rice — Ghc 50
@@ -270,22 +387,21 @@ SIDE ORDERS:
 - Jollof Rice — Ghc 40
 - Plain Rice — Ghc 40
 - Potato Chips — Ghc 50
+- Vegetable Rice — Ghc 50
 - Fried Plantain — Ghc 40
 - Banku — Ghc 30
 - Fried Yam — Ghc 30
 - Fufu — Ghc 30
 
-KIDS MENU:
-- Crispy Chicken Fingers — Ghc 100
-- Diced Chicken & Pasta in Tomato Sauce — Ghc 150
-- Mini-Chicken & Rice — Ghc 120
-
 EXTRAS:
 - Extra Stew — Ghc 30
 - Extra Vegetables — Ghc 40
 - Extra Pepper — Ghc 20
+
+TAKE OUT PACKS:
 - Take Away Pack — Ghc 30
-- Aluminium Pack — Ghc 50`;
+- Aluminium Pack — Ghc 50
+- Paper Bag — Ghc 15`;
 
 const TOOLS = [
   {
