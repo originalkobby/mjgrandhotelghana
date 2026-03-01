@@ -50,8 +50,8 @@ const sections = [
     title: "Suggestions",
     items: [
       "We greatly appreciate your suggestions to improve our performance to deliver excellent service.",
-      "E-mail any problems or suggestions directly to mj@mjgrandhotel.com or talk to the Management.",
-      "Like us on Instagram @MJGRAND_HOTEL and Facebook @MJ GRAND HOTEL.",
+      "E-mail any problems or suggestions directly to mj@mjgrandhotelghana.com or talk to the Management.",
+      "Follow us on Instagram @mjgrand_hotel, Facebook MJ Grand, Twitter @MJGRANDHOTEL001, and TikTok @mj.grand.hotel.",
     ],
   },
 ];

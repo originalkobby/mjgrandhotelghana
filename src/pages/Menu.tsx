@@ -224,7 +224,7 @@ const Menu = () => {
       {/* Footer CTA */}
       <div className="text-center py-16 border-t border-cream/10">
         <p className="font-sans text-cream/50 text-sm mb-4">
-          To order, call: <span className="text-gold">0573338062</span> | <span className="text-gold">0531024536</span>
+          To order, call: <span className="text-gold">+233 302544212</span> | <span className="text-gold">+233 302544211</span>
         </p>
         <Link
           to="/"
