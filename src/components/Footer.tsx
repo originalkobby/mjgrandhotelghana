@@ -19,15 +19,15 @@ const Footer = () => {
             <div className="space-y-3 text-sm font-sans text-cream/60">
               <p className="flex items-center gap-2">
                 <MapPin size={14} className="text-gold" />
-                123 Paradise Boulevard, Coastal City
+                No. 460 Abotsi Street, East Legon, Accra - Ghana
               </p>
               <p className="flex items-center gap-2">
                 <Phone size={14} className="text-gold" />
-                +1 (555) 123-4567
+                +233 302544212
               </p>
               <p className="flex items-center gap-2">
                 <Mail size={14} className="text-gold" />
-                reservations@mjgrand.com
+                mj@mjgrandhotelghana.com
               </p>
             </div>
           </div>
@@ -71,13 +71,20 @@ const Footer = () => {
             </div>
             {/* Social */}
             <div className="flex gap-4 mt-6">
-              {["Instagram", "Facebook", "Twitter"].map((s) => (
+              {[
+                { label: "Instagram", href: "https://instagram.com/mjgrand_hotel" },
+                { label: "Facebook", href: "https://facebook.com/MJGrand" },
+                { label: "Twitter", href: "https://twitter.com/MJGRANDHOTEL001" },
+                { label: "TikTok", href: "https://tiktok.com/@mj.grand.hotel" },
+              ].map((s) => (
                 <a
-                  key={s}
-                  href="#"
+                  key={s.label}
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-xs font-sans text-cream/40 hover:text-gold hover:scale-110 transition-all duration-300"
                 >
-                  {s}
+                  {s.label}
                 </a>
               ))}
             </div>

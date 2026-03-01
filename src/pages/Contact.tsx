@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ChevronLeft, Mail, Phone, MapPin, Instagram, Facebook } from "lucide-react";
+import { ChevronLeft, Mail, Phone, MapPin, Instagram, Facebook, Twitter } from "lucide-react";
 
 
 const Contact = () => {
@@ -69,8 +69,8 @@ const Contact = () => {
                   </div>
                   <div>
                     <p className="font-sans text-sm font-medium text-foreground">Phone</p>
-                    <p className="font-sans text-sm text-muted-foreground">0573338062</p>
-                    <p className="font-sans text-sm text-muted-foreground">0531024536</p>
+                    <p className="font-sans text-sm text-muted-foreground">+233 302544212</p>
+                    <p className="font-sans text-sm text-muted-foreground">+233 302544211</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -79,7 +79,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <p className="font-sans text-sm font-medium text-foreground">Email</p>
-                    <p className="font-sans text-sm text-muted-foreground">mj@mjgrandhotel.com</p>
+                    <p className="font-sans text-sm text-muted-foreground">mj@mjgrandhotelghana.com</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -88,7 +88,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <p className="font-sans text-sm font-medium text-foreground">Address</p>
-                    <p className="font-sans text-sm text-muted-foreground">MJ Grand Hotel, Ghana</p>
+                    <p className="font-sans text-sm text-muted-foreground">No. 460 Abotsi Street, East Legon, Accra - Ghana</p>
                   </div>
                 </div>
               </div>
@@ -104,11 +104,17 @@ const Contact = () => {
                 Follow Us
               </motion.h3>
               <div className="flex gap-3 md:gap-4 flex-wrap">
-                <a href="https://instagram.com/MJGRAND_HOTEL" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 md:gap-2 text-muted-foreground hover:text-gold transition-colors font-sans text-xs md:text-sm">
-                  <Instagram size={14} className="md:w-[18px] md:h-[18px]" /> @MJGRAND_HOTEL
+                <a href="https://instagram.com/mjgrand_hotel" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 md:gap-2 text-muted-foreground hover:text-gold transition-colors font-sans text-xs md:text-sm">
+                  <Instagram size={14} className="md:w-[18px] md:h-[18px]" /> @mjgrand_hotel
                 </a>
-                <a href="https://facebook.com/MJGrandHotel" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 md:gap-2 text-muted-foreground hover:text-gold transition-colors font-sans text-xs md:text-sm">
-                  <Facebook size={14} className="md:w-[18px] md:h-[18px]" /> MJ Grand Hotel
+                <a href="https://facebook.com/MJGrand" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 md:gap-2 text-muted-foreground hover:text-gold transition-colors font-sans text-xs md:text-sm">
+                  <Facebook size={14} className="md:w-[18px] md:h-[18px]" /> MJ Grand
+                </a>
+                <a href="https://twitter.com/MJGRANDHOTEL001" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 md:gap-2 text-muted-foreground hover:text-gold transition-colors font-sans text-xs md:text-sm">
+                  <Twitter size={14} className="md:w-[18px] md:h-[18px]" /> @MJGRANDHOTEL001
+                </a>
+                <a href="https://tiktok.com/@mj.grand.hotel" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 md:gap-2 text-muted-foreground hover:text-gold transition-colors font-sans text-xs md:text-sm">
+                  🎵 mj.grand.hotel
                 </a>
               </div>
             </div>
