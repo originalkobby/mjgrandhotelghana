@@ -2,3 +2,9 @@ project_id = "vfnqvwtcjtclprapzlvm"
 
 [functions.mj-ai]
 verify_jwt = false
+
+[functions.paystack]
+verify_jwt = false
+
+[functions.dynamic-pricing]
+verify_jwt = false
