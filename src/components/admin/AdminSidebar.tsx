@@ -1,6 +1,7 @@
 import {
   LayoutDashboard,
   CalendarCheck,
+  CalendarRange,
   LogOut,
   Hotel,
 } from "lucide-react";
@@ -24,6 +25,7 @@ import logo from "@/assets/logo.png";
 const NAV_ITEMS = [
   { title: "Overview", url: "/admin", icon: LayoutDashboard, end: true },
   { title: "Bookings", url: "/admin/bookings", icon: CalendarCheck, end: false },
+  { title: "Inventory", url: "/admin/inventory", icon: CalendarRange, end: false },
 ];
 
 interface Props {
