@@ -17,6 +17,8 @@ import AdminLayout from "./pages/admin/AdminLayout";
 import Overview from "./pages/admin/Overview";
 import AdminBookings from "./pages/admin/Bookings";
 
+import AdminInventory from "./pages/admin/Inventory";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -39,6 +41,7 @@ const App = () => (
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Overview />} />
             <Route path="bookings" element={<AdminBookings />} />
+            <Route path="inventory" element={<AdminInventory />} />
           </Route>
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
