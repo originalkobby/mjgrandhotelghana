@@ -9,6 +9,7 @@ import Dining from "./pages/Dining";
 import Policy from "./pages/Policy";
 import Contact from "./pages/Contact";
 import About from "./pages/About";
+import Booking from "./pages/Booking";
 import NotFound from "./pages/NotFound";
 import MJChat from "./components/MJChat";
 
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/about" element={<About />} />
           <Route path="/policy" element={<Policy />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/booking" element={<Booking />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

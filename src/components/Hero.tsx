@@ -50,7 +50,7 @@ const Hero = () => {
           className="mt-10 flex flex-col sm:flex-row gap-4"
         >
           <a
-            href="#contact"
+            href="/booking"
             className="group relative px-8 py-3.5 bg-gold font-sans text-sm font-semibold uppercase tracking-wider text-charcoal overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-gold/20"
           >
             <span className="relative z-10">Book Your Stay</span>

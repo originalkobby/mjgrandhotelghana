@@ -1,0 +1,125 @@
+import { motion } from "framer-motion";
+import { CheckCircle2, Calendar, Download, MessageCircle } from "lucide-react";
+import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import type { BookingState } from "@/hooks/useBooking";
+
+interface Props {
+  state: BookingState;
+}
+
+export default function ConfirmationStep({ state }: Props) {
+  const { selectedRoom, search, guestInfo, bookingReference, selectedAddOns, totalAmount } = state;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5, ease: [0.3, 0, 0.2, 1] }}
+      className="max-w-2xl mx-auto text-center"
+    >
+      {/* Success icon */}
+      <motion.div
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+        className="flex justify-center mb-6"
+      >
+        <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center">
+          <CheckCircle2 className="w-10 h-10 text-accent" />
+        </div>
+      </motion.div>
+
+      <h2 className="font-serif text-3xl md:text-4xl text-foreground">Booking Confirmed!</h2>
+      <p className="font-sans text-muted-foreground mt-3 mb-2">
+        Your reservation has been received. A confirmation email will be sent to{" "}
+        <strong className="text-foreground">{guestInfo.email}</strong>.
+      </p>
+
+      {/* Reference */}
+      <div className="inline-block bg-secondary rounded-lg px-6 py-3 mt-4 mb-8">
+        <p className="font-sans text-xs uppercase tracking-wider text-muted-foreground">Booking Reference</p>
+        <p className="font-serif text-2xl text-foreground tracking-wide">{bookingReference}</p>
+      </div>
+
+      {/* Summary card */}
+      <div className="bg-card rounded-xl border border-border p-6 text-left">
+        <h3 className="font-serif text-lg text-foreground mb-4">Stay Summary</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm font-sans">
+          <div>
+            <p className="text-muted-foreground">Room</p>
+            <p className="text-foreground font-medium">{selectedRoom?.name}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">Guest</p>
+            <p className="text-foreground font-medium">{guestInfo.fullName}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">Check-in</p>
+            <p className="text-foreground font-medium">
+              {search.checkIn ? format(search.checkIn, "EEE, MMM d, yyyy") : "—"}
+            </p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">Check-out</p>
+            <p className="text-foreground font-medium">
+              {search.checkOut ? format(search.checkOut, "EEE, MMM d, yyyy") : "—"}
+            </p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">Guests</p>
+            <p className="text-foreground font-medium">
+              {search.adults} Adult{search.adults !== 1 ? "s" : ""}
+              {search.children > 0 && `, ${search.children} Child${search.children !== 1 ? "ren" : ""}`}
+            </p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">Total</p>
+            <p className="text-accent font-semibold text-lg">GH₵ {totalAmount.toLocaleString()}</p>
+          </div>
+        </div>
+
+        {selectedAddOns.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-border">
+            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Add-Ons</p>
+            <div className="flex flex-wrap gap-2">
+              {selectedAddOns.map((a) => (
+                <span
+                  key={a.id}
+                  className="bg-secondary text-secondary-foreground text-xs font-sans px-3 py-1 rounded-full"
+                >
+                  {a.name}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Actions */}
+      <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
+        <Button variant="outline" className="h-11 gap-2">
+          <Calendar className="w-4 h-4" /> Add to Calendar
+        </Button>
+        <Button variant="outline" className="h-11 gap-2">
+          <Download className="w-4 h-4" /> Download PDF
+        </Button>
+        <Link to="/">
+          <Button variant="outline" className="h-11 gap-2 w-full sm:w-auto">
+            <MessageCircle className="w-4 h-4" /> Chat with MJ
+          </Button>
+        </Link>
+      </div>
+
+      {/* Upsell */}
+      <div className="mt-10 bg-accent/5 border border-accent/20 rounded-xl p-6">
+        <p className="font-serif text-lg text-foreground">Upgrade Your Experience</p>
+        <p className="font-sans text-sm text-muted-foreground mt-1">
+          Looking for something extra? Add a spa package or romantic setup to make your stay unforgettable.
+        </p>
+        <p className="font-sans text-sm text-accent font-medium mt-2">Contact us for upgrade options.</p>
+      </div>
+    </motion.div>
+  );
+}
