@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 
-export type BookingStep = "search" | "rooms" | "addons" | "details" | "confirmation";
+export type BookingStep = "search" | "rooms" | "addons" | "details" | "payment" | "confirmation";
 
 export interface BookingSearch {
   checkIn: Date | undefined;
@@ -52,7 +52,7 @@ export interface BookingState {
   totalAmount: number;
 }
 
-const STEPS: BookingStep[] = ["search", "rooms", "addons", "details", "confirmation"];
+const STEPS: BookingStep[] = ["search", "rooms", "addons", "details", "payment", "confirmation"];
 
 export function useBooking() {
   const [state, setState] = useState<BookingState>({

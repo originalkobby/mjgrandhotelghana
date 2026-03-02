@@ -1,5 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
+import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BookingStepper from "@/components/booking/BookingStepper";
@@ -7,6 +8,7 @@ import SearchStep from "@/components/booking/SearchStep";
 import RoomSelectionStep from "@/components/booking/RoomSelectionStep";
 import AddOnsStep from "@/components/booking/AddOnsStep";
 import GuestDetailsStep from "@/components/booking/GuestDetailsStep";
+import PaymentStep from "@/components/booking/PaymentStep";
 import ConfirmationStep from "@/components/booking/ConfirmationStep";
 import { useBooking } from "@/hooks/useBooking";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +30,28 @@ const Booking = () => {
   } = useBooking();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+
+  // Handle Paystack callback verification
+  useEffect(() => {
+    const verifyRef = searchParams.get("verify");
+    if (verifyRef && state.step !== "confirmation") {
+      (async () => {
+        try {
+          const { data } = await supabase.functions.invoke("paystack", {
+            body: { action: "verify", reference: verifyRef },
+          });
+          if (data?.verified) {
+            setBookingReference(verifyRef);
+            setStep("confirmation");
+            toast({ title: "Payment Successful!", description: `Reference: ${verifyRef}` });
+          }
+        } catch (err) {
+          console.error("Verification error:", err);
+        }
+      })();
+    }
+  }, [searchParams]);
 
   const handleSubmitBooking = useCallback(async () => {
     if (!state.selectedRoom || !state.search.checkIn || !state.search.checkOut) return;
@@ -35,7 +59,7 @@ const Booking = () => {
     setIsSubmitting(true);
     try {
       // Create or find guest
-      const { data: guestData, error: guestError } = await supabase
+      const { data: guestData } = await supabase
         .from("guests")
         .upsert(
           {
@@ -95,11 +119,11 @@ const Booking = () => {
       }
 
       setBookingReference(refCode);
-      setStep("confirmation");
+      goNext(); // Go to payment step
 
       toast({
-        title: "Booking Confirmed!",
-        description: `Reference: ${refCode}`,
+        title: "Booking Created!",
+        description: `Reference: ${refCode}. Proceed to payment.`,
       });
     } catch (err) {
       console.error("Booking error:", err);
@@ -111,7 +135,11 @@ const Booking = () => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [state, setBookingReference, setStep, toast]);
+  }, [state, setBookingReference, goNext, toast]);
+
+  const handlePaymentComplete = useCallback(() => {
+    setStep("confirmation");
+  }, [setStep]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -124,21 +152,13 @@ const Booking = () => {
 
           <AnimatePresence mode="wait">
             {state.step === "search" && (
-              <SearchStep
-                key="search"
-                search={state.search}
-                onUpdate={setSearch}
-                onNext={goNext}
-              />
+              <SearchStep key="search" search={state.search} onUpdate={setSearch} onNext={goNext} />
             )}
             {state.step === "rooms" && (
               <RoomSelectionStep
                 key="rooms"
                 search={state.search}
-                onSelect={(room) => {
-                  setSelectedRoom(room);
-                  goNext();
-                }}
+                onSelect={(room) => { setSelectedRoom(room); goNext(); }}
                 onBack={goBack}
               />
             )}
@@ -163,6 +183,18 @@ const Booking = () => {
                 onSubmit={handleSubmitBooking}
                 onBack={goBack}
                 isSubmitting={isSubmitting}
+              />
+            )}
+            {state.step === "payment" && state.selectedRoom && (
+              <PaymentStep
+                key="payment"
+                selectedRoom={state.selectedRoom}
+                selectedAddOns={state.selectedAddOns}
+                guestInfo={state.guestInfo}
+                totalAmount={state.totalAmount}
+                bookingReference={state.bookingReference}
+                onPaymentComplete={handlePaymentComplete}
+                onBack={goBack}
               />
             )}
             {state.step === "confirmation" && (
