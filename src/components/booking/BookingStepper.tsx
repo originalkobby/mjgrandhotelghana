@@ -7,10 +7,11 @@ const STEP_LABELS: Record<BookingStep, string> = {
   rooms: "Room",
   addons: "Extras",
   details: "Details",
+  payment: "Payment",
   confirmation: "Confirm",
 };
 
-const STEPS: BookingStep[] = ["search", "rooms", "addons", "details", "confirmation"];
+const STEPS: BookingStep[] = ["search", "rooms", "addons", "details", "payment", "confirmation"];
 
 interface Props {
   currentStep: BookingStep;
