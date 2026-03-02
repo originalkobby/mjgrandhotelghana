@@ -12,6 +12,10 @@ import About from "./pages/About";
 import Booking from "./pages/Booking";
 import NotFound from "./pages/NotFound";
 import MJChat from "./components/MJChat";
+import AdminLogin from "./pages/admin/Login";
+import AdminLayout from "./pages/admin/AdminLayout";
+import Overview from "./pages/admin/Overview";
+import AdminBookings from "./pages/admin/Bookings";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +33,14 @@ const App = () => (
           <Route path="/policy" element={<Policy />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/booking" element={<Booking />} />
+
+          {/* Admin Dashboard */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Overview />} />
+            <Route path="bookings" element={<AdminBookings />} />
+          </Route>
+
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
