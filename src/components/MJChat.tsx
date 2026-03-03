@@ -12,8 +12,9 @@ const FAREWELL_MARKER = "[[FAREWELL]]";
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/mj-ai`;
 
 const QUICK_ACTIONS = [
+  "Book a Room",
+  "Check Room Availability",
   "View My Reservation",
-  "Upgrade My Room",
   "Request Late Checkout",
   "Report an Issue",
 ];

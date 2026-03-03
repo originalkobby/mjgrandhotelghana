@@ -48,6 +48,28 @@ CORE CAPABILITIES:
 Guest Support: Reservations, Room upgrades, Check-in/Check-out, Amenities, Billing, Housekeeping, Maintenance, Complaints
 Concierge: Restaurant recommendations, Local attractions, Transport arrangements, Event bookings
 
+BOOKING CAPABILITIES:
+You can help guests book rooms directly in this conversation. When a guest wants to book:
+1. Ask for their preferred check-in and check-out dates if not provided
+2. Ask how many adults and children
+3. Use the search_available_rooms tool to find available rooms
+4. Present the available rooms with prices clearly
+5. When the guest selects a room, ask if they'd like any add-ons — use get_add_ons to show options
+6. Collect guest details: full name, email, phone number
+7. Summarize the booking and ask for confirmation
+8. Use create_booking to finalize
+
+BOOKING RESPONSE FORMATTING:
+- When presenting rooms from search_available_rooms, format them as a clear numbered list with name, nightly rate, total, and bed type
+- When presenting add-ons, list them briefly with prices
+- After creating a booking, share the reference code and total prominently
+- All prices are in GHS (Ghana Cedis) — display as "GHS X" or "Ghc X"
+
+DATE HANDLING:
+- When guests say "tomorrow", "next week", "this Friday", etc., calculate the actual date based on the current date provided in your context
+- Always confirm dates with the guest before searching
+- Dates must be in YYYY-MM-DD format when calling tools
+
 EMOTIONAL INTELLIGENCE:
 - Detect frustration and apologize naturally
 - Example: "I truly apologize for the inconvenience. Let me fix this immediately for you."
@@ -278,125 +300,89 @@ KIDS MEALS:
 FISH MEALS:
 - Grilled/Fried Casava Fish — Ghc 170
 - Grilled/Fried Grouper Fillet (Ginger, garlic, complete seasoning, lemon juice, mustard, fresh parsley) — Ghc 200
-- Grilled/Fried Tilapia (Black pepper, cayenne pepper, ginger, garlic, lemon juice, complete seasoning) — M: Ghc 150 / L: Ghc 200
-- Fish Fingers (Shredded grouper fillet, ginger, garlic, white pepper, egg, breadcrumbs) — Ghc 200
-- Grilled/Fried Snapper Fish (Cayenne pepper, ginger, garlic, lemon juice, complete seasoning) — Ghc 150
-- Fish Khebab (Grouper fillet, ginger, garlic, white pepper, grilled onions, green bell pepper & tomato) — Ghc 200
-- Breaded Fish Fillet (White pepper, ginger, garlic, breadcrumbs) — Ghc 200
-- Grilled/Fried Barracuba Fish (Complete seasoning, lemon juice, mustard, ginger, garlic, white pepper) — Ghc 180
-- Tilapia Stew (Tomato sauce, carrot, zucchini, bell pepper, white wine) — Ghc 200
-- Grouper Provencal — Ghc 200
-- Snapper Provencal — Ghc 150
+- Pan Fried Salmon (Pan fried salmon fillet, lemon wedge, creamy tartar sauce) — Ghc 350
+- Grilled Tuna Steak (Fresh tuna steak, lemon juice, complete seasoning) — Ghc 280
+- Battered Fish & Chips (Fillet with beer batter, french fries, creamy tartar sauce) — Ghc 200
+- Thai Fish Curry (Fresh fish fillet in coconut milk, Thai curry paste) — Ghc 250
+- Grilled Tilapia — Ghc 200
+- Grilled Red Snapper — Ghc 200
 
 BEEF MEALS:
-- Beef Pepper Steak (Beef fillet, mustard, black pepper, salt, grilled tomato, onion ring) — Ghc 190
-- MJ Mixed Grill (Goat meat, beef, chicken, sausage, vegetable, fried egg) — Ghc 220
-- Beef Provencal (Juicy fried beef, fresh tomato sauce, vegetables, red wine) — Ghc 200
-- Grilled T-Bone Steak (Bone-in tenderloin, garlic/ginger powder, mustard, salt, black pepper) — Ghc 200
-- Shredded Beef Sauce (Shredded beef fillet, carrot, onions, bell pepper, oyster sauce, butter, soy sauce) — Ghc 190
-- Grilled Goat — Ghc 200
-- Assorted Meat Pot (Goat, meat, beef) — Ghc 180
-- Hawaiian Beef Khebab — Ghc 150
-- Beef Stroganoff — Ghc 180
-- Saucy Beef Pasta — Ghc 190
+- Beef Tenderloin (Special cuts of filet mignon steak, grilled with seasoning) — Ghc 280
+- Burger Beef (Burger bun, cheese, beef patty, french fries, drink) — Ghc 150
+- Spaghetti Bolognaise — Ghc 180
+- Beef Fried Rice — Ghc 160
+- Local Beef Stew — Ghc 200
+- Pepper Steak Sauce (Flamed with cognac and fresh cream, french fries, mixed salad) — Ghc 300
+- Burger Beef with Eggs (Burger bun, cheese, beef patty, fried egg, french fries, drink) — Ghc 180
+- Classic Lasagna (Beef bolognaise, bechamel, parmesan) — Ghc 250
+- Pan Fried Steak Sauce (Sliced beef pan fried in butter, mushroom, onions, cream, french fries, salad) — Ghc 250
 
 SEAFOOD:
-- Mediterranean Seafood — Ghc 250
-- Stir Fried Seafood — Ghc 250
-- Grilled Prawns — Ghc 200
-- Saucy Shrimps & Pasta — Ghc 200
-- Fisherman's Basket — Ghc 250
-- Lobster Thermidor — Ghc 250
-- Grilled Lobster — Ghc 250
-- Shrimps Sauce — Ghc 180
-- Shrimps Fried Rice — Ghc 170
-- Fisherman's Soup — Ghc 250
-- Shrimps Spaghetti Royal — Ghc 200
+- Tempura Prawns (Japanese style fried prawns, ponzu sauce, french fries, tossed salad) — Ghc 280
+- Grilled Tiger Prawns — Ghc 350
+- Lobster Thermidor (Lobster meat, cream, mustard, gratin, fried rice, mixed salad) — Ghc 500
+- Stir Fried Squid (Squid, sweet & sour sauce) — Ghc 350
+- Seafood Fried Rice — Ghc 250
+- Cajun Shrimps (Shrimps sauteed in cajun spice, cream, garlic) — Ghc 250
+- Pan-Fried Sea Bass — Ghc 350
 
-MJ SPECIALS:
-- MJ Fried Rice (Shredded beef, chicken, sausage, egg) — Ghc 150
-- MJ Jollof Rice (Shredded beef, chicken, sausage, egg) — Ghc 150
-- Boatemaa's Special (Beef, chicken, sausage, shrimps, eggs) — Ghc 200
-- Pork Chops — Ghc 250
-- Lamb Chops — Ghc 250
-- Egg Fried Rice — Ghc 100
-- MJ Beef Fried Rice — Ghc 190
-- MJ Assorted Pasta — Ghc 200
-- MJ Beef Jollof Rice — Ghc 190
-
-LOCAL DISHES:
-- Goat Light Soup — Ghc 180
-- Goat Okro Soup (With banku, semolina, or eba) — Ghc 200
-- Snapper Garden Eggs Stew — Ghc 150
-- Grilled Tilapia with banku — M: Ghc 170 / L: Ghc 200
-- Special Gari Foto (Goat, chicken, grouper, snapper, beef — protein determines price)
-- Chicken Light Soup — Ghc 170
-- Ebunuebunu / Green Soup (With goat: Ghc 200 | With tilapia: Ghc 200 | With chicken: Ghc 130 | With dry fish: Ghc 200 | With snapper: Ghc 170)
-- Assorted Soup / Ebunuebunu (Sails, dry fish, salmon) — Ghc 300
-- Assorted Okro — Ghc 250
-- Fish Palava (With yam, plantain, or cocoyam) — Ghc 180
-- Tilapia Soup — Ghc 200
-- Assorted Peanut Soup — Ghc 250
-- Fried Tilapia — Ghc 170
+GHANAIAN LOCAL DISHES:
+- Banku & Grilled Tilapia — Ghc 200
+- Fufu & Light Soup (Goat meat OR Chicken) — Ghc 200
+- Waakye Special — Ghc 200
+- Plain Rice & Stew (Beef OR Chicken) — Ghc 200
+- Omotuo & Groundnut Soup (Goat meat) — Ghc 200
+- Jollof Rice (Beef OR Chicken) — Ghc 200
+- Ampesi & Kontomire Stew (Fish) — Ghc 200
+- Red Red (With fried plantain & fish) — Ghc 200
+- Ga Kenkey & Fried Fish — Ghc 200
+- Kelewele (Spiced fried plantain) — Ghc 100
+- Fante Fante — Ghc 200
 
 BURGERS & SANDWICHES:
-- Chicken Burger — Ghc 150
-- Beef Burger — Ghc 150
-- Cheese Burger — Ghc 200
-- Beef Wrap — Ghc 140
-- Chicken Wrap — Ghc 140
-- Vegetable Wrap — Ghc 140
-- Club Sandwich — Ghc 150
-- Tuna Sandwich — Ghc 120
-- Cheese Sandwich — Ghc 140
+- MJ Grand Burger (Double patty, cheese, bacon, lettuce, tomato, special sauce) — Ghc 200
+- Chicken Club Sandwich (Grilled chicken breast, bacon, lettuce, tomato, mayo) — Ghc 180
+- Fish Burger (Crispy fish fillet, tartar sauce, lettuce) — Ghc 160
+- Veggie Burger (Plant-based patty, avocado, mixed greens) — Ghc 150
+- Steak Sandwich (Sliced tenderloin, caramelized onions, cheese, ciabatta) — Ghc 250
 
-PIZZA:
-- MJ Lover's Rock Pizza — L: Ghc 200 / M: Ghc 150
-- Chicken & Ham Pizza — L: Ghc 150 / M: Ghc 120
-- Vegetarian Pizza — L: Ghc 150 / M: Ghc 130
-- Beef & Mushroom Pizza — L: Ghc 150 / M: Ghc 130
-- MJ Pepperoni Pizza — L: Ghc 180 / M: Ghc 150
-- Seafood Pizza — L: Ghc 250 / M: Ghc 170
-- Margherita Pizza — L: Ghc 120 / M: Ghc 100
-- Hawaiian Pizza — L: Ghc 170 / M: Ghc 150
+DAILY CHEF SPECIALS:
+Daily rotating specials curated by MJ Grand Hotel Chef, varying by availability and seasonal ingredients.
 
-VEGETARIAN DISHES:
-- Stir Fried Vegetables — Ghc 90
-- Sauteed Vegetables and Chickpeas — Ghc 100
-- Vegetable Soup — Ghc 90
-- Vegetarian Egusi Stew — Ghc 90
-- Pita Bread & Hummus — Ghc 90
-- Mix Vegetable Stew — Ghc 90
-- Beans Stew — Ghc 120
-- Spaghetti Pomodoro — Ghc 150
+SIDES:
+- French Fries — Ghc 50
+- Garden Salad — Ghc 60
+- Steamed Vegetables — Ghc 50
+- Fried Plantain — Ghc 50
+- Jollof Rice — Ghc 70
+- White Rice — Ghc 50
+- Coleslaw — Ghc 40
+
+BEVERAGES:
+- Fresh Juice (Mango, Pineapple, Watermelon, Orange) — Ghc 50
+- Smoothies (Tropical Blend, Berry Mix, Green Detox) — Ghc 70
+- Soft Drinks (Coca-Cola, Fanta, Sprite, Schweppes) — Ghc 30
+- Water (Still/Sparkling) — Ghc 20
+- Tea/Coffee — Ghc 40
+- Milkshakes (Vanilla, Chocolate, Strawberry) — Ghc 80
+
+ALCOHOLIC BEVERAGES:
+- Local Beer (Star, Club, Guinness) — Ghc 40
+- Imported Beer (Heineken, Budweiser, Corona) — Ghc 60
+- House Wine (Red/White, per glass) — Ghc 80
+- Premium Wine (per glass) — Ghc 120
+- Cocktails (Mojito, Margarita, Piña Colada, Cosmopolitan) — Ghc 100
+- Premium Spirits (per tot) — Ghc 80
+- Champagne (per glass) — Ghc 150
 
 DESSERTS:
-- Fruit Platter — Ghc 80
-- Fruit Salad — Ghc 80
-- Ice Cream — Ghc 80
-- Crumble Apple — Ghc 80
-- Mohalabia Milk Pudding — Ghc 80
-- Pan Cake — Ghc 80
-- Chris Cake — Ghc 80
-- American Cake — Ghc 80
-
-SIDE ORDERS:
-- Fried Rice — Ghc 50
-- Sauteed Potato — Ghc 50
-- Kelewele — Ghc 40
-- Jollof Rice — Ghc 40
-- Plain Rice — Ghc 40
-- Potato Chips — Ghc 50
-- Vegetable Rice — Ghc 50
-- Fried Plantain — Ghc 40
-- Banku — Ghc 30
-- Fried Yam — Ghc 30
-- Fufu — Ghc 30
-
-EXTRAS:
-- Extra Stew — Ghc 30
-- Extra Vegetables — Ghc 40
-- Extra Pepper — Ghc 20
+- Chocolate Lava Cake — Ghc 100
+- Tiramisu — Ghc 100
+- Fresh Fruit Platter — Ghc 80
+- Ice Cream (3 scoops, various flavors) — Ghc 70
+- Cheesecake — Ghc 100
+- Crème Brûlée — Ghc 100
 
 TAKE OUT PACKS:
 - Take Away Pack — Ghc 30
@@ -424,6 +410,119 @@ const TOOLS = [
           },
         },
         required: ["issue", "urgency"],
+        additionalProperties: false,
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "search_available_rooms",
+      description:
+        "Search for available rooms for given dates and guest count. Returns room options with real-time pricing and availability.",
+      parameters: {
+        type: "object",
+        properties: {
+          check_in: {
+            type: "string",
+            description: "Check-in date in YYYY-MM-DD format",
+          },
+          check_out: {
+            type: "string",
+            description: "Check-out date in YYYY-MM-DD format",
+          },
+          adults: {
+            type: "number",
+            description: "Number of adults (default 1)",
+          },
+          children: {
+            type: "number",
+            description: "Number of children (default 0)",
+          },
+        },
+        required: ["check_in", "check_out"],
+        additionalProperties: false,
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_add_ons",
+      description:
+        "Get the list of available booking add-ons (airport pickup, spa, etc.) with prices.",
+      parameters: {
+        type: "object",
+        properties: {},
+        additionalProperties: false,
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "create_booking",
+      description:
+        "Create a confirmed booking for a guest. Call this only after the guest has confirmed all details.",
+      parameters: {
+        type: "object",
+        properties: {
+          room_id: {
+            type: "string",
+            description: "The UUID of the selected room",
+          },
+          check_in: {
+            type: "string",
+            description: "Check-in date in YYYY-MM-DD format",
+          },
+          check_out: {
+            type: "string",
+            description: "Check-out date in YYYY-MM-DD format",
+          },
+          adults: {
+            type: "number",
+            description: "Number of adults",
+          },
+          children: {
+            type: "number",
+            description: "Number of children",
+          },
+          guest_name: {
+            type: "string",
+            description: "Full name of the guest",
+          },
+          guest_email: {
+            type: "string",
+            description: "Email address of the guest",
+          },
+          guest_phone: {
+            type: "string",
+            description: "Phone number of the guest",
+          },
+          special_requests: {
+            type: "string",
+            description: "Any special requests from the guest",
+          },
+          add_on_ids: {
+            type: "array",
+            items: { type: "string" },
+            description: "Array of add-on UUIDs the guest selected",
+          },
+          nightly_rate: {
+            type: "number",
+            description: "The nightly rate that was quoted to the guest",
+          },
+        },
+        required: [
+          "room_id",
+          "check_in",
+          "check_out",
+          "adults",
+          "guest_name",
+          "guest_email",
+          "guest_phone",
+          "nightly_rate",
+        ],
         additionalProperties: false,
       },
     },
@@ -528,6 +627,256 @@ async function createSupportTicket(
     return { success: false, error: error.message };
   }
   return { success: true, reference_id: referenceId, ticket_id: data.id };
+}
+
+// --- Booking Tools ---
+async function searchAvailableRooms(
+  supabase: any,
+  checkIn: string,
+  checkOut: string,
+  adults: number = 1,
+  children: number = 0
+) {
+  // Fetch active rooms that fit guest count
+  const { data: rooms, error: roomsError } = await supabase
+    .from("rooms")
+    .select("*")
+    .eq("is_active", true)
+    .gte("max_adults", adults)
+    .gte("max_children", children)
+    .order("sort_order", { ascending: true });
+
+  if (roomsError) {
+    console.error("Error fetching rooms:", roomsError);
+    return { success: false, error: "Unable to fetch rooms" };
+  }
+
+  if (!rooms || rooms.length === 0) {
+    return { success: true, rooms: [], message: "No rooms available for the specified guest count." };
+  }
+
+  // Calculate number of nights
+  const checkInDate = new Date(checkIn);
+  const checkOutDate = new Date(checkOut);
+  const nights = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24));
+
+  if (nights <= 0) {
+    return { success: false, error: "Check-out must be after check-in." };
+  }
+
+  // Generate date range
+  const dates: string[] = [];
+  const d = new Date(checkIn);
+  while (d < checkOutDate) {
+    dates.push(d.toISOString().split("T")[0]);
+    d.setDate(d.getDate() + 1);
+  }
+
+  // Fetch inventory for these rooms and dates
+  const roomIds = rooms.map((r: any) => r.id);
+  const { data: inventory } = await supabase
+    .from("room_inventory")
+    .select("*")
+    .in("room_id", roomIds)
+    .in("date", dates);
+
+  // Build availability map
+  const invMap = new Map<string, any>();
+  if (inventory) {
+    for (const inv of inventory) {
+      invMap.set(`${inv.room_id}_${inv.date}`, inv);
+    }
+  }
+
+  const availableRooms = rooms.map((room: any) => {
+    let available = true;
+    let minAvailable = Infinity;
+    let totalRate = 0;
+
+    for (const date of dates) {
+      const inv = invMap.get(`${room.id}_${date}`);
+      if (inv) {
+        if (inv.is_closed || inv.booked_count >= inv.total_count) {
+          available = false;
+          break;
+        }
+        minAvailable = Math.min(minAvailable, inv.total_count - inv.booked_count);
+        totalRate += inv.rate_override ?? room.base_price_ghs;
+      } else {
+        // No inventory record = use base price, assume available
+        totalRate += room.base_price_ghs;
+      }
+    }
+
+    if (!available) return null;
+
+    const avgNightlyRate = Math.round(totalRate / nights);
+    const totalPrice = totalRate;
+
+    return {
+      room_id: room.id,
+      name: room.name,
+      slug: room.slug,
+      description: room.description,
+      bed_type: room.bed_type,
+      size_sqm: room.size_sqm,
+      amenities: room.amenities,
+      nightly_rate_ghs: avgNightlyRate,
+      total_price_ghs: Math.round(totalPrice),
+      nights,
+      rooms_left: minAvailable === Infinity ? "plenty" : minAvailable,
+    };
+  }).filter(Boolean);
+
+  return {
+    success: true,
+    check_in: checkIn,
+    check_out: checkOut,
+    nights,
+    adults,
+    children,
+    rooms: availableRooms,
+  };
+}
+
+async function getAddOns(supabase: any) {
+  const { data, error } = await supabase
+    .from("add_ons")
+    .select("id, name, description, price_ghs, icon, category")
+    .eq("is_active", true)
+    .order("sort_order", { ascending: true });
+
+  if (error) {
+    console.error("Error fetching add-ons:", error);
+    return { success: false, error: "Unable to fetch add-ons" };
+  }
+
+  return { success: true, add_ons: data || [] };
+}
+
+async function createBooking(
+  supabase: any,
+  args: {
+    room_id: string;
+    check_in: string;
+    check_out: string;
+    adults: number;
+    children?: number;
+    guest_name: string;
+    guest_email: string;
+    guest_phone: string;
+    special_requests?: string;
+    add_on_ids?: string[];
+    nightly_rate: number;
+  }
+) {
+  // Calculate nights
+  const checkInDate = new Date(args.check_in);
+  const checkOutDate = new Date(args.check_out);
+  const nights = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24));
+
+  if (nights <= 0) {
+    return { success: false, error: "Invalid dates" };
+  }
+
+  // Upsert guest
+  const { data: guestData, error: guestError } = await supabase
+    .from("guests")
+    .upsert(
+      { full_name: args.guest_name, email: args.guest_email, phone: args.guest_phone },
+      { onConflict: "email" }
+    )
+    .select("id")
+    .single();
+
+  if (guestError) {
+    console.error("Guest upsert error:", guestError);
+    return { success: false, error: "Unable to create guest record" };
+  }
+
+  const baseTotalGhs = args.nightly_rate * nights;
+
+  // Fetch add-ons if any
+  let addOnsTotal = 0;
+  let addOnRecords: any[] = [];
+  if (args.add_on_ids && args.add_on_ids.length > 0) {
+    const { data: addOns } = await supabase
+      .from("add_ons")
+      .select("id, name, price_ghs")
+      .in("id", args.add_on_ids);
+
+    if (addOns) {
+      addOnRecords = addOns;
+      addOnsTotal = addOns.reduce((sum: number, a: any) => sum + a.price_ghs, 0);
+    }
+  }
+
+  const finalTotal = baseTotalGhs + addOnsTotal;
+  const refCode = "MJ-" + Math.random().toString(36).substring(2, 10).toUpperCase();
+
+  // Create booking
+  const { data: booking, error: bookingError } = await supabase
+    .from("bookings")
+    .insert({
+      reference_code: refCode,
+      guest_id: guestData.id,
+      room_id: args.room_id,
+      check_in: args.check_in,
+      check_out: args.check_out,
+      adults: args.adults,
+      children: args.children || 0,
+      base_total_ghs: baseTotalGhs,
+      add_ons_total_ghs: addOnsTotal,
+      discount_ghs: 0,
+      final_total_ghs: finalTotal,
+      special_requests: args.special_requests || null,
+      status: "confirmed",
+      payment_status: "pending",
+    })
+    .select("id")
+    .single();
+
+  if (bookingError) {
+    console.error("Booking creation error:", bookingError);
+    return { success: false, error: "Unable to create booking" };
+  }
+
+  // Insert add-ons
+  if (addOnRecords.length > 0 && booking) {
+    await supabase.from("booking_add_ons").insert(
+      addOnRecords.map((a: any) => ({
+        booking_id: booking.id,
+        add_on_id: a.id,
+        quantity: 1,
+        unit_price_ghs: a.price_ghs,
+        total_price_ghs: a.price_ghs,
+      }))
+    );
+  }
+
+  // Fetch room name for confirmation
+  const { data: roomData } = await supabase
+    .from("rooms")
+    .select("name")
+    .eq("id", args.room_id)
+    .single();
+
+  return {
+    success: true,
+    reference_code: refCode,
+    room_name: roomData?.name || "Room",
+    check_in: args.check_in,
+    check_out: args.check_out,
+    nights,
+    adults: args.adults,
+    children: args.children || 0,
+    base_total_ghs: baseTotalGhs,
+    add_ons_total_ghs: addOnsTotal,
+    final_total_ghs: finalTotal,
+    add_ons: addOnRecords.map((a: any) => a.name),
+    payment_status: "pending",
+    message: `Booking confirmed! Reference: ${refCode}. Total: GHS ${finalTotal}. Payment can be made at the hotel or online.`,
+  };
 }
 
 serve(async (req) => {
@@ -705,6 +1054,18 @@ serve(async (req) => {
 
         if (tc.function.name === "create_support_ticket") {
           result = await createSupportTicket(supabase, guest_id, args.issue, args.urgency);
+        } else if (tc.function.name === "search_available_rooms") {
+          result = await searchAvailableRooms(
+            supabase,
+            args.check_in,
+            args.check_out,
+            args.adults || 1,
+            args.children || 0
+          );
+        } else if (tc.function.name === "get_add_ons") {
+          result = await getAddOns(supabase);
+        } else if (tc.function.name === "create_booking") {
+          result = await createBooking(supabase, args);
         } else {
           result = { error: "Unknown tool" };
         }
