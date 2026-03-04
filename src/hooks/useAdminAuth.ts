@@ -72,10 +72,18 @@ export function useAdminAuth(): AdminAuth {
   }, [fetchRole]);
 
   const signOut = useCallback(async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setRole(null);
-    navigate("/admin/login");
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Sign out error:", error.message);
+      }
+    } catch (err) {
+      console.error("Unexpected sign out error:", err);
+    } finally {
+      setUser(null);
+      setRole(null);
+      navigate("/admin/login");
+    }
   }, [navigate]);
 
   return { user, role, loading, signIn, signOut };
