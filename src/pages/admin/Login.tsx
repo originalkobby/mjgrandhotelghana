@@ -100,7 +100,7 @@ export default function AdminLogin() {
 
           <Button
             type="submit"
-            disabled={submitting || loading}
+            disabled={submitting}
             className="w-full h-11 bg-accent text-accent-foreground hover:bg-accent/90 font-sans font-semibold"
           >
             {submitting ? "Signing in…" : "Sign In"}
