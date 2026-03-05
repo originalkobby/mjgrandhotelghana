@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Lock, Mail, Eye, EyeOff } from "lucide-react";
@@ -17,22 +17,29 @@ export default function AdminLogin() {
   const { signIn, user, role, loading } = useAdminAuth();
   const navigate = useNavigate();
 
-  // If already authed with a role, redirect
-  if (!loading && user && role) {
-    navigate("/admin", { replace: true });
-    return null;
-  }
+  // If already authed with a role, redirect (useEffect to avoid side-effect during render)
+  useEffect(() => {
+    if (!loading && user && role) {
+      navigate("/admin", { replace: true });
+    }
+  }, [loading, user, role, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
-    const err = await signIn(email, password);
-    setSubmitting(false);
-    if (err) {
-      setError(err);
-    } else {
-      navigate("/admin", { replace: true });
+    try {
+      const err = await signIn(email, password);
+      if (err) {
+        setError(err);
+      } else {
+        navigate("/admin", { replace: true });
+      }
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again.");
+      console.error("Sign in error:", err);
+    } finally {
+      setSubmitting(false);
     }
   };
 
