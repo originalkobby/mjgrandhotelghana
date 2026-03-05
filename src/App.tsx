@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Index from "./pages/Index";
 import Menu from "./pages/Menu";
 import Dining from "./pages/Dining";
@@ -16,8 +16,13 @@ import AdminLogin from "./pages/admin/Login";
 import AdminLayout from "./pages/admin/AdminLayout";
 import Overview from "./pages/admin/Overview";
 import AdminBookings from "./pages/admin/Bookings";
-
 import AdminInventory from "./pages/admin/Inventory";
+
+function ChatWidget() {
+  const { pathname } = useLocation();
+  if (pathname.startsWith("/admin")) return null;
+  return <MJChat />;
+}
 
 const queryClient = new QueryClient();
 
@@ -47,7 +52,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-        <MJChat />
+        <ChatWidget />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
