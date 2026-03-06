@@ -58,19 +58,28 @@ const Booking = () => {
 
     setIsSubmitting(true);
     try {
-      // Create or find guest
-      const { data: guestData } = await supabase
+      // Find existing guest or create new one
+      let guestId: string | null = null;
+      const { data: existingGuest } = await supabase
         .from("guests")
-        .upsert(
-          {
+        .select("id")
+        .eq("email", state.guestInfo.email)
+        .maybeSingle();
+
+      if (existingGuest) {
+        guestId = existingGuest.id;
+      } else {
+        const { data: newGuest } = await supabase
+          .from("guests")
+          .insert({
             full_name: state.guestInfo.fullName,
             email: state.guestInfo.email,
             phone: state.guestInfo.phone,
-          },
-          { onConflict: "email" }
-        )
-        .select("id")
-        .single();
+          })
+          .select("id")
+          .single();
+        guestId = newGuest?.id ?? null;
+      }
 
       // Generate reference
       const refCode = "MJ-" + Math.random().toString(36).substring(2, 10).toUpperCase();
@@ -83,7 +92,7 @@ const Booking = () => {
         .from("bookings")
         .insert({
           reference_code: refCode,
-          guest_id: guestData?.id ?? null,
+          guest_id: guestId,
           room_id: state.selectedRoom.id,
           check_in: state.search.checkIn.toISOString().split("T")[0],
           check_out: state.search.checkOut.toISOString().split("T")[0],
