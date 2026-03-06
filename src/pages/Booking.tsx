@@ -58,87 +58,53 @@ const Booking = () => {
 
     setIsSubmitting(true);
     try {
-      // Find existing guest or create new one
-      let guestId: string | null = null;
-      const { data: existingGuest } = await supabase
-        .from("guests")
-        .select("id")
-        .eq("email", state.guestInfo.email)
-        .maybeSingle();
-
-      if (existingGuest) {
-        guestId = existingGuest.id;
-      } else {
-        const { data: newGuest } = await supabase
-          .from("guests")
-          .insert({
-            full_name: state.guestInfo.fullName,
-            email: state.guestInfo.email,
-            phone: state.guestInfo.phone,
-          })
-          .select("id")
-          .single();
-        guestId = newGuest?.id ?? null;
-      }
-
-      // Generate reference
-      const refCode = "MJ-" + Math.random().toString(36).substring(2, 10).toUpperCase();
-
       const addOnsTotal = state.selectedAddOns.reduce((s, a) => s + a.price_ghs * a.quantity, 0);
       const finalTotal = state.selectedRoom.totalPrice + addOnsTotal;
 
-      // Create booking
-      const { data: booking, error: bookingError } = await supabase
-        .from("bookings")
-        .insert({
-          reference_code: refCode,
-          guest_id: guestId,
-          room_id: state.selectedRoom.id,
-          check_in: state.search.checkIn.toISOString().split("T")[0],
-          check_out: state.search.checkOut.toISOString().split("T")[0],
-          adults: state.search.adults,
-          children: state.search.children,
-          base_total_ghs: state.selectedRoom.totalPrice,
-          add_ons_total_ghs: addOnsTotal,
-          discount_ghs: 0,
-          final_total_ghs: finalTotal,
-          promo_code: state.search.promoCode || null,
-          special_requests: state.guestInfo.specialRequests || null,
-          arrival_time: state.guestInfo.arrivalTime || null,
-          nationality: state.guestInfo.nationality || null,
-          status: "confirmed",
-          payment_status: "pending",
-        })
-        .select("id")
-        .single();
-
-      if (bookingError) throw bookingError;
-
-      // Insert booking add-ons
-      if (state.selectedAddOns.length > 0 && booking) {
-        await supabase.from("booking_add_ons").insert(
-          state.selectedAddOns.map((a) => ({
-            booking_id: booking.id,
-            add_on_id: a.id,
+      const { data, error: fnError } = await supabase.functions.invoke("create-booking", {
+        body: {
+          guest: {
+            fullName: state.guestInfo.fullName,
+            email: state.guestInfo.email,
+            phone: state.guestInfo.phone,
+          },
+          booking: {
+            roomId: state.selectedRoom.id,
+            checkIn: state.search.checkIn.toISOString().split("T")[0],
+            checkOut: state.search.checkOut.toISOString().split("T")[0],
+            adults: state.search.adults,
+            children: state.search.children,
+            baseTotalGhs: state.selectedRoom.totalPrice,
+            addOnsTotalGhs: addOnsTotal,
+            finalTotalGhs: finalTotal,
+            promoCode: state.search.promoCode || null,
+            specialRequests: state.guestInfo.specialRequests || null,
+            arrivalTime: state.guestInfo.arrivalTime || null,
+            nationality: state.guestInfo.nationality || null,
+          },
+          addOns: state.selectedAddOns.map((a) => ({
+            id: a.id,
             quantity: a.quantity,
-            unit_price_ghs: a.price_ghs,
-            total_price_ghs: a.price_ghs * a.quantity,
-          }))
-        );
-      }
+            priceGhs: a.price_ghs,
+          })),
+        },
+      });
 
-      setBookingReference(refCode);
-      goNext(); // Go to payment step
+      if (fnError) throw new Error(fnError.message);
+      if (data?.error) throw new Error(data.error);
+
+      setBookingReference(data.reference);
+      goNext();
 
       toast({
         title: "Booking Created!",
-        description: `Reference: ${refCode}. Proceed to payment.`,
+        description: `Reference: ${data.reference}. Proceed to payment.`,
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error("Booking error:", err);
       toast({
         title: "Booking Failed",
-        description: "Something went wrong. Please try again.",
+        description: err.message || "Something went wrong. Please try again.",
         variant: "destructive",
       });
     } finally {
