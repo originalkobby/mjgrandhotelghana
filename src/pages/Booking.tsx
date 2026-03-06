@@ -92,7 +92,7 @@ const Booking = () => {
         .from("bookings")
         .insert({
           reference_code: refCode,
-          guest_id: guestData?.id ?? null,
+          guest_id: guestId,
           room_id: state.selectedRoom.id,
           check_in: state.search.checkIn.toISOString().split("T")[0],
           check_out: state.search.checkOut.toISOString().split("T")[0],
