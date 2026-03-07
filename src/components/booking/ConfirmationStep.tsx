@@ -1,12 +1,130 @@
 import { motion } from "framer-motion";
 import { CheckCircle2, Calendar, Download, MessageCircle } from "lucide-react";
 import { format } from "date-fns";
+import { jsPDF } from "jspdf";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import type { BookingState } from "@/hooks/useBooking";
 
 interface Props {
   state: BookingState;
+}
+
+function generateICS(state: BookingState): void {
+  const { selectedRoom, search, bookingReference } = state;
+  if (!search.checkIn || !search.checkOut) return;
+
+  const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+  const now = fmt(new Date());
+  const start = fmt(search.checkIn);
+  const end = fmt(search.checkOut);
+
+  const ics = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//MJ Grand Hotel//Booking//EN",
+    "BEGIN:VEVENT",
+    `DTSTART:${start}`,
+    `DTEND:${end}`,
+    `DTSTAMP:${now}`,
+    `UID:${bookingReference}@mjgrandhotelghana.com`,
+    `SUMMARY:MJ Grand Hotel — ${selectedRoom?.name ?? "Stay"}`,
+    `DESCRIPTION:Booking Ref: ${bookingReference}\\nRoom: ${selectedRoom?.name}\\nGuests: ${search.adults} Adults${search.children > 0 ? `, ${search.children} Children` : ""}`,
+    "LOCATION:MJ Grand Hotel, Ghana",
+    "STATUS:CONFIRMED",
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n");
+
+  const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `MJ-Grand-${bookingReference}.ics`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function generatePDF(state: BookingState): void {
+  const { selectedRoom, search, guestInfo, bookingReference, selectedAddOns, totalAmount } = state;
+  if (!search.checkIn || !search.checkOut) return;
+
+  const doc = new jsPDF();
+  const w = doc.internal.pageSize.getWidth();
+  let y = 20;
+
+  // Header
+  doc.setFontSize(22);
+  doc.setFont("helvetica", "bold");
+  doc.text("MJ Grand Hotel", w / 2, y, { align: "center" });
+  y += 8;
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text("Booking Confirmation", w / 2, y, { align: "center" });
+  y += 12;
+
+  // Divider
+  doc.setDrawColor(200);
+  doc.line(20, y, w - 20, y);
+  y += 10;
+
+  // Reference
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.text(`Booking Reference: ${bookingReference}`, 20, y);
+  y += 10;
+
+  // Guest details
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  const details = [
+    ["Guest", guestInfo.fullName],
+    ["Email", guestInfo.email],
+    ["Phone", guestInfo.phone],
+    ["Room", selectedRoom?.name ?? "—"],
+    ["Check-in", format(search.checkIn, "EEE, MMM d, yyyy")],
+    ["Check-out", format(search.checkOut, "EEE, MMM d, yyyy")],
+    ["Guests", `${search.adults} Adult${search.adults !== 1 ? "s" : ""}${search.children > 0 ? `, ${search.children} Child${search.children !== 1 ? "ren" : ""}` : ""}`],
+  ];
+
+  details.forEach(([label, value]) => {
+    doc.setFont("helvetica", "bold");
+    doc.text(`${label}:`, 20, y);
+    doc.setFont("helvetica", "normal");
+    doc.text(value, 65, y);
+    y += 7;
+  });
+
+  // Add-ons
+  if (selectedAddOns.length > 0) {
+    y += 4;
+    doc.setFont("helvetica", "bold");
+    doc.text("Add-Ons:", 20, y);
+    y += 7;
+    doc.setFont("helvetica", "normal");
+    selectedAddOns.forEach((a) => {
+      doc.text(`• ${a.name} — GH₵ ${(a.price_ghs * a.quantity).toLocaleString()}`, 25, y);
+      y += 6;
+    });
+  }
+
+  // Total
+  y += 6;
+  doc.line(20, y, w - 20, y);
+  y += 8;
+  doc.setFontSize(13);
+  doc.setFont("helvetica", "bold");
+  doc.text(`Total: GH₵ ${totalAmount.toLocaleString()}`, 20, y);
+  y += 14;
+
+  // Footer
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(130);
+  doc.text("Thank you for choosing MJ Grand Hotel. We look forward to welcoming you!", w / 2, y, { align: "center" });
+  doc.text("www.mjgrandhotelghana.com", w / 2, y + 5, { align: "center" });
+
+  doc.save(`MJ-Grand-${bookingReference}.pdf`);
 }
 
 export default function ConfirmationStep({ state }: Props) {
@@ -99,10 +217,10 @@ export default function ConfirmationStep({ state }: Props) {
 
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
-        <Button variant="outline" className="h-11 gap-2">
+        <Button variant="outline" className="h-11 gap-2" onClick={() => generateICS(state)}>
           <Calendar className="w-4 h-4" /> Add to Calendar
         </Button>
-        <Button variant="outline" className="h-11 gap-2">
+        <Button variant="outline" className="h-11 gap-2" onClick={() => generatePDF(state)}>
           <Download className="w-4 h-4" /> Download PDF
         </Button>
         <Link to="/">

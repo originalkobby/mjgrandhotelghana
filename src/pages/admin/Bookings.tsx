@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Search, Filter, RefreshCw } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,6 +52,14 @@ const STATUS_COLORS: Record<string, string> = {
   no_show: "bg-muted text-muted-foreground border-border",
 };
 
+const PAYMENT_COLORS: Record<string, string> = {
+  paid: "bg-accent/20 text-accent border-accent/30",
+  pending: "bg-gold-light/20 text-gold-dark border-gold-light/30",
+  failed: "bg-destructive/10 text-destructive border-destructive/20",
+  partial: "bg-gold-light/20 text-gold-dark border-gold-light/30",
+  refunded: "bg-muted text-muted-foreground border-border",
+};
+
 export default function Bookings() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -83,7 +91,8 @@ export default function Bookings() {
         (b) =>
           b.reference_code.toLowerCase().includes(q) ||
           b.guests?.full_name?.toLowerCase().includes(q) ||
-          b.guests?.email?.toLowerCase().includes(q)
+          b.guests?.email?.toLowerCase().includes(q) ||
+          b.guests?.phone?.toLowerCase().includes(q)
       );
     }
 
@@ -132,7 +141,7 @@ export default function Bookings() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by ref, name, or email…"
+            placeholder="Search by ref, name, email, or phone…"
             className="pl-10"
           />
         </div>
@@ -150,7 +159,7 @@ export default function Bookings() {
             ))}
           </SelectContent>
         </Select>
-        <Button variant="outline" size="icon" onClick={fetchBookings} disabled={loading}>
+        <Button variant="outline" size="icon" onClick={fetchBookings} disabled={loading} title="Refresh bookings">
           <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
         </Button>
       </div>
@@ -162,7 +171,7 @@ export default function Bookings() {
             <table className="w-full text-sm font-sans">
               <thead>
                 <tr className="border-b border-border">
-                  {["Ref", "Guest", "Room", "Check-in", "Check-out", "Guests", "Total", "Status", "Actions"].map((h) => (
+                  {["Ref", "Guest", "Phone", "Room", "Check-in", "Check-out", "Guests", "Total", "Status", "Payment", "Actions"].map((h) => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       {h}
                     </th>
@@ -173,7 +182,7 @@ export default function Bookings() {
                 {loading ? (
                   Array.from({ length: 5 }).map((_, i) => (
                     <tr key={i} className="border-b border-border/50">
-                      {Array.from({ length: 9 }).map((_, j) => (
+                      {Array.from({ length: 11 }).map((_, j) => (
                         <td key={j} className="px-4 py-3">
                           <div className="h-4 bg-muted rounded animate-pulse" />
                         </td>
@@ -182,7 +191,7 @@ export default function Bookings() {
                   ))
                 ) : bookings.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="text-center py-12 text-muted-foreground">
+                    <td colSpan={11} className="text-center py-12 text-muted-foreground">
                       No bookings found
                     </td>
                   </tr>
@@ -200,6 +209,9 @@ export default function Bookings() {
                         <p className="font-medium text-foreground">{b.guests?.full_name ?? "—"}</p>
                         <p className="text-xs text-muted-foreground">{b.guests?.email ?? ""}</p>
                       </td>
+                      <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
+                        {b.guests?.phone ?? "—"}
+                      </td>
                       <td className="px-4 py-3 text-foreground">{b.rooms?.name ?? "—"}</td>
                       <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{b.check_in}</td>
                       <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{b.check_out}</td>
@@ -212,6 +224,11 @@ export default function Bookings() {
                       <td className="px-4 py-3">
                         <Badge variant="outline" className={`text-xs capitalize ${STATUS_COLORS[b.status] ?? ""}`}>
                           {b.status.replace("_", " ")}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge variant="outline" className={`text-xs capitalize ${PAYMENT_COLORS[b.payment_status] ?? ""}`}>
+                          {b.payment_status}
                         </Badge>
                       </td>
                       <td className="px-4 py-3">
@@ -267,7 +284,17 @@ export default function Bookings() {
                 </div>
                 <div>
                   <p className="text-xs uppercase tracking-wider mb-1">Payment</p>
-                  <p className="text-foreground capitalize">{selectedBooking.payment_status}</p>
+                  <Badge variant="outline" className={`text-xs capitalize ${PAYMENT_COLORS[selectedBooking.payment_status] ?? ""}`}>
+                    {selectedBooking.payment_status}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wider mb-1">Phone</p>
+                  <p className="text-foreground">{selectedBooking.guests?.phone ?? "—"}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wider mb-1">Email</p>
+                  <p className="text-foreground">{selectedBooking.guests?.email ?? "—"}</p>
                 </div>
               </div>
 
