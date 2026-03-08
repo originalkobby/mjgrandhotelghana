@@ -285,9 +285,6 @@ export default function Promotions() {
                       </TableCell>
                     </TableRow>
                   )
-                      </TableCell>
-                    </TableRow>
-                  )
                   : filtered.map((p) => (
                     <TableRow key={p.id}>
                       <TableCell>
