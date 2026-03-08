@@ -32,17 +32,37 @@ const Booking = () => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
 
-  // Handle Paystack callback verification
+  // Handle Paystack callback verification — restore booking state from DB
   useEffect(() => {
     const verifyRef = searchParams.get("verify");
     if (verifyRef && state.step !== "confirmation") {
       (async () => {
         try {
+          // Verify payment with Paystack
           const { data } = await supabase.functions.invoke("paystack", {
             body: { action: "verify", reference: verifyRef },
           });
+
           if (data?.verified) {
+            // Look up the booking by reference to restore state
+            const { data: booking } = await supabase
+              .from("bookings")
+              .select("reference_code, check_in, check_out, adults, children, final_total_ghs, rooms(name), guests(full_name, email)")
+              .eq("reference_code", verifyRef)
+              .maybeSingle();
+
             setBookingReference(verifyRef);
+
+            if (booking) {
+              // Restore minimal state for confirmation display
+              setSearch({
+                checkIn: new Date(booking.check_in),
+                checkOut: new Date(booking.check_out),
+                adults: booking.adults,
+                children: booking.children,
+              });
+            }
+
             setStep("confirmation");
             toast({ title: "Payment Successful!", description: `Reference: ${verifyRef}` });
           }

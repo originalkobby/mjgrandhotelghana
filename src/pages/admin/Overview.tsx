@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   DollarSign,
@@ -11,8 +12,9 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
-import { format, subDays, startOfMonth, endOfMonth } from "date-fns";
+import { format, subDays, startOfMonth, endOfMonth, subMonths } from "date-fns";
 import {
   BarChart,
   Bar,
@@ -60,25 +62,22 @@ const PAYMENT_COLORS: Record<string, string> = {
   refunded: "bg-muted text-muted-foreground",
 };
 
-async function fetchOverviewData() {
-  const now = new Date();
-  const monthStart = format(startOfMonth(now), "yyyy-MM-dd");
-  const monthEnd = format(endOfMonth(now), "yyyy-MM-dd");
-  const prevMonthStart = format(startOfMonth(subDays(startOfMonth(now), 1)), "yyyy-MM-dd");
-  const prevMonthEnd = format(endOfMonth(subDays(startOfMonth(now), 1)), "yyyy-MM-dd");
+async function fetchOverviewData(dateFrom: string, dateTo: string) {
+  const prevDuration = new Date(dateTo).getTime() - new Date(dateFrom).getTime();
+  const prevFrom = format(new Date(new Date(dateFrom).getTime() - prevDuration), "yyyy-MM-dd");
+  const prevTo = format(new Date(new Date(dateTo).getTime() - prevDuration), "yyyy-MM-dd");
 
-  // All 3 queries in parallel
   const [{ data: currentBookings }, { data: prevBookings }, { data: recent }] = await Promise.all([
     supabase
       .from("bookings")
       .select("final_total_ghs, status, payment_status, check_in, check_out, created_at")
-      .gte("created_at", monthStart)
-      .lte("created_at", monthEnd + "T23:59:59"),
+      .gte("created_at", dateFrom)
+      .lte("created_at", dateTo + "T23:59:59"),
     supabase
       .from("bookings")
       .select("final_total_ghs, status, payment_status")
-      .gte("created_at", prevMonthStart)
-      .lte("created_at", prevMonthEnd + "T23:59:59"),
+      .gte("created_at", prevFrom)
+      .lte("created_at", prevTo + "T23:59:59"),
     supabase
       .from("bookings")
       .select("id, reference_code, status, payment_status, check_in, check_out, final_total_ghs, created_at, rooms(name), guests(full_name, email)")
@@ -114,7 +113,8 @@ async function fetchOverviewData() {
     { label: "Avg. Daily Rate", value: `GH₵ ${Math.round(adr).toLocaleString()}`, change: pctChange(adr, prevAdr), icon: TrendingUp },
   ];
 
-  // Revenue chart — last 14 days (only paid)
+  // Revenue chart — last 14 days within range
+  const now = new Date(dateTo);
   const chartData: { day: string; revenue: number }[] = [];
   for (let i = 13; i >= 0; i--) {
     const d = format(subDays(now, i), "yyyy-MM-dd");
@@ -130,10 +130,14 @@ async function fetchOverviewData() {
 
 export default function Overview() {
   const queryClient = useQueryClient();
+  const now = new Date();
+  const [dateFrom, setDateFrom] = useState(format(startOfMonth(now), "yyyy-MM-dd"));
+  const [dateTo, setDateTo] = useState(format(endOfMonth(now), "yyyy-MM-dd"));
+
   const { data, isLoading } = useQuery({
-    queryKey: ["admin-overview"],
-    queryFn: fetchOverviewData,
-    staleTime: 60_000, // cache for 1 min
+    queryKey: ["admin-overview", dateFrom, dateTo],
+    queryFn: () => fetchOverviewData(dateFrom, dateTo),
+    staleTime: 60_000,
   });
 
   const kpis = data?.kpis ?? [];
@@ -155,21 +159,36 @@ export default function Overview() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <h1 className="font-serif text-2xl md:text-3xl text-foreground">Dashboard</h1>
           <p className="font-sans text-sm text-muted-foreground mt-1">
-            {format(new Date(), "MMMM yyyy")} performance overview
+            Performance overview
           </p>
         </div>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => queryClient.invalidateQueries({ queryKey: ["admin-overview"] })}
-          title="Refresh dashboard"
-        >
-          <RefreshCw className="w-4 h-4" />
-        </Button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            className="w-36 text-xs"
+          />
+          <span className="text-muted-foreground text-sm">to</span>
+          <Input
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            className="w-36 text-xs"
+          />
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => queryClient.invalidateQueries({ queryKey: ["admin-overview"] })}
+            title="Refresh dashboard"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
 
       {/* KPI Cards */}
@@ -193,7 +212,7 @@ export default function Overview() {
                 {kpi.change !== 0 && (
                   <p className={`flex items-center gap-1 font-sans text-xs mt-1 ${kpi.change > 0 ? "text-accent" : "text-destructive"}`}>
                     {kpi.change > 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                    {Math.abs(kpi.change)}% vs last month
+                    {Math.abs(kpi.change)}% vs prior period
                   </p>
                 )}
               </CardContent>

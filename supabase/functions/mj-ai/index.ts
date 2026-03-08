@@ -546,6 +546,25 @@ const TOOLS = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "cancel_booking",
+      description:
+        "Cancel a confirmed booking by its reference code. Only works if the booking is confirmed/pending and at least 48 hours before check-in.",
+      parameters: {
+        type: "object",
+        properties: {
+          reference_code: {
+            type: "string",
+            description: "The booking reference code (e.g. MJ-A1B2C3D4)",
+          },
+        },
+        required: ["reference_code"],
+        additionalProperties: false,
+      },
+    },
+  },
 ];
 
 // --- Input Validation ---
@@ -860,6 +879,29 @@ async function createBooking(
     return { success: false, error: "Unable to create booking" };
   }
 
+  // Increment room_inventory.booked_count for each night
+  const dates: string[] = [];
+  const d = new Date(args.check_in);
+  while (d < checkOutDate) {
+    dates.push(d.toISOString().split("T")[0]);
+    d.setDate(d.getDate() + 1);
+  }
+
+  for (const date of dates) {
+    const { data: inv } = await supabase
+      .from("room_inventory")
+      .select("id, booked_count")
+      .eq("room_id", args.room_id)
+      .eq("date", date)
+      .maybeSingle();
+
+    if (inv) {
+      await supabase.from("room_inventory").update({ booked_count: inv.booked_count + 1 }).eq("id", inv.id);
+    } else {
+      await supabase.from("room_inventory").insert({ room_id: args.room_id, date, total_count: 1, booked_count: 1 });
+    }
+  }
+
   // Insert add-ons
   if (addOnRecords.length > 0 && booking) {
     await supabase.from("booking_add_ons").insert(
@@ -939,6 +981,37 @@ async function lookupBooking(supabase: any, referenceCode: string) {
       created_at: data.created_at,
     },
   };
+}
+
+async function cancelBooking(supabase: any, referenceCode: string) {
+  const ref = referenceCode.trim().toUpperCase();
+  if (!ref || !ref.startsWith("MJ-")) {
+    return { success: false, error: "Invalid reference code format." };
+  }
+
+  const { data: booking, error } = await supabase
+    .from("bookings")
+    .select("id, status, check_in, room_id")
+    .eq("reference_code", ref)
+    .maybeSingle();
+
+  if (error || !booking) {
+    return { success: false, error: `No booking found with reference ${ref}` };
+  }
+
+  if (booking.status !== "confirmed" && booking.status !== "pending") {
+    return { success: false, error: `Booking is already ${booking.status} and cannot be cancelled.` };
+  }
+
+  const checkInDate = new Date(booking.check_in);
+  const hoursUntil = (checkInDate.getTime() - Date.now()) / (1000 * 60 * 60);
+  if (hoursUntil < 48) {
+    return { success: false, error: "Cancellation is only allowed at least 48 hours before check-in." };
+  }
+
+  await supabase.from("bookings").update({ status: "cancelled" }).eq("id", booking.id);
+
+  return { success: true, reference_code: ref, message: `Booking ${ref} has been cancelled successfully.` };
 }
 
 serve(async (req) => {
@@ -1130,6 +1203,8 @@ serve(async (req) => {
           result = await createBooking(supabase, args);
         } else if (tc.function.name === "lookup_booking") {
           result = await lookupBooking(supabase, args.reference_code);
+        } else if (tc.function.name === "cancel_booking") {
+          result = await cancelBooking(supabase, args.reference_code);
         } else {
           result = { error: "Unknown tool" };
         }

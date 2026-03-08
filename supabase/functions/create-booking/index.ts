@@ -8,23 +8,18 @@ const corsHeaders = {
 
 // In-memory rate limiting (per instance)
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
-const RATE_LIMIT_MAX = 3; // max 3 bookings per email per hour
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
+const RATE_LIMIT_MAX = 3;
 
 function checkRateLimit(email: string): boolean {
   const key = email.toLowerCase().trim();
   const now = Date.now();
   const entry = rateLimitMap.get(key);
-
   if (!entry || now > entry.resetAt) {
     rateLimitMap.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
     return true;
   }
-
-  if (entry.count >= RATE_LIMIT_MAX) {
-    return false;
-  }
-
+  if (entry.count >= RATE_LIMIT_MAX) return false;
   entry.count++;
   return true;
 }
@@ -41,7 +36,7 @@ serve(async (req) => {
   try {
     const { guest, booking, addOns } = await req.json();
 
-    // --- Rate Limiting ---
+    // --- Validate email ---
     if (!guest?.email || typeof guest.email !== "string") {
       return new Response(JSON.stringify({ error: "Valid email is required" }), {
         status: 400,
@@ -57,7 +52,6 @@ serve(async (req) => {
     }
 
     // --- Duplicate Detection ---
-    // Block identical bookings (same email, room, dates) within 10 minutes
     const { data: recentDuplicate } = await supabase
       .from("bookings")
       .select("id, reference_code")
@@ -68,7 +62,6 @@ serve(async (req) => {
       .limit(1);
 
     if (recentDuplicate && recentDuplicate.length > 0) {
-      // Also verify it's the same guest by email
       const dupBooking = recentDuplicate[0];
       const { data: dupGuest } = await supabase
         .from("bookings")
@@ -87,7 +80,44 @@ serve(async (req) => {
       }
     }
 
-    // Upsert guest
+    // --- Promo Code Validation ---
+    let discountGhs = 0;
+    if (booking.promoCode) {
+      const { data: promo } = await supabase
+        .from("promotions")
+        .select("*")
+        .eq("code", booking.promoCode.toUpperCase())
+        .eq("is_active", true)
+        .maybeSingle();
+
+      if (promo) {
+        const now = new Date().toISOString().split("T")[0];
+        const validStart = !promo.start_date || promo.start_date <= now;
+        const validEnd = !promo.end_date || promo.end_date >= now;
+        const withinLimit = !promo.usage_limit || promo.usage_count < promo.usage_limit;
+        const roomAllowed = !promo.room_restrictions || promo.room_restrictions.length === 0 || promo.room_restrictions.includes(booking.roomId);
+
+        if (validStart && validEnd && withinLimit && roomAllowed) {
+          if (promo.discount_type === "percentage") {
+            discountGhs = Math.round((booking.baseTotalGhs * promo.discount_value) / 100);
+          } else if (promo.discount_type === "fixed") {
+            discountGhs = Math.min(promo.discount_value, booking.baseTotalGhs);
+          }
+
+          // Increment usage count
+          await supabase
+            .from("promotions")
+            .update({ usage_count: promo.usage_count + 1 })
+            .eq("id", promo.id);
+        }
+      }
+    }
+
+    // Recalculate final total with discount
+    const addOnsTotal = booking.addOnsTotalGhs || 0;
+    const finalTotal = booking.baseTotalGhs + addOnsTotal - discountGhs;
+
+    // --- Upsert guest ---
     let guestId: string | null = null;
     const { data: existingGuest } = await supabase
       .from("guests")
@@ -125,9 +155,9 @@ serve(async (req) => {
         adults: booking.adults,
         children: booking.children,
         base_total_ghs: booking.baseTotalGhs,
-        add_ons_total_ghs: booking.addOnsTotalGhs,
-        discount_ghs: 0,
-        final_total_ghs: booking.finalTotalGhs,
+        add_ons_total_ghs: addOnsTotal,
+        discount_ghs: discountGhs,
+        final_total_ghs: finalTotal,
         promo_code: booking.promoCode || null,
         special_requests: booking.specialRequests || null,
         arrival_time: booking.arrivalTime || null,
@@ -146,6 +176,43 @@ serve(async (req) => {
       });
     }
 
+    // --- Increment room_inventory.booked_count for each night ---
+    const checkInDate = new Date(booking.checkIn);
+    const checkOutDate = new Date(booking.checkOut);
+    const dates: string[] = [];
+    const d = new Date(checkInDate);
+    while (d < checkOutDate) {
+      dates.push(d.toISOString().split("T")[0]);
+      d.setDate(d.getDate() + 1);
+    }
+
+    for (const date of dates) {
+      // Try to find existing inventory row
+      const { data: inv } = await supabase
+        .from("room_inventory")
+        .select("id, booked_count")
+        .eq("room_id", booking.roomId)
+        .eq("date", date)
+        .maybeSingle();
+
+      if (inv) {
+        await supabase
+          .from("room_inventory")
+          .update({ booked_count: inv.booked_count + 1 })
+          .eq("id", inv.id);
+      } else {
+        // Create inventory row with booked_count = 1
+        await supabase
+          .from("room_inventory")
+          .insert({
+            room_id: booking.roomId,
+            date,
+            total_count: 1,
+            booked_count: 1,
+          });
+      }
+    }
+
     // Insert add-ons
     if (addOns && addOns.length > 0 && bookingData) {
       await supabase.from("booking_add_ons").insert(
@@ -160,7 +227,12 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ reference: refCode, bookingId: bookingData.id }),
+      JSON.stringify({
+        reference: refCode,
+        bookingId: bookingData.id,
+        discountGhs,
+        finalTotal,
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {

@@ -8,8 +8,9 @@ import mjAvatar from "@/assets/mj-avatar.jpg";
 type Msg = { role: "user" | "assistant"; content: string };
 
 const FAREWELL_MARKER = "[[FAREWELL]]";
-
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/mj-ai`;
+const STORAGE_KEY = "mj-chat-messages";
+const GUEST_KEY = "mj-chat-guest-id";
 
 const QUICK_ACTIONS = [
   "Book a Room",
@@ -19,13 +20,32 @@ const QUICK_ACTIONS = [
   "Report an Issue",
 ];
 
+function loadMessages(): Msg[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+function saveMessages(msgs: Msg[]) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(msgs.slice(-50))); } catch {}
+}
+
+function loadGuestId(): string | null {
+  try { return localStorage.getItem(GUEST_KEY); } catch { return null; }
+}
+
+function saveGuestId(id: string | null) {
+  try { if (id) localStorage.setItem(GUEST_KEY, id); } catch {}
+}
+
 const MJChat = () => {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState<Msg[]>([]);
+  const [messages, setMessages] = useState<Msg[]>(loadMessages);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [guestId, setGuestId] = useState<string | null>(null);
+  const [guestId, setGuestId] = useState<string | null>(loadGuestId);
   const [showRating, setShowRating] = useState(false);
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
@@ -33,6 +53,10 @@ const MJChat = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const sendTimestampRef = useRef<number>(0);
+
+  // Persist messages
+  useEffect(() => { saveMessages(messages); }, [messages]);
+  useEffect(() => { saveGuestId(guestId); }, [guestId]);
 
   // Auto-scroll on new messages
   useEffect(() => {
@@ -84,17 +108,10 @@ const MJChat = () => {
         throw new Error(errData.error || "Failed to connect to MJ");
       }
 
-      // Check if server returned a guest_id (for newly resolved guests)
-      const contentType = resp.headers.get("content-type") || "";
-      
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
       let textBuffer = "";
       let assistantSoFar = "";
-
-      const upsert = (chunk: string) => {
-        assistantSoFar += chunk;
-      };
 
       let streamDone = false;
       while (!streamDone) {
@@ -110,14 +127,11 @@ const MJChat = () => {
           if (line.startsWith(":") || line.trim() === "") continue;
           if (!line.startsWith("data: ")) continue;
           const jsonStr = line.slice(6).trim();
-          if (jsonStr === "[DONE]") {
-            streamDone = true;
-            break;
-          }
+          if (jsonStr === "[DONE]") { streamDone = true; break; }
           try {
             const parsed = JSON.parse(jsonStr);
             const content = parsed.choices?.[0]?.delta?.content as string | undefined;
-            if (content) upsert(content);
+            if (content) assistantSoFar += content;
           } catch {
             textBuffer = line + "\n" + textBuffer;
             break;
@@ -127,7 +141,7 @@ const MJChat = () => {
 
       return assistantSoFar;
     },
-    [guestId, messages]
+    [guestId]
   );
 
   const send = async (text: string) => {
@@ -145,7 +159,6 @@ const MJChat = () => {
     try {
       const fullResponse = await streamChat(newMessages);
 
-      // Ensure at least 10s have passed since the user sent the message
       const elapsed = Date.now() - startTime;
       const MINIMUM_DELAY_MS = 10_000;
       if (elapsed < MINIMUM_DELAY_MS) {
@@ -165,8 +178,7 @@ const MJChat = () => {
         ...prev,
         {
           role: "assistant",
-          content:
-            "I apologize, but I'm experiencing a temporary issue. Please try again in a moment.",
+          content: "I apologize, but I'm experiencing a temporary issue. Please try again in a moment.",
         },
       ]);
       console.error("MJ Chat error:", e);
@@ -185,16 +197,20 @@ const MJChat = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({
-            messages: [],
-            guest_id: guestId,
-            rating: selectedRating,
-          }),
+          body: JSON.stringify({ messages: [], guest_id: guestId, rating: selectedRating }),
         });
       } catch (e) {
         console.error("Rating submission error:", e);
       }
     }
+  };
+
+  const clearChat = () => {
+    setMessages([]);
+    setShowRating(false);
+    setRating(0);
+    setRatingSubmitted(false);
+    localStorage.removeItem(STORAGE_KEY);
   };
 
   return (
@@ -253,9 +269,20 @@ const MJChat = () => {
                   </p>
                 </div>
               </div>
-              <button onClick={() => setOpen(false)} aria-label="Close chat">
-                <X size={20} />
-              </button>
+              <div className="flex items-center gap-2">
+                {messages.length > 0 && (
+                  <button
+                    onClick={clearChat}
+                    className="text-[10px] text-primary-foreground/60 hover:text-primary-foreground/90 transition-colors"
+                    title="Clear chat"
+                  >
+                    Clear
+                  </button>
+                )}
+                <button onClick={() => setOpen(false)} aria-label="Close chat">
+                  <X size={20} />
+                </button>
+              </div>
             </div>
 
             {/* Messages area */}
@@ -325,22 +352,22 @@ const MJChat = () => {
                   </p>
                   <div className="flex gap-1">
                     {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          onClick={() => setRating(star)}
-                          onMouseEnter={() => setHoverRating(star)}
-                          onMouseLeave={() => setHoverRating(0)}
-                          className="p-1 transition-transform hover:scale-110"
-                        >
-                          <Star
-                            size={28}
-                            className={`transition-colors ${
-                              star <= (hoverRating || rating)
-                                ? "fill-accent text-accent"
-                                : "text-muted-foreground/40"
-                            }`}
-                          />
-                        </button>
+                      <button
+                        key={star}
+                        onClick={() => setRating(star)}
+                        onMouseEnter={() => setHoverRating(star)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        className="p-1 transition-transform hover:scale-110"
+                      >
+                        <Star
+                          size={28}
+                          className={`transition-colors ${
+                            star <= (hoverRating || rating)
+                              ? "fill-accent text-accent"
+                              : "text-muted-foreground/40"
+                          }`}
+                        />
+                      </button>
                     ))}
                   </div>
                   {rating > 0 && (
