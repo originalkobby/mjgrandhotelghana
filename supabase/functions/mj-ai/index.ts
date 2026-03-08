@@ -63,7 +63,7 @@ BOOKING RESPONSE FORMATTING:
 - When presenting rooms from search_available_rooms, format them as a clear numbered list with name, nightly rate, total, and bed type
 - When presenting add-ons, list them briefly with prices
 - After creating a booking, share the reference code and total prominently
-- All prices are in GHS (Ghana Cedis) — display as "GHS X" or "Ghc X"
+- All prices are in Ghana Cedis — display as "GH₵ X"
 
 DATE HANDLING:
 - When guests say "tomorrow", "next week", "this Friday", etc., calculate the actual date based on the current date provided in your context
