@@ -25,6 +25,7 @@ import AdminReports from "./pages/admin/Reports";
 import AdminRooms from "./pages/admin/Rooms";
 import AdminSupport from "./pages/admin/SupportTickets";
 import AdminSettings from "./pages/admin/Settings";
+import AdminMenu from "./pages/admin/MenuManagement";
 
 function ChatWidget() {
   const { pathname } = useLocation();
