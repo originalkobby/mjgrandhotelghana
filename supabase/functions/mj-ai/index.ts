@@ -63,7 +63,7 @@ BOOKING RESPONSE FORMATTING:
 - When presenting rooms from search_available_rooms, format them as a clear numbered list with name, nightly rate, total, and bed type
 - When presenting add-ons, list them briefly with prices
 - After creating a booking, share the reference code and total prominently
-- All prices are in GHS (Ghana Cedis) — display as "GHS X" or "Ghc X"
+- All prices are in Ghana Cedis — display as "GH₵ X"
 
 DATE HANDLING:
 - When guests say "tomorrow", "next week", "this Friday", etc., calculate the actual date based on the current date provided in your context
@@ -252,142 +252,142 @@ SUGGESTIONS & FEEDBACK:
 - Policy (/policy) — Guest policies (check-in/out, security, swimming, cancellation, drones, suggestions)
 - Contact (/contact) — Contact form, phone, email, address, social media links
 
-=== RESTAURANT MENU (All prices in Ghc) ===
+=== RESTAURANT MENU (All prices in GH₵) ===
 
 HOT APPETIZERS:
-- Spicy Chicken Wings (Juicy fried chicken wings in hot green chilli sauce) — Ghc 90
-- Beef Cocktail Khebab (Tender beef, khebab powder, grilled onions, bell pepper, fresh tomato) — Ghc 100
-- Beef Samosa (Tender beef, khebab powder, grilled onions, bell pepper, fresh tomato) — Ghc 80
-- Hot Chilli Gizzard (Chilli sauce, tender fried gizzard) — Ghc 85
-- Honey Glazed Chicken Wings (Juicy fried chicken wings in spicy honey) — Ghc 90
-- Golden Fried Prawns (Marinated prawns, bread crumbs, cocktail sauce) — Ghc 120
-- Goat Meat Pepper Soup (Goat meat pieces, hot pepper soup stock, served with bread rolls) — Ghc 150
-- Chicken Cocktail Kebab (Tender chicken, white pepper grilled bell pepper, onion & tomato) — Ghc 120
-- Shrimps Avocado Cocktail (Spicy steamed shrimps, cocktail sauce, lettuce, cucumber, fresh tomato, celery) — Ghc 120
-- Chicken Pepper Soup (Diced chicken, hot pepper soup stock, served with bread rolls) — Ghc 120
-- Mix Vegetable Soup (Mushroom, carrot, french beans, zucchini, cabbage, pumpkin, vegetables stock, bouquet-garni, served with bread rolls) — Ghc 120
-- Pumpkin Soup (Vegetables stock, pumpkin, bouquet, served with bread rolls) — Ghc 100
+- Spicy Chicken Wings (Juicy fried chicken wings in hot green chilli sauce) — GH₵ 90
+- Beef Cocktail Khebab (Tender beef, khebab powder, grilled onions, bell pepper, fresh tomato) — GH₵ 100
+- Beef Samosa (Tender beef, khebab powder, grilled onions, bell pepper, fresh tomato) — GH₵ 80
+- Hot Chilli Gizzard (Chilli sauce, tender fried gizzard) — GH₵ 85
+- Honey Glazed Chicken Wings (Juicy fried chicken wings in spicy honey) — GH₵ 90
+- Golden Fried Prawns (Marinated prawns, bread crumbs, cocktail sauce) — GH₵ 120
+- Goat Meat Pepper Soup (Goat meat pieces, hot pepper soup stock, served with bread rolls) — GH₵ 150
+- Chicken Cocktail Kebab (Tender chicken, white pepper grilled bell pepper, onion & tomato) — GH₵ 120
+- Shrimps Avocado Cocktail (Spicy steamed shrimps, cocktail sauce, lettuce, cucumber, fresh tomato, celery) — GH₵ 120
+- Chicken Pepper Soup (Diced chicken, hot pepper soup stock, served with bread rolls) — GH₵ 120
+- Mix Vegetable Soup (Mushroom, carrot, french beans, zucchini, cabbage, pumpkin, vegetables stock, bouquet-garni, served with bread rolls) — GH₵ 120
+- Pumpkin Soup (Vegetables stock, pumpkin, bouquet, served with bread rolls) — GH₵ 100
 
 SALADS (COLD LARDER):
-- Chef's Salad (Lettuce, tomato, carrot, cucumber, onions, chicken flakes, black olives, boiled egg, sliced apple) — Ghc 150
-- MJ Special Salad (Lettuce, fresh tomato, carrot, cucumber, onions, chicken flakes, beef flakes, shrimps, boiled egg, black olives) — Ghc 200
-- Seafood Salad (Prawns, squid, grouper fish, lettuce, fresh tomato, carrot, cucumber, onions, tartar sauce) — Ghc 250
-- Greek Salad (Lettuce, fresh tomato, cucumber, onions, black olives, feta cheese, vinaigrette dressing) — Ghc 110
-- Ghanaian Salad (Lettuce, carrot, cucumber, onions, boiled egg, baked beans, sardine, fresh tomato, black olives) — Ghc 200
-- Tuna Salad (Chunk tuna, lettuce, fresh tomato, onions, cucumber, carrot, olive oil, white pepper, black olive) — Ghc 120
-- Potato Salad (Potatoes, cucumber, carrot, green bell pepper, onions, egg) — Ghc 100
-- Chicken Caesar Salad (Lettuce, sun-dried tomatoes, onions, grilled chicken flakes, black olives, parmesan cheese, croutons) — Ghc 120
+- Chef's Salad (Lettuce, tomato, carrot, cucumber, onions, chicken flakes, black olives, boiled egg, sliced apple) — GH₵ 150
+- MJ Special Salad (Lettuce, fresh tomato, carrot, cucumber, onions, chicken flakes, beef flakes, shrimps, boiled egg, black olives) — GH₵ 200
+- Seafood Salad (Prawns, squid, grouper fish, lettuce, fresh tomato, carrot, cucumber, onions, tartar sauce) — GH₵ 250
+- Greek Salad (Lettuce, fresh tomato, cucumber, onions, black olives, feta cheese, vinaigrette dressing) — GH₵ 110
+- Ghanaian Salad (Lettuce, carrot, cucumber, onions, boiled egg, baked beans, sardine, fresh tomato, black olives) — GH₵ 200
+- Tuna Salad (Chunk tuna, lettuce, fresh tomato, onions, cucumber, carrot, olive oil, white pepper, black olive) — GH₵ 120
+- Potato Salad (Potatoes, cucumber, carrot, green bell pepper, onions, egg) — GH₵ 100
+- Chicken Caesar Salad (Lettuce, sun-dried tomatoes, onions, grilled chicken flakes, black olives, parmesan cheese, croutons) — GH₵ 120
 
 CHICKEN MEALS:
-- Spicy Grilled Chicken — Ghc 150
-- Hawaiian Chicken Khebeb — Ghc 150
-- Chicken Alfredo — Ghc 180
-- Chicken Khebab — Ghc 130
-- Chicken Fried Rice — Ghc 160
-- Chicken Soup — Ghc 180
-- Spicy Turkey Wings — Ghc 150
-- Grilled/Fried Chicken Breast — Ghc 150
-- Chicken Breast Veg Stir Fry — Ghc 150
-- Shredded Chicken Sauce — Ghc 150
-- Chicken Provencal — Ghc 180
-- Saucy Chicken Pasta — Ghc 180
+- Spicy Grilled Chicken — GH₵ 150
+- Hawaiian Chicken Khebeb — GH₵ 150
+- Chicken Alfredo — GH₵ 180
+- Chicken Khebab — GH₵ 130
+- Chicken Fried Rice — GH₵ 160
+- Chicken Soup — GH₵ 180
+- Spicy Turkey Wings — GH₵ 150
+- Grilled/Fried Chicken Breast — GH₵ 150
+- Chicken Breast Veg Stir Fry — GH₵ 150
+- Shredded Chicken Sauce — GH₵ 150
+- Chicken Provencal — GH₵ 180
+- Saucy Chicken Pasta — GH₵ 180
 
 KIDS MEALS:
-- Crispy Chicken Fingers — Ghc 100
-- Diced Chicken & Pasta in Tomato Sauce — Ghc 150
-- Mini-Chicken & Rice — Ghc 120
+- Crispy Chicken Fingers — GH₵ 100
+- Diced Chicken & Pasta in Tomato Sauce — GH₵ 150
+- Mini-Chicken & Rice — GH₵ 120
 
 FISH MEALS:
-- Grilled/Fried Casava Fish — Ghc 170
-- Grilled/Fried Grouper Fillet (Ginger, garlic, complete seasoning, lemon juice, mustard, fresh parsley) — Ghc 200
-- Pan Fried Salmon (Pan fried salmon fillet, lemon wedge, creamy tartar sauce) — Ghc 350
-- Grilled Tuna Steak (Fresh tuna steak, lemon juice, complete seasoning) — Ghc 280
-- Battered Fish & Chips (Fillet with beer batter, french fries, creamy tartar sauce) — Ghc 200
-- Thai Fish Curry (Fresh fish fillet in coconut milk, Thai curry paste) — Ghc 250
-- Grilled Tilapia — Ghc 200
-- Grilled Red Snapper — Ghc 200
+- Grilled/Fried Casava Fish — GH₵ 170
+- Grilled/Fried Grouper Fillet (Ginger, garlic, complete seasoning, lemon juice, mustard, fresh parsley) — GH₵ 200
+- Pan Fried Salmon (Pan fried salmon fillet, lemon wedge, creamy tartar sauce) — GH₵ 350
+- Grilled Tuna Steak (Fresh tuna steak, lemon juice, complete seasoning) — GH₵ 280
+- Battered Fish & Chips (Fillet with beer batter, french fries, creamy tartar sauce) — GH₵ 200
+- Thai Fish Curry (Fresh fish fillet in coconut milk, Thai curry paste) — GH₵ 250
+- Grilled Tilapia — GH₵ 200
+- Grilled Red Snapper — GH₵ 200
 
 BEEF MEALS:
-- Beef Tenderloin (Special cuts of filet mignon steak, grilled with seasoning) — Ghc 280
-- Burger Beef (Burger bun, cheese, beef patty, french fries, drink) — Ghc 150
-- Spaghetti Bolognaise — Ghc 180
-- Beef Fried Rice — Ghc 160
-- Local Beef Stew — Ghc 200
-- Pepper Steak Sauce (Flamed with cognac and fresh cream, french fries, mixed salad) — Ghc 300
-- Burger Beef with Eggs (Burger bun, cheese, beef patty, fried egg, french fries, drink) — Ghc 180
-- Classic Lasagna (Beef bolognaise, bechamel, parmesan) — Ghc 250
-- Pan Fried Steak Sauce (Sliced beef pan fried in butter, mushroom, onions, cream, french fries, salad) — Ghc 250
+- Beef Tenderloin (Special cuts of filet mignon steak, grilled with seasoning) — GH₵ 280
+- Burger Beef (Burger bun, cheese, beef patty, french fries, drink) — GH₵ 150
+- Spaghetti Bolognaise — GH₵ 180
+- Beef Fried Rice — GH₵ 160
+- Local Beef Stew — GH₵ 200
+- Pepper Steak Sauce (Flamed with cognac and fresh cream, french fries, mixed salad) — GH₵ 300
+- Burger Beef with Eggs (Burger bun, cheese, beef patty, fried egg, french fries, drink) — GH₵ 180
+- Classic Lasagna (Beef bolognaise, bechamel, parmesan) — GH₵ 250
+- Pan Fried Steak Sauce (Sliced beef pan fried in butter, mushroom, onions, cream, french fries, salad) — GH₵ 250
 
 SEAFOOD:
-- Tempura Prawns (Japanese style fried prawns, ponzu sauce, french fries, tossed salad) — Ghc 280
-- Grilled Tiger Prawns — Ghc 350
-- Lobster Thermidor (Lobster meat, cream, mustard, gratin, fried rice, mixed salad) — Ghc 500
-- Stir Fried Squid (Squid, sweet & sour sauce) — Ghc 350
-- Seafood Fried Rice — Ghc 250
-- Cajun Shrimps (Shrimps sauteed in cajun spice, cream, garlic) — Ghc 250
-- Pan-Fried Sea Bass — Ghc 350
+- Tempura Prawns (Japanese style fried prawns, ponzu sauce, french fries, tossed salad) — GH₵ 280
+- Grilled Tiger Prawns — GH₵ 350
+- Lobster Thermidor (Lobster meat, cream, mustard, gratin, fried rice, mixed salad) — GH₵ 500
+- Stir Fried Squid (Squid, sweet & sour sauce) — GH₵ 350
+- Seafood Fried Rice — GH₵ 250
+- Cajun Shrimps (Shrimps sauteed in cajun spice, cream, garlic) — GH₵ 250
+- Pan-Fried Sea Bass — GH₵ 350
 
 GHANAIAN LOCAL DISHES:
-- Banku & Grilled Tilapia — Ghc 200
-- Fufu & Light Soup (Goat meat OR Chicken) — Ghc 200
-- Waakye Special — Ghc 200
-- Plain Rice & Stew (Beef OR Chicken) — Ghc 200
-- Omotuo & Groundnut Soup (Goat meat) — Ghc 200
-- Jollof Rice (Beef OR Chicken) — Ghc 200
-- Ampesi & Kontomire Stew (Fish) — Ghc 200
-- Red Red (With fried plantain & fish) — Ghc 200
-- Ga Kenkey & Fried Fish — Ghc 200
-- Kelewele (Spiced fried plantain) — Ghc 100
-- Fante Fante — Ghc 200
+- Banku & Grilled Tilapia — GH₵ 200
+- Fufu & Light Soup (Goat meat OR Chicken) — GH₵ 200
+- Waakye Special — GH₵ 200
+- Plain Rice & Stew (Beef OR Chicken) — GH₵ 200
+- Omotuo & Groundnut Soup (Goat meat) — GH₵ 200
+- Jollof Rice (Beef OR Chicken) — GH₵ 200
+- Ampesi & Kontomire Stew (Fish) — GH₵ 200
+- Red Red (With fried plantain & fish) — GH₵ 200
+- Ga Kenkey & Fried Fish — GH₵ 200
+- Kelewele (Spiced fried plantain) — GH₵ 100
+- Fante Fante — GH₵ 200
 
 BURGERS & SANDWICHES:
-- MJ Grand Burger (Double patty, cheese, bacon, lettuce, tomato, special sauce) — Ghc 200
-- Chicken Club Sandwich (Grilled chicken breast, bacon, lettuce, tomato, mayo) — Ghc 180
-- Fish Burger (Crispy fish fillet, tartar sauce, lettuce) — Ghc 160
-- Veggie Burger (Plant-based patty, avocado, mixed greens) — Ghc 150
-- Steak Sandwich (Sliced tenderloin, caramelized onions, cheese, ciabatta) — Ghc 250
+- MJ Grand Burger (Double patty, cheese, bacon, lettuce, tomato, special sauce) — GH₵ 200
+- Chicken Club Sandwich (Grilled chicken breast, bacon, lettuce, tomato, mayo) — GH₵ 180
+- Fish Burger (Crispy fish fillet, tartar sauce, lettuce) — GH₵ 160
+- Veggie Burger (Plant-based patty, avocado, mixed greens) — GH₵ 150
+- Steak Sandwich (Sliced tenderloin, caramelized onions, cheese, ciabatta) — GH₵ 250
 
 DAILY CHEF SPECIALS:
 Daily rotating specials curated by MJ Grand Hotel Chef, varying by availability and seasonal ingredients.
 
 SIDES:
-- French Fries — Ghc 50
-- Garden Salad — Ghc 60
-- Steamed Vegetables — Ghc 50
-- Fried Plantain — Ghc 50
-- Jollof Rice — Ghc 70
-- White Rice — Ghc 50
-- Coleslaw — Ghc 40
+- French Fries — GH₵ 50
+- Garden Salad — GH₵ 60
+- Steamed Vegetables — GH₵ 50
+- Fried Plantain — GH₵ 50
+- Jollof Rice — GH₵ 70
+- White Rice — GH₵ 50
+- Coleslaw — GH₵ 40
 
 BEVERAGES:
-- Fresh Juice (Mango, Pineapple, Watermelon, Orange) — Ghc 50
-- Smoothies (Tropical Blend, Berry Mix, Green Detox) — Ghc 70
-- Soft Drinks (Coca-Cola, Fanta, Sprite, Schweppes) — Ghc 30
-- Water (Still/Sparkling) — Ghc 20
-- Tea/Coffee — Ghc 40
-- Milkshakes (Vanilla, Chocolate, Strawberry) — Ghc 80
+- Fresh Juice (Mango, Pineapple, Watermelon, Orange) — GH₵ 50
+- Smoothies (Tropical Blend, Berry Mix, Green Detox) — GH₵ 70
+- Soft Drinks (Coca-Cola, Fanta, Sprite, Schweppes) — GH₵ 30
+- Water (Still/Sparkling) — GH₵ 20
+- Tea/Coffee — GH₵ 40
+- Milkshakes (Vanilla, Chocolate, Strawberry) — GH₵ 80
 
 ALCOHOLIC BEVERAGES:
-- Local Beer (Star, Club, Guinness) — Ghc 40
-- Imported Beer (Heineken, Budweiser, Corona) — Ghc 60
-- House Wine (Red/White, per glass) — Ghc 80
-- Premium Wine (per glass) — Ghc 120
-- Cocktails (Mojito, Margarita, Piña Colada, Cosmopolitan) — Ghc 100
-- Premium Spirits (per tot) — Ghc 80
-- Champagne (per glass) — Ghc 150
+- Local Beer (Star, Club, Guinness) — GH₵ 40
+- Imported Beer (Heineken, Budweiser, Corona) — GH₵ 60
+- House Wine (Red/White, per glass) — GH₵ 80
+- Premium Wine (per glass) — GH₵ 120
+- Cocktails (Mojito, Margarita, Piña Colada, Cosmopolitan) — GH₵ 100
+- Premium Spirits (per tot) — GH₵ 80
+- Champagne (per glass) — GH₵ 150
 
 DESSERTS:
-- Chocolate Lava Cake — Ghc 100
-- Tiramisu — Ghc 100
-- Fresh Fruit Platter — Ghc 80
-- Ice Cream (3 scoops, various flavors) — Ghc 70
-- Cheesecake — Ghc 100
-- Crème Brûlée — Ghc 100
+- Chocolate Lava Cake — GH₵ 100
+- Tiramisu — GH₵ 100
+- Fresh Fruit Platter — GH₵ 80
+- Ice Cream (3 scoops, various flavors) — GH₵ 70
+- Cheesecake — GH₵ 100
+- Crème Brûlée — GH₵ 100
 
 TAKE OUT PACKS:
-- Take Away Pack — Ghc 30
-- Aluminium Pack — Ghc 50
-- Paper Bag — Ghc 15`;
+- Take Away Pack — GH₵ 30
+- Aluminium Pack — GH₵ 50
+- Paper Bag — GH₵ 15`;
 
 const TOOLS = [
   {
