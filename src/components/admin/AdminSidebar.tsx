@@ -11,6 +11,7 @@ import {
   BedDouble,
   TicketCheck,
   Settings2,
+  UtensilsCrossed,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
