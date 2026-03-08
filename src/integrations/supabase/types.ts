@@ -210,6 +210,33 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_messages: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          is_read: boolean
+          message: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          is_read?: boolean
+          message: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           created_at: string
