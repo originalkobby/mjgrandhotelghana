@@ -1128,6 +1128,8 @@ serve(async (req) => {
           result = await getAddOns(supabase);
         } else if (tc.function.name === "create_booking") {
           result = await createBooking(supabase, args);
+        } else if (tc.function.name === "lookup_booking") {
+          result = await lookupBooking(supabase, args.reference_code);
         } else {
           result = { error: "Unknown tool" };
         }
