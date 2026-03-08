@@ -84,6 +84,16 @@ async function fetchPromotions() {
   return (data ?? []) as Promotion[];
 }
 
+async function fetchRooms() {
+  const { data, error } = await supabase
+    .from("rooms")
+    .select("id, name")
+    .eq("is_active", true)
+    .order("sort_order");
+  if (error) throw error;
+  return (data ?? []) as Room[];
+}
+
 export default function Promotions() {
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -100,6 +110,12 @@ export default function Promotions() {
     queryKey: ["admin-promotions"],
     queryFn: fetchPromotions,
     staleTime: 30_000,
+  });
+
+  const { data: rooms = [] } = useQuery({
+    queryKey: ["admin-rooms-list"],
+    queryFn: fetchRooms,
+    staleTime: 60_000,
   });
 
   const filtered = promotions.filter(
