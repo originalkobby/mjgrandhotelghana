@@ -527,6 +527,25 @@ const TOOLS = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "lookup_booking",
+      description:
+        "Look up a booking by its reference code (e.g. MJ-A1B2C3D4). Returns booking details including status, dates, room, and payment info.",
+      parameters: {
+        type: "object",
+        properties: {
+          reference_code: {
+            type: "string",
+            description: "The booking reference code (e.g. MJ-A1B2C3D4)",
+          },
+        },
+        required: ["reference_code"],
+        additionalProperties: false,
+      },
+    },
+  },
 ];
 
 // --- Input Validation ---
@@ -879,6 +898,49 @@ async function createBooking(
   };
 }
 
+async function lookupBooking(supabase: any, referenceCode: string) {
+  const ref = referenceCode.trim().toUpperCase();
+  if (!ref || !ref.startsWith("MJ-")) {
+    return { success: false, error: "Invalid reference code format. It should start with MJ-" };
+  }
+
+  const { data, error } = await supabase
+    .from("bookings")
+    .select("reference_code, status, payment_status, check_in, check_out, adults, children, final_total_ghs, base_total_ghs, add_ons_total_ghs, special_requests, arrival_time, created_at, rooms(name), guests(full_name, email)")
+    .eq("reference_code", ref)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Booking lookup error:", error);
+    return { success: false, error: "Unable to look up booking" };
+  }
+
+  if (!data) {
+    return { success: false, error: `No booking found with reference ${ref}` };
+  }
+
+  return {
+    success: true,
+    booking: {
+      reference_code: data.reference_code,
+      status: data.status,
+      payment_status: data.payment_status,
+      check_in: data.check_in,
+      check_out: data.check_out,
+      adults: data.adults,
+      children: data.children,
+      room_name: (data as any).rooms?.name || "Room",
+      guest_name: (data as any).guests?.full_name || "Guest",
+      base_total_ghs: data.base_total_ghs,
+      add_ons_total_ghs: data.add_ons_total_ghs,
+      final_total_ghs: data.final_total_ghs,
+      special_requests: data.special_requests,
+      arrival_time: data.arrival_time,
+      created_at: data.created_at,
+    },
+  };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -1066,6 +1128,8 @@ serve(async (req) => {
           result = await getAddOns(supabase);
         } else if (tc.function.name === "create_booking") {
           result = await createBooking(supabase, args);
+        } else if (tc.function.name === "lookup_booking") {
+          result = await lookupBooking(supabase, args.reference_code);
         } else {
           result = { error: "Unknown tool" };
         }

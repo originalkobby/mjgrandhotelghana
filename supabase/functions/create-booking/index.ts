@@ -6,6 +6,29 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// In-memory rate limiting (per instance)
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const RATE_LIMIT_MAX = 3; // max 3 bookings per email per hour
+
+function checkRateLimit(email: string): boolean {
+  const key = email.toLowerCase().trim();
+  const now = Date.now();
+  const entry = rateLimitMap.get(key);
+
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return true;
+  }
+
+  if (entry.count >= RATE_LIMIT_MAX) {
+    return false;
+  }
+
+  entry.count++;
+  return true;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -17,6 +40,52 @@ serve(async (req) => {
 
   try {
     const { guest, booking, addOns } = await req.json();
+
+    // --- Rate Limiting ---
+    if (!guest?.email || typeof guest.email !== "string") {
+      return new Response(JSON.stringify({ error: "Valid email is required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (!checkRateLimit(guest.email)) {
+      return new Response(
+        JSON.stringify({ error: "Too many booking requests. Please try again later." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // --- Duplicate Detection ---
+    // Block identical bookings (same email, room, dates) within 10 minutes
+    const { data: recentDuplicate } = await supabase
+      .from("bookings")
+      .select("id, reference_code")
+      .eq("room_id", booking.roomId)
+      .eq("check_in", booking.checkIn)
+      .eq("check_out", booking.checkOut)
+      .gte("created_at", new Date(Date.now() - 10 * 60 * 1000).toISOString())
+      .limit(1);
+
+    if (recentDuplicate && recentDuplicate.length > 0) {
+      // Also verify it's the same guest by email
+      const dupBooking = recentDuplicate[0];
+      const { data: dupGuest } = await supabase
+        .from("bookings")
+        .select("guests!inner(email)")
+        .eq("id", dupBooking.id)
+        .single();
+
+      if ((dupGuest as any)?.guests?.email?.toLowerCase() === guest.email.toLowerCase().trim()) {
+        return new Response(
+          JSON.stringify({
+            error: "A similar booking was already made recently.",
+            existingReference: dupBooking.reference_code,
+          }),
+          { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
 
     // Upsert guest
     let guestId: string | null = null;
