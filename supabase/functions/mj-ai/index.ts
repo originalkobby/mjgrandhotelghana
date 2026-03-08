@@ -239,7 +239,9 @@ FLYING OF DRONES:
 SUGGESTIONS & FEEDBACK:
 - Email problems or suggestions to mj@mjgrandhotelghana.com or talk to Management
 
-=== WEBSITE NAVIGATION (Pages available on the website) ===
+=== ACTIVE PROMOTIONS ===
+{DYNAMIC_PROMOTIONS}
+
 - Home (/) — Hero, Rooms & Suites preview, Curated Experiences carousel, Gallery, Footer with contact
 - About (/about) — Hotel story, accommodation features, facilities, core values, CTA
 - Dining (/dining) — Restaurant info, opening hours, signature highlights, bar & lounge, in-room dining, private events, culinary commitment
