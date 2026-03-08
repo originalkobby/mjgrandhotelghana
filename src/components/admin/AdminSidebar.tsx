@@ -2,6 +2,7 @@ import {
   LayoutDashboard,
   CalendarCheck,
   CalendarRange,
+  MessageSquareText,
   LogOut,
   Hotel,
 } from "lucide-react";
@@ -26,6 +27,7 @@ const NAV_ITEMS = [
   { title: "Overview", url: "/admin", icon: LayoutDashboard, end: true },
   { title: "Bookings", url: "/admin/bookings", icon: CalendarCheck, end: false },
   { title: "Inventory", url: "/admin/inventory", icon: CalendarRange, end: false },
+  { title: "Messages", url: "/admin/messages", icon: MessageSquareText, end: false },
 ];
 
 interface Props {
