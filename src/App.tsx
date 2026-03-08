@@ -42,6 +42,7 @@ const App = () => (
           <Route path="/about" element={<About />} />
           <Route path="/policy" element={<Policy />} />
           <Route path="/booking" element={<Booking />} />
+          <Route path="/booking/lookup" element={<BookingLookup />} />
 
           {/* Admin Dashboard */}
           <Route path="/admin/login" element={<AdminLogin />} />
