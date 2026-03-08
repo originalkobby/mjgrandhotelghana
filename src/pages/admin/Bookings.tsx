@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Filter, RefreshCw } from "lucide-react";
+import { Search, Filter, RefreshCw, Download } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 import type { Database } from "@/integrations/supabase/types";
 
 type BookingStatus = Database["public"]["Enums"]["booking_status"];
@@ -84,6 +85,7 @@ export default function Bookings() {
   const [updating, setUpdating] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAdminAuth();
 
   const { data: allBookings = [], isLoading: loading } = useQuery({
     queryKey: ["admin-bookings", statusFilter],
@@ -91,7 +93,6 @@ export default function Bookings() {
     staleTime: 30_000,
   });
 
-  // Client-side search filter
   const bookings = search.trim()
     ? allBookings.filter((b) => {
         const q = search.toLowerCase();
@@ -108,10 +109,22 @@ export default function Bookings() {
     if (!selectedBooking || !newStatus) return;
     setUpdating(true);
 
+    const oldStatus = selectedBooking.status;
+
     const { error } = await supabase
       .from("bookings")
       .update({ status: newStatus as BookingStatus })
       .eq("id", selectedBooking.id);
+
+    if (!error) {
+      // Log audit trail
+      await supabase.from("booking_audit_log" as any).insert({
+        booking_id: selectedBooking.id,
+        old_status: oldStatus,
+        new_status: newStatus,
+        changed_by: user?.id || null,
+      });
+    }
 
     setUpdating(false);
     setSelectedBooking(null);
@@ -123,6 +136,34 @@ export default function Bookings() {
       toast({ title: "Updated", description: `Booking ${selectedBooking.reference_code} → ${newStatus}` });
       queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
     }
+  };
+
+  const exportCSV = () => {
+    if (bookings.length === 0) return;
+    const headers = ["Reference", "Guest", "Email", "Phone", "Room", "Check-in", "Check-out", "Adults", "Children", "Total (GHS)", "Status", "Payment", "Created"];
+    const rows = bookings.map((b) => [
+      b.reference_code,
+      b.guests?.full_name ?? "",
+      b.guests?.email ?? "",
+      b.guests?.phone ?? "",
+      b.rooms?.name ?? "",
+      b.check_in,
+      b.check_out,
+      b.adults,
+      b.children,
+      b.final_total_ghs,
+      b.status,
+      b.payment_status,
+      b.created_at.split("T")[0],
+    ]);
+    const csv = [headers.join(","), ...rows.map((r) => r.map((v) => `"${v}"`).join(","))].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `bookings-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -167,6 +208,16 @@ export default function Bookings() {
           title="Refresh bookings"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={exportCSV}
+          disabled={bookings.length === 0}
+          title="Export as CSV"
+        >
+          <Download className="w-4 h-4 mr-2" />
+          Export
         </Button>
       </div>
 
