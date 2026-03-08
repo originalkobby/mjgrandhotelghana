@@ -38,13 +38,18 @@ const Footer = () => {
               Quick Links
             </h4>
             <div className="space-y-3 font-sans text-sm">
-              {["Rooms & Suites", "Dining", "Spa & Wellness", "Events", "Careers"].map((link) => (
+            {[
+              { label: "Rooms & Suites", href: "#rooms" },
+              { label: "Dining", href: "/dining" },
+              { label: "Policy", href: "/policy" },
+              { label: "About", href: "/about" },
+            ].map((link) => (
                 <a
-                  key={link}
-                  href="#"
+                  key={link.label}
+                  href={link.href}
                   className="block text-cream/60 hover:text-gold transition-colors duration-300"
                 >
-                  {link}
+                  {link.label}
                 </a>
               ))}
             </div>

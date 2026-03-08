@@ -7,11 +7,11 @@ import Index from "./pages/Index";
 import Menu from "./pages/Menu";
 import Dining from "./pages/Dining";
 import Policy from "./pages/Policy";
-import Contact from "./pages/Contact";
 import About from "./pages/About";
 import Booking from "./pages/Booking";
 import NotFound from "./pages/NotFound";
 import MJChat from "./components/MJChat";
+import { ScrollToTop } from "./components/ScrollToTop";
 import AdminLogin from "./pages/admin/Login";
 import AdminLayout from "./pages/admin/AdminLayout";
 import Overview from "./pages/admin/Overview";
@@ -32,13 +32,13 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/menu" element={<Menu />} />
           <Route path="/dining" element={<Dining />} />
           <Route path="/about" element={<About />} />
           <Route path="/policy" element={<Policy />} />
-          <Route path="/contact" element={<Contact />} />
           <Route path="/booking" element={<Booking />} />
 
           {/* Admin Dashboard */}
