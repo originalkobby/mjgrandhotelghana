@@ -21,6 +21,10 @@ import AdminInventory from "./pages/admin/Inventory";
 import AdminMessages from "./pages/admin/Messages";
 import AdminGuests from "./pages/admin/Guests";
 import AdminPromotions from "./pages/admin/Promotions";
+import AdminReports from "./pages/admin/Reports";
+import AdminRooms from "./pages/admin/Rooms";
+import AdminSupport from "./pages/admin/SupportTickets";
+import AdminSettings from "./pages/admin/Settings";
 
 function ChatWidget() {
   const { pathname } = useLocation();
