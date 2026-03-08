@@ -6,6 +6,7 @@ import {
   Users,
   LogOut,
   Hotel,
+  Tag,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
@@ -29,6 +30,7 @@ const NAV_ITEMS = [
   { title: "Bookings", url: "/admin/bookings", icon: CalendarCheck, end: false, roles: null },
   { title: "Guests", url: "/admin/guests", icon: Users, end: false, roles: ["admin", "front_desk"] },
   { title: "Inventory", url: "/admin/inventory", icon: CalendarRange, end: false, roles: ["admin", "revenue_manager"] },
+  { title: "Promotions", url: "/admin/promotions", icon: Tag, end: false, roles: ["admin"] },
   { title: "Messages", url: "/admin/messages", icon: MessageSquareText, end: false, roles: null },
 ];
 

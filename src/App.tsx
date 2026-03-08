@@ -20,6 +20,7 @@ import AdminBookings from "./pages/admin/Bookings";
 import AdminInventory from "./pages/admin/Inventory";
 import AdminMessages from "./pages/admin/Messages";
 import AdminGuests from "./pages/admin/Guests";
+import AdminPromotions from "./pages/admin/Promotions";
 
 function ChatWidget() {
   const { pathname } = useLocation();
@@ -52,6 +53,7 @@ const App = () => (
             <Route path="bookings" element={<AdminBookings />} />
             <Route path="guests" element={<AdminGuests />} />
             <Route path="inventory" element={<AdminInventory />} />
+            <Route path="promotions" element={<AdminPromotions />} />
             <Route path="messages" element={<AdminMessages />} />
           </Route>
 
