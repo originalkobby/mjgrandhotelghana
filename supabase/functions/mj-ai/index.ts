@@ -252,7 +252,7 @@ SUGGESTIONS & FEEDBACK:
 - Policy (/policy) — Guest policies (check-in/out, security, swimming, cancellation, drones, suggestions)
 - Contact (/contact) — Contact form, phone, email, address, social media links
 
-=== RESTAURANT MENU (All prices in Ghc) ===
+=== RESTAURANT MENU (All prices in GH₵) ===
 
 HOT APPETIZERS:
 - Spicy Chicken Wings (Juicy fried chicken wings in hot green chilli sauce) — Ghc 90
