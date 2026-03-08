@@ -231,9 +231,7 @@ SWIMMING:
 - No swimming after 6 PM unless authorized by Management
 
 CANCELLATION & AMENDMENTS:
-- Cancellations or amendments must be made at least 72 hours before arrival
-- Refunds incur a 30% charge, inclusive of applicable government taxes
-- No-show results in a 100% charge (inclusive of applicable government taxes)
+{DYNAMIC_POLICIES}
 
 FLYING OF DRONES:
 - Not permitted unless authorized by Management
