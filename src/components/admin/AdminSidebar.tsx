@@ -7,6 +7,10 @@ import {
   LogOut,
   Hotel,
   Tag,
+  BarChart3,
+  BedDouble,
+  TicketCheck,
+  Settings2,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
