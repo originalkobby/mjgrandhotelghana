@@ -10,7 +10,6 @@ const navItems = [
   { label: "Experiences", href: "#experiences", isHash: true },
   { label: "Dining", href: "/dining", isHash: false },
   { label: "Gallery", href: "#gallery", isHash: true },
-  { label: "Policy", href: "/policy", isHash: false },
 ];
 
 const Navbar = () => {
