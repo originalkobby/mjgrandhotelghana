@@ -2,6 +2,7 @@ import {
   LayoutDashboard,
   CalendarCheck,
   CalendarRange,
+  MessageSquareText,
   LogOut,
   Hotel,
 } from "lucide-react";
