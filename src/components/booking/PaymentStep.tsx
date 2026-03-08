@@ -164,7 +164,7 @@ export default function PaymentStep({
           variant="outline"
           onClick={handlePayLater}
           disabled={isProcessing}
-          className="w-full h-12 font-sans text-sm"
+          className="w-full h-12 font-sans text-sm border-accent text-accent hover:bg-accent hover:text-accent-foreground"
         >
           Pay at Hotel — Reserve Now
         </Button>
