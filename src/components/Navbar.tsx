@@ -141,7 +141,7 @@ const Navbar = () => {
                   transition={{ delay: 0.4 }}
                 >
                   <Link
-                    to="/contact"
+                    to="/booking"
                     onClick={() => setMobileOpen(false)}
                     className="mt-4 border border-gold/60 px-5 py-3 text-center font-sans font-medium tracking-wide text-cream hover:bg-gold hover:text-charcoal transition-all duration-300 block"
                   >

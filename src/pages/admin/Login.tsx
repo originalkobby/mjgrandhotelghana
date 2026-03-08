@@ -53,7 +53,7 @@ export default function AdminLogin() {
       >
         <div className="text-center mb-8">
           <img src={logo} alt="MJ Grand Hotel" className="h-12 mx-auto mb-4" />
-          <h1 className="font-serif text-2xl text-foreground">Staff Portal</h1>
+          <h1 className="font-serif text-2xl text-foreground">Reservation Portal</h1>
           <p className="font-sans text-sm text-muted-foreground mt-1">
             Sign in to access the revenue command center
           </p>

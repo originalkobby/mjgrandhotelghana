@@ -32,13 +32,13 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/menu" element={<Menu />} />
           <Route path="/dining" element={<Dining />} />
           <Route path="/about" element={<About />} />
           <Route path="/policy" element={<Policy />} />
-          <Route path="/contact" element={<Contact />} />
           <Route path="/booking" element={<Booking />} />
 
           {/* Admin Dashboard */}
