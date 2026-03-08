@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
@@ -18,6 +18,7 @@ export function useAdminAuth(): AdminAuth {
   const [role, setRole] = useState<AdminRole | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const initialSessionHandled = useRef(false);
 
   const fetchRole = useCallback(async (userId: string) => {
     const { data } = await supabase
@@ -30,28 +31,37 @@ export function useAdminAuth(): AdminAuth {
   }, []);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        if (session?.user) {
-          setUser(session.user);
-          const r = await fetchRole(session.user.id);
-          setRole(r);
-        } else {
-          setUser(null);
-          setRole(null);
-        }
-        setLoading(false);
-      }
-    );
-
+    // 1. Restore session from storage FIRST
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user);
         const r = await fetchRole(session.user.id);
         setRole(r);
       }
+      initialSessionHandled.current = true;
       setLoading(false);
     });
+
+    // 2. Listen for SUBSEQUENT auth changes (sign-in, sign-out, token refresh)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        // Skip the INITIAL_SESSION event — we handle it via getSession above
+        if (event === "INITIAL_SESSION") return;
+
+        if (session?.user) {
+          setUser(session.user);
+          // Don't await inside onAuthStateChange to avoid deadlocks;
+          // use setTimeout to defer the async role fetch
+          setTimeout(async () => {
+            const r = await fetchRole(session.user.id);
+            setRole(r);
+          }, 0);
+        } else {
+          setUser(null);
+          setRole(null);
+        }
+      }
+    );
 
     return () => subscription.unsubscribe();
   }, [fetchRole]);
