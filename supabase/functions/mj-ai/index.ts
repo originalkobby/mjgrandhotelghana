@@ -546,6 +546,25 @@ const TOOLS = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "cancel_booking",
+      description:
+        "Cancel a confirmed booking by its reference code. Only works if the booking is confirmed/pending and at least 48 hours before check-in.",
+      parameters: {
+        type: "object",
+        properties: {
+          reference_code: {
+            type: "string",
+            description: "The booking reference code (e.g. MJ-A1B2C3D4)",
+          },
+        },
+        required: ["reference_code"],
+        additionalProperties: false,
+      },
+    },
+  },
 ];
 
 // --- Input Validation ---
