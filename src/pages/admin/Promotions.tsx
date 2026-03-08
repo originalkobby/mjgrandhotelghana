@@ -270,9 +270,7 @@ export default function Promotions() {
                 {isLoading
                   ? Array.from({ length: 4 }).map((_, i) => (
                       <TableRow key={i}>
-                        {Array.from({ length: 6 }).map((_, j) => (
-                          <TableCell key={j}>
-                            <div className="h-4 bg-muted rounded animate-pulse w-20" />
+                        {Array.from({ length: 7 }).map((_, j) => (
                           <TableCell key={j}>
                             <div className="h-4 bg-muted rounded animate-pulse w-20" />
                           </TableCell>
@@ -282,8 +280,11 @@ export default function Promotions() {
                   : filtered.length === 0
                   ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-12 text-muted-foreground font-sans">
+                      <TableCell colSpan={7} className="text-center py-12 text-muted-foreground font-sans">
                         {search ? "No promos match your search" : "No promotions yet — create your first one!"}
+                      </TableCell>
+                    </TableRow>
+                  )
                       </TableCell>
                     </TableRow>
                   )
