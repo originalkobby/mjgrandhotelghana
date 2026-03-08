@@ -1011,7 +1011,90 @@ async function cancelBooking(supabase: any, referenceCode: string) {
   return { success: true, reference_code: ref, message: `Booking ${ref} has been cancelled successfully.` };
 }
 
-serve(async (req) => {
+// --- Dynamic Knowledge Base Builder ---
+async function buildDynamicContext(supabase: any): Promise<string> {
+  let prompt = SYSTEM_PROMPT;
+
+  // Fetch active rooms
+  try {
+    const { data: rooms } = await supabase
+      .from("rooms")
+      .select("name, base_price_ghs, description, bed_type, size_sqm, amenities, max_adults, max_children")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true });
+
+    if (rooms && rooms.length > 0) {
+      const roomsText = "ROOM TYPES (live from database):\n" + rooms.map((r: any, i: number) => {
+        let line = `${i + 1}. ${r.name} — From GH₵ ${r.base_price_ghs.toLocaleString()}/night`;
+        if (r.description) line += `: ${r.description}`;
+        if (r.bed_type) line += ` | Bed: ${r.bed_type}`;
+        if (r.size_sqm) line += ` | ${r.size_sqm} sqm`;
+        if (r.max_adults) line += ` | Max: ${r.max_adults} adults, ${r.max_children} children`;
+        if (r.amenities?.length) line += ` | Amenities: ${r.amenities.join(", ")}`;
+        return line;
+      }).join("\n");
+      prompt = prompt.replace("{DYNAMIC_ROOMS}", roomsText);
+    } else {
+      prompt = prompt.replace("{DYNAMIC_ROOMS}", "Room information is currently being updated. Tell guests to contact reception.");
+    }
+  } catch {
+    prompt = prompt.replace("{DYNAMIC_ROOMS}", "Room information temporarily unavailable.");
+  }
+
+  // Fetch active promotions
+  try {
+    const { data: promos } = await supabase
+      .from("promotions")
+      .select("code, description, discount_type, discount_value, end_date, room_restrictions, rooms:room_restrictions(name)")
+      .eq("is_active", true);
+
+    if (promos && promos.length > 0) {
+      const now = new Date().toISOString().split("T")[0];
+      const activePromos = promos.filter((p: any) => !p.end_date || p.end_date >= now);
+      if (activePromos.length > 0) {
+        const promosText = activePromos.map((p: any) => {
+          const discount = p.discount_type === "percentage" ? `${p.discount_value}% off` : `GH₵ ${p.discount_value} off`;
+          let line = `- Code: ${p.code} — ${discount}`;
+          if (p.description) line += ` (${p.description})`;
+          if (p.end_date) line += ` | Valid until ${p.end_date}`;
+          return line;
+        }).join("\n");
+        prompt = prompt.replace("{DYNAMIC_PROMOTIONS}", "Current active promotions guests can use when booking:\n" + promosText + "\nIf a guest asks about deals or discounts, share these codes proactively.");
+      } else {
+        prompt = prompt.replace("{DYNAMIC_PROMOTIONS}", "No active promotions at this time.");
+      }
+    } else {
+      prompt = prompt.replace("{DYNAMIC_PROMOTIONS}", "No active promotions at this time.");
+    }
+  } catch {
+    prompt = prompt.replace("{DYNAMIC_PROMOTIONS}", "Promotion information temporarily unavailable.");
+  }
+
+  // Fetch cancellation policies
+  try {
+    const { data: policies } = await supabase
+      .from("cancellation_policies")
+      .select("name, description, deadline_hours, refund_percentage, is_default")
+      .order("deadline_hours", { ascending: true });
+
+    if (policies && policies.length > 0) {
+      const policiesText = policies.map((p: any) => {
+        let line = `- ${p.name}: Cancellations must be made at least ${p.deadline_hours} hours before arrival. Refund: ${p.refund_percentage}%.`;
+        if (p.description) line += ` ${p.description}`;
+        if (p.is_default) line += " (Default policy)";
+        return line;
+      }).join("\n");
+      prompt = prompt.replace("{DYNAMIC_POLICIES}", policiesText);
+    } else {
+      prompt = prompt.replace("{DYNAMIC_POLICIES}", "- Cancellations or amendments must be made at least 72 hours before arrival\n- Refunds incur a 30% charge, inclusive of applicable government taxes\n- No-show results in a 100% charge (inclusive of applicable government taxes)");
+    }
+  } catch {
+    prompt = prompt.replace("{DYNAMIC_POLICIES}", "- Cancellations or amendments must be made at least 72 hours before arrival\n- Refunds incur a 30% charge\n- No-show results in a 100% charge");
+  }
+
+  return prompt;
+}
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
