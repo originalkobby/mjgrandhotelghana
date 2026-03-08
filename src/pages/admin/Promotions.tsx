@@ -259,6 +259,7 @@ export default function Promotions() {
                 <TableRow>
                   <TableHead className="font-sans text-xs uppercase tracking-wider">Code</TableHead>
                   <TableHead className="font-sans text-xs uppercase tracking-wider">Discount</TableHead>
+                  <TableHead className="font-sans text-xs uppercase tracking-wider hidden md:table-cell">Rooms</TableHead>
                   <TableHead className="font-sans text-xs uppercase tracking-wider hidden md:table-cell">Validity</TableHead>
                   <TableHead className="font-sans text-xs uppercase tracking-wider">Usage</TableHead>
                   <TableHead className="font-sans text-xs uppercase tracking-wider">Status</TableHead>
