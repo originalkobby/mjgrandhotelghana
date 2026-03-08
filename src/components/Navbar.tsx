@@ -49,7 +49,9 @@ const Navbar = () => {
                 <a
                   key={item.label}
                   href={item.href}
-                  className="group relative text-sm font-sans font-medium tracking-wide text-cream/80 hover:text-cream transition-colors duration-300"
+                  className={`group relative text-sm font-sans font-medium tracking-wide transition-colors duration-300 ${
+                    useLight ? "text-foreground/80 hover:text-foreground" : "text-cream/80 hover:text-cream"
+                  }`}
                 >
                   {item.label}
                   <span className="absolute -bottom-1 left-0 h-[1.5px] w-0 bg-gold transition-all duration-300 ease-[cubic-bezier(0.3,0,0.2,1)] group-hover:w-full" />
@@ -58,7 +60,9 @@ const Navbar = () => {
                 <Link
                   key={item.label}
                   to={item.href}
-                  className="group relative text-sm font-sans font-medium tracking-wide text-cream/80 hover:text-cream transition-colors duration-300"
+                  className={`group relative text-sm font-sans font-medium tracking-wide transition-colors duration-300 ${
+                    useLight ? "text-foreground/80 hover:text-foreground" : "text-cream/80 hover:text-cream"
+                  }`}
                 >
                   {item.label}
                   <span className="absolute -bottom-1 left-0 h-[1.5px] w-0 bg-gold transition-all duration-300 ease-[cubic-bezier(0.3,0,0.2,1)] group-hover:w-full" />
