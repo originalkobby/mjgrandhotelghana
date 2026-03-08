@@ -1,23 +1,15 @@
-import { useEffect, useState, useCallback } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   RefreshCw,
   Zap,
   Lock,
-  Unlock,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -30,6 +22,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addDays,
   format,
@@ -55,13 +48,36 @@ interface InvCell {
   rate_override: number | null;
 }
 
+async function fetchInventoryData(weekStart: Date, weekEnd: Date) {
+  const startStr = format(weekStart, "yyyy-MM-dd");
+  const endStr = format(weekEnd, "yyyy-MM-dd");
+
+  const [{ data: roomsData }, { data: invData }] = await Promise.all([
+    supabase
+      .from("rooms")
+      .select("id, name, base_price_ghs")
+      .eq("is_active", true)
+      .order("sort_order"),
+    supabase
+      .from("room_inventory")
+      .select("id, room_id, date, total_count, booked_count, is_closed, rate_override")
+      .gte("date", startStr)
+      .lte("date", endStr),
+  ]);
+
+  const rooms = roomsData ?? [];
+  const map = new Map<string, InvCell>();
+  for (const row of invData ?? []) {
+    map.set(`${row.room_id}|${row.date}`, row as InvCell);
+  }
+
+  return { rooms, inventory: map };
+}
+
 export default function Inventory() {
-  const [rooms, setRooms] = useState<Room[]>([]);
-  const [inventory, setInventory] = useState<Map<string, InvCell>>(new Map());
   const [weekStart, setWeekStart] = useState(() =>
     startOfWeek(new Date(), { weekStartsOn: 1 })
   );
-  const [loading, setLoading] = useState(true);
   const [pricingRunning, setPricingRunning] = useState(false);
   const [selectedCell, setSelectedCell] = useState<{
     room: Room;
@@ -75,40 +91,20 @@ export default function Inventory() {
   });
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
   const days = eachDayOfInterval({ start: weekStart, end: weekEnd });
+  const weekKey = format(weekStart, "yyyy-MM-dd");
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    const startStr = format(weekStart, "yyyy-MM-dd");
-    const endStr = format(weekEnd, "yyyy-MM-dd");
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ["admin-inventory", weekKey],
+    queryFn: () => fetchInventoryData(weekStart, weekEnd),
+    staleTime: 30_000,
+  });
 
-    const [{ data: roomsData }, { data: invData }] = await Promise.all([
-      supabase
-        .from("rooms")
-        .select("id, name, base_price_ghs")
-        .eq("is_active", true)
-        .order("sort_order"),
-      supabase
-        .from("room_inventory")
-        .select("id, room_id, date, total_count, booked_count, is_closed, rate_override")
-        .gte("date", startStr)
-        .lte("date", endStr),
-    ]);
-
-    setRooms(roomsData ?? []);
-    const map = new Map<string, InvCell>();
-    for (const row of invData ?? []) {
-      map.set(`${row.room_id}|${row.date}`, row as InvCell);
-    }
-    setInventory(map);
-    setLoading(false);
-  }, [weekStart]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  const rooms = data?.rooms ?? [];
+  const inventory = data?.inventory ?? new Map<string, InvCell>();
 
   const getCell = (roomId: string, date: Date): InvCell => {
     const dateStr = format(date, "yyyy-MM-dd");
@@ -166,7 +162,7 @@ export default function Inventory() {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Saved", description: `${selectedCell.room.name} — ${selectedCell.date}` });
-      fetchData();
+      queryClient.invalidateQueries({ queryKey: ["admin-inventory"] });
     }
   };
 
@@ -184,13 +180,13 @@ export default function Inventory() {
           body: JSON.stringify({ days_ahead: 30 }),
         }
       );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Failed");
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error ?? "Failed");
       toast({
         title: "Dynamic Pricing Complete",
-        description: `Updated ${data.updated} rate entries across ${data.rooms} rooms`,
+        description: `Updated ${d.updated} rate entries across ${d.rooms} rooms`,
       });
-      fetchData();
+      queryClient.invalidateQueries({ queryKey: ["admin-inventory"] });
     } catch (e: any) {
       toast({ title: "Error", description: e.message, variant: "destructive" });
     } finally {
@@ -228,7 +224,12 @@ export default function Inventory() {
             <Zap className={`w-4 h-4 ${pricingRunning ? "animate-spin" : ""}`} />
             {pricingRunning ? "Running…" : "Run Pricing Engine"}
           </Button>
-          <Button variant="outline" size="icon" onClick={fetchData} disabled={loading}>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => queryClient.invalidateQueries({ queryKey: ["admin-inventory"] })}
+            disabled={loading}
+          >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
           </Button>
         </div>
@@ -236,21 +237,13 @@ export default function Inventory() {
 
       {/* Week Navigation */}
       <div className="flex items-center justify-between">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setWeekStart(addDays(weekStart, -7))}
-        >
+        <Button variant="ghost" size="sm" onClick={() => setWeekStart(addDays(weekStart, -7))}>
           <ChevronLeft className="w-4 h-4 mr-1" /> Previous
         </Button>
         <p className="font-sans text-sm font-medium text-foreground">
           {format(weekStart, "MMM d")} — {format(weekEnd, "MMM d, yyyy")}
         </p>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setWeekStart(addDays(weekStart, 7))}
-        >
+        <Button variant="ghost" size="sm" onClick={() => setWeekStart(addDays(weekStart, 7))}>
           Next <ChevronRight className="w-4 h-4 ml-1" />
         </Button>
       </div>
@@ -269,15 +262,11 @@ export default function Inventory() {
                     <th
                       key={d.toISOString()}
                       className={`text-center px-2 py-3 text-xs font-medium uppercase tracking-wider min-w-[100px] ${
-                        isSameDay(d, new Date())
-                          ? "text-accent bg-accent/5"
-                          : "text-muted-foreground"
+                        isSameDay(d, new Date()) ? "text-accent bg-accent/5" : "text-muted-foreground"
                       }`}
                     >
                       <div>{format(d, "EEE")}</div>
-                      <div className="text-foreground font-semibold">
-                        {format(d, "d")}
-                      </div>
+                      <div className="text-foreground font-semibold">{format(d, "d")}</div>
                     </th>
                   ))}
                 </tr>
@@ -374,9 +363,7 @@ export default function Inventory() {
       <Dialog open={!!selectedCell} onOpenChange={(o) => !o && setSelectedCell(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="font-serif">
-              {selectedCell?.room.name}
-            </DialogTitle>
+            <DialogTitle className="font-serif">{selectedCell?.room.name}</DialogTitle>
             <DialogDescription className="font-sans">
               {selectedCell?.date
                 ? format(new Date(selectedCell.date + "T00:00:00"), "EEEE, MMM d, yyyy")
@@ -392,14 +379,10 @@ export default function Inventory() {
                   <Input
                     type="number"
                     value={editForm.rate_override}
-                    onChange={(e) =>
-                      setEditForm({ ...editForm, rate_override: e.target.value })
-                    }
+                    onChange={(e) => setEditForm({ ...editForm, rate_override: e.target.value })}
                     placeholder={`Base: ${Number(selectedCell.room.base_price_ghs)}`}
                   />
-                  <p className="text-[10px] text-muted-foreground">
-                    Leave empty to use dynamic/base rate
-                  </p>
+                  <p className="text-[10px] text-muted-foreground">Leave empty to use dynamic/base rate</p>
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs">Total Rooms</Label>
@@ -407,9 +390,7 @@ export default function Inventory() {
                     type="number"
                     min={1}
                     value={editForm.total_count}
-                    onChange={(e) =>
-                      setEditForm({ ...editForm, total_count: e.target.value })
-                    }
+                    onChange={(e) => setEditForm({ ...editForm, total_count: e.target.value })}
                   />
                 </div>
               </div>
@@ -417,29 +398,22 @@ export default function Inventory() {
               <div className="flex items-center justify-between rounded-md border border-border p-3">
                 <div>
                   <p className="text-sm font-medium text-foreground">Close Date</p>
-                  <p className="text-xs text-muted-foreground">
-                    Block all bookings for this date
-                  </p>
+                  <p className="text-xs text-muted-foreground">Block all bookings for this date</p>
                 </div>
                 <Switch
                   checked={editForm.is_closed}
-                  onCheckedChange={(v) =>
-                    setEditForm({ ...editForm, is_closed: v })
-                  }
+                  onCheckedChange={(v) => setEditForm({ ...editForm, is_closed: v })}
                 />
               </div>
 
               <div className="bg-muted/50 rounded-md p-3 text-xs text-muted-foreground">
-                Currently booked: {selectedCell.cell.booked_count} /{" "}
-                {selectedCell.cell.total_count}
+                Currently booked: {selectedCell.cell.booked_count} / {selectedCell.cell.total_count}
               </div>
             </div>
           )}
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setSelectedCell(null)}>
-              Cancel
-            </Button>
+            <Button variant="outline" onClick={() => setSelectedCell(null)}>Cancel</Button>
             <Button
               onClick={handleSave}
               disabled={saving}

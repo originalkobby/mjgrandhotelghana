@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Search, Filter, RefreshCw } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Database } from "@/integrations/supabase/types";
 
 type BookingStatus = Database["public"]["Enums"]["booking_status"];
@@ -60,49 +61,48 @@ const PAYMENT_COLORS: Record<string, string> = {
   refunded: "bg-muted text-muted-foreground border-border",
 };
 
+async function fetchBookings(statusFilter: string) {
+  let query = supabase
+    .from("bookings")
+    .select("id, reference_code, status, payment_status, check_in, check_out, adults, children, final_total_ghs, special_requests, created_at, rooms(name), guests(full_name, email, phone)")
+    .order("created_at", { ascending: false })
+    .limit(100);
+
+  if (statusFilter !== "all") {
+    query = query.eq("status", statusFilter as BookingStatus);
+  }
+
+  const { data } = await query;
+  return (data as unknown as Booking[]) ?? [];
+}
+
 export default function Bookings() {
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [newStatus, setNewStatus] = useState<BookingStatus | "">("");
   const [updating, setUpdating] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const fetchBookings = useCallback(async () => {
-    setLoading(true);
-    let query = supabase
-      .from("bookings")
-      .select("id, reference_code, status, payment_status, check_in, check_out, adults, children, final_total_ghs, special_requests, created_at, rooms(name), guests(full_name, email, phone)")
-      .order("created_at", { ascending: false })
-      .limit(100);
+  const { data: allBookings = [], isLoading: loading } = useQuery({
+    queryKey: ["admin-bookings", statusFilter],
+    queryFn: () => fetchBookings(statusFilter),
+    staleTime: 30_000,
+  });
 
-    if (statusFilter !== "all") {
-      query = query.eq("status", statusFilter as BookingStatus);
-    }
-
-    const { data } = await query;
-    let results = (data as unknown as Booking[]) ?? [];
-
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      results = results.filter(
-        (b) =>
+  // Client-side search filter
+  const bookings = search.trim()
+    ? allBookings.filter((b) => {
+        const q = search.toLowerCase();
+        return (
           b.reference_code.toLowerCase().includes(q) ||
           b.guests?.full_name?.toLowerCase().includes(q) ||
           b.guests?.email?.toLowerCase().includes(q) ||
           b.guests?.phone?.toLowerCase().includes(q)
-      );
-    }
-
-    setBookings(results);
-    setLoading(false);
-  }, [statusFilter, search]);
-
-  useEffect(() => {
-    fetchBookings();
-  }, [fetchBookings]);
+        );
+      })
+    : allBookings;
 
   const handleStatusUpdate = async () => {
     if (!selectedBooking || !newStatus) return;
@@ -121,7 +121,7 @@ export default function Bookings() {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Updated", description: `Booking ${selectedBooking.reference_code} → ${newStatus}` });
-      fetchBookings();
+      queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
     }
   };
 
@@ -159,7 +159,13 @@ export default function Bookings() {
             ))}
           </SelectContent>
         </Select>
-        <Button variant="outline" size="icon" onClick={fetchBookings} disabled={loading} title="Refresh bookings">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => queryClient.invalidateQueries({ queryKey: ["admin-bookings"] })}
+          disabled={loading}
+          title="Refresh bookings"
+        >
           <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
         </Button>
       </div>

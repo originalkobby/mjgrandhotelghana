@@ -1,4 +1,3 @@
-import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
   DollarSign,
@@ -23,6 +22,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface KPI {
   label: string;
@@ -60,111 +60,87 @@ const PAYMENT_COLORS: Record<string, string> = {
   refunded: "bg-muted text-muted-foreground",
 };
 
-export default function Overview() {
-  const [kpis, setKpis] = useState<KPI[]>([]);
-  const [recentBookings, setRecentBookings] = useState<Booking[]>([]);
-  const [chartData, setChartData] = useState<{ day: string; revenue: number }[]>([]);
-  const [loading, setLoading] = useState(true);
+async function fetchOverviewData() {
+  const now = new Date();
+  const monthStart = format(startOfMonth(now), "yyyy-MM-dd");
+  const monthEnd = format(endOfMonth(now), "yyyy-MM-dd");
+  const prevMonthStart = format(startOfMonth(subDays(startOfMonth(now), 1)), "yyyy-MM-dd");
+  const prevMonthEnd = format(endOfMonth(subDays(startOfMonth(now), 1)), "yyyy-MM-dd");
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    const now = new Date();
-    const monthStart = format(startOfMonth(now), "yyyy-MM-dd");
-    const monthEnd = format(endOfMonth(now), "yyyy-MM-dd");
-    const prevMonthStart = format(startOfMonth(subDays(startOfMonth(now), 1)), "yyyy-MM-dd");
-    const prevMonthEnd = format(endOfMonth(subDays(startOfMonth(now), 1)), "yyyy-MM-dd");
-
-    // Current month bookings
-    const { data: currentBookings } = await supabase
+  // All 3 queries in parallel
+  const [{ data: currentBookings }, { data: prevBookings }, { data: recent }] = await Promise.all([
+    supabase
       .from("bookings")
       .select("final_total_ghs, status, payment_status, check_in, check_out, created_at")
       .gte("created_at", monthStart)
-      .lte("created_at", monthEnd + "T23:59:59");
-
-    // Previous month bookings for comparison
-    const { data: prevBookings } = await supabase
+      .lte("created_at", monthEnd + "T23:59:59"),
+    supabase
       .from("bookings")
       .select("final_total_ghs, status, payment_status")
       .gte("created_at", prevMonthStart)
-      .lte("created_at", prevMonthEnd + "T23:59:59");
-
-    const curr = currentBookings ?? [];
-    const prev = prevBookings ?? [];
-
-    // Only count PAID bookings in Total Revenue
-    const totalRevenue = curr
-      .filter((b) => b.payment_status === "paid")
-      .reduce((s, b) => s + Number(b.final_total_ghs), 0);
-    const prevRevenue = prev
-      .filter((b) => b.payment_status === "paid")
-      .reduce((s, b) => s + Number(b.final_total_ghs), 0);
-
-    const totalBookings = curr.length;
-    const prevTotalBookings = prev.length;
-
-    const confirmed = curr.filter((b) => b.status === "confirmed" || b.status === "completed").length;
-    const paidCount = curr.filter((b) => b.payment_status === "paid").length;
-    const adr = paidCount > 0 ? totalRevenue / paidCount : 0;
-    const prevPaidCount = prev.filter((b) => b.payment_status === "paid").length;
-    const prevAdr = prevPaidCount > 0 ? prevRevenue / prevPaidCount : 0;
-
-    const pctChange = (c: number, p: number) => (p === 0 ? (c > 0 ? 100 : 0) : Math.round(((c - p) / p) * 100));
-
-    setKpis([
-      {
-        label: "Total Revenue",
-        value: `GH₵ ${totalRevenue.toLocaleString()}`,
-        change: pctChange(totalRevenue, prevRevenue),
-        icon: DollarSign,
-      },
-      {
-        label: "Bookings",
-        value: totalBookings.toString(),
-        change: pctChange(totalBookings, prevTotalBookings),
-        icon: CalendarCheck,
-      },
-      {
-        label: "Confirmed",
-        value: confirmed.toString(),
-        change: 0,
-        icon: BedDouble,
-      },
-      {
-        label: "Avg. Daily Rate",
-        value: `GH₵ ${Math.round(adr).toLocaleString()}`,
-        change: pctChange(adr, prevAdr),
-        icon: TrendingUp,
-      },
-    ]);
-
-    // Revenue chart — last 14 days (only paid)
-    const days: { day: string; revenue: number }[] = [];
-    for (let i = 13; i >= 0; i--) {
-      const d = format(subDays(now, i), "yyyy-MM-dd");
-      const dayLabel = format(subDays(now, i), "MMM d");
-      const dayRevenue = curr
-        .filter((b) => b.created_at.startsWith(d) && b.payment_status === "paid")
-        .reduce((s, b) => s + Number(b.final_total_ghs), 0);
-      days.push({ day: dayLabel, revenue: dayRevenue });
-    }
-    setChartData(days);
-
-    // Recent bookings
-    const { data: recent } = await supabase
+      .lte("created_at", prevMonthEnd + "T23:59:59"),
+    supabase
       .from("bookings")
       .select("id, reference_code, status, payment_status, check_in, check_out, final_total_ghs, created_at, rooms(name), guests(full_name, email)")
       .order("created_at", { ascending: false })
-      .limit(8);
+      .limit(8),
+  ]);
 
-    setRecentBookings((recent as unknown as Booking[]) ?? []);
-    setLoading(false);
-  }, []);
+  const curr = currentBookings ?? [];
+  const prev = prevBookings ?? [];
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  const totalRevenue = curr
+    .filter((b) => b.payment_status === "paid")
+    .reduce((s, b) => s + Number(b.final_total_ghs), 0);
+  const prevRevenue = prev
+    .filter((b) => b.payment_status === "paid")
+    .reduce((s, b) => s + Number(b.final_total_ghs), 0);
 
-  if (loading) {
+  const totalBookings = curr.length;
+  const prevTotalBookings = prev.length;
+
+  const confirmed = curr.filter((b) => b.status === "confirmed" || b.status === "completed").length;
+  const paidCount = curr.filter((b) => b.payment_status === "paid").length;
+  const adr = paidCount > 0 ? totalRevenue / paidCount : 0;
+  const prevPaidCount = prev.filter((b) => b.payment_status === "paid").length;
+  const prevAdr = prevPaidCount > 0 ? prevRevenue / prevPaidCount : 0;
+
+  const pctChange = (c: number, p: number) => (p === 0 ? (c > 0 ? 100 : 0) : Math.round(((c - p) / p) * 100));
+
+  const kpis: KPI[] = [
+    { label: "Total Revenue", value: `GH₵ ${totalRevenue.toLocaleString()}`, change: pctChange(totalRevenue, prevRevenue), icon: DollarSign },
+    { label: "Bookings", value: totalBookings.toString(), change: pctChange(totalBookings, prevTotalBookings), icon: CalendarCheck },
+    { label: "Confirmed", value: confirmed.toString(), change: 0, icon: BedDouble },
+    { label: "Avg. Daily Rate", value: `GH₵ ${Math.round(adr).toLocaleString()}`, change: pctChange(adr, prevAdr), icon: TrendingUp },
+  ];
+
+  // Revenue chart — last 14 days (only paid)
+  const chartData: { day: string; revenue: number }[] = [];
+  for (let i = 13; i >= 0; i--) {
+    const d = format(subDays(now, i), "yyyy-MM-dd");
+    const dayLabel = format(subDays(now, i), "MMM d");
+    const dayRevenue = curr
+      .filter((b) => b.created_at.startsWith(d) && b.payment_status === "paid")
+      .reduce((s, b) => s + Number(b.final_total_ghs), 0);
+    chartData.push({ day: dayLabel, revenue: dayRevenue });
+  }
+
+  return { kpis, chartData, recentBookings: (recent as unknown as Booking[]) ?? [] };
+}
+
+export default function Overview() {
+  const queryClient = useQueryClient();
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin-overview"],
+    queryFn: fetchOverviewData,
+    staleTime: 60_000, // cache for 1 min
+  });
+
+  const kpis = data?.kpis ?? [];
+  const chartData = data?.chartData ?? [];
+  const recentBookings = data?.recentBookings ?? [];
+
+  if (isLoading) {
     return (
       <div className="space-y-6 animate-pulse">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -186,7 +162,12 @@ export default function Overview() {
             {format(new Date(), "MMMM yyyy")} performance overview
           </p>
         </div>
-        <Button variant="outline" size="icon" onClick={loadData} title="Refresh dashboard">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => queryClient.invalidateQueries({ queryKey: ["admin-overview"] })}
+          title="Refresh dashboard"
+        >
           <RefreshCw className="w-4 h-4" />
         </Button>
       </div>
@@ -233,24 +214,11 @@ export default function Overview() {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(30 15% 88%)" />
-                <XAxis
-                  dataKey="day"
-                  tick={{ fontSize: 11, fontFamily: "DM Sans" }}
-                  stroke="hsl(30 8% 45%)"
-                />
-                <YAxis
-                  tick={{ fontSize: 11, fontFamily: "DM Sans" }}
-                  stroke="hsl(30 8% 45%)"
-                  tickFormatter={(v) => `₵${v}`}
-                />
+                <XAxis dataKey="day" tick={{ fontSize: 11, fontFamily: "DM Sans" }} stroke="hsl(30 8% 45%)" />
+                <YAxis tick={{ fontSize: 11, fontFamily: "DM Sans" }} stroke="hsl(30 8% 45%)" tickFormatter={(v) => `₵${v}`} />
                 <Tooltip
                   formatter={(value: number) => [`GH₵ ${value.toLocaleString()}`, "Revenue"]}
-                  contentStyle={{
-                    fontFamily: "DM Sans",
-                    fontSize: 12,
-                    borderRadius: 8,
-                    border: "1px solid hsl(30 15% 88%)",
-                  }}
+                  contentStyle={{ fontFamily: "DM Sans", fontSize: 12, borderRadius: 8, border: "1px solid hsl(30 15% 88%)" }}
                 />
                 <Bar dataKey="revenue" fill="hsl(38 60% 52%)" radius={[4, 4, 0, 0]} />
               </BarChart>
@@ -283,9 +251,7 @@ export default function Overview() {
               <tbody>
                 {recentBookings.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="text-center py-8 text-muted-foreground">
-                      No bookings yet
-                    </td>
+                    <td colSpan={7} className="text-center py-8 text-muted-foreground">No bookings yet</td>
                   </tr>
                 ) : (
                   recentBookings.map((b) => (
@@ -296,21 +262,13 @@ export default function Overview() {
                         <p className="text-xs text-muted-foreground">{b.guests?.email ?? ""}</p>
                       </td>
                       <td className="px-4 py-3 text-foreground">{b.rooms?.name ?? "—"}</td>
-                      <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
-                        {b.check_in} → {b.check_out}
-                      </td>
-                      <td className="px-4 py-3 font-medium text-foreground">
-                        GH₵ {Number(b.final_total_ghs).toLocaleString()}
+                      <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{b.check_in} → {b.check_out}</td>
+                      <td className="px-4 py-3 font-medium text-foreground">GH₵ {Number(b.final_total_ghs).toLocaleString()}</td>
+                      <td className="px-4 py-3">
+                        <Badge variant="outline" className={`text-xs capitalize ${STATUS_COLORS[b.status] ?? ""}`}>{b.status.replace("_", " ")}</Badge>
                       </td>
                       <td className="px-4 py-3">
-                        <Badge variant="outline" className={`text-xs capitalize ${STATUS_COLORS[b.status] ?? ""}`}>
-                          {b.status.replace("_", " ")}
-                        </Badge>
-                      </td>
-                      <td className="px-4 py-3">
-                        <Badge variant="secondary" className={`text-xs capitalize ${PAYMENT_COLORS[b.payment_status] ?? ""}`}>
-                          {b.payment_status}
-                        </Badge>
+                        <Badge variant="secondary" className={`text-xs capitalize ${PAYMENT_COLORS[b.payment_status] ?? ""}`}>{b.payment_status}</Badge>
                       </td>
                     </tr>
                   ))
