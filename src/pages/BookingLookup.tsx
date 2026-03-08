@@ -126,6 +126,13 @@ const BookingLookup = () => {
       setResult({ ...result, status: "cancelled" });
       setShowCancelDialog(false);
       toast({ title: "Booking Cancelled", description: `Booking ${result.reference_code} has been cancelled.` });
+
+      // Fire-and-forget cancellation email
+      supabase.functions.invoke("send-cancellation-email", {
+        body: { bookingId: result.id },
+      }).then(({ error: emailErr }) => {
+        if (emailErr) console.error("Cancellation email failed:", emailErr);
+      });
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     } finally {
