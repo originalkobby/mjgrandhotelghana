@@ -141,6 +141,7 @@ export default function Promotions() {
       end_date: p.end_date ?? "",
       is_active: p.is_active,
       usage_limit: p.usage_limit?.toString() ?? "",
+      room_restrictions: p.room_restrictions ?? [],
     });
     setDialogOpen(true);
   };
