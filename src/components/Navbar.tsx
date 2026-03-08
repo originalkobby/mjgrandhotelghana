@@ -15,6 +15,11 @@ const navItems = [
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const location = useLocation();
+
+  // Pages with dark hero backgrounds where cream text works
+  const isDarkHeroPage = location.pathname === "/" || location.pathname === "/dining" || location.pathname === "/about";
+  const useLight = scrolled || !isDarkHeroPage;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
