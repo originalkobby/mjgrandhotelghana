@@ -1203,6 +1203,8 @@ serve(async (req) => {
           result = await createBooking(supabase, args);
         } else if (tc.function.name === "lookup_booking") {
           result = await lookupBooking(supabase, args.reference_code);
+        } else if (tc.function.name === "cancel_booking") {
+          result = await cancelBooking(supabase, args.reference_code);
         } else {
           result = { error: "Unknown tool" };
         }
