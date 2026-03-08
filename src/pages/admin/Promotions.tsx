@@ -480,7 +480,38 @@ export default function Promotions() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between rounded-md border border-border p-3">
+            {/* Room Restrictions */}
+            <div className="space-y-2">
+              <Label className="text-xs">Room Restrictions (optional)</Label>
+              <p className="text-xs text-muted-foreground">Leave empty to apply to all rooms</p>
+              <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto rounded-md border border-border p-3">
+                {rooms.map((room) => {
+                  const isSelected = form.room_restrictions.includes(room.id);
+                  return (
+                    <label key={room.id} className="flex items-center gap-2 cursor-pointer text-sm">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => {
+                          setForm({
+                            ...form,
+                            room_restrictions: isSelected
+                              ? form.room_restrictions.filter((id) => id !== room.id)
+                              : [...form.room_restrictions, room.id],
+                          });
+                        }}
+                        className="rounded border-border"
+                      />
+                      <span className="text-foreground">{room.name}</span>
+                    </label>
+                  );
+                })}
+                {rooms.length === 0 && (
+                  <p className="text-xs text-muted-foreground">No rooms available</p>
+                )}
+              </div>
+            </div>
+
               <div>
                 <p className="text-sm font-medium text-foreground">Active</p>
                 <p className="text-xs text-muted-foreground">Guests can use this code at checkout</p>
