@@ -273,6 +273,8 @@ export default function Promotions() {
                         {Array.from({ length: 6 }).map((_, j) => (
                           <TableCell key={j}>
                             <div className="h-4 bg-muted rounded animate-pulse w-20" />
+                          <TableCell key={j}>
+                            <div className="h-4 bg-muted rounded animate-pulse w-20" />
                           </TableCell>
                         ))}
                       </TableRow>
