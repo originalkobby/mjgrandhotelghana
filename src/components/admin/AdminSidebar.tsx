@@ -3,6 +3,7 @@ import {
   CalendarCheck,
   CalendarRange,
   MessageSquareText,
+  Users,
   LogOut,
   Hotel,
 } from "lucide-react";
@@ -26,6 +27,7 @@ import logo from "@/assets/logo.png";
 const NAV_ITEMS = [
   { title: "Overview", url: "/admin", icon: LayoutDashboard, end: true, roles: ["admin", "revenue_manager", "finance"] },
   { title: "Bookings", url: "/admin/bookings", icon: CalendarCheck, end: false, roles: null },
+  { title: "Guests", url: "/admin/guests", icon: Users, end: false, roles: ["admin", "front_desk"] },
   { title: "Inventory", url: "/admin/inventory", icon: CalendarRange, end: false, roles: ["admin", "revenue_manager"] },
   { title: "Messages", url: "/admin/messages", icon: MessageSquareText, end: false, roles: null },
 ];
