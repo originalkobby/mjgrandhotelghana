@@ -24,10 +24,10 @@ import {
 import logo from "@/assets/logo.png";
 
 const NAV_ITEMS = [
-  { title: "Overview", url: "/admin", icon: LayoutDashboard, end: true },
-  { title: "Bookings", url: "/admin/bookings", icon: CalendarCheck, end: false },
-  { title: "Inventory", url: "/admin/inventory", icon: CalendarRange, end: false },
-  { title: "Messages", url: "/admin/messages", icon: MessageSquareText, end: false },
+  { title: "Overview", url: "/admin", icon: LayoutDashboard, end: true, roles: ["admin", "revenue_manager", "finance"] },
+  { title: "Bookings", url: "/admin/bookings", icon: CalendarCheck, end: false, roles: null },
+  { title: "Inventory", url: "/admin/inventory", icon: CalendarRange, end: false, roles: ["admin", "revenue_manager"] },
+  { title: "Messages", url: "/admin/messages", icon: MessageSquareText, end: false, roles: null },
 ];
 
 interface Props {
