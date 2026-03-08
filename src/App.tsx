@@ -48,6 +48,7 @@ const App = () => (
             <Route index element={<Overview />} />
             <Route path="bookings" element={<AdminBookings />} />
             <Route path="inventory" element={<AdminInventory />} />
+            <Route path="messages" element={<AdminMessages />} />
           </Route>
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
