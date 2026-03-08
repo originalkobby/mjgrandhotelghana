@@ -21,6 +21,10 @@ import AdminInventory from "./pages/admin/Inventory";
 import AdminMessages from "./pages/admin/Messages";
 import AdminGuests from "./pages/admin/Guests";
 import AdminPromotions from "./pages/admin/Promotions";
+import AdminReports from "./pages/admin/Reports";
+import AdminRooms from "./pages/admin/Rooms";
+import AdminSupport from "./pages/admin/SupportTickets";
+import AdminSettings from "./pages/admin/Settings";
 
 function ChatWidget() {
   const { pathname } = useLocation();
@@ -53,8 +57,12 @@ const App = () => (
             <Route path="bookings" element={<AdminBookings />} />
             <Route path="guests" element={<AdminGuests />} />
             <Route path="inventory" element={<AdminInventory />} />
+            <Route path="rooms" element={<AdminRooms />} />
             <Route path="promotions" element={<AdminPromotions />} />
+            <Route path="reports" element={<AdminReports />} />
+            <Route path="support" element={<AdminSupport />} />
             <Route path="messages" element={<AdminMessages />} />
+            <Route path="settings" element={<AdminSettings />} />
           </Route>
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

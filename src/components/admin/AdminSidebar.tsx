@@ -7,6 +7,10 @@ import {
   LogOut,
   Hotel,
   Tag,
+  BarChart3,
+  BedDouble,
+  TicketCheck,
+  Settings2,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
@@ -29,9 +33,13 @@ const NAV_ITEMS = [
   { title: "Overview", url: "/admin", icon: LayoutDashboard, end: true, roles: ["admin", "revenue_manager", "finance"] },
   { title: "Bookings", url: "/admin/bookings", icon: CalendarCheck, end: false, roles: null },
   { title: "Guests", url: "/admin/guests", icon: Users, end: false, roles: ["admin", "front_desk"] },
+  { title: "Rooms", url: "/admin/rooms", icon: BedDouble, end: false, roles: ["admin"] },
   { title: "Inventory", url: "/admin/inventory", icon: CalendarRange, end: false, roles: ["admin", "revenue_manager"] },
   { title: "Promotions", url: "/admin/promotions", icon: Tag, end: false, roles: ["admin"] },
+  { title: "Reports", url: "/admin/reports", icon: BarChart3, end: false, roles: ["admin", "revenue_manager", "finance"] },
+  { title: "Support", url: "/admin/support", icon: TicketCheck, end: false, roles: ["admin", "front_desk"] },
   { title: "Messages", url: "/admin/messages", icon: MessageSquareText, end: false, roles: null },
+  { title: "Settings", url: "/admin/settings", icon: Settings2, end: false, roles: ["admin"] },
 ];
 
 interface Props {
