@@ -248,14 +248,14 @@ export default function ConfirmationStep({ state }: Props) {
 
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
-        <Button variant="outline" className="h-11 gap-2" onClick={() => generateICS(state)}>
+        <Button variant="outline" className="h-11 gap-2 border-accent text-accent hover:bg-accent hover:text-accent-foreground" onClick={() => generateICS(state)}>
           <Calendar className="w-4 h-4" /> Add to Calendar
         </Button>
-        <Button variant="outline" className="h-11 gap-2" onClick={() => generatePDF(state)}>
+        <Button variant="outline" className="h-11 gap-2 border-accent text-accent hover:bg-accent hover:text-accent-foreground" onClick={() => generatePDF(state)}>
           <Download className="w-4 h-4" /> Download PDF
         </Button>
         <Link to="/">
-          <Button variant="outline" className="h-11 gap-2 w-full sm:w-auto">
+          <Button variant="outline" className="h-11 gap-2 w-full sm:w-auto border-accent text-accent hover:bg-accent hover:text-accent-foreground">
             <MessageCircle className="w-4 h-4" /> Chat with MJ
           </Button>
         </Link>
