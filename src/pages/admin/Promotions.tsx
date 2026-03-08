@@ -162,6 +162,7 @@ export default function Promotions() {
       end_date: form.end_date || null,
       is_active: form.is_active,
       usage_limit: form.usage_limit ? parseInt(form.usage_limit) : null,
+      room_restrictions: form.room_restrictions.length > 0 ? form.room_restrictions : null,
     };
 
     let error;
