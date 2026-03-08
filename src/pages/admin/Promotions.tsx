@@ -512,7 +512,7 @@ export default function Promotions() {
               </div>
             </div>
 
-              <div>
+            <div className="flex items-center justify-between rounded-md border border-border p-3">
                 <p className="text-sm font-medium text-foreground">Active</p>
                 <p className="text-xs text-muted-foreground">Guests can use this code at checkout</p>
               </div>
