@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
   Plus,
@@ -54,7 +54,13 @@ interface Promotion {
   is_active: boolean;
   usage_count: number;
   usage_limit: number | null;
+  room_restrictions: string[] | null;
   created_at: string;
+}
+
+interface Room {
+  id: string;
+  name: string;
 }
 
 const EMPTY_FORM = {
@@ -66,6 +72,7 @@ const EMPTY_FORM = {
   end_date: "",
   is_active: true,
   usage_limit: "",
+  room_restrictions: [] as string[],
 };
 
 async function fetchPromotions() {
@@ -75,6 +82,16 @@ async function fetchPromotions() {
     .order("created_at", { ascending: false });
   if (error) throw error;
   return (data ?? []) as Promotion[];
+}
+
+async function fetchRooms() {
+  const { data, error } = await supabase
+    .from("rooms")
+    .select("id, name")
+    .eq("is_active", true)
+    .order("sort_order");
+  if (error) throw error;
+  return (data ?? []) as Room[];
 }
 
 export default function Promotions() {
@@ -93,6 +110,12 @@ export default function Promotions() {
     queryKey: ["admin-promotions"],
     queryFn: fetchPromotions,
     staleTime: 30_000,
+  });
+
+  const { data: rooms = [] } = useQuery({
+    queryKey: ["admin-rooms-list"],
+    queryFn: fetchRooms,
+    staleTime: 60_000,
   });
 
   const filtered = promotions.filter(
@@ -118,6 +141,7 @@ export default function Promotions() {
       end_date: p.end_date ?? "",
       is_active: p.is_active,
       usage_limit: p.usage_limit?.toString() ?? "",
+      room_restrictions: p.room_restrictions ?? [],
     });
     setDialogOpen(true);
   };
@@ -138,6 +162,7 @@ export default function Promotions() {
       end_date: form.end_date || null,
       is_active: form.is_active,
       usage_limit: form.usage_limit ? parseInt(form.usage_limit) : null,
+      room_restrictions: form.room_restrictions.length > 0 ? form.room_restrictions : null,
     };
 
     let error;
@@ -234,6 +259,7 @@ export default function Promotions() {
                 <TableRow>
                   <TableHead className="font-sans text-xs uppercase tracking-wider">Code</TableHead>
                   <TableHead className="font-sans text-xs uppercase tracking-wider">Discount</TableHead>
+                  <TableHead className="font-sans text-xs uppercase tracking-wider hidden md:table-cell">Rooms</TableHead>
                   <TableHead className="font-sans text-xs uppercase tracking-wider hidden md:table-cell">Validity</TableHead>
                   <TableHead className="font-sans text-xs uppercase tracking-wider">Usage</TableHead>
                   <TableHead className="font-sans text-xs uppercase tracking-wider">Status</TableHead>
@@ -244,7 +270,7 @@ export default function Promotions() {
                 {isLoading
                   ? Array.from({ length: 4 }).map((_, i) => (
                       <TableRow key={i}>
-                        {Array.from({ length: 6 }).map((_, j) => (
+                        {Array.from({ length: 7 }).map((_, j) => (
                           <TableCell key={j}>
                             <div className="h-4 bg-muted rounded animate-pulse w-20" />
                           </TableCell>
@@ -254,7 +280,7 @@ export default function Promotions() {
                   : filtered.length === 0
                   ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-12 text-muted-foreground font-sans">
+                      <TableCell colSpan={7} className="text-center py-12 text-muted-foreground font-sans">
                         {search ? "No promos match your search" : "No promotions yet — create your first one!"}
                       </TableCell>
                     </TableRow>
@@ -292,6 +318,22 @@ export default function Promotions() {
                         <span className="text-xs text-muted-foreground ml-1">
                           {p.discount_type === "percentage" ? "off" : "flat"}
                         </span>
+                      </TableCell>
+                      <TableCell className="font-sans text-sm hidden md:table-cell">
+                        {p.room_restrictions && p.room_restrictions.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {p.room_restrictions.map((rid) => {
+                              const room = rooms.find((r) => r.id === rid);
+                              return (
+                                <Badge key={rid} variant="outline" className="text-xs">
+                                  {room?.name ?? "Unknown"}
+                                </Badge>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground/50">All rooms</span>
+                        )}
                       </TableCell>
                       <TableCell className="font-sans text-sm hidden md:table-cell">
                         {p.start_date && p.end_date ? (
@@ -435,6 +477,38 @@ export default function Promotions() {
                   value={form.end_date}
                   onChange={(e) => setForm({ ...form, end_date: e.target.value })}
                 />
+              </div>
+            </div>
+
+            {/* Room Restrictions */}
+            <div className="space-y-2">
+              <Label className="text-xs">Room Restrictions (optional)</Label>
+              <p className="text-xs text-muted-foreground">Leave empty to apply to all rooms</p>
+              <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto rounded-md border border-border p-3">
+                {rooms.map((room) => {
+                  const isSelected = form.room_restrictions.includes(room.id);
+                  return (
+                    <label key={room.id} className="flex items-center gap-2 cursor-pointer text-sm">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => {
+                          setForm({
+                            ...form,
+                            room_restrictions: isSelected
+                              ? form.room_restrictions.filter((id) => id !== room.id)
+                              : [...form.room_restrictions, room.id],
+                          });
+                        }}
+                        className="rounded border-border"
+                      />
+                      <span className="text-foreground">{room.name}</span>
+                    </label>
+                  );
+                })}
+                {rooms.length === 0 && (
+                  <p className="text-xs text-muted-foreground">No rooms available</p>
+                )}
               </div>
             </div>
 
