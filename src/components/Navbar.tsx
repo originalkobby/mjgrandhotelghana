@@ -61,7 +61,7 @@ const Navbar = () => {
               )
             )}
             <Link
-              to="/contact"
+              to="/booking"
               className="ml-2 border border-gold/60 px-5 py-2 text-sm font-sans font-medium tracking-wide text-cream hover:bg-gold hover:text-charcoal transition-all duration-300"
             >
               Book Now
