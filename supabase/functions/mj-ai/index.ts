@@ -958,6 +958,38 @@ async function buildDynamicContext(supabase: any): Promise<string> {
     prompt = prompt.replace("{DYNAMIC_POLICIES}", "- Cancellations or amendments must be made at least 72 hours before arrival\n- Refunds incur a 30% charge\n- No-show results in a 100% charge");
   }
 
+  // Fetch menu items
+  try {
+    const { data: menuItems } = await supabase
+      .from("menu_items")
+      .select("category, name, description, price")
+      .eq("is_active", true)
+      .order("category")
+      .order("sort_order", { ascending: true });
+
+    if (menuItems && menuItems.length > 0) {
+      const grouped: Record<string, any[]> = {};
+      for (const item of menuItems) {
+        if (!grouped[item.category]) grouped[item.category] = [];
+        grouped[item.category].push(item);
+      }
+      const menuText = Object.entries(grouped).map(([cat, items]) => {
+        const itemLines = items.map((i: any) => {
+          let line = `- ${i.name}`;
+          if (i.description) line += ` (${i.description})`;
+          if (i.price) line += ` — ${i.price}`;
+          return line;
+        }).join("\n");
+        return `${cat.toUpperCase()}:\n${itemLines}`;
+      }).join("\n\n");
+      prompt = prompt.replace("{DYNAMIC_MENU}", "All prices in GH₵ (live from database):\n\n" + menuText);
+    } else {
+      prompt = prompt.replace("{DYNAMIC_MENU}", "Menu is currently being updated. Tell guests to contact the restaurant directly.");
+    }
+  } catch {
+    prompt = prompt.replace("{DYNAMIC_MENU}", "Menu information temporarily unavailable.");
+  }
+
   return prompt;
 }
 
