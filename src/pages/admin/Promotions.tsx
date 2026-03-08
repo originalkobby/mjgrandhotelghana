@@ -54,7 +54,13 @@ interface Promotion {
   is_active: boolean;
   usage_count: number;
   usage_limit: number | null;
+  room_restrictions: string[] | null;
   created_at: string;
+}
+
+interface Room {
+  id: string;
+  name: string;
 }
 
 const EMPTY_FORM = {
