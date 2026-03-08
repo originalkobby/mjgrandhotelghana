@@ -879,6 +879,29 @@ async function createBooking(
     return { success: false, error: "Unable to create booking" };
   }
 
+  // Increment room_inventory.booked_count for each night
+  const dates: string[] = [];
+  const d = new Date(args.check_in);
+  while (d < checkOutDate) {
+    dates.push(d.toISOString().split("T")[0]);
+    d.setDate(d.getDate() + 1);
+  }
+
+  for (const date of dates) {
+    const { data: inv } = await supabase
+      .from("room_inventory")
+      .select("id, booked_count")
+      .eq("room_id", args.room_id)
+      .eq("date", date)
+      .maybeSingle();
+
+    if (inv) {
+      await supabase.from("room_inventory").update({ booked_count: inv.booked_count + 1 }).eq("id", inv.id);
+    } else {
+      await supabase.from("room_inventory").insert({ room_id: args.room_id, date, total_count: 1, booked_count: 1 });
+    }
+  }
+
   // Insert add-ons
   if (addOnRecords.length > 0 && booking) {
     await supabase.from("booking_add_ons").insert(
