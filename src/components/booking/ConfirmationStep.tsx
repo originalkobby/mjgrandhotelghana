@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { jsPDF } from "jspdf";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import logoSrc from "@/assets/logo.png";
 import type { BookingState } from "@/hooks/useBooking";
 
 interface Props {
@@ -45,23 +46,53 @@ function generateICS(state: BookingState): void {
   URL.revokeObjectURL(url);
 }
 
-function generatePDF(state: BookingState): void {
+/** Load logo as base64 for PDF embedding */
+function loadImageAsBase64(src: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return reject(new Error("Canvas context unavailable"));
+      ctx.drawImage(img, 0, 0);
+      resolve(canvas.toDataURL("image/png"));
+    };
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+async function generatePDF(state: BookingState): Promise<void> {
   const { selectedRoom, search, guestInfo, bookingReference, selectedAddOns, totalAmount } = state;
   if (!search.checkIn || !search.checkOut) return;
 
   const doc = new jsPDF();
   const w = doc.internal.pageSize.getWidth();
-  let y = 20;
+  let y = 15;
 
-  // Header
-  doc.setFontSize(22);
-  doc.setFont("helvetica", "bold");
-  doc.text("MJ Grand Hotel", w / 2, y, { align: "center" });
-  y += 8;
+  // Logo
+  try {
+    const logoBase64 = await loadImageAsBase64(logoSrc);
+    const logoH = 14;
+    const logoW = logoH * 2.5; // approximate aspect ratio
+    doc.addImage(logoBase64, "PNG", (w - logoW) / 2, y, logoW, logoH);
+    y += logoH + 4;
+  } catch {
+    // Fallback: text header if logo fails
+    doc.setFontSize(22);
+    doc.setFont("helvetica", "bold");
+    doc.text("MJ Grand Hotel", w / 2, y + 8, { align: "center" });
+    y += 16;
+  }
+
+  // Sub-header
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
   doc.text("Booking Confirmation", w / 2, y, { align: "center" });
-  y += 12;
+  y += 10;
 
   // Divider
   doc.setDrawColor(200);
