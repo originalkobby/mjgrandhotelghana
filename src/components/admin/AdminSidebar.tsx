@@ -6,6 +6,7 @@ import {
   Users,
   LogOut,
   Hotel,
+  Tag,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
