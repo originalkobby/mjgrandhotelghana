@@ -17,6 +17,7 @@ import AdminLayout from "./pages/admin/AdminLayout";
 import Overview from "./pages/admin/Overview";
 import AdminBookings from "./pages/admin/Bookings";
 import AdminInventory from "./pages/admin/Inventory";
+import AdminMessages from "./pages/admin/Messages";
 
 function ChatWidget() {
   const { pathname } = useLocation();
