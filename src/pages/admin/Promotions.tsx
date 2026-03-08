@@ -320,6 +320,22 @@ export default function Promotions() {
                         </span>
                       </TableCell>
                       <TableCell className="font-sans text-sm hidden md:table-cell">
+                        {p.room_restrictions && p.room_restrictions.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {p.room_restrictions.map((rid) => {
+                              const room = rooms.find((r) => r.id === rid);
+                              return (
+                                <Badge key={rid} variant="outline" className="text-xs">
+                                  {room?.name ?? "Unknown"}
+                                </Badge>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground/50">All rooms</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="font-sans text-sm hidden md:table-cell">
                         {p.start_date && p.end_date ? (
                           <span className="text-muted-foreground">
                             {format(new Date(p.start_date), "MMM d")} – {format(new Date(p.end_date), "MMM d, yyyy")}
