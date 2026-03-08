@@ -527,6 +527,25 @@ const TOOLS = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "lookup_booking",
+      description:
+        "Look up a booking by its reference code (e.g. MJ-A1B2C3D4). Returns booking details including status, dates, room, and payment info.",
+      parameters: {
+        type: "object",
+        properties: {
+          reference_code: {
+            type: "string",
+            description: "The booking reference code (e.g. MJ-A1B2C3D4)",
+          },
+        },
+        required: ["reference_code"],
+        additionalProperties: false,
+      },
+    },
+  },
 ];
 
 // --- Input Validation ---
