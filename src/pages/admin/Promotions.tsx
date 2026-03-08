@@ -72,6 +72,7 @@ const EMPTY_FORM = {
   end_date: "",
   is_active: true,
   usage_limit: "",
+  room_restrictions: [] as string[],
 };
 
 async function fetchPromotions() {
