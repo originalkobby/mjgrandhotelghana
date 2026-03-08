@@ -983,6 +983,37 @@ async function lookupBooking(supabase: any, referenceCode: string) {
   };
 }
 
+async function cancelBooking(supabase: any, referenceCode: string) {
+  const ref = referenceCode.trim().toUpperCase();
+  if (!ref || !ref.startsWith("MJ-")) {
+    return { success: false, error: "Invalid reference code format." };
+  }
+
+  const { data: booking, error } = await supabase
+    .from("bookings")
+    .select("id, status, check_in, room_id")
+    .eq("reference_code", ref)
+    .maybeSingle();
+
+  if (error || !booking) {
+    return { success: false, error: `No booking found with reference ${ref}` };
+  }
+
+  if (booking.status !== "confirmed" && booking.status !== "pending") {
+    return { success: false, error: `Booking is already ${booking.status} and cannot be cancelled.` };
+  }
+
+  const checkInDate = new Date(booking.check_in);
+  const hoursUntil = (checkInDate.getTime() - Date.now()) / (1000 * 60 * 60);
+  if (hoursUntil < 48) {
+    return { success: false, error: "Cancellation is only allowed at least 48 hours before check-in." };
+  }
+
+  await supabase.from("bookings").update({ status: "cancelled" }).eq("id", booking.id);
+
+  return { success: true, reference_code: ref, message: `Booking ${ref} has been cancelled successfully.` };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
