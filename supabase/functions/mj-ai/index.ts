@@ -135,10 +135,7 @@ ROOM FEATURES:
 - Modern bathrooms with quality amenities
 - 24-hour room service
 
-ROOM TYPES:
-1. Ocean Suite — From $450/night: Panoramic ocean views with private balcony and luxurious amenities.
-2. Deluxe Room — From $320/night: Mediterranean charm meets modern comfort with terrace access.
-3. Presidential Penthouse — From $1,200/night: The pinnacle of luxury with panoramic city and ocean vistas.
+{DYNAMIC_ROOMS}
 
 === FACILITIES & SERVICES ===
 "At MJ Grand Hotel, we go beyond accommodation to provide a complete hospitality experience."
