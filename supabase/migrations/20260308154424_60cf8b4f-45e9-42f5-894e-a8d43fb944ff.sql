@@ -1,0 +1,7 @@
+
+-- Fix: Add WITH CHECK to the ALL policy so admin can insert/update roles
+DROP POLICY IF EXISTS "Admins can manage roles" ON public.user_roles;
+CREATE POLICY "Admins can manage roles" ON public.user_roles
+  FOR ALL TO authenticated
+  USING (has_role(auth.uid(), 'admin'::app_role))
+  WITH CHECK (has_role(auth.uid(), 'admin'::app_role));
