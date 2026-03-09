@@ -129,6 +129,8 @@ export type Database = {
       }
       bookings: {
         Row: {
+          actual_check_in: string | null
+          actual_check_out: string | null
           add_ons_total_ghs: number
           adults: number
           arrival_time: string | null
@@ -143,6 +145,7 @@ export type Database = {
           guest_id: string | null
           id: string
           nationality: string | null
+          payment_method: string | null
           payment_status: Database["public"]["Enums"]["payment_status"]
           promo_code: string | null
           reference_code: string
@@ -152,6 +155,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          actual_check_in?: string | null
+          actual_check_out?: string | null
           add_ons_total_ghs?: number
           adults?: number
           arrival_time?: string | null
@@ -166,6 +171,7 @@ export type Database = {
           guest_id?: string | null
           id?: string
           nationality?: string | null
+          payment_method?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           promo_code?: string | null
           reference_code: string
@@ -175,6 +181,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          actual_check_in?: string | null
+          actual_check_out?: string | null
           add_ons_total_ghs?: number
           adults?: number
           arrival_time?: string | null
@@ -189,6 +197,7 @@ export type Database = {
           guest_id?: string | null
           id?: string
           nationality?: string | null
+          payment_method?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           promo_code?: string | null
           reference_code?: string
