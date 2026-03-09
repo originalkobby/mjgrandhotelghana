@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, RefreshCw, Star, Crown } from "lucide-react";
+import { Search, RefreshCw, Star, Crown, Clock, LogIn, LogOut } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -34,6 +35,8 @@ interface GuestBooking {
   check_in: string;
   check_out: string;
   final_total_ghs: number;
+  actual_check_in: string | null;
+  actual_check_out: string | null;
   rooms: { name: string } | null;
 }
 
@@ -49,7 +52,7 @@ async function fetchGuests() {
 async function fetchGuestBookings(guestId: string) {
   const { data } = await supabase
     .from("bookings")
-    .select("id, reference_code, status, check_in, check_out, final_total_ghs, rooms(name)")
+    .select("id, reference_code, status, check_in, check_out, final_total_ghs, actual_check_in, actual_check_out, rooms(name)")
     .eq("guest_id", guestId)
     .order("created_at", { ascending: false })
     .limit(20);
@@ -67,10 +70,14 @@ const STATUS_COLORS: Record<string, string> = {
 export default function Guests() {
   const [search, setSearch] = useState("");
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
+  const [checkInTime, setCheckInTime] = useState("");
+  const [checkOutTime, setCheckOutTime] = useState("");
+  const [recordingBookingId, setRecordingBookingId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: allGuests = [], isLoading } = useQuery({
+  const { data: allGuests = [], isLoading, isFetching } = useQuery({
     queryKey: ["admin-guests"],
     queryFn: fetchGuests,
     staleTime: 30_000,
@@ -110,7 +117,44 @@ export default function Guests() {
     }
   };
 
+  const handleRecordCheckIn = async (bookingId: string) => {
+    if (!checkInTime) return;
+    setSaving(true);
+    const { error } = await supabase
+      .from("bookings")
+      .update({ actual_check_in: new Date(checkInTime).toISOString() } as any)
+      .eq("id", bookingId);
+    setSaving(false);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Check-in Recorded" });
+      queryClient.invalidateQueries({ queryKey: ["admin-guest-bookings"] });
+      setRecordingBookingId(null);
+      setCheckInTime("");
+    }
+  };
+
+  const handleRecordCheckOut = async (bookingId: string) => {
+    if (!checkOutTime) return;
+    setSaving(true);
+    const { error } = await supabase
+      .from("bookings")
+      .update({ actual_check_out: new Date(checkOutTime).toISOString() } as any)
+      .eq("id", bookingId);
+    setSaving(false);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Check-out Recorded" });
+      queryClient.invalidateQueries({ queryKey: ["admin-guest-bookings"] });
+      setRecordingBookingId(null);
+      setCheckOutTime("");
+    }
+  };
+
   const rating = selectedGuest?.preferences?.last_chat_rating;
+  const refreshing = isLoading || isFetching;
 
   return (
     <div className="space-y-6">
@@ -136,10 +180,10 @@ export default function Guests() {
           variant="outline"
           size="icon"
           onClick={() => queryClient.invalidateQueries({ queryKey: ["admin-guests"] })}
-          disabled={isLoading}
+          disabled={refreshing}
           title="Refresh guests"
         >
-          <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+          <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
         </Button>
       </div>
 
@@ -225,7 +269,7 @@ export default function Guests() {
 
       {/* Guest Detail Dialog */}
       <Dialog open={!!selectedGuest} onOpenChange={(o) => !o && setSelectedGuest(null)}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-serif flex items-center gap-2">
               {selectedGuest?.full_name ?? "Guest"}
@@ -266,7 +310,7 @@ export default function Guests() {
               </div>
 
               <div>
-                <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Booking History</p>
+                <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Booking History & Check-in/out</p>
                 {bookingsLoading ? (
                   <div className="space-y-2">
                     {[1, 2].map((i) => (
@@ -276,21 +320,123 @@ export default function Guests() {
                 ) : guestBookings.length === 0 ? (
                   <p className="text-muted-foreground text-sm py-4">No bookings found</p>
                 ) : (
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                  <div className="space-y-3 max-h-80 overflow-y-auto">
                     {guestBookings.map((b) => (
-                      <div key={b.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                        <div>
-                          <p className="font-mono text-xs font-medium">{b.reference_code}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {b.rooms?.name ?? "Room"} · {b.check_in} → {b.check_out}
-                          </p>
+                      <div key={b.id} className="p-3 bg-muted/50 rounded-lg space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-mono text-xs font-medium">{b.reference_code}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {b.rooms?.name ?? "Room"} · {b.check_in} → {b.check_out}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-medium text-foreground text-xs">GH₵ {Number(b.final_total_ghs).toLocaleString()}</p>
+                            <Badge variant="outline" className={`text-[10px] capitalize ${STATUS_COLORS[b.status] ?? ""}`}>
+                              {b.status.replace("_", " ")}
+                            </Badge>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="font-medium text-foreground text-xs">GH₵ {Number(b.final_total_ghs).toLocaleString()}</p>
-                          <Badge variant="outline" className={`text-[10px] capitalize ${STATUS_COLORS[b.status] ?? ""}`}>
-                            {b.status.replace("_", " ")}
-                          </Badge>
+
+                        {/* Check-in/out times */}
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div className="flex items-center gap-1.5">
+                            <LogIn className="w-3 h-3 text-accent" />
+                            <span className="text-muted-foreground">Check-in:</span>
+                            {b.actual_check_in ? (
+                              <span className="text-foreground font-medium">
+                                {format(new Date(b.actual_check_in), "MMM d, h:mm:ss a")}
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground/50">Not recorded</span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <LogOut className="w-3 h-3 text-destructive" />
+                            <span className="text-muted-foreground">Check-out:</span>
+                            {b.actual_check_out ? (
+                              <span className="text-foreground font-medium">
+                                {format(new Date(b.actual_check_out), "MMM d, h:mm:ss a")}
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground/50">Not recorded</span>
+                            )}
+                          </div>
                         </div>
+
+                        {/* Record buttons */}
+                        {(b.status === "confirmed" || b.status === "completed") && (
+                          <div className="pt-1">
+                            {recordingBookingId === b.id ? (
+                              <div className="space-y-2 bg-card p-2 rounded border border-border">
+                                {!b.actual_check_in && (
+                                  <div className="flex items-center gap-2">
+                                    <Label className="text-xs shrink-0">Check-in:</Label>
+                                    <Input
+                                      type="datetime-local"
+                                      value={checkInTime}
+                                      onChange={(e) => setCheckInTime(e.target.value)}
+                                      className="h-7 text-xs flex-1"
+                                      step="1"
+                                    />
+                                    <Button
+                                      size="sm"
+                                      onClick={() => handleRecordCheckIn(b.id)}
+                                      disabled={saving || !checkInTime}
+                                      className="h-7 text-xs bg-accent text-accent-foreground hover:bg-accent/90"
+                                    >
+                                      Save
+                                    </Button>
+                                  </div>
+                                )}
+                                {b.actual_check_in && !b.actual_check_out && (
+                                  <div className="flex items-center gap-2">
+                                    <Label className="text-xs shrink-0">Check-out:</Label>
+                                    <Input
+                                      type="datetime-local"
+                                      value={checkOutTime}
+                                      onChange={(e) => setCheckOutTime(e.target.value)}
+                                      className="h-7 text-xs flex-1"
+                                      step="1"
+                                    />
+                                    <Button
+                                      size="sm"
+                                      onClick={() => handleRecordCheckOut(b.id)}
+                                      disabled={saving || !checkOutTime}
+                                      className="h-7 text-xs bg-accent text-accent-foreground hover:bg-accent/90"
+                                    >
+                                      Save
+                                    </Button>
+                                  </div>
+                                )}
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-xs h-6"
+                                  onClick={() => { setRecordingBookingId(null); setCheckInTime(""); setCheckOutTime(""); }}
+                                >
+                                  Cancel
+                                </Button>
+                              </div>
+                            ) : (
+                              (!b.actual_check_in || (b.actual_check_in && !b.actual_check_out)) && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-xs h-7 gap-1.5"
+                                  onClick={() => {
+                                    setRecordingBookingId(b.id);
+                                    setCheckInTime("");
+                                    setCheckOutTime("");
+                                  }}
+                                >
+                                  <Clock className="w-3 h-3" />
+                                  {!b.actual_check_in ? "Record Check-in" : "Record Check-out"}
+                                </Button>
+                              )
+                            )}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

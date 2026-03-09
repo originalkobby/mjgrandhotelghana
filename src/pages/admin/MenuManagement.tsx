@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, UtensilsCrossed } from "lucide-react";
+import { Plus, Pencil, Trash2, UtensilsCrossed, RefreshCw } from "lucide-react";
 
 const CATEGORIES = [
   "Hot Appetizers", "Salads", "Chicken Meals", "Kids Meals", "Fish Meals",
@@ -46,7 +46,7 @@ export default function AdminMenu() {
   const [form, setForm] = useState(emptyForm);
   const [filterCategory, setFilterCategory] = useState<string>("all");
 
-  const { data: items, isLoading } = useQuery({
+  const { data: items, isLoading, isFetching } = useQuery({
     queryKey: ["admin-menu-items"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -121,12 +121,13 @@ export default function AdminMenu() {
 
   const filtered = items?.filter((i) => filterCategory === "all" || i.category === filterCategory) || [];
 
-  // Group by category for display
   const grouped = filtered.reduce<Record<string, MenuItem[]>>((acc, item) => {
     if (!acc[item.category]) acc[item.category] = [];
     acc[item.category].push(item);
     return acc;
   }, {});
+
+  const refreshing = isLoading || isFetching;
 
   if (isLoading) {
     return (
@@ -157,6 +158,15 @@ export default function AdminMenu() {
               ))}
             </SelectContent>
           </Select>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => qc.invalidateQueries({ queryKey: ["admin-menu-items"] })}
+            disabled={refreshing}
+            title="Refresh menu"
+          >
+            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+          </Button>
           <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
             <DialogTrigger asChild>
               <Button><Plus className="h-4 w-4 mr-2" /> Add Item</Button>

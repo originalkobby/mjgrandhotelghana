@@ -33,6 +33,7 @@ interface Booking {
   reference_code: string;
   status: BookingStatus;
   payment_status: string;
+  payment_method: string | null;
   check_in: string;
   check_out: string;
   adults: number;
@@ -62,10 +63,15 @@ const PAYMENT_COLORS: Record<string, string> = {
   refunded: "bg-muted text-muted-foreground border-border",
 };
 
+const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  paystack: "Paystack",
+  pay_at_hotel: "Pay at Hotel",
+};
+
 async function fetchBookings(statusFilter: string) {
   let query = supabase
     .from("bookings")
-    .select("id, reference_code, status, payment_status, check_in, check_out, adults, children, final_total_ghs, special_requests, created_at, rooms(name), guests(full_name, email, phone)")
+    .select("id, reference_code, status, payment_status, payment_method, check_in, check_out, adults, children, final_total_ghs, special_requests, created_at, rooms(name), guests(full_name, email, phone)")
     .order("created_at", { ascending: false })
     .limit(100);
 
@@ -87,7 +93,7 @@ export default function Bookings() {
   const queryClient = useQueryClient();
   const { user } = useAdminAuth();
 
-  const { data: allBookings = [], isLoading: loading } = useQuery({
+  const { data: allBookings = [], isLoading: loading, isFetching } = useQuery({
     queryKey: ["admin-bookings", statusFilter],
     queryFn: () => fetchBookings(statusFilter),
     staleTime: 30_000,
@@ -117,7 +123,6 @@ export default function Bookings() {
       .eq("id", selectedBooking.id);
 
     if (!error) {
-      // Log audit trail
       await supabase.from("booking_audit_log" as any).insert({
         booking_id: selectedBooking.id,
         old_status: oldStatus,
@@ -140,12 +145,11 @@ export default function Bookings() {
 
   const exportCSV = () => {
     if (bookings.length === 0) return;
-    const headers = ["Reference", "Guest", "Email", "Phone", "Room", "Check-in", "Check-out", "Adults", "Children", "Total (GHS)", "Status", "Payment", "Created"];
+    const headers = ["Reference", "Guest", "Email", "Room", "Check-in", "Check-out", "Adults", "Children", "Total (GHS)", "Status", "Payment", "Method", "Created"];
     const rows = bookings.map((b) => [
       b.reference_code,
       b.guests?.full_name ?? "",
       b.guests?.email ?? "",
-      b.guests?.phone ?? "",
       b.rooms?.name ?? "",
       b.check_in,
       b.check_out,
@@ -153,7 +157,8 @@ export default function Bookings() {
       b.children,
       b.final_total_ghs,
       b.status,
-      b.payment_status,
+      b.status === "cancelled" ? "--" : b.payment_status,
+      PAYMENT_METHOD_LABELS[b.payment_method ?? "pay_at_hotel"] ?? b.payment_method ?? "—",
       b.created_at.split("T")[0],
     ]);
     const csv = [headers.join(","), ...rows.map((r) => r.map((v) => `"${v}"`).join(","))].join("\n");
@@ -165,6 +170,8 @@ export default function Bookings() {
     a.click();
     URL.revokeObjectURL(url);
   };
+
+  const refreshing = loading || isFetching;
 
   return (
     <div className="space-y-6">
@@ -182,7 +189,7 @@ export default function Bookings() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by ref, name, email, or phone…"
+            placeholder="Search by ref, name, or email…"
             className="pl-10"
           />
         </div>
@@ -204,10 +211,10 @@ export default function Bookings() {
           variant="outline"
           size="icon"
           onClick={() => queryClient.invalidateQueries({ queryKey: ["admin-bookings"] })}
-          disabled={loading}
+          disabled={refreshing}
           title="Refresh bookings"
         >
-          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+          <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
         </Button>
         <Button
           variant="outline"
@@ -221,14 +228,14 @@ export default function Bookings() {
         </Button>
       </div>
 
-      {/* Table */}
+      {/* Table — Phone column removed, Payment Method column added */}
       <Card>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm font-sans">
               <thead>
                 <tr className="border-b border-border">
-                  {["Ref", "Guest", "Phone", "Room", "Check-in", "Check-out", "Guests", "Total", "Status", "Payment", "Actions"].map((h) => (
+                  {["Ref", "Guest", "Room", "Check-in", "Check-out", "Guests", "Total", "Status", "Payment", "Method", "Actions"].map((h) => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       {h}
                     </th>
@@ -266,9 +273,6 @@ export default function Bookings() {
                         <p className="font-medium text-foreground">{b.guests?.full_name ?? "—"}</p>
                         <p className="text-xs text-muted-foreground">{b.guests?.email ?? ""}</p>
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
-                        {b.guests?.phone ?? "—"}
-                      </td>
                       <td className="px-4 py-3 text-foreground">{b.rooms?.name ?? "—"}</td>
                       <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{b.check_in}</td>
                       <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{b.check_out}</td>
@@ -284,9 +288,16 @@ export default function Bookings() {
                         </Badge>
                       </td>
                       <td className="px-4 py-3">
-                        <Badge variant="outline" className={`text-xs capitalize ${PAYMENT_COLORS[b.payment_status] ?? ""}`}>
-                          {b.payment_status}
-                        </Badge>
+                        {b.status === "cancelled" ? (
+                          <span className="text-muted-foreground font-medium">—</span>
+                        ) : (
+                          <Badge variant="outline" className={`text-xs capitalize ${PAYMENT_COLORS[b.payment_status] ?? ""}`}>
+                            {b.payment_status}
+                          </Badge>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                        {PAYMENT_METHOD_LABELS[b.payment_method ?? "pay_at_hotel"] ?? b.payment_method ?? "—"}
                       </td>
                       <td className="px-4 py-3">
                         <Button
@@ -341,13 +352,19 @@ export default function Bookings() {
                 </div>
                 <div>
                   <p className="text-xs uppercase tracking-wider mb-1">Payment</p>
-                  <Badge variant="outline" className={`text-xs capitalize ${PAYMENT_COLORS[selectedBooking.payment_status] ?? ""}`}>
-                    {selectedBooking.payment_status}
-                  </Badge>
+                  {selectedBooking.status === "cancelled" ? (
+                    <span className="text-muted-foreground font-medium">—</span>
+                  ) : (
+                    <Badge variant="outline" className={`text-xs capitalize ${PAYMENT_COLORS[selectedBooking.payment_status] ?? ""}`}>
+                      {selectedBooking.payment_status}
+                    </Badge>
+                  )}
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-wider mb-1">Phone</p>
-                  <p className="text-foreground">{selectedBooking.guests?.phone ?? "—"}</p>
+                  <p className="text-xs uppercase tracking-wider mb-1">Payment Method</p>
+                  <p className="text-foreground">
+                    {PAYMENT_METHOD_LABELS[selectedBooking.payment_method ?? "pay_at_hotel"] ?? selectedBooking.payment_method ?? "—"}
+                  </p>
                 </div>
                 <div>
                   <p className="text-xs uppercase tracking-wider mb-1">Email</p>

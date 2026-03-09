@@ -27,14 +27,18 @@ export default function PaymentStep({
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const addOnsTotal = selectedAddOns.reduce((s, a) => s + a.price_ghs * a.quantity, 0);
-
   const handlePayWithPaystack = async () => {
     if (!bookingReference) return;
     setIsProcessing(true);
     setError(null);
 
     try {
+      // Update payment method to paystack
+      await supabase
+        .from("bookings")
+        .update({ payment_method: "paystack" } as any)
+        .eq("reference_code", bookingReference);
+
       const { data, error: fnError } = await supabase.functions.invoke("paystack", {
         body: {
           action: "initialize",
@@ -49,7 +53,6 @@ export default function PaymentStep({
         throw new Error(fnError?.message || "Failed to initialize payment");
       }
 
-      // Redirect to Paystack checkout
       window.location.href = data.authorization_url;
     } catch (err: any) {
       console.error("Payment init error:", err);
@@ -58,8 +61,8 @@ export default function PaymentStep({
     }
   };
 
-  const handlePayLater = () => {
-    // Skip payment, proceed to confirmation with pending status
+  const handlePayLater = async () => {
+    // payment_method defaults to 'pay_at_hotel' in DB
     onPaymentComplete();
   };
 
