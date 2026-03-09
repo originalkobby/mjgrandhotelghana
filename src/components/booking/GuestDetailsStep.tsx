@@ -1,9 +1,53 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Shield, Lock } from "lucide-react";
+import { ArrowLeft, Shield, Lock, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import type { GuestInfo, SelectedRoom, SelectedAddOn } from "@/hooks/useBooking";
+
+const COUNTRY_CODES = [
+  { code: "+233", flag: "🇬🇭", country: "Ghana" },
+  { code: "+234", flag: "🇳🇬", country: "Nigeria" },
+  { code: "+254", flag: "🇰🇪", country: "Kenya" },
+  { code: "+27", flag: "🇿🇦", country: "South Africa" },
+  { code: "+225", flag: "🇨🇮", country: "Côte d'Ivoire" },
+  { code: "+228", flag: "🇹🇬", country: "Togo" },
+  { code: "+229", flag: "🇧🇯", country: "Benin" },
+  { code: "+226", flag: "🇧🇫", country: "Burkina Faso" },
+  { code: "+1", flag: "🇺🇸", country: "United States" },
+  { code: "+44", flag: "🇬🇧", country: "United Kingdom" },
+  { code: "+49", flag: "🇩🇪", country: "Germany" },
+  { code: "+33", flag: "🇫🇷", country: "France" },
+  { code: "+39", flag: "🇮🇹", country: "Italy" },
+  { code: "+34", flag: "🇪🇸", country: "Spain" },
+  { code: "+31", flag: "🇳🇱", country: "Netherlands" },
+  { code: "+46", flag: "🇸🇪", country: "Sweden" },
+  { code: "+41", flag: "🇨🇭", country: "Switzerland" },
+  { code: "+86", flag: "🇨🇳", country: "China" },
+  { code: "+91", flag: "🇮🇳", country: "India" },
+  { code: "+81", flag: "🇯🇵", country: "Japan" },
+  { code: "+82", flag: "🇰🇷", country: "South Korea" },
+  { code: "+971", flag: "🇦🇪", country: "UAE" },
+  { code: "+966", flag: "🇸🇦", country: "Saudi Arabia" },
+  { code: "+61", flag: "🇦🇺", country: "Australia" },
+  { code: "+55", flag: "🇧🇷", country: "Brazil" },
+  { code: "+52", flag: "🇲🇽", country: "Mexico" },
+  { code: "+20", flag: "🇪🇬", country: "Egypt" },
+  { code: "+212", flag: "🇲🇦", country: "Morocco" },
+  { code: "+255", flag: "🇹🇿", country: "Tanzania" },
+  { code: "+256", flag: "🇺🇬", country: "Uganda" },
+  { code: "+237", flag: "🇨🇲", country: "Cameroon" },
+  { code: "+221", flag: "🇸🇳", country: "Senegal" },
+  { code: "+251", flag: "🇪🇹", country: "Ethiopia" },
+  { code: "+260", flag: "🇿🇲", country: "Zambia" },
+  { code: "+263", flag: "🇿🇼", country: "Zimbabwe" },
+];
 
 interface Props {
   guestInfo: GuestInfo;
@@ -26,10 +70,47 @@ export default function GuestDetailsStep({
   onBack,
   isSubmitting,
 }: Props) {
+  const [selectedCountry, setSelectedCountry] = useState(COUNTRY_CODES[0]);
+  const [phoneNumber, setPhoneNumber] = useState(() => {
+    // Extract number part if phone already has a country code
+    const existing = guestInfo.phone;
+    if (existing) {
+      const match = COUNTRY_CODES.find((c) => existing.startsWith(c.code));
+      if (match) {
+        setSelectedCountry(match);
+        return existing.slice(match.code.length).trim();
+      }
+      return existing;
+    }
+    return "";
+  });
+  const [countryOpen, setCountryOpen] = useState(false);
+  const [countrySearch, setCountrySearch] = useState("");
+
+  const handlePhoneChange = (num: string) => {
+    setPhoneNumber(num);
+    onUpdate({ phone: `${selectedCountry.code} ${num}` });
+  };
+
+  const handleCountrySelect = (country: typeof COUNTRY_CODES[0]) => {
+    setSelectedCountry(country);
+    setCountryOpen(false);
+    setCountrySearch("");
+    onUpdate({ phone: `${country.code} ${phoneNumber}` });
+  };
+
+  const filteredCountries = countrySearch
+    ? COUNTRY_CODES.filter(
+        (c) =>
+          c.country.toLowerCase().includes(countrySearch.toLowerCase()) ||
+          c.code.includes(countrySearch)
+      )
+    : COUNTRY_CODES;
+
   const isValid =
     guestInfo.fullName.trim().length >= 2 &&
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestInfo.email) &&
-    guestInfo.phone.trim().length >= 8;
+    phoneNumber.trim().length >= 6;
 
   const addOnsTotal = selectedAddOns.reduce((s, a) => s + a.price_ghs * a.quantity, 0);
 
@@ -73,12 +154,52 @@ export default function GuestDetailsStep({
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Phone *">
-              <Input
-                value={guestInfo.phone}
-                onChange={(e) => onUpdate({ phone: e.target.value })}
-                placeholder="+233 xxx xxx xxxx"
-                className="h-12"
-              />
+              <div className="flex gap-1.5">
+                <Popover open={countryOpen} onOpenChange={setCountryOpen}>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className="h-12 px-3 border border-input rounded-md flex items-center gap-1.5 text-sm font-sans hover:bg-muted/50 transition-colors shrink-0"
+                    >
+                      <span className="text-lg">{selectedCountry.flag}</span>
+                      <span className="text-muted-foreground">{selectedCountry.code}</span>
+                      <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-64 p-0" align="start">
+                    <div className="p-2 border-b border-border">
+                      <Input
+                        value={countrySearch}
+                        onChange={(e) => setCountrySearch(e.target.value)}
+                        placeholder="Search country…"
+                        className="h-8 text-xs"
+                        autoFocus
+                      />
+                    </div>
+                    <div className="max-h-48 overflow-y-auto">
+                      {filteredCountries.map((c) => (
+                        <button
+                          key={c.code + c.country}
+                          onClick={() => handleCountrySelect(c)}
+                          className={`w-full flex items-center gap-2 px-3 py-2 text-sm font-sans hover:bg-muted/50 transition-colors ${
+                            selectedCountry.code === c.code ? "bg-accent/10 text-accent" : ""
+                          }`}
+                        >
+                          <span className="text-lg">{c.flag}</span>
+                          <span className="flex-1 text-left">{c.country}</span>
+                          <span className="text-muted-foreground text-xs">{c.code}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+                <Input
+                  value={phoneNumber}
+                  onChange={(e) => handlePhoneChange(e.target.value)}
+                  placeholder="xxx xxx xxxx"
+                  className="h-12 flex-1"
+                />
+              </div>
             </Field>
             <Field label="Nationality">
               <Input

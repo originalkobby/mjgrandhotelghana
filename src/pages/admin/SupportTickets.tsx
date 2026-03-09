@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { format, parseISO } from "date-fns";
-import { TicketCheck } from "lucide-react";
+import { TicketCheck, RefreshCw } from "lucide-react";
 
 const STATUS_COLORS: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   open: "destructive",
@@ -27,7 +27,7 @@ const URGENCY_COLORS: Record<string, "default" | "secondary" | "destructive" | "
 export default function SupportTickets() {
   const qc = useQueryClient();
 
-  const { data: tickets, isLoading } = useQuery({
+  const { data: tickets, isLoading, isFetching } = useQuery({
     queryKey: ["admin-support-tickets"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -52,6 +52,8 @@ export default function SupportTickets() {
     onError: (e) => toast.error(e.message),
   });
 
+  const refreshing = isLoading || isFetching;
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -67,6 +69,15 @@ export default function SupportTickets() {
         <TicketCheck className="h-6 w-6 text-primary" />
         <h1 className="text-2xl font-serif text-foreground">Support Tickets</h1>
         <Badge variant="secondary" className="ml-auto">{tickets?.length || 0} tickets</Badge>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => qc.invalidateQueries({ queryKey: ["admin-support-tickets"] })}
+          disabled={refreshing}
+          title="Refresh tickets"
+        >
+          <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+        </Button>
       </div>
 
       <Card>

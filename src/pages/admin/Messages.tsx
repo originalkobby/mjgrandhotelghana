@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
-import { Mail, MailOpen, Search, Inbox } from "lucide-react";
+import { Mail, MailOpen, Search, Inbox, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,7 +45,7 @@ export default function AdminMessages() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<ContactMessage | null>(null);
 
-  const { data: messages = [], isLoading } = useQuery({
+  const { data: messages = [], isLoading, isFetching } = useQuery({
     queryKey: ["admin-messages"],
     queryFn: fetchMessages,
     staleTime: 30_000,
@@ -75,6 +75,7 @@ export default function AdminMessages() {
   );
 
   const unreadCount = messages.filter((m) => !m.is_read).length;
+  const refreshing = isLoading || isFetching;
 
   return (
     <div className="space-y-6">
@@ -87,14 +88,25 @@ export default function AdminMessages() {
               : "All messages read"}
           </p>
         </div>
-        <div className="relative w-full sm:w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search messages…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
+        <div className="flex items-center gap-2">
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search messages…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => queryClient.invalidateQueries({ queryKey: ["admin-messages"] })}
+            disabled={refreshing}
+            title="Refresh messages"
+          >
+            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+          </Button>
         </div>
       </div>
 

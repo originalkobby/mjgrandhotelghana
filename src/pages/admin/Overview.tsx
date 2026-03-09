@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
-import { format, subDays, startOfMonth, endOfMonth, subMonths } from "date-fns";
+import { format, subDays, startOfMonth, endOfMonth } from "date-fns";
 import {
   BarChart,
   Bar,
@@ -113,7 +113,6 @@ async function fetchOverviewData(dateFrom: string, dateTo: string) {
     { label: "Avg. Daily Rate", value: `GH₵ ${Math.round(adr).toLocaleString()}`, change: pctChange(adr, prevAdr), icon: TrendingUp },
   ];
 
-  // Revenue chart — last 14 days within range
   const now = new Date(dateTo);
   const chartData: { day: string; revenue: number }[] = [];
   for (let i = 13; i >= 0; i--) {
@@ -134,7 +133,7 @@ export default function Overview() {
   const [dateFrom, setDateFrom] = useState(format(startOfMonth(now), "yyyy-MM-dd"));
   const [dateTo, setDateTo] = useState(format(endOfMonth(now), "yyyy-MM-dd"));
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isFetching } = useQuery({
     queryKey: ["admin-overview", dateFrom, dateTo],
     queryFn: () => fetchOverviewData(dateFrom, dateTo),
     staleTime: 60_000,
@@ -143,6 +142,7 @@ export default function Overview() {
   const kpis = data?.kpis ?? [];
   const chartData = data?.chartData ?? [];
   const recentBookings = data?.recentBookings ?? [];
+  const refreshing = isLoading || isFetching;
 
   if (isLoading) {
     return (
@@ -184,9 +184,10 @@ export default function Overview() {
             variant="outline"
             size="icon"
             onClick={() => queryClient.invalidateQueries({ queryKey: ["admin-overview"] })}
+            disabled={refreshing}
             title="Refresh dashboard"
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
           </Button>
         </div>
       </div>
@@ -287,7 +288,11 @@ export default function Overview() {
                         <Badge variant="outline" className={`text-xs capitalize ${STATUS_COLORS[b.status] ?? ""}`}>{b.status.replace("_", " ")}</Badge>
                       </td>
                       <td className="px-4 py-3">
-                        <Badge variant="secondary" className={`text-xs capitalize ${PAYMENT_COLORS[b.payment_status] ?? ""}`}>{b.payment_status}</Badge>
+                        {b.status === "cancelled" ? (
+                          <span className="text-muted-foreground font-medium">—</span>
+                        ) : (
+                          <Badge variant="secondary" className={`text-xs capitalize ${PAYMENT_COLORS[b.payment_status] ?? ""}`}>{b.payment_status}</Badge>
+                        )}
                       </td>
                     </tr>
                   ))

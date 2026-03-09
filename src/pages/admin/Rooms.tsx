@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Plus, Pencil, BedDouble } from "lucide-react";
+import { Plus, Pencil, BedDouble, RefreshCw } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Room = Tables<"rooms">;
@@ -36,7 +36,7 @@ export default function AdminRooms() {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
 
-  const { data: rooms, isLoading } = useQuery({
+  const { data: rooms, isLoading, isFetching } = useQuery({
     queryKey: ["admin-rooms"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -104,6 +104,8 @@ export default function AdminRooms() {
 
   const set = (key: string, val: any) => setForm((p) => ({ ...p, [key]: val }));
 
+  const refreshing = isLoading || isFetching;
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -117,70 +119,81 @@ export default function AdminRooms() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-serif text-foreground">Room Management</h1>
-        <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
-          <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 mr-2" /> Add Room</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{editId ? "Edit Room" : "New Room"}</DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4 py-2">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Name *</Label>
-                  <Input value={form.name} onChange={(e) => set("name", e.target.value)} />
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => qc.invalidateQueries({ queryKey: ["admin-rooms"] })}
+            disabled={refreshing}
+            title="Refresh rooms"
+          >
+            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+          </Button>
+          <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
+            <DialogTrigger asChild>
+              <Button><Plus className="h-4 w-4 mr-2" /> Add Room</Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>{editId ? "Edit Room" : "New Room"}</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-4 py-2">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Name *</Label>
+                    <Input value={form.name} onChange={(e) => set("name", e.target.value)} />
+                  </div>
+                  <div>
+                    <Label>Slug</Label>
+                    <Input value={form.slug} onChange={(e) => set("slug", e.target.value)} placeholder="auto-generated" />
+                  </div>
                 </div>
                 <div>
-                  <Label>Slug</Label>
-                  <Input value={form.slug} onChange={(e) => set("slug", e.target.value)} placeholder="auto-generated" />
+                  <Label>Description</Label>
+                  <Textarea value={form.description} onChange={(e) => set("description", e.target.value)} rows={3} />
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label>Base Price (GH₵) *</Label>
+                    <Input type="number" value={form.base_price_ghs} onChange={(e) => set("base_price_ghs", +e.target.value)} />
+                  </div>
+                  <div>
+                    <Label>Bed Type</Label>
+                    <Input value={form.bed_type} onChange={(e) => set("bed_type", e.target.value)} />
+                  </div>
+                  <div>
+                    <Label>Size (sqm)</Label>
+                    <Input type="number" value={form.size_sqm} onChange={(e) => set("size_sqm", +e.target.value)} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Max Adults</Label>
+                    <Input type="number" value={form.max_adults} onChange={(e) => set("max_adults", +e.target.value)} />
+                  </div>
+                  <div>
+                    <Label>Max Children</Label>
+                    <Input type="number" value={form.max_children} onChange={(e) => set("max_children", +e.target.value)} />
+                  </div>
+                </div>
+                <div>
+                  <Label>Amenities (comma-separated)</Label>
+                  <Input value={form.amenities} onChange={(e) => set("amenities", e.target.value)} placeholder="WiFi, Pool, AC" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch checked={form.is_active} onCheckedChange={(v) => set("is_active", v)} />
+                  <Label>Active</Label>
                 </div>
               </div>
-              <div>
-                <Label>Description</Label>
-                <Textarea value={form.description} onChange={(e) => set("description", e.target.value)} rows={3} />
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <Label>Base Price (GH₵) *</Label>
-                  <Input type="number" value={form.base_price_ghs} onChange={(e) => set("base_price_ghs", +e.target.value)} />
-                </div>
-                <div>
-                  <Label>Bed Type</Label>
-                  <Input value={form.bed_type} onChange={(e) => set("bed_type", e.target.value)} />
-                </div>
-                <div>
-                  <Label>Size (sqm)</Label>
-                  <Input type="number" value={form.size_sqm} onChange={(e) => set("size_sqm", +e.target.value)} />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Max Adults</Label>
-                  <Input type="number" value={form.max_adults} onChange={(e) => set("max_adults", +e.target.value)} />
-                </div>
-                <div>
-                  <Label>Max Children</Label>
-                  <Input type="number" value={form.max_children} onChange={(e) => set("max_children", +e.target.value)} />
-                </div>
-              </div>
-              <div>
-                <Label>Amenities (comma-separated)</Label>
-                <Input value={form.amenities} onChange={(e) => set("amenities", e.target.value)} placeholder="WiFi, Pool, AC" />
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch checked={form.is_active} onCheckedChange={(v) => set("is_active", v)} />
-                <Label>Active</Label>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-              <Button onClick={() => saveMutation.mutate()} disabled={!form.name || saveMutation.isPending}>
-                {saveMutation.isPending ? "Saving…" : "Save"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+                <Button onClick={() => saveMutation.mutate()} disabled={!form.name || saveMutation.isPending}>
+                  {saveMutation.isPending ? "Saving…" : "Save"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <Card>
