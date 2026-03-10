@@ -24,6 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { formatDateGB } from "@/lib/dateUtils";
 import type { Database } from "@/integrations/supabase/types";
 
 type BookingStatus = Database["public"]["Enums"]["booking_status"];
@@ -67,6 +68,13 @@ const PAYMENT_METHOD_LABELS: Record<string, string> = {
   paystack: "Paystack",
   pay_at_hotel: "Pay at Hotel",
 };
+
+/** Derive display payment status based on booking status */
+function getPaymentDisplay(b: Booking): { label: string; isDash: boolean } {
+  if (b.status === "cancelled" || b.status === "no_show") return { label: "—", isDash: true };
+  if (b.status === "completed") return { label: "Paid", isDash: false };
+  return { label: b.payment_status, isDash: false };
+}
 
 async function fetchBookings(statusFilter: string) {
   let query = supabase
@@ -117,9 +125,15 @@ export default function Bookings() {
 
     const oldStatus = selectedBooking.status;
 
+    const updatePayload: any = { status: newStatus as BookingStatus };
+    // Auto-set payment_status to paid when completing a booking
+    if (newStatus === "completed") {
+      updatePayload.payment_status = "paid";
+    }
+
     const { error } = await supabase
       .from("bookings")
-      .update({ status: newStatus as BookingStatus })
+      .update(updatePayload)
       .eq("id", selectedBooking.id);
 
     if (!error) {
@@ -146,27 +160,30 @@ export default function Bookings() {
   const exportCSV = () => {
     if (bookings.length === 0) return;
     const headers = ["Reference", "Guest", "Email", "Room", "Check-in", "Check-out", "Adults", "Children", "Total (GHS)", "Status", "Payment", "Method", "Created"];
-    const rows = bookings.map((b) => [
-      b.reference_code,
-      b.guests?.full_name ?? "",
-      b.guests?.email ?? "",
-      b.rooms?.name ?? "",
-      b.check_in,
-      b.check_out,
-      b.adults,
-      b.children,
-      b.final_total_ghs,
-      b.status,
-      b.status === "cancelled" ? "--" : b.payment_status,
-      PAYMENT_METHOD_LABELS[b.payment_method ?? "pay_at_hotel"] ?? b.payment_method ?? "—",
-      b.created_at.split("T")[0],
-    ]);
+    const rows = bookings.map((b) => {
+      const pd = getPaymentDisplay(b);
+      return [
+        b.reference_code,
+        b.guests?.full_name ?? "",
+        b.guests?.email ?? "",
+        b.rooms?.name ?? "",
+        formatDateGB(b.check_in),
+        formatDateGB(b.check_out),
+        b.adults,
+        b.children,
+        b.final_total_ghs,
+        b.status,
+        pd.isDash ? "--" : pd.label,
+        PAYMENT_METHOD_LABELS[b.payment_method ?? "pay_at_hotel"] ?? b.payment_method ?? "—",
+        formatDateGB(b.created_at),
+      ];
+    });
     const csv = [headers.join(","), ...rows.map((r) => r.map((v) => `"${v}"`).join(","))].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `bookings-${new Date().toISOString().split("T")[0]}.csv`;
+    a.download = `bookings-${formatDateGB(new Date().toISOString())}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -228,7 +245,7 @@ export default function Bookings() {
         </Button>
       </div>
 
-      {/* Table — Phone column removed, Payment Method column added */}
+      {/* Table */}
       <Card>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -260,60 +277,63 @@ export default function Bookings() {
                     </td>
                   </tr>
                 ) : (
-                  bookings.map((b, i) => (
-                    <motion.tr
-                      key={b.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: i * 0.02 }}
-                      className="border-b border-border/50 hover:bg-muted/30 transition-colors"
-                    >
-                      <td className="px-4 py-3 font-mono text-xs">{b.reference_code}</td>
-                      <td className="px-4 py-3">
-                        <p className="font-medium text-foreground">{b.guests?.full_name ?? "—"}</p>
-                        <p className="text-xs text-muted-foreground">{b.guests?.email ?? ""}</p>
-                      </td>
-                      <td className="px-4 py-3 text-foreground">{b.rooms?.name ?? "—"}</td>
-                      <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{b.check_in}</td>
-                      <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{b.check_out}</td>
-                      <td className="px-4 py-3 text-muted-foreground">
-                        {b.adults}A{b.children > 0 ? ` ${b.children}C` : ""}
-                      </td>
-                      <td className="px-4 py-3 font-medium text-foreground">
-                        GH₵ {Number(b.final_total_ghs).toLocaleString()}
-                      </td>
-                      <td className="px-4 py-3">
-                        <Badge variant="outline" className={`text-xs capitalize ${STATUS_COLORS[b.status] ?? ""}`}>
-                          {b.status.replace("_", " ")}
-                        </Badge>
-                      </td>
-                      <td className="px-4 py-3">
-                        {b.status === "cancelled" ? (
-                          <span className="text-muted-foreground font-medium">—</span>
-                        ) : (
-                          <Badge variant="outline" className={`text-xs capitalize ${PAYMENT_COLORS[b.payment_status] ?? ""}`}>
-                            {b.payment_status}
+                  bookings.map((b, i) => {
+                    const pd = getPaymentDisplay(b);
+                    return (
+                      <motion.tr
+                        key={b.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: i * 0.02 }}
+                        className="border-b border-border/50 hover:bg-muted/30 transition-colors"
+                      >
+                        <td className="px-4 py-3 font-mono text-xs">{b.reference_code}</td>
+                        <td className="px-4 py-3">
+                          <p className="font-medium text-foreground">{b.guests?.full_name ?? "—"}</p>
+                          <p className="text-xs text-muted-foreground">{b.guests?.email ?? ""}</p>
+                        </td>
+                        <td className="px-4 py-3 text-foreground">{b.rooms?.name ?? "—"}</td>
+                        <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{formatDateGB(b.check_in)}</td>
+                        <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{formatDateGB(b.check_out)}</td>
+                        <td className="px-4 py-3 text-muted-foreground">
+                          {b.adults}A{b.children > 0 ? ` ${b.children}C` : ""}
+                        </td>
+                        <td className="px-4 py-3 font-medium text-foreground">
+                          GH₵ {Number(b.final_total_ghs).toLocaleString()}
+                        </td>
+                        <td className="px-4 py-3">
+                          <Badge variant="outline" className={`text-xs capitalize ${STATUS_COLORS[b.status] ?? ""}`}>
+                            {b.status.replace("_", " ")}
                           </Badge>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
-                        {PAYMENT_METHOD_LABELS[b.payment_method ?? "pay_at_hotel"] ?? b.payment_method ?? "—"}
-                      </td>
-                      <td className="px-4 py-3">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-xs"
-                          onClick={() => {
-                            setSelectedBooking(b);
-                            setNewStatus(b.status);
-                          }}
-                        >
-                          Manage
-                        </Button>
-                      </td>
-                    </motion.tr>
-                  ))
+                        </td>
+                        <td className="px-4 py-3">
+                          {pd.isDash ? (
+                            <span className="text-muted-foreground font-medium text-center block">—</span>
+                          ) : (
+                            <Badge variant="outline" className={`text-xs capitalize ${PAYMENT_COLORS[pd.label] ?? ""}`}>
+                              {pd.label}
+                            </Badge>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                          {PAYMENT_METHOD_LABELS[b.payment_method ?? "pay_at_hotel"] ?? b.payment_method ?? "—"}
+                        </td>
+                        <td className="px-4 py-3">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs"
+                            onClick={() => {
+                              setSelectedBooking(b);
+                              setNewStatus(b.status);
+                            }}
+                          >
+                            Manage
+                          </Button>
+                        </td>
+                      </motion.tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -338,11 +358,11 @@ export default function Bookings() {
               <div className="grid grid-cols-2 gap-3 text-muted-foreground">
                 <div>
                   <p className="text-xs uppercase tracking-wider mb-1">Check-in</p>
-                  <p className="text-foreground">{selectedBooking.check_in}</p>
+                  <p className="text-foreground">{formatDateGB(selectedBooking.check_in)}</p>
                 </div>
                 <div>
                   <p className="text-xs uppercase tracking-wider mb-1">Check-out</p>
-                  <p className="text-foreground">{selectedBooking.check_out}</p>
+                  <p className="text-foreground">{formatDateGB(selectedBooking.check_out)}</p>
                 </div>
                 <div>
                   <p className="text-xs uppercase tracking-wider mb-1">Total</p>
@@ -352,13 +372,16 @@ export default function Bookings() {
                 </div>
                 <div>
                   <p className="text-xs uppercase tracking-wider mb-1">Payment</p>
-                  {selectedBooking.status === "cancelled" ? (
-                    <span className="text-muted-foreground font-medium">—</span>
-                  ) : (
-                    <Badge variant="outline" className={`text-xs capitalize ${PAYMENT_COLORS[selectedBooking.payment_status] ?? ""}`}>
-                      {selectedBooking.payment_status}
-                    </Badge>
-                  )}
+                  {(() => {
+                    const pd = getPaymentDisplay(selectedBooking);
+                    return pd.isDash ? (
+                      <span className="text-muted-foreground font-medium">—</span>
+                    ) : (
+                      <Badge variant="outline" className={`text-xs capitalize ${PAYMENT_COLORS[pd.label] ?? ""}`}>
+                        {pd.label}
+                      </Badge>
+                    );
+                  })()}
                 </div>
                 <div>
                   <p className="text-xs uppercase tracking-wider mb-1">Payment Method</p>
