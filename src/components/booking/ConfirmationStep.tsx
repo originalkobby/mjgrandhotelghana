@@ -73,15 +73,17 @@ async function generatePDF(state: BookingState): Promise<void> {
   const w = doc.internal.pageSize.getWidth();
   let y = 15;
 
+  // The official Ghana cedi symbol: GH₵
+  const cedi = "GH\u20B5";
+
   // Logo
   try {
     const logoBase64 = await loadImageAsBase64(logoSrc);
     const logoH = 14;
-    const logoW = logoH * 2.5; // approximate aspect ratio
+    const logoW = logoH * 2.5;
     doc.addImage(logoBase64, "PNG", (w - logoW) / 2, y, logoW, logoH);
     y += logoH + 4;
   } catch {
-    // Fallback: text header if logo fails
     doc.setFontSize(22);
     doc.setFont("helvetica", "bold");
     doc.text("MJ Grand Hotel", w / 2, y + 8, { align: "center" });
@@ -105,16 +107,16 @@ async function generatePDF(state: BookingState): Promise<void> {
   doc.text(`Booking Reference: ${bookingReference}`, 20, y);
   y += 10;
 
-  // Guest details
+  // Guest details — using DD/MM/YYYY format
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
   const details = [
     ["Guest", guestInfo.fullName],
     ["Email", guestInfo.email],
     ["Phone", guestInfo.phone],
-    ["Room", selectedRoom?.name ?? "—"],
-    ["Check-in", format(search.checkIn, "EEE, MMM d, yyyy")],
-    ["Check-out", format(search.checkOut, "EEE, MMM d, yyyy")],
+    ["Room", selectedRoom?.name ?? "\u2014"],
+    ["Check-in", format(search.checkIn, "dd/MM/yyyy")],
+    ["Check-out", format(search.checkOut, "dd/MM/yyyy")],
     ["Guests", `${search.adults} Adult${search.adults !== 1 ? "s" : ""}${search.children > 0 ? `, ${search.children} Child${search.children !== 1 ? "ren" : ""}` : ""}`],
   ];
 
@@ -134,7 +136,7 @@ async function generatePDF(state: BookingState): Promise<void> {
     y += 7;
     doc.setFont("helvetica", "normal");
     selectedAddOns.forEach((a) => {
-      doc.text(`• ${a.name} — GH₵ ${(a.price_ghs * a.quantity).toLocaleString()}`, 25, y);
+      doc.text(`\u2022 ${a.name} \u2014 ${cedi} ${(a.price_ghs * a.quantity).toLocaleString()}`, 25, y);
       y += 6;
     });
   }
@@ -145,7 +147,7 @@ async function generatePDF(state: BookingState): Promise<void> {
   y += 8;
   doc.setFontSize(13);
   doc.setFont("helvetica", "bold");
-  doc.text(`Total: GH₵ ${totalAmount.toLocaleString()}`, 20, y);
+  doc.text(`Total: ${cedi} ${totalAmount.toLocaleString()}`, 20, y);
   y += 14;
 
   // Footer
@@ -207,13 +209,13 @@ export default function ConfirmationStep({ state }: Props) {
           <div>
             <p className="text-muted-foreground">Check-in</p>
             <p className="text-foreground font-medium">
-              {search.checkIn ? format(search.checkIn, "EEE, MMM d, yyyy") : "—"}
+              {search.checkIn ? format(search.checkIn, "dd/MM/yyyy") : "—"}
             </p>
           </div>
           <div>
             <p className="text-muted-foreground">Check-out</p>
             <p className="text-foreground font-medium">
-              {search.checkOut ? format(search.checkOut, "EEE, MMM d, yyyy") : "—"}
+              {search.checkOut ? format(search.checkOut, "dd/MM/yyyy") : "—"}
             </p>
           </div>
           <div>

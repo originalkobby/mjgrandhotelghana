@@ -10,6 +10,7 @@ const navItems = [
   { label: "Experiences", href: "#experiences", isHash: true },
   { label: "Dining", href: "/dining", isHash: false },
   { label: "Gallery", href: "#gallery", isHash: true },
+  { label: "Guest Services", href: "/guest-services", isHash: false },
 ];
 
 const Navbar = () => {
@@ -18,7 +19,7 @@ const Navbar = () => {
   const location = useLocation();
 
   // Pages with dark hero backgrounds where cream text works
-  const isDarkHeroPage = location.pathname === "/" || location.pathname === "/dining" || location.pathname === "/about";
+  const isDarkHeroPage = location.pathname === "/" || location.pathname === "/dining" || location.pathname === "/about" || location.pathname === "/guest-services";
   const useLight = scrolled || !isDarkHeroPage;
 
   useEffect(() => {

@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Plus, Pencil, BedDouble, RefreshCw } from "lucide-react";
+import { Plus, Pencil, BedDouble, RefreshCw, ImageIcon } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Room = Tables<"rooms">;
@@ -28,6 +28,7 @@ const emptyForm = {
   max_children: 1,
   is_active: true,
   amenities: "",
+  image_url: "",
 };
 
 export default function AdminRooms() {
@@ -51,6 +52,7 @@ export default function AdminRooms() {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
+      const images = form.image_url.trim() ? [form.image_url.trim()] : null;
       const payload = {
         name: form.name,
         slug: form.slug || form.name.toLowerCase().replace(/\s+/g, "-"),
@@ -62,6 +64,7 @@ export default function AdminRooms() {
         max_children: form.max_children,
         is_active: form.is_active,
         amenities: form.amenities ? form.amenities.split(",").map((a) => a.trim()) : null,
+        images,
       };
       if (editId) {
         const { error } = await supabase.from("rooms").update(payload).eq("id", editId);
@@ -98,6 +101,7 @@ export default function AdminRooms() {
       max_children: room.max_children,
       is_active: room.is_active,
       amenities: room.amenities?.join(", ") || "",
+      image_url: room.images?.[0] || "",
     });
     setOpen(true);
   };
@@ -180,6 +184,19 @@ export default function AdminRooms() {
                   <Label>Amenities (comma-separated)</Label>
                   <Input value={form.amenities} onChange={(e) => set("amenities", e.target.value)} placeholder="WiFi, Pool, AC" />
                 </div>
+                <div>
+                  <Label className="flex items-center gap-1.5">
+                    <ImageIcon className="w-3.5 h-3.5" /> Room Image URL
+                  </Label>
+                  <Input
+                    value={form.image_url}
+                    onChange={(e) => set("image_url", e.target.value)}
+                    placeholder="https://example.com/room-photo.jpg"
+                  />
+                  {form.image_url && (
+                    <img src={form.image_url} alt="Preview" className="mt-2 h-24 w-full object-cover rounded-md border border-border" />
+                  )}
+                </div>
                 <div className="flex items-center gap-2">
                   <Switch checked={form.is_active} onCheckedChange={(v) => set("is_active", v)} />
                   <Label>Active</Label>
@@ -213,8 +230,14 @@ export default function AdminRooms() {
               {rooms?.map((room) => (
                 <TableRow key={room.id}>
                   <TableCell>
-                    <div className="flex items-center gap-2">
-                      <BedDouble className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex items-center gap-3">
+                      {room.images?.[0] ? (
+                        <img src={room.images[0]} alt={room.name} className="w-10 h-10 rounded object-cover border border-border" />
+                      ) : (
+                        <div className="w-10 h-10 rounded bg-muted flex items-center justify-center">
+                          <BedDouble className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                      )}
                       <div>
                         <p className="font-medium text-foreground">{room.name}</p>
                         {room.size_sqm && <p className="text-xs text-muted-foreground">{room.size_sqm} sqm</p>}

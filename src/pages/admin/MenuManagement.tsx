@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, UtensilsCrossed, RefreshCw } from "lucide-react";
+import { Plus, Pencil, Trash2, UtensilsCrossed, RefreshCw, ImageIcon } from "lucide-react";
 
 const CATEGORIES = [
   "Hot Appetizers", "Salads", "Chicken Meals", "Kids Meals", "Fish Meals",
@@ -37,6 +37,7 @@ const emptyForm = {
   price: "",
   is_active: true,
   sort_order: 0,
+  image_url: "",
 };
 
 export default function AdminMenu() {
@@ -113,6 +114,7 @@ export default function AdminMenu() {
       price: item.price,
       is_active: item.is_active,
       sort_order: item.sort_order,
+      image_url: "",
     });
     setOpen(true);
   };
@@ -204,6 +206,19 @@ export default function AdminMenu() {
                     <Label>Sort Order</Label>
                     <Input type="number" value={form.sort_order} onChange={(e) => set("sort_order", +e.target.value)} />
                   </div>
+                </div>
+                <div>
+                  <Label className="flex items-center gap-1.5">
+                    <ImageIcon className="w-3.5 h-3.5" /> Image URL (optional)
+                  </Label>
+                  <Input
+                    value={form.image_url}
+                    onChange={(e) => set("image_url", e.target.value)}
+                    placeholder="https://example.com/dish-photo.jpg"
+                  />
+                  {form.image_url && (
+                    <img src={form.image_url} alt="Preview" className="mt-2 h-20 w-full object-cover rounded-md border border-border" />
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <Switch checked={form.is_active} onCheckedChange={(v) => set("is_active", v)} />

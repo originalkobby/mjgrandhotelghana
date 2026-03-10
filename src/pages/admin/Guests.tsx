@@ -16,7 +16,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { formatDateGB, formatDateTimeGB } from "@/lib/dateUtils";
 
 interface Guest {
   id: string;
@@ -246,7 +246,7 @@ export default function Guests() {
                         </button>
                       </td>
                       <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
-                        {format(new Date(g.created_at), "MMM d, yyyy")}
+                        {formatDateGB(g.created_at)}
                       </td>
                       <td className="px-4 py-3">
                         <Button
@@ -285,7 +285,7 @@ export default function Guests() {
               <div className="flex items-center gap-4">
                 <div>
                   <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Joined</p>
-                  <p className="text-foreground">{format(new Date(selectedGuest.created_at), "MMM d, yyyy")}</p>
+                  <p className="text-foreground">{formatDateGB(selectedGuest.created_at)}</p>
                 </div>
                 {rating && (
                   <div>
@@ -327,7 +327,7 @@ export default function Guests() {
                           <div>
                             <p className="font-mono text-xs font-medium">{b.reference_code}</p>
                             <p className="text-xs text-muted-foreground">
-                              {b.rooms?.name ?? "Room"} · {b.check_in} → {b.check_out}
+                              {b.rooms?.name ?? "Room"} · {formatDateGB(b.check_in)} → {formatDateGB(b.check_out)}
                             </p>
                           </div>
                           <div className="text-right">
@@ -345,7 +345,7 @@ export default function Guests() {
                             <span className="text-muted-foreground">Check-in:</span>
                             {b.actual_check_in ? (
                               <span className="text-foreground font-medium">
-                                {format(new Date(b.actual_check_in), "MMM d, h:mm:ss a")}
+                                {formatDateTimeGB(b.actual_check_in)}
                               </span>
                             ) : (
                               <span className="text-muted-foreground/50">Not recorded</span>
@@ -356,7 +356,7 @@ export default function Guests() {
                             <span className="text-muted-foreground">Check-out:</span>
                             {b.actual_check_out ? (
                               <span className="text-foreground font-medium">
-                                {format(new Date(b.actual_check_out), "MMM d, h:mm:ss a")}
+                                {formatDateTimeGB(b.actual_check_out)}
                               </span>
                             ) : (
                               <span className="text-muted-foreground/50">Not recorded</span>

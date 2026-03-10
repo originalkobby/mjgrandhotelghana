@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { format, subDays, startOfMonth, endOfMonth } from "date-fns";
+import { formatDateGB } from "@/lib/dateUtils";
 import {
   BarChart,
   Bar,
@@ -61,6 +62,12 @@ const PAYMENT_COLORS: Record<string, string> = {
   partial: "bg-gold-light/20 text-gold-dark",
   refunded: "bg-muted text-muted-foreground",
 };
+
+function getPaymentDisplay(b: Booking): { label: string; isDash: boolean } {
+  if (b.status === "cancelled" || b.status === "no_show") return { label: "—", isDash: true };
+  if (b.status === "completed") return { label: "Paid", isDash: false };
+  return { label: b.payment_status, isDash: false };
+}
 
 async function fetchOverviewData(dateFrom: string, dateTo: string) {
   const prevDuration = new Date(dateTo).getTime() - new Date(dateFrom).getTime();
@@ -117,7 +124,7 @@ async function fetchOverviewData(dateFrom: string, dateTo: string) {
   const chartData: { day: string; revenue: number }[] = [];
   for (let i = 13; i >= 0; i--) {
     const d = format(subDays(now, i), "yyyy-MM-dd");
-    const dayLabel = format(subDays(now, i), "MMM d");
+    const dayLabel = format(subDays(now, i), "dd/MM");
     const dayRevenue = curr
       .filter((b) => b.created_at.startsWith(d) && b.payment_status === "paid")
       .reduce((s, b) => s + Number(b.final_total_ghs), 0);
@@ -274,28 +281,31 @@ export default function Overview() {
                     <td colSpan={7} className="text-center py-8 text-muted-foreground">No bookings yet</td>
                   </tr>
                 ) : (
-                  recentBookings.map((b) => (
-                    <tr key={b.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
-                      <td className="px-4 py-3 font-mono text-xs">{b.reference_code}</td>
-                      <td className="px-4 py-3">
-                        <p className="font-medium text-foreground">{b.guests?.full_name ?? "—"}</p>
-                        <p className="text-xs text-muted-foreground">{b.guests?.email ?? ""}</p>
-                      </td>
-                      <td className="px-4 py-3 text-foreground">{b.rooms?.name ?? "—"}</td>
-                      <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{b.check_in} → {b.check_out}</td>
-                      <td className="px-4 py-3 font-medium text-foreground">GH₵ {Number(b.final_total_ghs).toLocaleString()}</td>
-                      <td className="px-4 py-3">
-                        <Badge variant="outline" className={`text-xs capitalize ${STATUS_COLORS[b.status] ?? ""}`}>{b.status.replace("_", " ")}</Badge>
-                      </td>
-                      <td className="px-4 py-3">
-                        {b.status === "cancelled" ? (
-                          <span className="text-muted-foreground font-medium">—</span>
-                        ) : (
-                          <Badge variant="secondary" className={`text-xs capitalize ${PAYMENT_COLORS[b.payment_status] ?? ""}`}>{b.payment_status}</Badge>
-                        )}
-                      </td>
-                    </tr>
-                  ))
+                  recentBookings.map((b) => {
+                    const pd = getPaymentDisplay(b);
+                    return (
+                      <tr key={b.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+                        <td className="px-4 py-3 font-mono text-xs">{b.reference_code}</td>
+                        <td className="px-4 py-3">
+                          <p className="font-medium text-foreground">{b.guests?.full_name ?? "—"}</p>
+                          <p className="text-xs text-muted-foreground">{b.guests?.email ?? ""}</p>
+                        </td>
+                        <td className="px-4 py-3 text-foreground">{b.rooms?.name ?? "—"}</td>
+                        <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{formatDateGB(b.check_in)} → {formatDateGB(b.check_out)}</td>
+                        <td className="px-4 py-3 font-medium text-foreground">GH₵ {Number(b.final_total_ghs).toLocaleString()}</td>
+                        <td className="px-4 py-3">
+                          <Badge variant="outline" className={`text-xs capitalize ${STATUS_COLORS[b.status] ?? ""}`}>{b.status.replace("_", " ")}</Badge>
+                        </td>
+                        <td className="px-4 py-3">
+                          {pd.isDash ? (
+                            <span className="text-muted-foreground font-medium text-center block">—</span>
+                          ) : (
+                            <Badge variant="secondary" className={`text-xs capitalize ${PAYMENT_COLORS[pd.label] ?? ""}`}>{pd.label}</Badge>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>

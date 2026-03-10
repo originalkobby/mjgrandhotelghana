@@ -11,6 +11,7 @@ import About from "./pages/About";
 import Booking from "./pages/Booking";
 import BookingLookup from "./pages/BookingLookup";
 import NotFound from "./pages/NotFound";
+import GuestServices from "./pages/GuestServices";
 import MJChat from "./components/MJChat";
 import { ScrollToTop } from "./components/ScrollToTop";
 import AdminLogin from "./pages/admin/Login";
@@ -50,6 +51,7 @@ const App = () => (
           <Route path="/policy" element={<Policy />} />
           <Route path="/booking" element={<Booking />} />
           <Route path="/booking/lookup" element={<BookingLookup />} />
+          <Route path="/guest-services" element={<GuestServices />} />
 
           {/* Admin Dashboard */}
           <Route path="/admin/login" element={<AdminLogin />} />
