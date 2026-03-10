@@ -19,7 +19,7 @@ const Navbar = () => {
   const location = useLocation();
 
   // Pages with dark hero backgrounds where cream text works
-  const isDarkHeroPage = location.pathname === "/" || location.pathname === "/dining" || location.pathname === "/about";
+  const isDarkHeroPage = location.pathname === "/" || location.pathname === "/dining" || location.pathname === "/about" || location.pathname === "/guest-services";
   const useLight = scrolled || !isDarkHeroPage;
 
   useEffect(() => {
