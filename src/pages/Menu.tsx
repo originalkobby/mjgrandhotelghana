@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import MenuSection, { getItemVariants } from "@/components/MenuSection";
-
+import { usePublicMenu, MENU_SECTIONS } from "@/hooks/usePublicMenu";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import menuF1 from "@/assets/menu-f1.png";
 import menuF2 from "@/assets/menu-f2.png";
@@ -15,21 +16,42 @@ import menuF7 from "@/assets/menu-f7.jpg";
 import menuF8 from "@/assets/menu-f8.jpg";
 import menuF9 from "@/assets/menu-f9.jpg";
 import menuF10 from "@/assets/menu-f10.jpg";
-
-import {
-  hotAppetizers, coldLarder, chickenMeals, kidsMeals, fishMeals,
-  beefMeals, extras, seafoodMeals, mjSpecials, localDishes,
-  burgersAndSandwiches, pizzaMeals, desserts, takeOutPacks,
-  vegetarianDishes, sideOrders,
-} from "@/data/menuData";
 import menuF11 from "@/assets/menu-f11.jpg";
+
+// Section config: which sections get full images vs compact display
+type SectionConfig = {
+  image?: string;
+  imageAlt?: string;
+  subtitle?: string;
+  reverse?: boolean;
+  compact?: boolean;
+};
+
+const SECTION_CONFIG: Record<string, SectionConfig> = {
+  "Hot Appetizers": { image: menuF1, imageAlt: "Hot appetizers food collage featuring chicken wings, beef kebab, and prawns" },
+  "Salads": { image: menuF2, imageAlt: "Cold larder food collage featuring fresh salads and vegetables", subtitle: "Fresh salads & light bites", reverse: true },
+  "Chicken Meals": { image: menuF3, imageAlt: "Chicken meals food collage featuring grilled and fried chicken dishes" },
+  "Kids Meals": { compact: true },
+  "Fish Meals": { image: menuF4, imageAlt: "Fish meals food collage featuring grilled tilapia, grouper, and snapper", reverse: true },
+  "Beef Meals": { image: menuF5, imageAlt: "Beef meals food collage featuring steak, mixed grill, and beef stew" },
+  "Extras": { compact: true },
+  "Seafood": { image: menuF6, imageAlt: "Seafood food collage featuring lobster, prawns, and shrimps", reverse: true },
+  "MJ Specials": { image: menuF7, imageAlt: "MJ Specials food collage featuring fried rice, jollof rice, and pasta" },
+  "Local Dishes": { image: menuF8, imageAlt: "Local dishes food collage featuring light soup, okro soup, and garden eggs stew", reverse: true },
+  "Burgers & Sandwiches": { image: menuF9, imageAlt: "Burgers, sandwiches and pizza food collage" },
+  "Pizza": { compact: true },
+  "Desserts": { image: menuF10, imageAlt: "Desserts food collage featuring fruit platter, ice cream, and pudding", reverse: true },
+  "Take Out Packs": { compact: true },
+  "Vegetarian": { image: menuF11, imageAlt: "Vegetarian dishes food collage featuring stir fried vegetables, hummus, and vegetable soup" },
+  "Side Orders": { compact: true },
+};
 
 const containerVariants = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.08 } },
 };
 
-const CompactSection = ({ title, items }: { title: string; items: typeof kidsMeals }) => {
+const CompactSection = ({ title, items }: { title: string; items: { name: string; description: string; price: string }[] }) => {
   const [cols, setCols] = useState(1);
 
   useEffect(() => {
@@ -82,6 +104,8 @@ const CompactSection = ({ title, items }: { title: string; items: typeof kidsMea
 };
 
 const Menu = () => {
+  const { data: menuData, isLoading } = usePublicMenu();
+
   return (
     <div className="min-h-screen bg-charcoal">
       {/* Header */}
@@ -127,98 +151,53 @@ const Menu = () => {
 
       {/* Menu Sections */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-12">
-        <MenuSection
-          title="Hot Appetizers"
-          image={menuF1}
-          imageAlt="Hot appetizers food collage featuring chicken wings, beef kebab, and prawns"
-          items={hotAppetizers}
-        />
+        {isLoading ? (
+          <div className="space-y-8 py-16">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="flex flex-col lg:flex-row gap-10 items-center">
+                <Skeleton className="w-full lg:w-1/2 h-64 rounded-2xl bg-cream/5" />
+                <div className="w-full lg:w-1/2 space-y-4">
+                  <Skeleton className="h-8 w-48 bg-cream/5" />
+                  <div className="grid grid-cols-2 gap-4">
+                    {[...Array(6)].map((_, j) => (
+                      <Skeleton key={j} className="h-24 rounded-xl bg-cream/5" />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          MENU_SECTIONS.map((section) => {
+            const items = menuData?.[section];
+            if (!items?.length) return null;
+            const config = SECTION_CONFIG[section] || { compact: true };
 
-        <MenuSection
-          title="Cold Larder"
-          subtitle="Fresh salads & light bites"
-          image={menuF2}
-          imageAlt="Cold larder food collage featuring fresh salads and vegetables"
-          items={coldLarder}
-          reverse
-        />
+            if (config.compact) {
+              return <CompactSection key={section} title={section} items={items} />;
+            }
 
-        <MenuSection
-          title="Chicken Meals"
-          image={menuF3}
-          imageAlt="Chicken meals food collage featuring grilled and fried chicken dishes"
-          items={chickenMeals}
-        />
+            return (
+              <MenuSection
+                key={section}
+                title={section}
+                subtitle={config.subtitle}
+                image={config.image!}
+                imageAlt={config.imageAlt!}
+                items={items}
+                reverse={config.reverse}
+              />
+            );
+          })
+        )}
 
-        <CompactSection title="Kids Meals" items={kidsMeals} />
-
-        <MenuSection
-          title="Fish Meals"
-          image={menuF4}
-          imageAlt="Fish meals food collage featuring grilled tilapia, grouper, and snapper"
-          items={fishMeals}
-          reverse
-        />
-
-        <MenuSection
-          title="Beef Meals"
-          image={menuF5}
-          imageAlt="Beef meals food collage featuring steak, mixed grill, and beef stew"
-          items={beefMeals}
-        />
-
-        <CompactSection title="Extras" items={extras} />
-
-        <MenuSection
-          title="Sea Food"
-          image={menuF6}
-          imageAlt="Seafood food collage featuring lobster, prawns, and shrimps"
-          items={seafoodMeals}
-          reverse
-        />
-
-        <MenuSection
-          title="MJ Specials"
-          image={menuF7}
-          imageAlt="MJ Specials food collage featuring fried rice, jollof rice, and pasta"
-          items={mjSpecials}
-        />
-
-        <MenuSection
-          title="Local Dishes"
-          image={menuF8}
-          imageAlt="Local dishes food collage featuring light soup, okro soup, and garden eggs stew"
-          items={localDishes}
-          reverse
-        />
-
-        <MenuSection
-          title="Burgers | Sandwiches | Shawarma"
-          image={menuF9}
-          imageAlt="Burgers, sandwiches and pizza food collage"
-          items={burgersAndSandwiches}
-        />
-
-        <CompactSection title="Pizza" items={pizzaMeals} />
-
-        <MenuSection
-          title="Dessert"
-          image={menuF10}
-          imageAlt="Desserts food collage featuring fruit platter, ice cream, and pudding"
-          items={desserts}
-          reverse
-        />
-
-        <CompactSection title="Take Out Packs" items={takeOutPacks} />
-
-        <MenuSection
-          title="Vegetarian Dishes"
-          image={menuF11}
-          imageAlt="Vegetarian dishes food collage featuring stir fried vegetables, hummus, and vegetable soup"
-          items={vegetarianDishes}
-        />
-
-        <CompactSection title="Side Orders" items={sideOrders} />
+        {/* Render any extra DB categories not in the standard list */}
+        {menuData && Object.entries(menuData)
+          .filter(([cat]) => !MENU_SECTIONS.includes(cat))
+          .map(([cat, items]) => (
+            items.length > 0 && <CompactSection key={cat} title={cat} items={items} />
+          ))
+        }
       </div>
 
       {/* Footer CTA */}
