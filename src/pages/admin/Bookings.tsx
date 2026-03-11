@@ -143,6 +143,37 @@ export default function Bookings() {
         new_status: newStatus,
         changed_by: user?.id || null,
       });
+
+      // Decrement room_inventory when cancelling from a non-cancelled state
+      if (newStatus === "cancelled" && oldStatus !== "cancelled") {
+        const { data: bookingRow } = await supabase
+          .from("bookings")
+          .select("room_id, check_in, check_out")
+          .eq("id", selectedBooking.id)
+          .single();
+
+        if (bookingRow) {
+          const ciDate = new Date(bookingRow.check_in);
+          const coDate = new Date(bookingRow.check_out);
+          const d = new Date(ciDate);
+          while (d < coDate) {
+            const dateStr = d.toISOString().split("T")[0];
+            const { data: inv } = await supabase
+              .from("room_inventory")
+              .select("id, booked_count")
+              .eq("room_id", bookingRow.room_id)
+              .eq("date", dateStr)
+              .maybeSingle();
+            if (inv && inv.booked_count > 0) {
+              await supabase
+                .from("room_inventory")
+                .update({ booked_count: inv.booked_count - 1 })
+                .eq("id", inv.id);
+            }
+            d.setDate(d.getDate() + 1);
+          }
+        }
+      }
     }
 
     setUpdating(false);
