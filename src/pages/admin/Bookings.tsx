@@ -358,6 +358,11 @@ export default function Bookings() {
                           </Badge>
                         </td>
                         <td className="px-4 py-3">
+                          <Badge variant="outline" className={`text-xs ${SOURCE_COLORS[b.booking_source] ?? "bg-muted text-muted-foreground border-border"}`}>
+                            {SOURCE_LABELS[b.booking_source] ?? b.booking_source}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3">
                           {pd.isDash ? (
                             <span className="text-muted-foreground font-medium text-center block">—</span>
                           ) : (
