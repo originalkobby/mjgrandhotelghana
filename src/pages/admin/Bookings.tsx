@@ -303,7 +303,7 @@ export default function Bookings() {
             <table className="w-full text-sm font-sans">
               <thead>
                 <tr className="border-b border-border">
-                  {["Ref", "Guest", "Room", "Check-in", "Check-out", "Guests", "Total", "Status", "Payment", "Method", "Actions"].map((h) => (
+                  {["Ref", "Guest", "Room", "Check-in", "Check-out", "Guests", "Total", "Status", "Source", "Payment", "Method", "Actions"].map((h) => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       {h}
                     </th>
