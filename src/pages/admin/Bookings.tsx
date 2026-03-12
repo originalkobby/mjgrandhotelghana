@@ -447,6 +447,12 @@ export default function Bookings() {
                   </p>
                 </div>
                 <div>
+                  <p className="text-xs uppercase tracking-wider mb-1">Source</p>
+                  <Badge variant="outline" className={`text-xs ${SOURCE_COLORS[selectedBooking.booking_source] ?? "bg-muted text-muted-foreground border-border"}`}>
+                    {SOURCE_LABELS[selectedBooking.booking_source] ?? selectedBooking.booking_source}
+                  </Badge>
+                </div>
+                <div>
                   <p className="text-xs uppercase tracking-wider mb-1">Email</p>
                   <p className="text-foreground">{selectedBooking.guests?.email ?? "—"}</p>
                 </div>

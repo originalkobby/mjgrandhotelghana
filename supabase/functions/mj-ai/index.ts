@@ -869,7 +869,7 @@ async function lookupBooking(supabase: any, referenceCode: string) {
 
   const { data, error } = await supabase
     .from("bookings")
-    .select("reference_code, status, payment_status, check_in, check_out, adults, children, final_total_ghs, base_total_ghs, add_ons_total_ghs, special_requests, arrival_time, created_at, rooms(name), guests(full_name, email)")
+    .select("reference_code, status, payment_status, booking_source, ota_reference, check_in, check_out, adults, children, final_total_ghs, base_total_ghs, add_ons_total_ghs, special_requests, arrival_time, created_at, rooms(name), guests(full_name, email)")
     .eq("reference_code", ref)
     .maybeSingle();
 
@@ -888,6 +888,8 @@ async function lookupBooking(supabase: any, referenceCode: string) {
       reference_code: data.reference_code,
       status: data.status,
       payment_status: data.payment_status,
+      booking_source: (data as any).booking_source ?? "direct",
+      ota_reference: (data as any).ota_reference ?? null,
       check_in: data.check_in,
       check_out: data.check_out,
       adults: data.adults,
