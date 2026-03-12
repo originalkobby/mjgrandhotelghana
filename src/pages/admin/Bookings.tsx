@@ -210,7 +210,7 @@ export default function Bookings() {
 
   const exportCSV = () => {
     if (bookings.length === 0) return;
-    const headers = ["Reference", "Guest", "Email", "Room", "Check-in", "Check-out", "Adults", "Children", "Total (GHS)", "Status", "Payment", "Method", "Created"];
+    const headers = ["Reference", "Guest", "Email", "Room", "Check-in", "Check-out", "Adults", "Children", "Total (GHS)", "Status", "Source", "Payment", "Method", "Created"];
     const rows = bookings.map((b) => {
       const pd = getPaymentDisplay(b);
       return [
@@ -224,6 +224,7 @@ export default function Bookings() {
         b.children,
         b.final_total_ghs,
         b.status,
+        SOURCE_LABELS[b.booking_source] ?? b.booking_source,
         pd.isDash ? "--" : pd.label,
         PAYMENT_METHOD_LABELS[b.payment_method ?? "pay_at_hotel"] ?? b.payment_method ?? "—",
         formatDateGB(b.created_at),
