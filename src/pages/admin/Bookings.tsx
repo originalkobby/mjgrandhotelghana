@@ -35,6 +35,8 @@ interface Booking {
   status: BookingStatus;
   payment_status: string;
   payment_method: string | null;
+  booking_source: string;
+  ota_reference: string | null;
   check_in: string;
   check_out: string;
   adults: number;
