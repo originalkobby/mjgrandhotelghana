@@ -35,6 +35,8 @@ interface Booking {
   status: BookingStatus;
   payment_status: string;
   payment_method: string | null;
+  booking_source: string;
+  ota_reference: string | null;
   check_in: string;
   check_out: string;
   adults: number;
@@ -69,6 +71,24 @@ const PAYMENT_METHOD_LABELS: Record<string, string> = {
   pay_at_hotel: "Pay at Hotel",
 };
 
+const SOURCE_LABELS: Record<string, string> = {
+  direct: "Direct",
+  booking_com: "Booking.com",
+  expedia: "Expedia",
+  airbnb: "Airbnb",
+  agoda: "Agoda",
+  siteminder: "SiteMinder",
+  cloudbeds: "Cloudbeds",
+  staah: "STAAH",
+};
+
+const SOURCE_COLORS: Record<string, string> = {
+  direct: "bg-accent/20 text-accent border-accent/30",
+  booking_com: "bg-blue-500/15 text-blue-700 border-blue-500/30",
+  expedia: "bg-yellow-500/15 text-yellow-700 border-yellow-500/30",
+  airbnb: "bg-rose-500/15 text-rose-700 border-rose-500/30",
+};
+
 /** Derive display payment status based on booking status */
 function getPaymentDisplay(b: Booking): { label: string; isDash: boolean } {
   if (b.status === "cancelled" || b.status === "no_show") return { label: "—", isDash: true };
@@ -79,7 +99,7 @@ function getPaymentDisplay(b: Booking): { label: string; isDash: boolean } {
 async function fetchBookings(statusFilter: string) {
   let query = supabase
     .from("bookings")
-    .select("id, reference_code, status, payment_status, payment_method, check_in, check_out, adults, children, final_total_ghs, special_requests, created_at, rooms(name), guests(full_name, email, phone)")
+    .select("id, reference_code, status, payment_status, payment_method, booking_source, ota_reference, check_in, check_out, adults, children, final_total_ghs, special_requests, created_at, rooms(name), guests(full_name, email, phone)")
     .order("created_at", { ascending: false })
     .limit(100);
 
@@ -190,7 +210,7 @@ export default function Bookings() {
 
   const exportCSV = () => {
     if (bookings.length === 0) return;
-    const headers = ["Reference", "Guest", "Email", "Room", "Check-in", "Check-out", "Adults", "Children", "Total (GHS)", "Status", "Payment", "Method", "Created"];
+    const headers = ["Reference", "Guest", "Email", "Room", "Check-in", "Check-out", "Adults", "Children", "Total (GHS)", "Status", "Source", "Payment", "Method", "Created"];
     const rows = bookings.map((b) => {
       const pd = getPaymentDisplay(b);
       return [
@@ -204,6 +224,7 @@ export default function Bookings() {
         b.children,
         b.final_total_ghs,
         b.status,
+        SOURCE_LABELS[b.booking_source] ?? b.booking_source,
         pd.isDash ? "--" : pd.label,
         PAYMENT_METHOD_LABELS[b.payment_method ?? "pay_at_hotel"] ?? b.payment_method ?? "—",
         formatDateGB(b.created_at),
@@ -283,7 +304,7 @@ export default function Bookings() {
             <table className="w-full text-sm font-sans">
               <thead>
                 <tr className="border-b border-border">
-                  {["Ref", "Guest", "Room", "Check-in", "Check-out", "Guests", "Total", "Status", "Payment", "Method", "Actions"].map((h) => (
+                  {["Ref", "Guest", "Room", "Check-in", "Check-out", "Guests", "Total", "Status", "Source", "Payment", "Method", "Actions"].map((h) => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       {h}
                     </th>
@@ -294,7 +315,7 @@ export default function Bookings() {
                 {loading ? (
                   Array.from({ length: 5 }).map((_, i) => (
                     <tr key={i} className="border-b border-border/50">
-                      {Array.from({ length: 11 }).map((_, j) => (
+                      {Array.from({ length: 12 }).map((_, j) => (
                         <td key={j} className="px-4 py-3">
                           <div className="h-4 bg-muted rounded animate-pulse" />
                         </td>
@@ -303,7 +324,7 @@ export default function Bookings() {
                   ))
                 ) : bookings.length === 0 ? (
                   <tr>
-                    <td colSpan={11} className="text-center py-12 text-muted-foreground">
+                    <td colSpan={12} className="text-center py-12 text-muted-foreground">
                       No bookings found
                     </td>
                   </tr>
@@ -335,6 +356,11 @@ export default function Bookings() {
                         <td className="px-4 py-3">
                           <Badge variant="outline" className={`text-xs capitalize ${STATUS_COLORS[b.status] ?? ""}`}>
                             {b.status.replace("_", " ")}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3">
+                          <Badge variant="outline" className={`text-xs ${SOURCE_COLORS[b.booking_source] ?? "bg-muted text-muted-foreground border-border"}`}>
+                            {SOURCE_LABELS[b.booking_source] ?? b.booking_source}
                           </Badge>
                         </td>
                         <td className="px-4 py-3">
@@ -419,6 +445,12 @@ export default function Bookings() {
                   <p className="text-foreground">
                     {PAYMENT_METHOD_LABELS[selectedBooking.payment_method ?? "pay_at_hotel"] ?? selectedBooking.payment_method ?? "—"}
                   </p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wider mb-1">Source</p>
+                  <Badge variant="outline" className={`text-xs ${SOURCE_COLORS[selectedBooking.booking_source] ?? "bg-muted text-muted-foreground border-border"}`}>
+                    {SOURCE_LABELS[selectedBooking.booking_source] ?? selectedBooking.booking_source}
+                  </Badge>
                 </div>
                 <div>
                   <p className="text-xs uppercase tracking-wider mb-1">Email</p>
