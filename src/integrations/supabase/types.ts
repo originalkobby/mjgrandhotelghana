@@ -135,6 +135,7 @@ export type Database = {
           adults: number
           arrival_time: string | null
           base_total_ghs: number
+          booking_source: string
           cancellation_policy_id: string | null
           check_in: string
           check_out: string
@@ -145,6 +146,7 @@ export type Database = {
           guest_id: string | null
           id: string
           nationality: string | null
+          ota_reference: string | null
           payment_method: string | null
           payment_status: Database["public"]["Enums"]["payment_status"]
           promo_code: string | null
@@ -161,6 +163,7 @@ export type Database = {
           adults?: number
           arrival_time?: string | null
           base_total_ghs: number
+          booking_source?: string
           cancellation_policy_id?: string | null
           check_in: string
           check_out: string
@@ -171,6 +174,7 @@ export type Database = {
           guest_id?: string | null
           id?: string
           nationality?: string | null
+          ota_reference?: string | null
           payment_method?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           promo_code?: string | null
@@ -187,6 +191,7 @@ export type Database = {
           adults?: number
           arrival_time?: string | null
           base_total_ghs?: number
+          booking_source?: string
           cancellation_policy_id?: string | null
           check_in?: string
           check_out?: string
@@ -197,6 +202,7 @@ export type Database = {
           guest_id?: string | null
           id?: string
           nationality?: string | null
+          ota_reference?: string | null
           payment_method?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           promo_code?: string | null
@@ -683,6 +689,47 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      webhook_logs: {
+        Row: {
+          booking_id: string | null
+          created_at: string
+          error_message: string | null
+          event_type: string
+          id: string
+          payload: Json
+          source: string
+          status: string
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          event_type: string
+          id?: string
+          payload?: Json
+          source: string
+          status?: string
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          event_type?: string
+          id?: string
+          payload?: Json
+          source?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_logs_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
