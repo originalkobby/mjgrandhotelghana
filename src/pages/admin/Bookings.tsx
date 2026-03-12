@@ -99,7 +99,7 @@ function getPaymentDisplay(b: Booking): { label: string; isDash: boolean } {
 async function fetchBookings(statusFilter: string) {
   let query = supabase
     .from("bookings")
-    .select("id, reference_code, status, payment_status, payment_method, check_in, check_out, adults, children, final_total_ghs, special_requests, created_at, rooms(name), guests(full_name, email, phone)")
+    .select("id, reference_code, status, payment_status, payment_method, booking_source, ota_reference, check_in, check_out, adults, children, final_total_ghs, special_requests, created_at, rooms(name), guests(full_name, email, phone)")
     .order("created_at", { ascending: false })
     .limit(100);
 
