@@ -69,6 +69,24 @@ const PAYMENT_METHOD_LABELS: Record<string, string> = {
   pay_at_hotel: "Pay at Hotel",
 };
 
+const SOURCE_LABELS: Record<string, string> = {
+  direct: "Direct",
+  booking_com: "Booking.com",
+  expedia: "Expedia",
+  airbnb: "Airbnb",
+  agoda: "Agoda",
+  siteminder: "SiteMinder",
+  cloudbeds: "Cloudbeds",
+  staah: "STAAH",
+};
+
+const SOURCE_COLORS: Record<string, string> = {
+  direct: "bg-accent/20 text-accent border-accent/30",
+  booking_com: "bg-blue-500/15 text-blue-700 border-blue-500/30",
+  expedia: "bg-yellow-500/15 text-yellow-700 border-yellow-500/30",
+  airbnb: "bg-rose-500/15 text-rose-700 border-rose-500/30",
+};
+
 /** Derive display payment status based on booking status */
 function getPaymentDisplay(b: Booking): { label: string; isDash: boolean } {
   if (b.status === "cancelled" || b.status === "no_show") return { label: "—", isDash: true };
