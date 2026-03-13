@@ -96,7 +96,9 @@ function getPaymentDisplay(b: Booking): { label: string; isDash: boolean } {
   return { label: b.payment_status, isDash: false };
 }
 
-async function fetchBookings(statusFilter: string) {
+const SOURCE_OPTIONS = Object.keys(SOURCE_LABELS);
+
+async function fetchBookings(statusFilter: string, sourceFilter: string) {
   let query = supabase
     .from("bookings")
     .select("id, reference_code, status, payment_status, payment_method, booking_source, ota_reference, check_in, check_out, adults, children, final_total_ghs, special_requests, created_at, rooms(name), guests(full_name, email, phone)")
@@ -105,6 +107,9 @@ async function fetchBookings(statusFilter: string) {
 
   if (statusFilter !== "all") {
     query = query.eq("status", statusFilter as BookingStatus);
+  }
+  if (sourceFilter !== "all") {
+    query = query.eq("booking_source", sourceFilter);
   }
 
   const { data } = await query;
