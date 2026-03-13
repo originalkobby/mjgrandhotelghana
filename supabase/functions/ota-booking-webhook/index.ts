@@ -145,6 +145,15 @@ serve(async (req) => {
 
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
+  // Validate webhook secret
+  const webhookSecret = Deno.env.get("OTA_WEBHOOK_SECRET");
+  if (webhookSecret) {
+    const providedSecret = req.headers.get("x-webhook-secret") || new URL(req.url).searchParams.get("secret");
+    if (providedSecret !== webhookSecret) {
+      return json({ error: "Unauthorized" }, 401);
+    }
+  }
+
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
