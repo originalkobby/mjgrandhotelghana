@@ -127,7 +127,7 @@ const Policy = () => {
             transition={{ duration: 0.6, delay: 0.5, ease: [0.3, 0, 0.2, 1] }}
             className="font-sans text-muted-foreground max-w-2xl mx-auto leading-relaxed"
           >
-            Thank you for choosing to stay at MJ Grand Hotel Ltd. Taking a room at our hotel means that you have accepted our terms and conditions and agree to the rate per night of our accommodation.
+            Thank you for choosing to stay at MJ Grand Hotel Ltd. To ensure a safe, comfortable, and well-organized stay for all our guests, please take note of the following policies available at MJ Grand Hotel.
           </motion.p>
         </motion.div>
 
