@@ -128,8 +128,8 @@ export default function Bookings() {
   const { user } = useAdminAuth();
 
   const { data: allBookings = [], isLoading: loading, isFetching } = useQuery({
-    queryKey: ["admin-bookings", statusFilter],
-    queryFn: () => fetchBookings(statusFilter),
+    queryKey: ["admin-bookings", statusFilter, sourceFilter],
+    queryFn: () => fetchBookings(statusFilter, sourceFilter),
     staleTime: 30_000,
   });
 
