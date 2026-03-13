@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ChevronLeft, Shield, Clock, UtensilsCrossed, Key, Car, Waves, CircleX, Ban, MessageSquare } from "lucide-react";
+import { ChevronLeft, Shield, Clock, UtensilsCrossed, Key, Car, Waves, CircleX, Ban, MessageSquare, Lock, Search, Users, Banknote, Dumbbell } from "lucide-react";
 
 
 const sections = [
@@ -38,6 +38,38 @@ const sections = [
     items: [
       "Cancellations or amendments to your reservation must be made at least 72 hours before your arrival date. Refunds will incur a 30% charge, inclusive of any applicable prevailing government taxes.",
       "In the event of a no-show, a 100% charge (inclusive of any applicable prevailing government taxes) will be applied to the account provided at the time of reservation.",
+    ],
+  },
+  {
+    icon: Lock,
+    title: "In-Room Safes",
+    items: [
+      "Each guest room is equipped with a secure in-room safe for storing luggage and valuables during their stay.",
+      "Guests are kindly advised to declare valuables during physical check-in at the Front Office for proper documentation and security purposes.",
+    ],
+  },
+  {
+    icon: Search,
+    title: "Lost & Found",
+    items: [
+      "Any items found within the hotel premises will be recorded and stored in our Lost and Found department.",
+      "Unclaimed items will be kept for a period of six (6) months, after which they will be discarded if not claimed by the owner.",
+    ],
+  },
+  {
+    icon: Users,
+    title: "Residential Conference",
+    items: [
+      "Conference Start Time: 8:00 AM.",
+      "Conference Closing Time: 5:00 PM.",
+      "Any use of conference facilities beyond the scheduled closing time will attract an additional charge.",
+    ],
+  },
+  {
+    icon: Banknote,
+    title: "Refund",
+    items: [
+      "For refund requests, a 30% fee will be applied to the refund amount.",
     ],
   },
   {

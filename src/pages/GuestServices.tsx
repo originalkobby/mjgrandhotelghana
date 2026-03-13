@@ -14,6 +14,9 @@ import {
   QrCode,
   Clock,
   Droplets,
+  Dumbbell,
+  UtensilsCrossed,
+  PartyPopper,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -44,13 +47,13 @@ const services = [
   },
   {
     icon: Waves,
-    title: "Swimming Pool & Gym",
-    text: "Guests enjoy access to our swimming pool and gym facilities.",
+    title: "Swimming Pool",
+    text: "Guests enjoy complimentary access to our swimming pool facilities.",
   },
   {
     icon: Car,
-    title: "Airport Shuttle / Car Rentals",
-    text: "Airport shuttle is free and car rentals are available.",
+    title: "Airport Shuttle",
+    text: "Complimentary airport shuttle departs every 2 hours.\nOperating hours: 5:00 AM – 11:00 PM.\nPlease confirm arrangements with the Front Office in advance.",
   },
   {
     icon: ConciergeBell,
@@ -70,7 +73,22 @@ const services = [
   {
     icon: Users,
     title: "Conference Facility",
-    text: "Conference facility available.",
+    text: "Conference facility available for residential and corporate events.",
+  },
+  {
+    icon: Dumbbell,
+    title: "Gym",
+    text: "A fully equipped gym facility for guests who wish to maintain their fitness and wellness routines during their stay.",
+  },
+  {
+    icon: UtensilsCrossed,
+    title: "Catering Services",
+    text: "Professional catering services available for the general public, offering high-quality meals for a variety of occasions and gatherings.",
+  },
+  {
+    icon: PartyPopper,
+    title: "Outdoor Events",
+    text: "We host outdoor events such as wedding receptions and end-of-year get-togethers, with dedicated event planning and execution.",
   },
 ];
 
