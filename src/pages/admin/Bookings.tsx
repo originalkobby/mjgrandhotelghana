@@ -96,7 +96,9 @@ function getPaymentDisplay(b: Booking): { label: string; isDash: boolean } {
   return { label: b.payment_status, isDash: false };
 }
 
-async function fetchBookings(statusFilter: string) {
+const SOURCE_OPTIONS = Object.keys(SOURCE_LABELS);
+
+async function fetchBookings(statusFilter: string, sourceFilter: string) {
   let query = supabase
     .from("bookings")
     .select("id, reference_code, status, payment_status, payment_method, booking_source, ota_reference, check_in, check_out, adults, children, final_total_ghs, special_requests, created_at, rooms(name), guests(full_name, email, phone)")
@@ -106,6 +108,9 @@ async function fetchBookings(statusFilter: string) {
   if (statusFilter !== "all") {
     query = query.eq("status", statusFilter as BookingStatus);
   }
+  if (sourceFilter !== "all") {
+    query = query.eq("booking_source", sourceFilter);
+  }
 
   const { data } = await query;
   return (data as unknown as Booking[]) ?? [];
@@ -114,6 +119,7 @@ async function fetchBookings(statusFilter: string) {
 export default function Bookings() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sourceFilter, setSourceFilter] = useState<string>("all");
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [newStatus, setNewStatus] = useState<BookingStatus | "">("");
   const [updating, setUpdating] = useState(false);
@@ -122,8 +128,8 @@ export default function Bookings() {
   const { user } = useAdminAuth();
 
   const { data: allBookings = [], isLoading: loading, isFetching } = useQuery({
-    queryKey: ["admin-bookings", statusFilter],
-    queryFn: () => fetchBookings(statusFilter),
+    queryKey: ["admin-bookings", statusFilter, sourceFilter],
+    queryFn: () => fetchBookings(statusFilter, sourceFilter),
     staleTime: 30_000,
   });
 
@@ -272,6 +278,19 @@ export default function Bookings() {
             {STATUS_OPTIONS.map((s) => (
               <SelectItem key={s} value={s} className="capitalize">
                 {s.replace("_", " ")}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={sourceFilter} onValueChange={setSourceFilter}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="Source" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Sources</SelectItem>
+            {SOURCE_OPTIONS.map((s) => (
+              <SelectItem key={s} value={s}>
+                {SOURCE_LABELS[s]}
               </SelectItem>
             ))}
           </SelectContent>
