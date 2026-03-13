@@ -119,6 +119,7 @@ async function fetchBookings(statusFilter: string, sourceFilter: string) {
 export default function Bookings() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sourceFilter, setSourceFilter] = useState<string>("all");
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [newStatus, setNewStatus] = useState<BookingStatus | "">("");
   const [updating, setUpdating] = useState(false);
