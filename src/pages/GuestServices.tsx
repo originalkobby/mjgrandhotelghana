@@ -14,6 +14,9 @@ import {
   QrCode,
   Clock,
   Droplets,
+  Dumbbell,
+  UtensilsCrossed,
+  PartyPopper,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
