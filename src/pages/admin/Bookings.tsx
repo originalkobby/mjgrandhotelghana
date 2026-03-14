@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Filter, RefreshCw, Download } from "lucide-react";
+import { Search, Filter, RefreshCw, Download, CalendarPlus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -37,6 +38,7 @@ interface Booking {
   payment_method: string | null;
   booking_source: string;
   ota_reference: string | null;
+  room_number: string | null;
   check_in: string;
   check_out: string;
   adults: number;
@@ -101,7 +103,7 @@ const SOURCE_OPTIONS = Object.keys(SOURCE_LABELS);
 async function fetchBookings(statusFilter: string, sourceFilter: string) {
   let query = supabase
     .from("bookings")
-    .select("id, reference_code, status, payment_status, payment_method, booking_source, ota_reference, check_in, check_out, adults, children, final_total_ghs, special_requests, created_at, rooms(name), guests(full_name, email, phone)")
+    .select("id, reference_code, status, payment_status, payment_method, booking_source, ota_reference, room_number, check_in, check_out, adults, children, final_total_ghs, special_requests, created_at, rooms(name), guests(full_name, email, phone)")
     .order("created_at", { ascending: false })
     .limit(100);
 
@@ -122,7 +124,14 @@ export default function Bookings() {
   const [sourceFilter, setSourceFilter] = useState<string>("all");
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [newStatus, setNewStatus] = useState<BookingStatus | "">("");
+  const [roomNumber, setRoomNumber] = useState("");
   const [updating, setUpdating] = useState(false);
+  // Extend checkout
+  const [showExtendDialog, setShowExtendDialog] = useState(false);
+  const [extendBooking, setExtendBooking] = useState<Booking | null>(null);
+  const [newCheckOutDate, setNewCheckOutDate] = useState("");
+  const [extending, setExtending] = useState(false);
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAdminAuth();
@@ -138,9 +147,11 @@ export default function Bookings() {
         const q = search.toLowerCase();
         return (
           b.reference_code.toLowerCase().includes(q) ||
+          b.ota_reference?.toLowerCase().includes(q) ||
           b.guests?.full_name?.toLowerCase().includes(q) ||
           b.guests?.email?.toLowerCase().includes(q) ||
-          b.guests?.phone?.toLowerCase().includes(q)
+          b.guests?.phone?.toLowerCase().includes(q) ||
+          b.room_number?.toLowerCase().includes(q)
         );
       })
     : allBookings;
@@ -152,9 +163,12 @@ export default function Bookings() {
     const oldStatus = selectedBooking.status;
 
     const updatePayload: any = { status: newStatus as BookingStatus };
-    // Auto-set payment_status to paid when completing a booking
     if (newStatus === "completed") {
       updatePayload.payment_status = "paid";
+    }
+    // Save room number if changed
+    if (roomNumber !== (selectedBooking.room_number ?? "")) {
+      updatePayload.room_number = roomNumber || null;
     }
 
     const { error } = await supabase
@@ -168,6 +182,9 @@ export default function Bookings() {
         old_status: oldStatus,
         new_status: newStatus,
         changed_by: user?.id || null,
+        note: roomNumber && roomNumber !== (selectedBooking.room_number ?? "")
+          ? `Room number assigned: ${roomNumber}`
+          : null,
       });
 
       // Decrement room_inventory when cancelling from a non-cancelled state
@@ -205,6 +222,7 @@ export default function Bookings() {
     setUpdating(false);
     setSelectedBooking(null);
     setNewStatus("");
+    setRoomNumber("");
 
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -214,16 +232,45 @@ export default function Bookings() {
     }
   };
 
+  const handleExtendCheckout = async () => {
+    if (!extendBooking || !newCheckOutDate) return;
+    setExtending(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("extend-checkout", {
+        body: { bookingId: extendBooking.id, newCheckOut: newCheckOutDate },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast({
+        title: "Checkout Extended",
+        description: `+${data.extraNights} night(s), +GH₵ ${data.extraCost}. New total: GH₵ ${data.newFinalTotal}`,
+      });
+      setShowExtendDialog(false);
+      setExtendBooking(null);
+      setNewCheckOutDate("");
+      queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setExtending(false);
+    }
+  };
+
   const exportCSV = () => {
     if (bookings.length === 0) return;
-    const headers = ["Reference", "Guest", "Email", "Room", "Check-in", "Check-out", "Adults", "Children", "Total (GHS)", "Status", "Source", "Payment", "Method", "Created"];
+    const headers = ["Reference", "OTA Ref", "Guest", "Email", "Room", "Room #", "Check-in", "Check-out", "Adults", "Children", "Total (GHS)", "Status", "Source", "Payment", "Method", "Created"];
     const rows = bookings.map((b) => {
       const pd = getPaymentDisplay(b);
       return [
         b.reference_code,
+        b.ota_reference ?? "",
         b.guests?.full_name ?? "",
         b.guests?.email ?? "",
         b.rooms?.name ?? "",
+        b.room_number ?? "",
         formatDateGB(b.check_in),
         formatDateGB(b.check_out),
         b.adults,
@@ -264,7 +311,7 @@ export default function Bookings() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by ref, name, or email…"
+            placeholder="Search ref, OTA ref, name, room #…"
             className="pl-10"
           />
         </div>
@@ -323,7 +370,7 @@ export default function Bookings() {
             <table className="w-full text-sm font-sans">
               <thead>
                 <tr className="border-b border-border">
-                  {["Ref", "Guest", "Room", "Check-in", "Check-out", "Guests", "Total", "Status", "Source", "Payment", "Method", "Actions"].map((h) => (
+                  {["Ref", "Guest", "Room", "Room #", "Check-in", "Check-out", "Guests", "Total", "Status", "Source", "Payment", "Method", "Actions"].map((h) => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       {h}
                     </th>
@@ -334,7 +381,7 @@ export default function Bookings() {
                 {loading ? (
                   Array.from({ length: 5 }).map((_, i) => (
                     <tr key={i} className="border-b border-border/50">
-                      {Array.from({ length: 12 }).map((_, j) => (
+                      {Array.from({ length: 13 }).map((_, j) => (
                         <td key={j} className="px-4 py-3">
                           <div className="h-4 bg-muted rounded animate-pulse" />
                         </td>
@@ -343,7 +390,7 @@ export default function Bookings() {
                   ))
                 ) : bookings.length === 0 ? (
                   <tr>
-                    <td colSpan={12} className="text-center py-12 text-muted-foreground">
+                    <td colSpan={13} className="text-center py-12 text-muted-foreground">
                       No bookings found
                     </td>
                   </tr>
@@ -358,12 +405,20 @@ export default function Bookings() {
                         transition={{ delay: i * 0.02 }}
                         className="border-b border-border/50 hover:bg-muted/30 transition-colors"
                       >
-                        <td className="px-4 py-3 font-mono text-xs">{b.reference_code}</td>
+                        <td className="px-4 py-3 font-mono text-xs">
+                          <div>{b.reference_code}</div>
+                          {b.ota_reference && (
+                            <div className="text-[10px] text-muted-foreground mt-0.5" title="OTA Reference">
+                              {b.ota_reference}
+                            </div>
+                          )}
+                        </td>
                         <td className="px-4 py-3">
                           <p className="font-medium text-foreground">{b.guests?.full_name ?? "—"}</p>
                           <p className="text-xs text-muted-foreground">{b.guests?.email ?? ""}</p>
                         </td>
                         <td className="px-4 py-3 text-foreground">{b.rooms?.name ?? "—"}</td>
+                        <td className="px-4 py-3 font-mono text-xs text-foreground">{b.room_number ?? "—"}</td>
                         <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{formatDateGB(b.check_in)}</td>
                         <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{formatDateGB(b.check_out)}</td>
                         <td className="px-4 py-3 text-muted-foreground">
@@ -395,17 +450,35 @@ export default function Bookings() {
                           {PAYMENT_METHOD_LABELS[b.payment_method ?? "pay_at_hotel"] ?? b.payment_method ?? "—"}
                         </td>
                         <td className="px-4 py-3">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-xs"
-                            onClick={() => {
-                              setSelectedBooking(b);
-                              setNewStatus(b.status);
-                            }}
-                          >
-                            Manage
-                          </Button>
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-xs"
+                              onClick={() => {
+                                setSelectedBooking(b);
+                                setNewStatus(b.status);
+                                setRoomNumber(b.room_number ?? "");
+                              }}
+                            >
+                              Manage
+                            </Button>
+                            {(b.status === "confirmed" || b.status === "completed") && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-xs"
+                                title="Extend checkout"
+                                onClick={() => {
+                                  setExtendBooking(b);
+                                  setNewCheckOutDate("");
+                                  setShowExtendDialog(true);
+                                }}
+                              >
+                                <CalendarPlus className="w-3.5 h-3.5" />
+                              </Button>
+                            )}
+                          </div>
                         </td>
                       </motion.tr>
                     );
@@ -417,8 +490,8 @@ export default function Bookings() {
         </CardContent>
       </Card>
 
-      {/* Status Update Dialog */}
-      <Dialog open={!!selectedBooking} onOpenChange={(o) => !o && setSelectedBooking(null)}>
+      {/* Status Update / Room Assignment Dialog */}
+      <Dialog open={!!selectedBooking} onOpenChange={(o) => { if (!o) { setSelectedBooking(null); setRoomNumber(""); } }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="font-serif">
@@ -471,6 +544,12 @@ export default function Bookings() {
                     {SOURCE_LABELS[selectedBooking.booking_source] ?? selectedBooking.booking_source}
                   </Badge>
                 </div>
+                {selectedBooking.ota_reference && (
+                  <div>
+                    <p className="text-xs uppercase tracking-wider mb-1">OTA Reference</p>
+                    <p className="text-foreground font-mono text-xs">{selectedBooking.ota_reference}</p>
+                  </div>
+                )}
                 <div>
                   <p className="text-xs uppercase tracking-wider mb-1">Email</p>
                   <p className="text-foreground">{selectedBooking.guests?.email ?? "—"}</p>
@@ -483,6 +562,20 @@ export default function Bookings() {
                   <p className="text-foreground bg-muted p-2 rounded text-xs">{selectedBooking.special_requests}</p>
                 </div>
               )}
+
+              {/* Room Number Assignment */}
+              <div>
+                <Label htmlFor="room-number" className="text-xs uppercase tracking-wider text-muted-foreground">
+                  Room Number
+                </Label>
+                <Input
+                  id="room-number"
+                  value={roomNumber}
+                  onChange={(e) => setRoomNumber(e.target.value)}
+                  placeholder="e.g. 101, 205A"
+                  className="mt-1"
+                />
+              </div>
 
               <div>
                 <p className="text-xs uppercase tracking-wider mb-2 text-muted-foreground">Update Status</p>
@@ -503,15 +596,61 @@ export default function Bookings() {
           )}
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setSelectedBooking(null)}>
+            <Button variant="outline" onClick={() => { setSelectedBooking(null); setRoomNumber(""); }}>
               Cancel
             </Button>
             <Button
               onClick={handleStatusUpdate}
-              disabled={updating || newStatus === selectedBooking?.status}
+              disabled={updating || (newStatus === selectedBooking?.status && roomNumber === (selectedBooking?.room_number ?? ""))}
               className="bg-accent text-accent-foreground hover:bg-accent/90"
             >
-              {updating ? "Updating…" : "Update Status"}
+              {updating ? "Updating…" : "Save Changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Extend Checkout Dialog */}
+      <Dialog open={showExtendDialog} onOpenChange={(o) => { if (!o) { setShowExtendDialog(false); setExtendBooking(null); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-serif flex items-center gap-2">
+              <CalendarPlus className="w-5 h-5 text-accent" />
+              Extend Checkout
+            </DialogTitle>
+            <DialogDescription className="font-sans">
+              {extendBooking?.reference_code} — {extendBooking?.guests?.full_name}
+              <br />
+              Current check-out: <strong>{extendBooking ? formatDateGB(extendBooking.check_out) : ""}</strong>
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div>
+              <Label htmlFor="new-checkout" className="text-sm text-muted-foreground">
+                New Check-out Date
+              </Label>
+              <Input
+                id="new-checkout"
+                type="date"
+                value={newCheckOutDate}
+                onChange={(e) => setNewCheckOutDate(e.target.value)}
+                min={extendBooking ? new Date(new Date(extendBooking.check_out).getTime() + 86400000).toISOString().split("T")[0] : ""}
+                className="mt-1"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowExtendDialog(false); setExtendBooking(null); }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleExtendCheckout}
+              disabled={extending || !newCheckOutDate}
+              className="bg-accent text-accent-foreground hover:bg-accent/90"
+            >
+              {extending ? "Extending…" : "Extend Checkout"}
             </Button>
           </DialogFooter>
         </DialogContent>

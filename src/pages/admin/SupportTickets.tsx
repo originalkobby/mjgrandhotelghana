@@ -87,6 +87,7 @@ export default function SupportTickets() {
               <TableRow>
                 <TableHead>Ref</TableHead>
                 <TableHead>Guest</TableHead>
+                <TableHead>Room #</TableHead>
                 <TableHead>Issue</TableHead>
                 <TableHead>Urgency</TableHead>
                 <TableHead>Status</TableHead>
@@ -104,6 +105,7 @@ export default function SupportTickets() {
                       <p className="text-xs text-muted-foreground">{(t.guests as any)?.email || ""}</p>
                     </div>
                   </TableCell>
+                  <TableCell className="font-mono text-xs">{(t as any).room_number || "—"}</TableCell>
                   <TableCell className="max-w-xs truncate text-sm">{t.issue}</TableCell>
                   <TableCell>
                     <Badge variant={URGENCY_COLORS[t.urgency] || "outline"} className="capitalize">{t.urgency}</Badge>
@@ -129,7 +131,7 @@ export default function SupportTickets() {
               ))}
               {tickets?.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No support tickets</TableCell>
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">No support tickets</TableCell>
                 </TableRow>
               )}
             </TableBody>

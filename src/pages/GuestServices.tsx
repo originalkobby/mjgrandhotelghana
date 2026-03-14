@@ -195,7 +195,7 @@ export default function GuestServices() {
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, margin: "-60px" }}
-                className="group bg-card rounded-[18px] border border-border p-7 shadow-sm hover:shadow-lg hover:-translate-y-1.5 transition-all duration-300"
+                className="group bg-card rounded-xl border border-border p-5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300"
               >
                 <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center mb-5 group-hover:bg-gold/10 transition-colors duration-300">
                   <s.icon className="w-5 h-5 text-gold" />
