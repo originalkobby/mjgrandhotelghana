@@ -152,6 +152,7 @@ export type Database = {
           promo_code: string | null
           reference_code: string
           room_id: string
+          room_number: string | null
           special_requests: string | null
           status: Database["public"]["Enums"]["booking_status"]
           updated_at: string
@@ -180,6 +181,7 @@ export type Database = {
           promo_code?: string | null
           reference_code: string
           room_id: string
+          room_number?: string | null
           special_requests?: string | null
           status?: Database["public"]["Enums"]["booking_status"]
           updated_at?: string
@@ -208,6 +210,7 @@ export type Database = {
           promo_code?: string | null
           reference_code?: string
           room_id?: string
+          room_number?: string | null
           special_requests?: string | null
           status?: Database["public"]["Enums"]["booking_status"]
           updated_at?: string
@@ -641,6 +644,7 @@ export type Database = {
           id: string
           issue: string
           reference_id: string
+          room_number: string | null
           status: string
           urgency: string
         }
@@ -650,6 +654,7 @@ export type Database = {
           id?: string
           issue: string
           reference_id: string
+          room_number?: string | null
           status?: string
           urgency?: string
         }
@@ -659,6 +664,7 @@ export type Database = {
           id?: string
           issue?: string
           reference_id?: string
+          room_number?: string | null
           status?: string
           urgency?: string
         }

@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.ota-booking-webhook]
 verify_jwt = false
+
+[functions.extend-checkout]
+verify_jwt = false

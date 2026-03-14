@@ -195,13 +195,13 @@ export default function GuestServices() {
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, margin: "-60px" }}
-                className="group bg-card rounded-[18px] border border-border p-7 shadow-sm hover:shadow-lg hover:-translate-y-1.5 transition-all duration-300"
+                className="group bg-card rounded-xl border border-border p-5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300"
               >
-                <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center mb-5 group-hover:bg-gold/10 transition-colors duration-300">
-                  <s.icon className="w-5 h-5 text-gold" />
+                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center mb-4 group-hover:bg-gold/10 transition-colors duration-300">
+                  <s.icon className="w-4 h-4 text-gold" />
                 </div>
-                <h3 className="font-serif text-lg text-foreground mb-2">{s.title}</h3>
-                <p className="font-sans text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                <h3 className="font-serif text-base text-foreground mb-1.5">{s.title}</h3>
+                <p className="font-sans text-xs text-muted-foreground leading-relaxed whitespace-pre-line">
                   {s.text}
                 </p>
               </motion.div>

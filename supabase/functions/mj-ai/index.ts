@@ -934,6 +934,32 @@ async function cancelBooking(supabase: any, referenceCode: string) {
 
   await supabase.from("bookings").update({ status: "cancelled" }).eq("id", booking.id);
 
+  // Decrement room_inventory for each night
+  const { data: fullBooking } = await supabase
+    .from("bookings")
+    .select("room_id, check_in, check_out")
+    .eq("id", booking.id)
+    .single();
+
+  if (fullBooking) {
+    const ciDate = new Date(fullBooking.check_in);
+    const coDate = new Date(fullBooking.check_out);
+    const dt = new Date(ciDate);
+    while (dt < coDate) {
+      const dateStr = dt.toISOString().split("T")[0];
+      const { data: inv } = await supabase
+        .from("room_inventory")
+        .select("id, booked_count")
+        .eq("room_id", fullBooking.room_id)
+        .eq("date", dateStr)
+        .maybeSingle();
+      if (inv && inv.booked_count > 0) {
+        await supabase.from("room_inventory").update({ booked_count: inv.booked_count - 1 }).eq("id", inv.id);
+      }
+      dt.setDate(dt.getDate() + 1);
+    }
+  }
+
   return { success: true, reference_code: ref, message: `Booking ${ref} has been cancelled successfully.` };
 }
 
