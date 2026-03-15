@@ -390,7 +390,7 @@ export default function Bookings() {
                   ))
                 ) : bookings.length === 0 ? (
                   <tr>
-                    <td colSpan={13} className="text-center py-12 text-muted-foreground">
+                    <td colSpan={12} className="text-center py-12 text-muted-foreground">
                       No bookings found
                     </td>
                   </tr>
