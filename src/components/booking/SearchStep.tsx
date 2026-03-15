@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CalendarIcon, Users, ChevronDown, Minus, Plus, Tag } from "lucide-react";
+import { CalendarIcon, Users, ChevronDown, Minus, Plus, Tag, Sparkles } from "lucide-react";
 import { format, addDays, differenceInDays } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import type { BookingSearch } from "@/hooks/useBooking";
 
 interface Props {
