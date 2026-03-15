@@ -12,7 +12,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Plus, Pencil, BedDouble, RefreshCw, ImageIcon } from "lucide-react";
+import { Plus, Pencil, BedDouble, RefreshCw } from "lucide-react";
+import ImageUpload from "@/components/admin/ImageUpload";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Room = Tables<"rooms">;
@@ -185,17 +186,13 @@ export default function AdminRooms() {
                   <Input value={form.amenities} onChange={(e) => set("amenities", e.target.value)} placeholder="WiFi, Pool, AC" />
                 </div>
                 <div>
-                  <Label className="flex items-center gap-1.5">
-                    <ImageIcon className="w-3.5 h-3.5" /> Room Image URL
-                  </Label>
-                  <Input
+                  <Label>Room Image</Label>
+                  <ImageUpload
                     value={form.image_url}
-                    onChange={(e) => set("image_url", e.target.value)}
-                    placeholder="https://example.com/room-photo.jpg"
+                    onChange={(url) => set("image_url", url)}
+                    folder="rooms"
+                    label="Upload Room Photo"
                   />
-                  {form.image_url && (
-                    <img src={form.image_url} alt="Preview" className="mt-2 h-24 w-full object-cover rounded-md border border-border" />
-                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <Switch checked={form.is_active} onCheckedChange={(v) => set("is_active", v)} />

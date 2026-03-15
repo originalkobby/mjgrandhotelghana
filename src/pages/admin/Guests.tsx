@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, RefreshCw, Star, Crown, Clock, LogIn, LogOut } from "lucide-react";
+import { Search, RefreshCw, Star, Crown, Clock, LogIn, LogOut, DoorOpen } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,7 @@ interface GuestBooking {
   final_total_ghs: number;
   actual_check_in: string | null;
   actual_check_out: string | null;
+  room_number: string | null;
   rooms: { name: string } | null;
 }
 
@@ -52,7 +53,7 @@ async function fetchGuests() {
 async function fetchGuestBookings(guestId: string) {
   const { data } = await supabase
     .from("bookings")
-    .select("id, reference_code, status, check_in, check_out, final_total_ghs, actual_check_in, actual_check_out, rooms(name)")
+    .select("id, reference_code, status, check_in, check_out, final_total_ghs, actual_check_in, actual_check_out, room_number, rooms(name)")
     .eq("guest_id", guestId)
     .order("created_at", { ascending: false })
     .limit(20);
@@ -66,6 +67,29 @@ const STATUS_COLORS: Record<string, string> = {
   completed: "bg-accent/20 text-accent",
   no_show: "bg-muted text-muted-foreground",
 };
+
+// SVG flag components for common nationalities based on phone codes
+function getFlagForPhone(phone: string | null): string | null {
+  if (!phone) return null;
+  const cleaned = phone.replace(/\s+/g, "");
+  if (cleaned.startsWith("+233")) return "🇬🇭";
+  if (cleaned.startsWith("+1")) return "🇺🇸";
+  if (cleaned.startsWith("+44")) return "🇬🇧";
+  if (cleaned.startsWith("+234")) return "🇳🇬";
+  if (cleaned.startsWith("+27")) return "🇿🇦";
+  if (cleaned.startsWith("+49")) return "🇩🇪";
+  if (cleaned.startsWith("+33")) return "🇫🇷";
+  if (cleaned.startsWith("+91")) return "🇮🇳";
+  if (cleaned.startsWith("+86")) return "🇨🇳";
+  if (cleaned.startsWith("+81")) return "🇯🇵";
+  if (cleaned.startsWith("+61")) return "🇦🇺";
+  if (cleaned.startsWith("+971")) return "🇦🇪";
+  if (cleaned.startsWith("+254")) return "🇰🇪";
+  if (cleaned.startsWith("+225")) return "🇨🇮";
+  if (cleaned.startsWith("+228")) return "🇹🇬";
+  if (cleaned.startsWith("+229")) return "🇧🇯";
+  return null;
+}
 
 export default function Guests() {
   const [search, setSearch] = useState("");
@@ -153,6 +177,15 @@ export default function Guests() {
     }
   };
 
+  // Get latest room # for a guest from their bookings
+  const getGuestRoomNumber = (guestId: string): string | null => {
+    if (selectedGuest?.id === guestId && guestBookings.length > 0) {
+      const activeBooking = guestBookings.find(b => b.status === "confirmed" || b.status === "completed");
+      return activeBooking?.room_number ?? null;
+    }
+    return null;
+  };
+
   const rating = selectedGuest?.preferences?.last_chat_rating;
   const refreshing = isLoading || isFetching;
 
@@ -194,7 +227,7 @@ export default function Guests() {
             <table className="w-full text-sm font-sans">
               <thead>
                 <tr className="border-b border-border">
-                  {["Name", "Email", "Phone", "VIP", "Joined", "Actions"].map((h) => (
+                  {["Name", "Email", "Phone", "VIP", "Date", "Actions"].map((h) => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       {h}
                     </th>
@@ -217,49 +250,57 @@ export default function Guests() {
                     <td colSpan={6} className="text-center py-12 text-muted-foreground">No guests found</td>
                   </tr>
                 ) : (
-                  guests.map((g, i) => (
-                    <motion.tr
-                      key={g.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: i * 0.02 }}
-                      className="border-b border-border/50 hover:bg-muted/30 transition-colors"
-                    >
-                      <td className="px-4 py-3 font-medium text-foreground">
-                        <div className="flex items-center gap-2">
-                          {g.full_name ?? "—"}
-                          {g.vip && <Crown className="w-3.5 h-3.5 text-accent" />}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground">{g.email ?? "—"}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{g.phone ?? "—"}</td>
-                      <td className="px-4 py-3">
-                        <button
-                          onClick={() => toggleVIP(g)}
-                          className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
-                            g.vip
-                              ? "bg-accent/20 text-accent border-accent/30"
-                              : "bg-muted text-muted-foreground border-border hover:border-accent/50"
-                          }`}
-                        >
-                          {g.vip ? "VIP" : "Regular"}
-                        </button>
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
-                        {formatDateGB(g.created_at)}
-                      </td>
-                      <td className="px-4 py-3">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-xs"
-                          onClick={() => setSelectedGuest(g)}
-                        >
-                          View
-                        </Button>
-                      </td>
-                    </motion.tr>
-                  ))
+                  guests.map((g, i) => {
+                    const flag = getFlagForPhone(g.phone);
+                    return (
+                      <motion.tr
+                        key={g.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: i * 0.02 }}
+                        className="border-b border-border/50 hover:bg-muted/30 transition-colors"
+                      >
+                        <td className="px-4 py-3 font-medium text-foreground">
+                          <div className="flex items-center gap-2">
+                            {g.full_name ?? "—"}
+                            {g.vip && <Crown className="w-3.5 h-3.5 text-accent" />}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-muted-foreground">{g.email ?? "—"}</td>
+                        <td className="px-4 py-3 text-muted-foreground">
+                          <span className="flex items-center gap-1.5">
+                            {flag && <span className="text-base">{flag}</span>}
+                            {g.phone ?? "—"}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <button
+                            onClick={() => toggleVIP(g)}
+                            className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
+                              g.vip
+                                ? "bg-accent/20 text-accent border-accent/30"
+                                : "bg-muted text-muted-foreground border-border hover:border-accent/50"
+                            }`}
+                          >
+                            {g.vip ? "VIP" : "Regular"}
+                          </button>
+                        </td>
+                        <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
+                          {formatDateGB(g.created_at)}
+                        </td>
+                        <td className="px-4 py-3">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs"
+                            onClick={() => setSelectedGuest(g)}
+                          >
+                            View
+                          </Button>
+                        </td>
+                      </motion.tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -284,7 +325,7 @@ export default function Guests() {
             <div className="space-y-4 font-sans text-sm">
               <div className="flex items-center gap-4">
                 <div>
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Joined</p>
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Date</p>
                   <p className="text-foreground">{formatDateGB(selectedGuest.created_at)}</p>
                 </div>
                 {rating && (
@@ -310,7 +351,7 @@ export default function Guests() {
               </div>
 
               <div>
-                <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Booking History & Check-in/out</p>
+                <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Booking History & Room Assignment</p>
                 {bookingsLoading ? (
                   <div className="space-y-2">
                     {[1, 2].map((i) => (
@@ -337,6 +378,15 @@ export default function Guests() {
                             </Badge>
                           </div>
                         </div>
+
+                        {/* Room Number */}
+                        {b.room_number && (
+                          <div className="flex items-center gap-1.5 text-xs">
+                            <DoorOpen className="w-3 h-3 text-primary" />
+                            <span className="text-muted-foreground">Room #:</span>
+                            <span className="text-foreground font-medium font-mono">{b.room_number}</span>
+                          </div>
+                        )}
 
                         {/* Check-in/out times */}
                         <div className="grid grid-cols-2 gap-2 text-xs">

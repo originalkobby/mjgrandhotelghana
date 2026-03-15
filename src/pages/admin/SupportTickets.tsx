@@ -91,7 +91,7 @@ export default function SupportTickets() {
                 <TableHead>Issue</TableHead>
                 <TableHead>Urgency</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Date</TableHead>
+                <TableHead>Date & Time</TableHead>
                 <TableHead className="w-36">Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -113,7 +113,9 @@ export default function SupportTickets() {
                   <TableCell>
                     <Badge variant={STATUS_COLORS[t.status] || "outline"} className="capitalize">{t.status.replace("_", " ")}</Badge>
                   </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{format(parseISO(t.created_at), "dd MMM yyyy")}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                    {format(parseISO(t.created_at), "dd/MM/yyyy HH:mm")}
+                  </TableCell>
                   <TableCell>
                     <Select value={t.status} onValueChange={(v) => updateStatus.mutate({ id: t.id, status: v })}>
                       <SelectTrigger className="h-8 text-xs">

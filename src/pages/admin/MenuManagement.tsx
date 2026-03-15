@@ -12,7 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, UtensilsCrossed, RefreshCw, ImageIcon } from "lucide-react";
+import { Plus, Pencil, Trash2, UtensilsCrossed, RefreshCw } from "lucide-react";
+import ImageUpload from "@/components/admin/ImageUpload";
 
 const CATEGORIES = [
   "Hot Appetizers", "Salads", "Chicken Meals", "Kids Meals", "Fish Meals",
@@ -208,17 +209,13 @@ export default function AdminMenu() {
                   </div>
                 </div>
                 <div>
-                  <Label className="flex items-center gap-1.5">
-                    <ImageIcon className="w-3.5 h-3.5" /> Image URL (optional)
-                  </Label>
-                  <Input
+                  <Label>Dish Image</Label>
+                  <ImageUpload
                     value={form.image_url}
-                    onChange={(e) => set("image_url", e.target.value)}
-                    placeholder="https://example.com/dish-photo.jpg"
+                    onChange={(url) => set("image_url", url)}
+                    folder="menu"
+                    label="Upload Dish Photo"
                   />
-                  {form.image_url && (
-                    <img src={form.image_url} alt="Preview" className="mt-2 h-20 w-full object-cover rounded-md border border-border" />
-                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <Switch checked={form.is_active} onCheckedChange={(v) => set("is_active", v)} />
