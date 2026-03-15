@@ -22,6 +22,21 @@ export default function SearchStep({ search, onUpdate, onNext }: Props) {
   const [showPromo, setShowPromo] = useState(false);
   const [guestOpen, setGuestOpen] = useState(false);
 
+  // Fetch active promotions
+  const { data: activePromos = [] } = useQuery({
+    queryKey: ["public-active-promos"],
+    queryFn: async () => {
+      const today = new Date().toISOString().split("T")[0];
+      const { data } = await supabase
+        .from("promotions")
+        .select("code, description, discount_type, discount_value, end_date")
+        .eq("is_active", true);
+      // Filter valid promos
+      return (data ?? []).filter((p: any) => !p.end_date || p.end_date >= today);
+    },
+    staleTime: 60_000,
+  });
+
   const today = new Date();
   const checkIn = search.checkIn ?? today;
   const checkOut = search.checkOut ?? addDays(today, 1);

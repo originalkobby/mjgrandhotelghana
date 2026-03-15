@@ -338,12 +338,12 @@ export default function Promotions() {
                       <TableCell className="font-sans text-sm hidden md:table-cell">
                         {p.start_date && p.end_date ? (
                           <span className="text-muted-foreground">
-                            {format(new Date(p.start_date), "MMM d")} – {format(new Date(p.end_date), "MMM d, yyyy")}
+                            {format(new Date(p.start_date), "dd/MM/yyyy")} – {format(new Date(p.end_date), "dd/MM/yyyy")}
                           </span>
                         ) : p.start_date ? (
-                          <span className="text-muted-foreground">From {format(new Date(p.start_date), "MMM d, yyyy")}</span>
+                          <span className="text-muted-foreground">From {format(new Date(p.start_date), "dd/MM/yyyy")}</span>
                         ) : p.end_date ? (
-                          <span className="text-muted-foreground">Until {format(new Date(p.end_date), "MMM d, yyyy")}</span>
+                          <span className="text-muted-foreground">Until {format(new Date(p.end_date), "dd/MM/yyyy")}</span>
                         ) : (
                           <span className="text-muted-foreground/50">No dates set</span>
                         )}
