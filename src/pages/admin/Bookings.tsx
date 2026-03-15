@@ -418,7 +418,6 @@ export default function Bookings() {
                           <p className="text-xs text-muted-foreground">{b.guests?.email ?? ""}</p>
                         </td>
                         <td className="px-4 py-3 text-foreground">{b.rooms?.name ?? "—"}</td>
-                        <td className="px-4 py-3 font-mono text-xs text-foreground">{b.room_number ?? "—"}</td>
                         <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{formatDateGB(b.check_in)}</td>
                         <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{formatDateGB(b.check_out)}</td>
                         <td className="px-4 py-3 text-muted-foreground">
