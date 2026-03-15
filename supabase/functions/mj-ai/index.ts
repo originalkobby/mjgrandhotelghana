@@ -1263,7 +1263,7 @@ serve(async (req) => {
         const args = JSON.parse(tc.function.arguments);
 
         if (tc.function.name === "create_support_ticket") {
-          result = await createSupportTicket(supabase, guest_id, args.issue, args.urgency);
+          result = await createSupportTicket(supabase, guest_id, args.issue, args.urgency, args.room_number);
         } else if (tc.function.name === "search_available_rooms") {
           result = await searchAvailableRooms(
             supabase,
