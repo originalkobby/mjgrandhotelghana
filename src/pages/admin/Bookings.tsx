@@ -370,7 +370,7 @@ export default function Bookings() {
             <table className="w-full text-sm font-sans">
               <thead>
                 <tr className="border-b border-border">
-                  {["Ref", "Guest", "Room", "Room #", "Check-in", "Check-out", "Guests", "Total", "Status", "Source", "Payment", "Method", "Actions"].map((h) => (
+                  {["Ref", "Guest", "Room", "Check-in", "Check-out", "Guests", "Total", "Status", "Source", "Payment", "Method", "Actions"].map((h) => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       {h}
                     </th>
@@ -381,7 +381,7 @@ export default function Bookings() {
                 {loading ? (
                   Array.from({ length: 5 }).map((_, i) => (
                     <tr key={i} className="border-b border-border/50">
-                      {Array.from({ length: 13 }).map((_, j) => (
+                      {Array.from({ length: 12 }).map((_, j) => (
                         <td key={j} className="px-4 py-3">
                           <div className="h-4 bg-muted rounded animate-pulse" />
                         </td>
@@ -390,7 +390,7 @@ export default function Bookings() {
                   ))
                 ) : bookings.length === 0 ? (
                   <tr>
-                    <td colSpan={13} className="text-center py-12 text-muted-foreground">
+                    <td colSpan={12} className="text-center py-12 text-muted-foreground">
                       No bookings found
                     </td>
                   </tr>
@@ -418,7 +418,6 @@ export default function Bookings() {
                           <p className="text-xs text-muted-foreground">{b.guests?.email ?? ""}</p>
                         </td>
                         <td className="px-4 py-3 text-foreground">{b.rooms?.name ?? "—"}</td>
-                        <td className="px-4 py-3 font-mono text-xs text-foreground">{b.room_number ?? "—"}</td>
                         <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{formatDateGB(b.check_in)}</td>
                         <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{formatDateGB(b.check_out)}</td>
                         <td className="px-4 py-3 text-muted-foreground">

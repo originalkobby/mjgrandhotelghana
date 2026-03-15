@@ -76,7 +76,8 @@ EMOTIONAL INTELLIGENCE:
 
 ESCALATION RULES:
 When encountering: repeated anger, legal threats, refund requests, safety concerns, payment disputes, VIP issues, or system uncertainty:
-- Use the create_support_ticket tool
+- ALWAYS ask the guest for their room number before creating a ticket — say "May I have your room number so our team can locate you quickly?"
+- Use the create_support_ticket tool with the room_number
 - Say: "I'm escalating this to our Guest Relations Manager. You'll receive contact within 10 minutes."
 - Provide the reference ID from the ticket
 
@@ -316,7 +317,7 @@ const TOOLS = [
     function: {
       name: "create_support_ticket",
       description:
-        "Create an escalation/support ticket for a guest issue that needs human attention",
+        "Create an escalation/support ticket for a guest issue that needs human attention. Always ask for the guest's room number before creating a ticket.",
       parameters: {
         type: "object",
         properties: {
@@ -328,6 +329,10 @@ const TOOLS = [
             type: "string",
             enum: ["low", "medium", "high", "critical"],
             description: "Urgency level",
+          },
+          room_number: {
+            type: "string",
+            description: "The guest's room number for the team to locate them",
           },
         },
         required: ["issue", "urgency"],
@@ -571,15 +576,19 @@ async function createSupportTicket(
   supabase: any,
   guestId: string | null,
   issue: string,
-  urgency: string
+  urgency: string,
+  roomNumber?: string
 ) {
   const referenceId = `MJ-${Math.floor(10000 + Math.random() * 90000)}`;
-  const { data, error } = await supabase.from("support_tickets").insert({
+  const insertPayload: any = {
     guest_id: guestId,
     issue,
     urgency,
     reference_id: referenceId,
-  }).select().single();
+  };
+  if (roomNumber) insertPayload.room_number = roomNumber;
+
+  const { data, error } = await supabase.from("support_tickets").insert(insertPayload).select().single();
 
   if (error) {
     console.error("Error creating ticket:", error);
@@ -1255,7 +1264,7 @@ serve(async (req) => {
         const args = JSON.parse(tc.function.arguments);
 
         if (tc.function.name === "create_support_ticket") {
-          result = await createSupportTicket(supabase, guest_id, args.issue, args.urgency);
+          result = await createSupportTicket(supabase, guest_id, args.issue, args.urgency, args.room_number);
         } else if (tc.function.name === "search_available_rooms") {
           result = await searchAvailableRooms(
             supabase,
