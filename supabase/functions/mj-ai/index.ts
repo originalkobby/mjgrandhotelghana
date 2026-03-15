@@ -316,7 +316,7 @@ const TOOLS = [
     function: {
       name: "create_support_ticket",
       description:
-        "Create an escalation/support ticket for a guest issue that needs human attention",
+        "Create an escalation/support ticket for a guest issue that needs human attention. Always ask for the guest's room number before creating a ticket.",
       parameters: {
         type: "object",
         properties: {
@@ -328,6 +328,10 @@ const TOOLS = [
             type: "string",
             enum: ["low", "medium", "high", "critical"],
             description: "Urgency level",
+          },
+          room_number: {
+            type: "string",
+            description: "The guest's room number for the team to locate them",
           },
         },
         required: ["issue", "urgency"],
