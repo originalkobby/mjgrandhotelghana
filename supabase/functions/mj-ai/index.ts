@@ -575,15 +575,19 @@ async function createSupportTicket(
   supabase: any,
   guestId: string | null,
   issue: string,
-  urgency: string
+  urgency: string,
+  roomNumber?: string
 ) {
   const referenceId = `MJ-${Math.floor(10000 + Math.random() * 90000)}`;
-  const { data, error } = await supabase.from("support_tickets").insert({
+  const insertPayload: any = {
     guest_id: guestId,
     issue,
     urgency,
     reference_id: referenceId,
-  }).select().single();
+  };
+  if (roomNumber) insertPayload.room_number = roomNumber;
+
+  const { data, error } = await supabase.from("support_tickets").insert(insertPayload).select().single();
 
   if (error) {
     console.error("Error creating ticket:", error);
