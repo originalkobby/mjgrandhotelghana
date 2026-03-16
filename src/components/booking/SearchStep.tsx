@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CalendarIcon, Users, ChevronDown, Minus, Plus, Tag, Sparkles } from "lucide-react";
+import { CalendarIcon, Users, ChevronDown, Minus, Plus, Tag } from "lucide-react";
 import { format, addDays, differenceInDays } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -8,8 +8,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import type { BookingSearch } from "@/hooks/useBooking";
 
 interface Props {
@@ -22,20 +20,6 @@ export default function SearchStep({ search, onUpdate, onNext }: Props) {
   const [showPromo, setShowPromo] = useState(false);
   const [guestOpen, setGuestOpen] = useState(false);
 
-  // Fetch active promotions
-  const { data: activePromos = [] } = useQuery({
-    queryKey: ["public-active-promos"],
-    queryFn: async () => {
-      const today = new Date().toISOString().split("T")[0];
-      const { data } = await supabase
-        .from("promotions")
-        .select("code, description, discount_type, discount_value, end_date")
-        .eq("is_active", true);
-      // Filter valid promos
-      return (data ?? []).filter((p: any) => !p.end_date || p.end_date >= today);
-    },
-    staleTime: 60_000,
-  });
 
   const today = new Date();
   const checkIn = search.checkIn ?? today;
@@ -174,30 +158,6 @@ export default function SearchStep({ search, onUpdate, onNext }: Props) {
           </Popover>
         </div>
 
-        {/* Active Promotions Banner */}
-        {activePromos.length > 0 && (
-          <div className="space-y-2">
-            <p className="font-sans text-xs font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-accent" /> Active Offers
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {activePromos.map((p: any) => (
-                <button
-                  key={p.code}
-                  onClick={() => {
-                    onUpdate({ promoCode: p.code });
-                    setShowPromo(true);
-                  }}
-                  className="flex items-center gap-1.5 text-xs border border-accent/30 bg-accent/10 text-accent rounded-full px-3 py-1.5 hover:bg-accent/20 transition-colors font-sans"
-                  title={p.description || undefined}
-                >
-                  <Tag className="w-3 h-3" />
-                  {p.code} — {p.discount_type === "percentage" ? `${p.discount_value}% off` : `GH₵ ${p.discount_value} off`}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Promo code toggle */}
         <div>
