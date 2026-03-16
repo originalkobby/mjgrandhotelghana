@@ -174,30 +174,6 @@ export default function SearchStep({ search, onUpdate, onNext }: Props) {
           </Popover>
         </div>
 
-        {/* Active Promotions Banner */}
-        {activePromos.length > 0 && (
-          <div className="space-y-2">
-            <p className="font-sans text-xs font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-accent" /> Active Offers
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {activePromos.map((p: any) => (
-                <button
-                  key={p.code}
-                  onClick={() => {
-                    onUpdate({ promoCode: p.code });
-                    setShowPromo(true);
-                  }}
-                  className="flex items-center gap-1.5 text-xs border border-accent/30 bg-accent/10 text-accent rounded-full px-3 py-1.5 hover:bg-accent/20 transition-colors font-sans"
-                  title={p.description || undefined}
-                >
-                  <Tag className="w-3 h-3" />
-                  {p.code} — {p.discount_type === "percentage" ? `${p.discount_value}% off` : `GH₵ ${p.discount_value} off`}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Promo code toggle */}
         <div>
