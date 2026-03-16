@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import FlagIcon, { getIsoFromPhone } from "@/components/FlagIcon";
 import { Search, RefreshCw, Star, Crown, Clock, LogIn, LogOut, DoorOpen } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -69,27 +70,6 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 // SVG flag components for common nationalities based on phone codes
-function getFlagForPhone(phone: string | null): string | null {
-  if (!phone) return null;
-  const cleaned = phone.replace(/\s+/g, "");
-  if (cleaned.startsWith("+233")) return "🇬🇭";
-  if (cleaned.startsWith("+1")) return "🇺🇸";
-  if (cleaned.startsWith("+44")) return "🇬🇧";
-  if (cleaned.startsWith("+234")) return "🇳🇬";
-  if (cleaned.startsWith("+27")) return "🇿🇦";
-  if (cleaned.startsWith("+49")) return "🇩🇪";
-  if (cleaned.startsWith("+33")) return "🇫🇷";
-  if (cleaned.startsWith("+91")) return "🇮🇳";
-  if (cleaned.startsWith("+86")) return "🇨🇳";
-  if (cleaned.startsWith("+81")) return "🇯🇵";
-  if (cleaned.startsWith("+61")) return "🇦🇺";
-  if (cleaned.startsWith("+971")) return "🇦🇪";
-  if (cleaned.startsWith("+254")) return "🇰🇪";
-  if (cleaned.startsWith("+225")) return "🇨🇮";
-  if (cleaned.startsWith("+228")) return "🇹🇬";
-  if (cleaned.startsWith("+229")) return "🇧🇯";
-  return null;
-}
 
 export default function Guests() {
   const [search, setSearch] = useState("");
@@ -251,7 +231,7 @@ export default function Guests() {
                   </tr>
                 ) : (
                   guests.map((g, i) => {
-                    const flag = getFlagForPhone(g.phone);
+                    const isoCode = getIsoFromPhone(g.phone);
                     return (
                       <motion.tr
                         key={g.id}
@@ -269,7 +249,7 @@ export default function Guests() {
                         <td className="px-4 py-3 text-muted-foreground">{g.email ?? "—"}</td>
                         <td className="px-4 py-3 text-muted-foreground">
                           <span className="flex items-center gap-1.5">
-                            {flag && <span className="text-base">{flag}</span>}
+                            {isoCode && <FlagIcon code={isoCode} size={16} />}
                             {g.phone ?? "—"}
                           </span>
                         </td>
