@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CalendarIcon, Users, ChevronDown, Minus, Plus, Tag, Sparkles } from "lucide-react";
+import { CalendarIcon, Users, ChevronDown, Minus, Plus, Tag } from "lucide-react";
 import { format, addDays, differenceInDays } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
