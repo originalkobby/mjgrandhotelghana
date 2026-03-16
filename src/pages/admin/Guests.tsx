@@ -231,7 +231,7 @@ export default function Guests() {
                   </tr>
                 ) : (
                   guests.map((g, i) => {
-                    const flag = getFlagForPhone(g.phone);
+                    const isoCode = getIsoFromPhone(g.phone);
                     return (
                       <motion.tr
                         key={g.id}
