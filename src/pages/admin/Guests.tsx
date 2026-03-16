@@ -249,7 +249,7 @@ export default function Guests() {
                         <td className="px-4 py-3 text-muted-foreground">{g.email ?? "—"}</td>
                         <td className="px-4 py-3 text-muted-foreground">
                           <span className="flex items-center gap-1.5">
-                            {flag && <span className="text-base">{flag}</span>}
+                            {isoCode && <FlagIcon code={isoCode} size={16} />}
                             {g.phone ?? "—"}
                           </span>
                         </td>
