@@ -145,12 +145,37 @@ serve(async (req) => {
 
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
-  // Validate webhook secret
+  // --- Layer 1: Static shared-secret validation ---
   const webhookSecret = Deno.env.get("OTA_WEBHOOK_SECRET");
   if (webhookSecret) {
     const providedSecret = req.headers.get("x-webhook-secret") || new URL(req.url).searchParams.get("secret");
     if (providedSecret !== webhookSecret) {
       return json({ error: "Unauthorized" }, 401);
+    }
+  }
+
+  // Read raw body once for HMAC validation + JSON parsing
+  const rawBody = await req.text();
+
+  // --- Layer 2: HMAC-SHA256 signature validation ---
+  const hmacSecret = Deno.env.get("OTA_WEBHOOK_SECRET");
+  const signature = req.headers.get("x-webhook-signature");
+  if (hmacSecret && signature) {
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(hmacSecret),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"],
+    );
+    const sig = await crypto.subtle.sign("HMAC", key, encoder.encode(rawBody));
+    const expected = Array.from(new Uint8Array(sig))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    const provided = signature.replace(/^sha256=/, "").toLowerCase();
+    if (provided !== expected) {
+      return json({ error: "Invalid HMAC signature" }, 401);
     }
   }
 
@@ -161,7 +186,7 @@ serve(async (req) => {
 
   let body: any;
   try {
-    body = await req.json();
+    body = JSON.parse(rawBody);
   } catch {
     return json({ error: "Invalid JSON" }, 400);
   }
