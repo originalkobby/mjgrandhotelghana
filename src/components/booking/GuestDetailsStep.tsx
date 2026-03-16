@@ -307,7 +307,7 @@ export default function GuestDetailsStep({
                       type="button"
                       className="h-12 px-3 border border-input rounded-md flex items-center gap-1.5 text-sm font-sans hover:bg-muted/50 transition-colors shrink-0"
                     >
-                      <span className="text-lg">{selectedCountry.flag}</span>
+                      <FlagIcon code={selectedCountry.iso} size={18} />
                       <span className="text-muted-foreground">{selectedCountry.code}</span>
                       <ChevronDown className="w-3 h-3 text-muted-foreground" />
                     </button>
