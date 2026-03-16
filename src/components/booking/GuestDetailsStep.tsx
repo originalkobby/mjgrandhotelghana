@@ -331,7 +331,7 @@ export default function GuestDetailsStep({
                             selectedCountry.code === c.code && selectedCountry.country === c.country ? "bg-accent/10 text-accent" : ""
                           }`}
                         >
-                          <span className="text-lg">{c.flag}</span>
+                          <FlagIcon code={c.iso} size={18} />
                           <span className="flex-1 text-left">{c.country}</span>
                           <span className="text-muted-foreground text-xs">{c.code}</span>
                         </button>
