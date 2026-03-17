@@ -3,8 +3,10 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-webhook-secret",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-webhook-secret, x-webhook-signature, x-webhook-timestamp",
 };
+
+const REPLAY_TOLERANCE_MS = 5 * 60 * 1000; // 5 minutes
 
 // Normalise OTA source names
 const SOURCE_MAP: Record<string, string> = {
