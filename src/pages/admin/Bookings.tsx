@@ -522,9 +522,14 @@ export default function Bookings() {
                 </div>
                 <div>
                   <p className="text-xs uppercase tracking-wider mb-1">Total</p>
-                  <p className="text-foreground font-medium">
+                  <div className="text-foreground font-medium">
                     GH₵ {Number(selectedBooking.final_total_ghs).toLocaleString()}
-                  </p>
+                    {selectedBooking.discount_ghs > 0 && (
+                      <span className="text-xs text-accent ml-1">
+                        (−GH₵ {Number(selectedBooking.discount_ghs).toLocaleString()} promo{selectedBooking.promo_code ? `: ${selectedBooking.promo_code}` : ""})
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <p className="text-xs uppercase tracking-wider mb-1">Payment</p>
