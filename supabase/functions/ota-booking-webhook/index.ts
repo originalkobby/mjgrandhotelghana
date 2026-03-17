@@ -3,8 +3,10 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-webhook-secret",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-webhook-secret, x-webhook-signature, x-webhook-timestamp",
 };
+
+const REPLAY_TOLERANCE_MS = 5 * 60 * 1000; // 5 minutes
 
 // Normalise OTA source names
 const SOURCE_MAP: Record<string, string> = {
@@ -154,10 +156,20 @@ serve(async (req) => {
     }
   }
 
+  // --- Layer 2: Replay attack protection (timestamp validation) ---
+  const timestamp = req.headers.get("x-webhook-timestamp");
+  if (timestamp) {
+    const tsMs = Number(timestamp) * 1000; // expect Unix seconds
+    const now = Date.now();
+    if (isNaN(tsMs) || Math.abs(now - tsMs) > REPLAY_TOLERANCE_MS) {
+      return json({ error: "Request timestamp is too old or invalid. Rejected to prevent replay attacks." }, 401);
+    }
+  }
+
   // Read raw body once for HMAC validation + JSON parsing
   const rawBody = await req.text();
 
-  // --- Layer 2: HMAC-SHA256 signature validation ---
+  // --- Layer 3: HMAC-SHA256 signature validation ---
   const hmacSecret = Deno.env.get("OTA_WEBHOOK_SECRET");
   const signature = req.headers.get("x-webhook-signature");
   if (hmacSecret && signature) {

@@ -71,29 +71,34 @@ async function generatePDF(state: BookingState): Promise<void> {
 
   const doc = new jsPDF();
   const w = doc.internal.pageSize.getWidth();
+  const cx = w / 2;
   let y = 15;
 
   // The official Ghana cedi symbol: GH₵
   const cedi = "GH\u20B5";
 
-  // Logo
+  // Logo — maintain aspect ratio
   try {
     const logoBase64 = await loadImageAsBase64(logoSrc);
+    const img = new Image();
+    img.src = logoBase64;
+    // Use natural dimensions to calculate correct aspect ratio
     const logoH = 14;
-    const logoW = logoH * 2.5;
+    const aspectRatio = img.naturalWidth && img.naturalHeight ? img.naturalWidth / img.naturalHeight : 2.5;
+    const logoW = logoH * aspectRatio;
     doc.addImage(logoBase64, "PNG", (w - logoW) / 2, y, logoW, logoH);
     y += logoH + 4;
   } catch {
     doc.setFontSize(22);
     doc.setFont("helvetica", "bold");
-    doc.text("MJ Grand Hotel", w / 2, y + 8, { align: "center" });
+    doc.text("MJ Grand Hotel", cx, y + 8, { align: "center" });
     y += 16;
   }
 
   // Sub-header
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.text("Booking Confirmation", w / 2, y, { align: "center" });
+  doc.text("Booking Confirmation", cx, y, { align: "center" });
   y += 10;
 
   // Divider
@@ -101,13 +106,13 @@ async function generatePDF(state: BookingState): Promise<void> {
   doc.line(20, y, w - 20, y);
   y += 10;
 
-  // Reference
+  // Reference — centered
   doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
-  doc.text(`Booking Reference: ${bookingReference}`, 20, y);
+  doc.text(`Booking Reference: ${bookingReference}`, cx, y, { align: "center" });
   y += 10;
 
-  // Guest details — using DD/MM/YYYY format
+  // Guest details — centered
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
   const details = [
@@ -122,9 +127,14 @@ async function generatePDF(state: BookingState): Promise<void> {
 
   details.forEach(([label, value]) => {
     doc.setFont("helvetica", "bold");
-    doc.text(`${label}:`, 20, y);
+    const labelText = `${label}: `;
+    const labelWidth = doc.getTextWidth(labelText);
     doc.setFont("helvetica", "normal");
-    doc.text(value, 65, y);
+    const fullText = `${label}: ${value}`;
+    doc.setFont("helvetica", "bold");
+    doc.text(labelText, cx - doc.getTextWidth(fullText) / 2, y);
+    doc.setFont("helvetica", "normal");
+    doc.text(value, cx - doc.getTextWidth(fullText) / 2 + labelWidth, y);
     y += 7;
   });
 
@@ -132,13 +142,16 @@ async function generatePDF(state: BookingState): Promise<void> {
   if (selectedAddOns.length > 0) {
     y += 4;
     doc.setFont("helvetica", "bold");
-    doc.text("Add-Ons:", 20, y);
+    doc.text("Add-Ons:", cx, y, { align: "center" });
     y += 7;
     doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
     selectedAddOns.forEach((a) => {
-      doc.text(`\u2022 ${a.name} \u2014 ${cedi} ${(a.price_ghs * a.quantity).toLocaleString()}`, 25, y);
+      const text = `${a.name} — ${cedi} ${(a.price_ghs * a.quantity).toLocaleString()}`;
+      doc.text(text, cx, y, { align: "center" });
       y += 6;
     });
+    doc.setFontSize(10);
   }
 
   // Total
@@ -147,15 +160,15 @@ async function generatePDF(state: BookingState): Promise<void> {
   y += 8;
   doc.setFontSize(13);
   doc.setFont("helvetica", "bold");
-  doc.text(`Total: ${cedi} ${totalAmount.toLocaleString()}`, 20, y);
+  doc.text(`Total: ${cedi} ${totalAmount.toLocaleString()}`, cx, y, { align: "center" });
   y += 14;
 
   // Footer
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(130);
-  doc.text("Thank you for choosing MJ Grand Hotel. We look forward to welcoming you!", w / 2, y, { align: "center" });
-  doc.text("www.mjgrandhotelghana.com", w / 2, y + 5, { align: "center" });
+  doc.text("Thank you for choosing MJ Grand Hotel. We look forward to welcoming you!", cx, y, { align: "center" });
+  doc.text("www.mjgrandhotelghana.com", cx, y + 5, { align: "center" });
 
   doc.save(`MJ-Grand-${bookingReference}.pdf`);
 }

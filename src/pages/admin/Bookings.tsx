@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Filter, RefreshCw, Download, CalendarPlus } from "lucide-react";
+import { Search, Filter, RefreshCw, Download, CalendarPlus, Banknote } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,7 +43,11 @@ interface Booking {
   check_out: string;
   adults: number;
   children: number;
+  base_total_ghs: number;
+  discount_ghs: number;
+  add_ons_total_ghs: number;
   final_total_ghs: number;
+  promo_code: string | null;
   special_requests: string | null;
   created_at: string;
   rooms: { name: string } | null;
@@ -103,7 +107,7 @@ const SOURCE_OPTIONS = Object.keys(SOURCE_LABELS);
 async function fetchBookings(statusFilter: string, sourceFilter: string) {
   let query = supabase
     .from("bookings")
-    .select("id, reference_code, status, payment_status, payment_method, booking_source, ota_reference, room_number, check_in, check_out, adults, children, final_total_ghs, special_requests, created_at, rooms(name), guests(full_name, email, phone)")
+    .select("id, reference_code, status, payment_status, payment_method, booking_source, ota_reference, room_number, check_in, check_out, adults, children, base_total_ghs, discount_ghs, add_ons_total_ghs, final_total_ghs, promo_code, special_requests, created_at, rooms(name), guests(full_name, email, phone)")
     .order("created_at", { ascending: false })
     .limit(100);
 
@@ -131,6 +135,11 @@ export default function Bookings() {
   const [extendBooking, setExtendBooking] = useState<Booking | null>(null);
   const [newCheckOutDate, setNewCheckOutDate] = useState("");
   const [extending, setExtending] = useState(false);
+  // Record payment
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [paymentBooking, setPaymentBooking] = useState<Booking | null>(null);
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const [recordingPayment, setRecordingPayment] = useState(false);
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -256,6 +265,47 @@ export default function Bookings() {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     } finally {
       setExtending(false);
+    }
+  };
+
+  const handleRecordPayment = async () => {
+    if (!paymentBooking || !paymentAmount) return;
+    setRecordingPayment(true);
+
+    try {
+      const amount = parseFloat(paymentAmount);
+      if (isNaN(amount) || amount <= 0) throw new Error("Invalid amount");
+
+      // Insert payment log
+      await supabase.from("payment_logs").insert({
+        booking_id: paymentBooking.id,
+        amount_ghs: amount,
+        provider: "manual",
+        status: "success",
+        provider_reference: `MANUAL-${Date.now()}`,
+      });
+
+      // Determine payment status
+      const newPaymentStatus = amount >= paymentBooking.final_total_ghs ? "paid" : "partial";
+
+      // Update booking payment status
+      await supabase
+        .from("bookings")
+        .update({ payment_status: newPaymentStatus } as any)
+        .eq("id", paymentBooking.id);
+
+      toast({
+        title: "Payment Recorded",
+        description: `GH₵ ${amount.toLocaleString()} recorded for ${paymentBooking.reference_code}. Status: ${newPaymentStatus}`,
+      });
+      setShowPaymentDialog(false);
+      setPaymentBooking(null);
+      setPaymentAmount("");
+      queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setRecordingPayment(false);
     }
   };
 
@@ -406,11 +456,10 @@ export default function Bookings() {
                         className="border-b border-border/50 hover:bg-muted/30 transition-colors"
                       >
                         <td className="px-4 py-3 font-mono text-xs">
-                          <div>{b.reference_code}</div>
-                          {b.ota_reference && (
-                            <div className="text-[10px] text-muted-foreground mt-0.5" title="OTA Reference">
-                              {b.ota_reference}
-                            </div>
+                          {b.booking_source !== "direct" && b.ota_reference ? (
+                            <div title={`Internal: ${b.reference_code}`}>{b.ota_reference}</div>
+                          ) : (
+                            <div>{b.reference_code}</div>
                           )}
                         </td>
                         <td className="px-4 py-3">
@@ -477,6 +526,21 @@ export default function Bookings() {
                                 <CalendarPlus className="w-3.5 h-3.5" />
                               </Button>
                             )}
+                            {b.payment_method === "pay_at_hotel" && b.payment_status !== "paid" && b.status !== "cancelled" && b.status !== "no_show" && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-xs text-accent"
+                                title="Record payment"
+                                onClick={() => {
+                                  setPaymentBooking(b);
+                                  setPaymentAmount(String(b.final_total_ghs));
+                                  setShowPaymentDialog(true);
+                                }}
+                              >
+                                <Banknote className="w-3.5 h-3.5" />
+                              </Button>
+                            )}
                           </div>
                         </td>
                       </motion.tr>
@@ -514,9 +578,14 @@ export default function Bookings() {
                 </div>
                 <div>
                   <p className="text-xs uppercase tracking-wider mb-1">Total</p>
-                  <p className="text-foreground font-medium">
+                  <div className="text-foreground font-medium">
                     GH₵ {Number(selectedBooking.final_total_ghs).toLocaleString()}
-                  </p>
+                    {selectedBooking.discount_ghs > 0 && (
+                      <span className="text-xs text-accent ml-1">
+                        (−GH₵ {Number(selectedBooking.discount_ghs).toLocaleString()} promo{selectedBooking.promo_code ? `: ${selectedBooking.promo_code}` : ""})
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <p className="text-xs uppercase tracking-wider mb-1">Payment</p>
@@ -650,6 +719,57 @@ export default function Bookings() {
               className="bg-accent text-accent-foreground hover:bg-accent/90"
             >
               {extending ? "Extending…" : "Extend Checkout"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Record Payment Dialog */}
+      <Dialog open={showPaymentDialog} onOpenChange={(o) => { if (!o) { setShowPaymentDialog(false); setPaymentBooking(null); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-serif flex items-center gap-2">
+              <Banknote className="w-5 h-5 text-accent" />
+              Record Payment
+            </DialogTitle>
+            <DialogDescription className="font-sans">
+              {paymentBooking?.reference_code} — {paymentBooking?.guests?.full_name}
+              <br />
+              Total due: <strong>GH₵ {Number(paymentBooking?.final_total_ghs ?? 0).toLocaleString()}</strong>
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div>
+              <Label htmlFor="payment-amount" className="text-sm text-muted-foreground">
+                Amount Received (GH₵)
+              </Label>
+              <Input
+                id="payment-amount"
+                type="number"
+                step="0.01"
+                min="0"
+                value={paymentAmount}
+                onChange={(e) => setPaymentAmount(e.target.value)}
+                placeholder="e.g. 500"
+                className="mt-1"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Full amount marks as "Paid", partial marks as "Partial".
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowPaymentDialog(false); setPaymentBooking(null); }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleRecordPayment}
+              disabled={recordingPayment || !paymentAmount || parseFloat(paymentAmount) <= 0}
+              className="bg-accent text-accent-foreground hover:bg-accent/90"
+            >
+              {recordingPayment ? "Recording…" : "Record Payment"}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -500,6 +500,75 @@ const Dining = () => {
         </div>
       </section>
 
+      {/* Featured Dining Experience — Sunday Buffet */}
+      <section className="border-t border-cream/10 py-20">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-12">
+          <div className="text-center mb-12">
+            <motion.h2
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.7, ease }}
+              className="font-serif text-3xl md:text-4xl text-cream mb-4"
+            >
+              Featured Dining Experience
+            </motion.h2>
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.8, delay: 0.15, ease }}
+              className="w-12 h-[2px] bg-gold mx-auto mb-6"
+            />
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.98 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            whileHover={{ scale: 1.02 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5, ease }}
+            className="max-w-[800px] mx-auto bg-white rounded-[20px] p-8 sm:p-10 text-center shadow-[0_8px_40px_rgba(0,0,0,0.08)]"
+          >
+            <motion.span
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2, duration: 0.5, ease }}
+              className="inline-block font-sans text-xs uppercase tracking-[0.25em] text-gold mb-4"
+            >
+              ✨ Weekend Special
+            </motion.span>
+
+            <h3 className="font-serif text-3xl sm:text-4xl md:text-[44px] text-charcoal leading-tight mb-5">
+              Special Sunday Buffet
+            </h3>
+
+            <p className="font-sans text-charcoal/70 leading-relaxed max-w-xl mx-auto mb-4">
+              Indulge in a delightful culinary experience every Sunday at MJ Grand Hotel with our Special Sunday Buffet, carefully curated to offer a rich selection of local and international dishes.
+            </p>
+            <p className="font-sans text-charcoal/60 leading-relaxed max-w-xl mx-auto mb-6 text-sm">
+              Whether you're dining with family, friends, or colleagues, our buffet provides the perfect setting for a relaxing and enjoyable afternoon.
+            </p>
+
+            <p className="font-serif text-2xl sm:text-3xl font-bold text-gold mb-2">
+              GHS 250 <span className="text-base font-normal text-charcoal/50">per person</span>
+            </p>
+
+            <p className="font-sans text-charcoal/50 text-sm leading-relaxed max-w-md mx-auto mb-8">
+              Enjoy a variety of freshly prepared meals, expertly crafted by our chefs to deliver both quality and taste in every bite.
+            </p>
+
+            <a
+              href="tel:0573338062"
+              className="inline-block bg-gold px-10 py-4 font-sans text-sm font-semibold uppercase tracking-wider text-charcoal rounded-lg hover:shadow-[0_0_24px_rgba(198,165,92,0.5)] transition-all duration-300"
+            >
+              Reserve a Table
+            </a>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Culinary Commitment */}
       <section className="border-t border-cream/10 py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-12">
@@ -563,12 +632,12 @@ const Dining = () => {
             >
               We invite you to indulge in a dining experience that harmonizes tradition with modern elegance. For reservations or inquiries, please get in touch with our front desk.
             </motion.p>
-            <Link
-              to="/contact"
+            <a
+              href="tel:0573338062"
               className="inline-block bg-gold px-8 py-3.5 font-sans text-sm font-semibold uppercase tracking-wider text-charcoal hover:shadow-lg hover:shadow-gold/20 transition-all duration-300"
             >
               Reserve a Table
-            </Link>
+            </a>
           </motion.div>
         </div>
       </section>
