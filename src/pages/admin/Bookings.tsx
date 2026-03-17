@@ -722,6 +722,57 @@ export default function Bookings() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Record Payment Dialog */}
+      <Dialog open={showPaymentDialog} onOpenChange={(o) => { if (!o) { setShowPaymentDialog(false); setPaymentBooking(null); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-serif flex items-center gap-2">
+              <Banknote className="w-5 h-5 text-accent" />
+              Record Payment
+            </DialogTitle>
+            <DialogDescription className="font-sans">
+              {paymentBooking?.reference_code} — {paymentBooking?.guests?.full_name}
+              <br />
+              Total due: <strong>GH₵ {Number(paymentBooking?.final_total_ghs ?? 0).toLocaleString()}</strong>
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div>
+              <Label htmlFor="payment-amount" className="text-sm text-muted-foreground">
+                Amount Received (GH₵)
+              </Label>
+              <Input
+                id="payment-amount"
+                type="number"
+                step="0.01"
+                min="0"
+                value={paymentAmount}
+                onChange={(e) => setPaymentAmount(e.target.value)}
+                placeholder="e.g. 500"
+                className="mt-1"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Full amount marks as "Paid", partial marks as "Partial".
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowPaymentDialog(false); setPaymentBooking(null); }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleRecordPayment}
+              disabled={recordingPayment || !paymentAmount || parseFloat(paymentAmount) <= 0}
+              className="bg-accent text-accent-foreground hover:bg-accent/90"
+            >
+              {recordingPayment ? "Recording…" : "Record Payment"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
