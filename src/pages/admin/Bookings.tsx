@@ -307,6 +307,7 @@ export default function Bookings() {
     } finally {
       setRecordingPayment(false);
     }
+  };
 
   const exportCSV = () => {
     if (bookings.length === 0) return;
