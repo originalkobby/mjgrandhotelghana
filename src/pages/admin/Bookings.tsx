@@ -406,11 +406,10 @@ export default function Bookings() {
                         className="border-b border-border/50 hover:bg-muted/30 transition-colors"
                       >
                         <td className="px-4 py-3 font-mono text-xs">
-                          <div>{b.reference_code}</div>
-                          {b.ota_reference && (
-                            <div className="text-[10px] text-muted-foreground mt-0.5" title="OTA Reference">
-                              {b.ota_reference}
-                            </div>
+                          {b.booking_source !== "direct" && b.ota_reference ? (
+                            <div title={`Internal: ${b.reference_code}`}>{b.ota_reference}</div>
+                          ) : (
+                            <div>{b.reference_code}</div>
                           )}
                         </td>
                         <td className="px-4 py-3">
