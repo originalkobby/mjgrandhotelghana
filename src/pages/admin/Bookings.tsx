@@ -485,6 +485,21 @@ export default function Bookings() {
                                 <CalendarPlus className="w-3.5 h-3.5" />
                               </Button>
                             )}
+                            {b.payment_method === "pay_at_hotel" && b.payment_status !== "paid" && b.status !== "cancelled" && b.status !== "no_show" && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-xs text-accent"
+                                title="Record payment"
+                                onClick={() => {
+                                  setPaymentBooking(b);
+                                  setPaymentAmount(String(b.final_total_ghs));
+                                  setShowPaymentDialog(true);
+                                }}
+                              >
+                                <Banknote className="w-3.5 h-3.5" />
+                              </Button>
+                            )}
                           </div>
                         </td>
                       </motion.tr>
