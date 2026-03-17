@@ -567,6 +567,7 @@ const Dining = () => {
             </a>
           </motion.div>
         </div>
+      </section>
 
       {/* Culinary Commitment */}
       <section className="border-t border-cream/10 py-20">
