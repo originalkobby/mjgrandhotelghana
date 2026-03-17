@@ -43,7 +43,11 @@ interface Booking {
   check_out: string;
   adults: number;
   children: number;
+  base_total_ghs: number;
+  discount_ghs: number;
+  add_ons_total_ghs: number;
   final_total_ghs: number;
+  promo_code: string | null;
   special_requests: string | null;
   created_at: string;
   rooms: { name: string } | null;
