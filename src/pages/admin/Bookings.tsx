@@ -135,6 +135,11 @@ export default function Bookings() {
   const [extendBooking, setExtendBooking] = useState<Booking | null>(null);
   const [newCheckOutDate, setNewCheckOutDate] = useState("");
   const [extending, setExtending] = useState(false);
+  // Record payment
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [paymentBooking, setPaymentBooking] = useState<Booking | null>(null);
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const [recordingPayment, setRecordingPayment] = useState(false);
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
