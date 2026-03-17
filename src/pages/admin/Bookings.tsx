@@ -268,6 +268,46 @@ export default function Bookings() {
     }
   };
 
+  const handleRecordPayment = async () => {
+    if (!paymentBooking || !paymentAmount) return;
+    setRecordingPayment(true);
+
+    try {
+      const amount = parseFloat(paymentAmount);
+      if (isNaN(amount) || amount <= 0) throw new Error("Invalid amount");
+
+      // Insert payment log
+      await supabase.from("payment_logs").insert({
+        booking_id: paymentBooking.id,
+        amount_ghs: amount,
+        provider: "manual",
+        status: "success",
+        provider_reference: `MANUAL-${Date.now()}`,
+      });
+
+      // Determine payment status
+      const newPaymentStatus = amount >= paymentBooking.final_total_ghs ? "paid" : "partial";
+
+      // Update booking payment status
+      await supabase
+        .from("bookings")
+        .update({ payment_status: newPaymentStatus } as any)
+        .eq("id", paymentBooking.id);
+
+      toast({
+        title: "Payment Recorded",
+        description: `GH₵ ${amount.toLocaleString()} recorded for ${paymentBooking.reference_code}. Status: ${newPaymentStatus}`,
+      });
+      setShowPaymentDialog(false);
+      setPaymentBooking(null);
+      setPaymentAmount("");
+      queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setRecordingPayment(false);
+    }
+
   const exportCSV = () => {
     if (bookings.length === 0) return;
     const headers = ["Reference", "OTA Ref", "Guest", "Email", "Room", "Room #", "Check-in", "Check-out", "Adults", "Children", "Total (GHS)", "Status", "Source", "Payment", "Method", "Created"];
