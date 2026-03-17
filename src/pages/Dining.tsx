@@ -631,12 +631,12 @@ const Dining = () => {
             >
               We invite you to indulge in a dining experience that harmonizes tradition with modern elegance. For reservations or inquiries, please get in touch with our front desk.
             </motion.p>
-            <Link
-              to="/contact"
+            <a
+              href="tel:0573338062"
               className="inline-block bg-gold px-8 py-3.5 font-sans text-sm font-semibold uppercase tracking-wider text-charcoal hover:shadow-lg hover:shadow-gold/20 transition-all duration-300"
             >
               Reserve a Table
-            </Link>
+            </a>
           </motion.div>
         </div>
       </section>
