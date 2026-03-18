@@ -27,6 +27,7 @@ import AdminRooms from "./pages/admin/Rooms";
 import AdminSupport from "./pages/admin/SupportTickets";
 import AdminSettings from "./pages/admin/Settings";
 import AdminMenu from "./pages/admin/MenuManagement";
+import RevenueIntelligence from "./pages/admin/RevenueIntelligence";
 
 function ChatWidget() {
   const { pathname } = useLocation();
@@ -63,6 +64,7 @@ const App = () => (
             <Route path="rooms" element={<AdminRooms />} />
             <Route path="promotions" element={<AdminPromotions />} />
             <Route path="menu" element={<AdminMenu />} />
+            <Route path="revenue" element={<RevenueIntelligence />} />
             <Route path="reports" element={<AdminReports />} />
             <Route path="support" element={<AdminSupport />} />
             <Route path="messages" element={<AdminMessages />} />

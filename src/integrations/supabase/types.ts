@@ -328,6 +328,56 @@ export type Database = {
           },
         ]
       }
+      demand_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string
+          date_end: string
+          date_start: string
+          description: string | null
+          id: string
+          is_dismissed: boolean
+          recommended_action: string | null
+          room_id: string | null
+          severity: string
+          title: string
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string
+          date_end: string
+          date_start: string
+          description?: string | null
+          id?: string
+          is_dismissed?: boolean
+          recommended_action?: string | null
+          room_id?: string | null
+          severity?: string
+          title: string
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string
+          date_end?: string
+          date_start?: string
+          description?: string | null
+          id?: string
+          is_dismissed?: boolean
+          recommended_action?: string | null
+          room_id?: string | null
+          severity?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demand_alerts_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guests: {
         Row: {
           created_at: string
@@ -501,6 +551,77 @@ export type Database = {
           start_date?: string | null
           usage_count?: number
           usage_limit?: number | null
+        }
+        Relationships: []
+      }
+      revenue_forecasts: {
+        Row: {
+          confidence_level: number | null
+          created_at: string
+          expected_occupancy: number
+          forecast_date: string
+          id: string
+          model_version: string | null
+          predicted_revenue: number | null
+          recommended_price: number | null
+          room_id: string | null
+        }
+        Insert: {
+          confidence_level?: number | null
+          created_at?: string
+          expected_occupancy?: number
+          forecast_date: string
+          id?: string
+          model_version?: string | null
+          predicted_revenue?: number | null
+          recommended_price?: number | null
+          room_id?: string | null
+        }
+        Update: {
+          confidence_level?: number | null
+          created_at?: string
+          expected_occupancy?: number
+          forecast_date?: string
+          id?: string
+          model_version?: string | null
+          predicted_revenue?: number | null
+          recommended_price?: number | null
+          room_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "revenue_forecasts_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      revenue_streams: {
+        Row: {
+          amount_ghs: number
+          created_at: string
+          description: string | null
+          id: string
+          record_date: string
+          stream_type: string
+        }
+        Insert: {
+          amount_ghs?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          record_date: string
+          stream_type: string
+        }
+        Update: {
+          amount_ghs?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          record_date?: string
+          stream_type?: string
         }
         Relationships: []
       }
