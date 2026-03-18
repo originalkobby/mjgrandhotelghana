@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.extend-checkout]
 verify_jwt = false
+
+[functions.ingest-forecast]
+verify_jwt = false
