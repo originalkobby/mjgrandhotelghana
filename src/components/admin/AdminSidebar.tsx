@@ -12,6 +12,7 @@ import {
   TicketCheck,
   Settings2,
   UtensilsCrossed,
+  Brain,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
