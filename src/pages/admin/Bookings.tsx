@@ -130,11 +130,7 @@ export default function Bookings() {
   const [newStatus, setNewStatus] = useState<BookingStatus | "">("");
   const [roomNumber, setRoomNumber] = useState("");
   const [updating, setUpdating] = useState(false);
-  // Extend checkout
-  const [showExtendDialog, setShowExtendDialog] = useState(false);
-  const [extendBooking, setExtendBooking] = useState<Booking | null>(null);
-  const [newCheckOutDate, setNewCheckOutDate] = useState("");
-  const [extending, setExtending] = useState(false);
+  
   // Record payment
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [paymentBooking, setPaymentBooking] = useState<Booking | null>(null);
