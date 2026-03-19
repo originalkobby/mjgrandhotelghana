@@ -32,7 +32,7 @@ export default function AdminLayout() {
       <div className="min-h-screen flex w-full">
         <AdminSidebar role={role} />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-14 flex items-center gap-3 border-b border-border px-4 bg-card shrink-0">
+          <header className="h-14 flex items-center gap-3 border-b border-border px-4 bg-card shrink-0 sticky top-0 z-30">
             <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
             <span className="font-serif text-lg text-foreground flex-1">Booking Command Center</span>
             <NotificationBell />

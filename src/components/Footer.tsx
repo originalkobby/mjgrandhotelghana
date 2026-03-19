@@ -14,7 +14,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
           {/* Brand + contact */}
           <div>
-            <img src={logo} alt="MJ Grand Hotel" className="h-7 w-auto mb-4" />
+            <h4 className="font-serif text-lg text-cream mb-4">MJ Grand Hotel</h4>
             <div className="space-y-3 text-sm font-sans text-cream/60">
               <p className="flex items-center gap-2">
                 <MapPin size={14} className="text-gold" />

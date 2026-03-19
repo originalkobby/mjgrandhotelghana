@@ -144,7 +144,7 @@ export default function RevenueIntelligence() {
   const inventory = data?.inventory ?? [];
 
   // Calculate revenue target tracking ($1M / 6 months)
-  const TARGET_6M = 1_000_000; // GHS
+  const TARGET_6M = 16_000_000; // GHS (~$1M USD)
   const today = new Date();
   const periodStart = subDays(today, 180);
   const daysElapsed = differenceInDays(today, periodStart);

@@ -74,6 +74,7 @@ export function useBooking() {
       specialRequests: "",
       arrivalTime: "",
       nationality: "",
+      flightItinerary: "",
     },
     bookingReference: null,
     totalAmount: 0,

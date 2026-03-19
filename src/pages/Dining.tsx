@@ -523,48 +523,52 @@ const Dining = () => {
           </div>
 
           <motion.div
-            initial={{ opacity: 0, y: 30, scale: 0.98 }}
-            whileInView={{ opacity: 1, y: 0, scale: 1 }}
-            whileHover={{ scale: 1.02 }}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.5, ease }}
-            className="max-w-[800px] mx-auto bg-white rounded-[20px] p-8 sm:p-10 text-center shadow-[0_8px_40px_rgba(0,0,0,0.08)]"
+            className="w-full"
           >
-            <motion.span
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2, duration: 0.5, ease }}
-              className="inline-block font-sans text-xs uppercase tracking-[0.25em] text-gold mb-4"
-            >
-              ✨ Weekend Special
-            </motion.span>
+            <div className="relative w-full overflow-hidden rounded-2xl bg-gradient-to-br from-charcoal via-charcoal to-charcoal/95 border border-gold/20">
+              {/* Decorative gold accents */}
+              <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-gold/60 to-transparent" />
+              <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-gold/60 to-transparent" />
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(198,165,92,0.08)_0%,_transparent_60%)]" />
 
-            <h3 className="font-serif text-3xl sm:text-4xl md:text-[44px] text-charcoal leading-tight mb-5">
-              Special Sunday Buffet
-            </h3>
+              <div className="relative px-6 py-14 sm:px-12 sm:py-20 text-center">
+                <span className="inline-block font-sans text-xs uppercase tracking-[0.3em] text-gold mb-5">
+                  ✨ Weekend Special
+                </span>
 
-            <p className="font-sans text-charcoal/70 leading-relaxed max-w-xl mx-auto mb-4">
-              Indulge in a delightful culinary experience every Sunday at MJ Grand Hotel with our Special Sunday Buffet, carefully curated to offer a rich selection of local and international dishes.
-            </p>
-            <p className="font-sans text-charcoal/60 leading-relaxed max-w-xl mx-auto mb-6 text-sm">
-              Whether you're dining with family, friends, or colleagues, our buffet provides the perfect setting for a relaxing and enjoyable afternoon.
-            </p>
+                <h3 className="font-serif text-3xl sm:text-4xl md:text-5xl text-cream leading-tight mb-6">
+                  Special Sunday Buffet
+                </h3>
 
-            <p className="font-serif text-2xl sm:text-3xl font-bold text-gold mb-2">
-              GHS 250 <span className="text-base font-normal text-charcoal/50">per person</span>
-            </p>
+                <div className="w-16 h-[2px] bg-gold/50 mx-auto mb-6" />
 
-            <p className="font-sans text-charcoal/50 text-sm leading-relaxed max-w-md mx-auto mb-8">
-              Enjoy a variety of freshly prepared meals, expertly crafted by our chefs to deliver both quality and taste in every bite.
-            </p>
+                <p className="font-sans text-cream/70 leading-relaxed max-w-2xl mx-auto mb-4">
+                  Indulge in a delightful culinary experience every Sunday at MJ Grand Hotel with our Special Sunday Buffet, carefully curated to offer a rich selection of local and international dishes.
+                </p>
+                <p className="font-sans text-cream/50 leading-relaxed max-w-2xl mx-auto mb-8 text-sm">
+                  Whether you're dining with family, friends, or colleagues, our buffet provides the perfect setting for a relaxing and enjoyable afternoon.
+                </p>
 
-            <a
-              href="tel:0573338062"
-              className="inline-block bg-gold px-10 py-4 font-sans text-sm font-semibold uppercase tracking-wider text-charcoal rounded-lg hover:shadow-[0_0_24px_rgba(198,165,92,0.5)] transition-all duration-300"
-            >
-              Reserve a Table
-            </a>
+                <p className="font-serif text-3xl sm:text-4xl font-bold text-gold mb-3">
+                  GHS 250 <span className="text-base font-normal text-cream/40">per person</span>
+                </p>
+
+                <p className="font-sans text-cream/40 text-sm leading-relaxed max-w-lg mx-auto mb-10">
+                  Enjoy a variety of freshly prepared meals, expertly crafted by our chefs to deliver both quality and taste in every bite.
+                </p>
+
+                <a
+                  href="tel:0573338062"
+                  className="inline-block bg-gold px-10 py-4 font-sans text-sm font-semibold uppercase tracking-wider text-charcoal rounded-lg hover:shadow-[0_0_30px_rgba(198,165,92,0.4)] transition-all duration-300"
+                >
+                  Reserve a Table
+                </a>
+              </div>
+            </div>
           </motion.div>
         </div>
       </section>
