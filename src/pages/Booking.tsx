@@ -101,6 +101,7 @@ const Booking = () => {
             specialRequests: state.guestInfo.specialRequests || null,
             arrivalTime: state.guestInfo.arrivalTime || null,
             nationality: state.guestInfo.nationality || null,
+            flightItinerary: state.guestInfo.flightItinerary || null,
           },
           addOns: state.selectedAddOns.map((a) => ({
             id: a.id,

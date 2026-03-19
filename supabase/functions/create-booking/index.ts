@@ -127,6 +127,13 @@ serve(async (req) => {
 
     if (existingGuest) {
       guestId = existingGuest.id;
+      // Update preferences with flight itinerary if provided
+      if (booking.flightItinerary) {
+        await supabase
+          .from("guests")
+          .update({ preferences: { flight_itinerary: booking.flightItinerary } })
+          .eq("id", existingGuest.id);
+      }
     } else {
       const { data: newGuest } = await supabase
         .from("guests")
@@ -134,6 +141,7 @@ serve(async (req) => {
           full_name: guest.fullName,
           email: guest.email,
           phone: guest.phone,
+          preferences: booking.flightItinerary ? { flight_itinerary: booking.flightItinerary } : {},
         })
         .select("id")
         .single();

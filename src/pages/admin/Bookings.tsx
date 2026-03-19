@@ -637,51 +637,8 @@ export default function Bookings() {
         </DialogContent>
       </Dialog>
 
-      {/* Extend Checkout Dialog */}
-      <Dialog open={showExtendDialog} onOpenChange={(o) => { if (!o) { setShowExtendDialog(false); setExtendBooking(null); } }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="font-serif flex items-center gap-2">
-              <CalendarPlus className="w-5 h-5 text-accent" />
-              Extend Checkout
-            </DialogTitle>
-            <DialogDescription className="font-sans">
-              {extendBooking?.reference_code} — {extendBooking?.guests?.full_name}
-              <br />
-              Current check-out: <strong>{extendBooking ? formatDateGB(extendBooking.check_out) : ""}</strong>
-            </DialogDescription>
-          </DialogHeader>
 
-          <div className="space-y-4 py-2">
-            <div>
-              <Label htmlFor="new-checkout" className="text-sm text-muted-foreground">
-                New Check-out Date
-              </Label>
-              <Input
-                id="new-checkout"
-                type="date"
-                value={newCheckOutDate}
-                onChange={(e) => setNewCheckOutDate(e.target.value)}
-                min={extendBooking ? new Date(new Date(extendBooking.check_out).getTime() + 86400000).toISOString().split("T")[0] : ""}
-                className="mt-1"
-              />
-            </div>
-          </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => { setShowExtendDialog(false); setExtendBooking(null); }}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleExtendCheckout}
-              disabled={extending || !newCheckOutDate}
-              className="bg-accent text-accent-foreground hover:bg-accent/90"
-            >
-              {extending ? "Extending…" : "Extend Checkout"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Record Payment Dialog */}
       <Dialog open={showPaymentDialog} onOpenChange={(o) => { if (!o) { setShowPaymentDialog(false); setPaymentBooking(null); } }}>
