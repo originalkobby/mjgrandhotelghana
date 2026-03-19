@@ -483,21 +483,8 @@ export default function Bookings() {
                             >
                               Manage
                             </Button>
-                            {(b.status === "confirmed" || b.status === "completed") && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-xs"
-                                title="Extend checkout"
-                                onClick={() => {
-                                  setExtendBooking(b);
-                                  setNewCheckOutDate("");
-                                  setShowExtendDialog(true);
-                                }}
-                              >
-                                <CalendarPlus className="w-3.5 h-3.5" />
-                              </Button>
-                            )}
+
+
                             {b.payment_method === "pay_at_hotel" && b.payment_status !== "paid" && b.status !== "cancelled" && b.status !== "no_show" && (
                               <Button
                                 variant="ghost"
