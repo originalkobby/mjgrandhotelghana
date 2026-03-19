@@ -40,6 +40,7 @@ export interface GuestInfo {
   specialRequests: string;
   arrivalTime: string;
   nationality: string;
+  flightItinerary: string;
 }
 
 export interface BookingState {
