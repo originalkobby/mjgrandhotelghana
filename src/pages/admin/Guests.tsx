@@ -361,6 +361,17 @@ export default function Guests() {
                 </div>
               </div>
 
+              {/* Flight Itinerary */}
+              {selectedGuest.preferences?.flight_itinerary && (
+                <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
+                  <Plane className="w-4 h-4 text-primary" />
+                  <div>
+                    <p className="text-xs uppercase tracking-wider text-muted-foreground">Flight Itinerary</p>
+                    <p className="text-foreground font-medium">{selectedGuest.preferences.flight_itinerary}</p>
+                  </div>
+                </div>
+              )}
+
               <div>
                 <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Booking History & Room Assignment</p>
                 {bookingsLoading ? (
