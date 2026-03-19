@@ -414,29 +414,36 @@ export default function RevenueIntelligence() {
       </div>
 
       {/* Demand Alerts */}
-      {alerts.length > 0 && (
-        <Card>
-          <CardHeader className="flex flex-row items-center gap-2">
-            <Bell className="h-4 w-4 text-gold-dark" />
-            <CardTitle className="font-sans text-sm font-medium text-muted-foreground">
-              Demand Alerts ({alerts.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {alerts.slice(0, 5).map((alert) => {
+      <Card>
+        <CardHeader className="flex flex-row items-center gap-2">
+          <Bell className="h-4 w-4 text-gold-dark" />
+          <CardTitle className="font-sans text-sm font-medium text-muted-foreground">
+            Demand Alerts ({alerts.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {alerts.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4 text-center">
+              No active demand alerts. Alerts will appear when forecast data detects demand shifts.
+            </p>
+          ) : (
+            alerts.slice(0, 10).map((alert) => {
               const Icon = ALERT_ICONS[alert.alert_type] || AlertTriangle;
               return (
                 <motion.div
                   key={alert.id}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className={`flex items-start gap-3 p-3 rounded-lg border ${ALERT_COLORS[alert.severity] ?? ""}`}
+                  className={`flex items-start gap-3 p-3 rounded-lg border ${ALERT_COLORS[alert.severity] ?? "bg-muted"}`}
                 >
                   <Icon className="w-5 h-5 mt-0.5 shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-sans text-sm font-medium">{alert.title}</p>
-                      <Badge variant="outline" className={`text-xs ${SEVERITY_BADGE[alert.severity] ?? ""}`}>
+                      <Badge
+                        variant="outline"
+                        className={`text-[10px] uppercase tracking-wider font-semibold ${SEVERITY_BADGE[alert.severity] ?? "bg-muted"}`}
+                      >
                         {alert.severity}
                       </Badge>
                     </div>
@@ -457,18 +464,18 @@ export default function RevenueIntelligence() {
                   </div>
                   <Button
                     variant="ghost"
-                    size="icon"
-                    className="shrink-0 h-6 w-6"
+                    size="sm"
+                    className="shrink-0 h-7 text-xs gap-1 text-muted-foreground hover:text-destructive"
                     onClick={() => dismissAlert(alert.id)}
                   >
-                    <X className="w-3 h-3" />
+                    <X className="w-3 h-3" /> Dismiss
                   </Button>
                 </motion.div>
               );
-            })}
-          </CardContent>
-        </Card>
-      )}
+            })
+          )}
+        </CardContent>
+      </Card>
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
