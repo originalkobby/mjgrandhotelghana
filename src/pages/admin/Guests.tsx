@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import FlagIcon, { getIsoFromPhone } from "@/components/FlagIcon";
-import { Search, RefreshCw, Star, Crown, Clock, LogIn, LogOut, DoorOpen } from "lucide-react";
+import { Search, RefreshCw, Star, Crown, Clock, LogIn, LogOut, DoorOpen, CalendarPlus, Plane } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -78,6 +78,13 @@ export default function Guests() {
   const [checkOutTime, setCheckOutTime] = useState("");
   const [recordingBookingId, setRecordingBookingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  // Extend checkout
+  const [showExtendDialog, setShowExtendDialog] = useState(false);
+  const [extendBookingId, setExtendBookingId] = useState<string | null>(null);
+  const [extendBookingRef, setExtendBookingRef] = useState("");
+  const [extendCurrentCheckout, setExtendCurrentCheckout] = useState("");
+  const [newCheckOutDate, setNewCheckOutDate] = useState("");
+  const [extending, setExtending] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -154,6 +161,30 @@ export default function Guests() {
       queryClient.invalidateQueries({ queryKey: ["admin-guest-bookings"] });
       setRecordingBookingId(null);
       setCheckOutTime("");
+    }
+  };
+
+  const handleExtendCheckout = async () => {
+    if (!extendBookingId || !newCheckOutDate) return;
+    setExtending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("extend-checkout", {
+        body: { bookingId: extendBookingId, newCheckOut: newCheckOutDate },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast({
+        title: "Checkout Extended",
+        description: `+${data.extraNights} night(s), +GH₵ ${data.extraCost}. New total: GH₵ ${data.newFinalTotal}`,
+      });
+      setShowExtendDialog(false);
+      setExtendBookingId(null);
+      setNewCheckOutDate("");
+      queryClient.invalidateQueries({ queryKey: ["admin-guest-bookings"] });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setExtending(false);
     }
   };
 
@@ -330,6 +361,17 @@ export default function Guests() {
                 </div>
               </div>
 
+              {/* Flight Itinerary */}
+              {selectedGuest.preferences?.flight_itinerary && (
+                <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
+                  <Plane className="w-4 h-4 text-primary" />
+                  <div>
+                    <p className="text-xs uppercase tracking-wider text-muted-foreground">Flight Itinerary</p>
+                    <p className="text-foreground font-medium">{selectedGuest.preferences.flight_itinerary}</p>
+                  </div>
+                </div>
+              )}
+
               <div>
                 <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Booking History & Room Assignment</p>
                 {bookingsLoading ? (
@@ -465,6 +507,23 @@ export default function Guests() {
                                 </Button>
                               )
                             )}
+                            {(b.status === "confirmed" || b.status === "completed") && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-xs h-7 gap-1.5"
+                                onClick={() => {
+                                  setExtendBookingId(b.id);
+                                  setExtendBookingRef(b.reference_code);
+                                  setExtendCurrentCheckout(b.check_out);
+                                  setNewCheckOutDate("");
+                                  setShowExtendDialog(true);
+                                }}
+                              >
+                                <CalendarPlus className="w-3 h-3" />
+                                Extend Checkout
+                              </Button>
+                            )}
                           </div>
                         )}
                       </div>
@@ -474,6 +533,51 @@ export default function Guests() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Extend Checkout Dialog */}
+      <Dialog open={showExtendDialog} onOpenChange={(o) => { if (!o) { setShowExtendDialog(false); setExtendBookingId(null); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-serif flex items-center gap-2">
+              <CalendarPlus className="w-5 h-5 text-accent" />
+              Extend Checkout
+            </DialogTitle>
+            <DialogDescription className="font-sans">
+              {extendBookingRef} — {selectedGuest?.full_name}
+              <br />
+              Current check-out: <strong>{extendCurrentCheckout ? formatDateGB(extendCurrentCheckout) : ""}</strong>
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div>
+              <Label className="text-sm text-muted-foreground">
+                New Check-out Date
+              </Label>
+              <Input
+                type="date"
+                value={newCheckOutDate}
+                onChange={(e) => setNewCheckOutDate(e.target.value)}
+                min={extendCurrentCheckout ? new Date(new Date(extendCurrentCheckout).getTime() + 86400000).toISOString().split("T")[0] : ""}
+                className="mt-1"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => { setShowExtendDialog(false); setExtendBookingId(null); }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleExtendCheckout}
+              disabled={extending || !newCheckOutDate}
+              className="bg-accent text-accent-foreground hover:bg-accent/90"
+            >
+              {extending ? "Extending…" : "Extend Checkout"}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

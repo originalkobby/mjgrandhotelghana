@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Filter, RefreshCw, Download, CalendarPlus, Banknote } from "lucide-react";
+import { Search, Filter, RefreshCw, Download, Banknote } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -130,11 +130,7 @@ export default function Bookings() {
   const [newStatus, setNewStatus] = useState<BookingStatus | "">("");
   const [roomNumber, setRoomNumber] = useState("");
   const [updating, setUpdating] = useState(false);
-  // Extend checkout
-  const [showExtendDialog, setShowExtendDialog] = useState(false);
-  const [extendBooking, setExtendBooking] = useState<Booking | null>(null);
-  const [newCheckOutDate, setNewCheckOutDate] = useState("");
-  const [extending, setExtending] = useState(false);
+  
   // Record payment
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [paymentBooking, setPaymentBooking] = useState<Booking | null>(null);
@@ -241,32 +237,8 @@ export default function Bookings() {
     }
   };
 
-  const handleExtendCheckout = async () => {
-    if (!extendBooking || !newCheckOutDate) return;
-    setExtending(true);
 
-    try {
-      const { data, error } = await supabase.functions.invoke("extend-checkout", {
-        body: { bookingId: extendBooking.id, newCheckOut: newCheckOutDate },
-      });
 
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-
-      toast({
-        title: "Checkout Extended",
-        description: `+${data.extraNights} night(s), +GH₵ ${data.extraCost}. New total: GH₵ ${data.newFinalTotal}`,
-      });
-      setShowExtendDialog(false);
-      setExtendBooking(null);
-      setNewCheckOutDate("");
-      queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
-    } finally {
-      setExtending(false);
-    }
-  };
 
   const handleRecordPayment = async () => {
     if (!paymentBooking || !paymentAmount) return;
@@ -511,21 +483,8 @@ export default function Bookings() {
                             >
                               Manage
                             </Button>
-                            {(b.status === "confirmed" || b.status === "completed") && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-xs"
-                                title="Extend checkout"
-                                onClick={() => {
-                                  setExtendBooking(b);
-                                  setNewCheckOutDate("");
-                                  setShowExtendDialog(true);
-                                }}
-                              >
-                                <CalendarPlus className="w-3.5 h-3.5" />
-                              </Button>
-                            )}
+
+
                             {b.payment_method === "pay_at_hotel" && b.payment_status !== "paid" && b.status !== "cancelled" && b.status !== "no_show" && (
                               <Button
                                 variant="ghost"
@@ -678,51 +637,8 @@ export default function Bookings() {
         </DialogContent>
       </Dialog>
 
-      {/* Extend Checkout Dialog */}
-      <Dialog open={showExtendDialog} onOpenChange={(o) => { if (!o) { setShowExtendDialog(false); setExtendBooking(null); } }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="font-serif flex items-center gap-2">
-              <CalendarPlus className="w-5 h-5 text-accent" />
-              Extend Checkout
-            </DialogTitle>
-            <DialogDescription className="font-sans">
-              {extendBooking?.reference_code} — {extendBooking?.guests?.full_name}
-              <br />
-              Current check-out: <strong>{extendBooking ? formatDateGB(extendBooking.check_out) : ""}</strong>
-            </DialogDescription>
-          </DialogHeader>
 
-          <div className="space-y-4 py-2">
-            <div>
-              <Label htmlFor="new-checkout" className="text-sm text-muted-foreground">
-                New Check-out Date
-              </Label>
-              <Input
-                id="new-checkout"
-                type="date"
-                value={newCheckOutDate}
-                onChange={(e) => setNewCheckOutDate(e.target.value)}
-                min={extendBooking ? new Date(new Date(extendBooking.check_out).getTime() + 86400000).toISOString().split("T")[0] : ""}
-                className="mt-1"
-              />
-            </div>
-          </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => { setShowExtendDialog(false); setExtendBooking(null); }}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleExtendCheckout}
-              disabled={extending || !newCheckOutDate}
-              className="bg-accent text-accent-foreground hover:bg-accent/90"
-            >
-              {extending ? "Extending…" : "Extend Checkout"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Record Payment Dialog */}
       <Dialog open={showPaymentDialog} onOpenChange={(o) => { if (!o) { setShowPaymentDialog(false); setPaymentBooking(null); } }}>

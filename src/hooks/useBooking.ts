@@ -40,6 +40,7 @@ export interface GuestInfo {
   specialRequests: string;
   arrivalTime: string;
   nationality: string;
+  flightItinerary: string;
 }
 
 export interface BookingState {
@@ -73,6 +74,7 @@ export function useBooking() {
       specialRequests: "",
       arrivalTime: "",
       nationality: "",
+      flightItinerary: "",
     },
     bookingReference: null,
     totalAmount: 0,

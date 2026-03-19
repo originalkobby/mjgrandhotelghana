@@ -356,14 +356,24 @@ export default function GuestDetailsStep({
               />
             </Field>
           </div>
-          <Field label="Estimated Arrival Time">
-            <Input
-              value={guestInfo.arrivalTime}
-              onChange={(e) => onUpdate({ arrivalTime: e.target.value })}
-              placeholder="e.g. 3:00 PM"
-              className="h-12"
-            />
-          </Field>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Field label="Estimated Arrival Time">
+              <Input
+                value={guestInfo.arrivalTime}
+                onChange={(e) => onUpdate({ arrivalTime: e.target.value })}
+                placeholder="e.g. 3:00 PM"
+                className="h-12"
+              />
+            </Field>
+            <Field label="Flight Itinerary (Optional)">
+              <Input
+                value={guestInfo.flightItinerary}
+                onChange={(e) => onUpdate({ flightItinerary: e.target.value })}
+                placeholder="e.g. KQ 508 / BA 2065"
+                className="h-12"
+              />
+            </Field>
+          </div>
           <Field label="Special Requests">
             <Textarea
               value={guestInfo.specialRequests}
