@@ -535,6 +535,51 @@ export default function Guests() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Extend Checkout Dialog */}
+      <Dialog open={showExtendDialog} onOpenChange={(o) => { if (!o) { setShowExtendDialog(false); setExtendBookingId(null); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-serif flex items-center gap-2">
+              <CalendarPlus className="w-5 h-5 text-accent" />
+              Extend Checkout
+            </DialogTitle>
+            <DialogDescription className="font-sans">
+              {extendBookingRef} — {selectedGuest?.full_name}
+              <br />
+              Current check-out: <strong>{extendCurrentCheckout ? formatDateGB(extendCurrentCheckout) : ""}</strong>
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div>
+              <Label className="text-sm text-muted-foreground">
+                New Check-out Date
+              </Label>
+              <Input
+                type="date"
+                value={newCheckOutDate}
+                onChange={(e) => setNewCheckOutDate(e.target.value)}
+                min={extendCurrentCheckout ? new Date(new Date(extendCurrentCheckout).getTime() + 86400000).toISOString().split("T")[0] : ""}
+                className="mt-1"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => { setShowExtendDialog(false); setExtendBookingId(null); }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleExtendCheckout}
+              disabled={extending || !newCheckOutDate}
+              className="bg-accent text-accent-foreground hover:bg-accent/90"
+            >
+              {extending ? "Extending…" : "Extend Checkout"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
