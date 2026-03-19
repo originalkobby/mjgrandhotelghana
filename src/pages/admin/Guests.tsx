@@ -507,6 +507,23 @@ export default function Guests() {
                                 </Button>
                               )
                             )}
+                            {(b.status === "confirmed" || b.status === "completed") && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-xs h-7 gap-1.5"
+                                onClick={() => {
+                                  setExtendBookingId(b.id);
+                                  setExtendBookingRef(b.reference_code);
+                                  setExtendCurrentCheckout(b.check_out);
+                                  setNewCheckOutDate("");
+                                  setShowExtendDialog(true);
+                                }}
+                              >
+                                <CalendarPlus className="w-3 h-3" />
+                                Extend Checkout
+                              </Button>
+                            )}
                           </div>
                         )}
                       </div>
