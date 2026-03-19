@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin } from "lucide-react";
-import logo from "@/assets/logo.png";
 
 const Footer = () => {
   return (
