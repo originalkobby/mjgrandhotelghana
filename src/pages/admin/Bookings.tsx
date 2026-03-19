@@ -237,32 +237,8 @@ export default function Bookings() {
     }
   };
 
-  const handleExtendCheckout = async () => {
-    if (!extendBooking || !newCheckOutDate) return;
-    setExtending(true);
 
-    try {
-      const { data, error } = await supabase.functions.invoke("extend-checkout", {
-        body: { bookingId: extendBooking.id, newCheckOut: newCheckOutDate },
-      });
 
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-
-      toast({
-        title: "Checkout Extended",
-        description: `+${data.extraNights} night(s), +GH₵ ${data.extraCost}. New total: GH₵ ${data.newFinalTotal}`,
-      });
-      setShowExtendDialog(false);
-      setExtendBooking(null);
-      setNewCheckOutDate("");
-      queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
-    } finally {
-      setExtending(false);
-    }
-  };
 
   const handleRecordPayment = async () => {
     if (!paymentBooking || !paymentAmount) return;
