@@ -78,6 +78,13 @@ export default function Guests() {
   const [checkOutTime, setCheckOutTime] = useState("");
   const [recordingBookingId, setRecordingBookingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  // Extend checkout
+  const [showExtendDialog, setShowExtendDialog] = useState(false);
+  const [extendBookingId, setExtendBookingId] = useState<string | null>(null);
+  const [extendBookingRef, setExtendBookingRef] = useState("");
+  const [extendCurrentCheckout, setExtendCurrentCheckout] = useState("");
+  const [newCheckOutDate, setNewCheckOutDate] = useState("");
+  const [extending, setExtending] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
