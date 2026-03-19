@@ -164,6 +164,30 @@ export default function Guests() {
     }
   };
 
+  const handleExtendCheckout = async () => {
+    if (!extendBookingId || !newCheckOutDate) return;
+    setExtending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("extend-checkout", {
+        body: { bookingId: extendBookingId, newCheckOut: newCheckOutDate },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast({
+        title: "Checkout Extended",
+        description: `+${data.extraNights} night(s), +GH₵ ${data.extraCost}. New total: GH₵ ${data.newFinalTotal}`,
+      });
+      setShowExtendDialog(false);
+      setExtendBookingId(null);
+      setNewCheckOutDate("");
+      queryClient.invalidateQueries({ queryKey: ["admin-guest-bookings"] });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setExtending(false);
+    }
+  };
+
   // Get latest room # for a guest from their bookings
   const getGuestRoomNumber = (guestId: string): string | null => {
     if (selectedGuest?.id === guestId && guestBookings.length > 0) {
