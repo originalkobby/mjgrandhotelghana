@@ -50,7 +50,7 @@ const App = () => (
           <Route path="/about" element={<About />} />
           <Route path="/policy" element={<Policy />} />
           <Route path="/booking" element={<Booking />} />
-          <Route path="/booking/lookup" element={<BookingLookup />} />
+          <Route path="/booking/lookup" element={<Navigate to="/booking" replace />} />
           <Route path="/guest-services" element={<GuestServices />} />
 
           {/* Admin Dashboard */}
