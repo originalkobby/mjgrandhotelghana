@@ -198,6 +198,8 @@ const Booking = () => {
               <ConfirmationStep key="confirmation" state={state} />
             )}
           </AnimatePresence>
+
+          {state.step !== "confirmation" && <BookingLookupSection />}
         </div>
       </main>
       <Footer />
