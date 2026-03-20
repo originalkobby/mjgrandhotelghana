@@ -2,14 +2,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Index from "./pages/Index";
 import Menu from "./pages/Menu";
 import Dining from "./pages/Dining";
 import Policy from "./pages/Policy";
 import About from "./pages/About";
 import Booking from "./pages/Booking";
-import BookingLookup from "./pages/BookingLookup";
 import NotFound from "./pages/NotFound";
 import GuestServices from "./pages/GuestServices";
 import MJChat from "./components/MJChat";
@@ -51,7 +50,7 @@ const App = () => (
           <Route path="/about" element={<About />} />
           <Route path="/policy" element={<Policy />} />
           <Route path="/booking" element={<Booking />} />
-          <Route path="/booking/lookup" element={<BookingLookup />} />
+          <Route path="/booking/lookup" element={<Navigate to="/booking" replace />} />
           <Route path="/guest-services" element={<GuestServices />} />
 
           {/* Admin Dashboard */}

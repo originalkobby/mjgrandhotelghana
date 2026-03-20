@@ -65,7 +65,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const PAYMENT_COLORS: Record<string, string> = {
-  paid: "bg-accent/20 text-accent border-accent/30",
+  paid: "bg-emerald-100 text-emerald-700 border-emerald-300",
   pending: "bg-gold-light/20 text-gold-dark border-gold-light/30",
   failed: "bg-destructive/10 text-destructive border-destructive/20",
   partial: "bg-gold-light/20 text-gold-dark border-gold-light/30",

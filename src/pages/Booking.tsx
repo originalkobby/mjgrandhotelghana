@@ -10,6 +10,7 @@ import AddOnsStep from "@/components/booking/AddOnsStep";
 import GuestDetailsStep from "@/components/booking/GuestDetailsStep";
 import PaymentStep from "@/components/booking/PaymentStep";
 import ConfirmationStep from "@/components/booking/ConfirmationStep";
+import BookingLookupSection from "@/components/booking/BookingLookupSection";
 import { useBooking } from "@/hooks/useBooking";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -197,6 +198,8 @@ const Booking = () => {
               <ConfirmationStep key="confirmation" state={state} />
             )}
           </AnimatePresence>
+
+          {state.step !== "confirmation" && <BookingLookupSection />}
         </div>
       </main>
       <Footer />

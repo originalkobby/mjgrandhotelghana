@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.ingest-forecast]
 verify_jwt = false
+
+[functions.auto-status]
+verify_jwt = false
