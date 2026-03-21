@@ -589,19 +589,6 @@ export default function Bookings() {
                 </div>
               )}
 
-              {/* Room Number Assignment */}
-              <div>
-                <Label htmlFor="room-number" className="text-xs uppercase tracking-wider text-muted-foreground">
-                  Room Number
-                </Label>
-                <Input
-                  id="room-number"
-                  value={roomNumber}
-                  onChange={(e) => setRoomNumber(e.target.value)}
-                  placeholder="e.g. 101, 205A"
-                  className="mt-1"
-                />
-              </div>
 
               <div>
                 <p className="text-xs uppercase tracking-wider mb-2 text-muted-foreground">Update Status</p>
