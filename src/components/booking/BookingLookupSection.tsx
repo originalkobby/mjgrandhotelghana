@@ -16,6 +16,9 @@ import {
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { formatBookingLabel, getPaymentDisplay } from "@/lib/bookingLifecycle";
+import { lookupBookingByReference } from "@/lib/bookingLookup";
+import { useBookingLifecycleSync } from "@/hooks/useBookingLifecycleSync";
 
 interface BookingResult {
   id: string;
@@ -62,6 +65,19 @@ export default function BookingLookupSection() {
   const [cancelling, setCancelling] = useState(false);
   const { toast } = useToast();
 
+  useBookingLifecycleSync({
+    enabled: !!result,
+    onSynced: async () => {
+      const latest = await lookupBookingByReference<BookingResult>(
+        supabase,
+        result?.reference_code ?? reference,
+        "id, reference_code, status, payment_status, check_in, check_out, adults, children, final_total_ghs, base_total_ghs, add_ons_total_ghs, discount_ghs, special_requests, arrival_time, created_at, rooms(name), guests(full_name, email)"
+      );
+
+      if (latest) setResult(latest);
+    },
+  });
+
   const handleLookup = async () => {
     const ref = reference.trim().toUpperCase();
     if (!ref) return;
@@ -69,14 +85,11 @@ export default function BookingLookupSection() {
     setResult(null);
     setNotFound(false);
     try {
-      const { data, error } = await supabase
-        .from("bookings")
-        .select(
-          "id, reference_code, status, payment_status, check_in, check_out, adults, children, final_total_ghs, base_total_ghs, add_ons_total_ghs, discount_ghs, special_requests, arrival_time, created_at, rooms(name), guests(full_name, email)"
-        )
-        .eq("reference_code", ref)
-        .maybeSingle();
-      if (error) throw error;
+      const data = await lookupBookingByReference<BookingResult>(
+        supabase,
+        ref,
+        "id, reference_code, status, payment_status, check_in, check_out, adults, children, final_total_ghs, base_total_ghs, add_ons_total_ghs, discount_ghs, special_requests, arrival_time, created_at, rooms(name), guests(full_name, email)"
+      );
       if (data) setResult(data as unknown as BookingResult);
       else setNotFound(true);
     } catch (err: any) {
@@ -150,7 +163,9 @@ export default function BookingLookupSection() {
     }
   };
 
-  const canCancel = result && (result.status === "confirmed" || result.status === "pending");
+  const paymentDisplay = result ? getPaymentDisplay(result) : null;
+  const displayStatus = paymentDisplay?.effectiveStatus ?? result?.status ?? "pending";
+  const canCancel = result && (displayStatus === "confirmed" || displayStatus === "pending");
 
   return (
     <section className="border-t border-border mt-16 pt-16 pb-4">
@@ -214,13 +229,17 @@ export default function BookingLookupSection() {
                       Booked on {format(new Date(result.created_at), "MMM d, yyyy 'at' h:mm a")}
                     </p>
                   </div>
-                  <div className="flex gap-2">
-                    <Badge variant="outline" className={`capitalize ${STATUS_COLORS[result.status] ?? ""}`}>
-                      {result.status.replace("_", " ")}
+                  <div className="flex gap-2 flex-wrap justify-end">
+                    <Badge variant="outline" className={`capitalize ${STATUS_COLORS[displayStatus] ?? ""}`}>
+                      {formatBookingLabel(displayStatus)}
                     </Badge>
-                    <Badge variant="secondary" className={`capitalize ${PAYMENT_COLORS[result.payment_status] ?? ""}`}>
-                      {result.payment_status}
-                    </Badge>
+                    {paymentDisplay?.isDash ? (
+                      <span className="min-w-10 text-center font-medium text-muted-foreground">--</span>
+                    ) : (
+                      <Badge variant="secondary" className={`capitalize ${PAYMENT_COLORS[paymentDisplay?.label ?? result.payment_status] ?? ""}`}>
+                        {formatBookingLabel(paymentDisplay?.label ?? result.payment_status)}
+                      </Badge>
+                    )}
                   </div>
                 </div>
 

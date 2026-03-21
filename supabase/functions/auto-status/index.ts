@@ -6,6 +6,38 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+async function releaseInventoryForBooking(
+  supabase: ReturnType<typeof createClient>,
+  booking: { room_id: string; check_in: string; check_out: string }
+) {
+  let released = 0;
+  const ciDate = new Date(booking.check_in);
+  const coDate = new Date(booking.check_out);
+  const d = new Date(ciDate);
+
+  while (d < coDate) {
+    const dateStr = d.toISOString().split("T")[0];
+    const { data: inv } = await supabase
+      .from("room_inventory")
+      .select("id, booked_count")
+      .eq("room_id", booking.room_id)
+      .eq("date", dateStr)
+      .maybeSingle();
+
+    if (inv && inv.booked_count > 0) {
+      await supabase
+        .from("room_inventory")
+        .update({ booked_count: inv.booked_count - 1 })
+        .eq("id", inv.id);
+      released++;
+    }
+
+    d.setDate(d.getDate() + 1);
+  }
+
+  return released;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -56,35 +88,8 @@ serve(async (req) => {
         note: `Auto-status: check-out date ${booking.check_out} reached. Payment: ${booking.payment_status}`,
       });
 
-      // Release inventory for no_show bookings (completed stays already used the room)
-      if (newStatus === "no_show") {
-        const ciDate = new Date(booking.check_in);
-        const coDate = new Date(booking.check_out);
-        const d = new Date(ciDate);
-        while (d < coDate) {
-          const dateStr = d.toISOString().split("T")[0];
-          const { data: inv } = await supabase
-            .from("room_inventory")
-            .select("id, booked_count")
-            .eq("room_id", booking.room_id)
-            .eq("date", dateStr)
-            .maybeSingle();
-
-          if (inv && inv.booked_count > 0) {
-            await supabase
-              .from("room_inventory")
-              .update({ booked_count: inv.booked_count - 1 })
-              .eq("id", inv.id);
-            results.inventoryReleased++;
-          }
-          d.setDate(d.getDate() + 1);
-        }
-      }
+      results.inventoryReleased += await releaseInventoryForBooking(supabase, booking);
     }
-
-    // 2. Release inventory for past dates on completed bookings (cleanup)
-    //    For completed bookings whose check_out is in the past, inventory
-    //    was legitimately used, so no release needed.
 
     return new Response(
       JSON.stringify({

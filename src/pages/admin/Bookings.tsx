@@ -27,6 +27,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { formatDateGB } from "@/lib/dateUtils";
 import type { Database } from "@/integrations/supabase/types";
+import { formatBookingLabel, getPaymentDisplay } from "@/lib/bookingLifecycle";
+import { useBookingLifecycleSync } from "@/hooks/useBookingLifecycleSync";
 
 type BookingStatus = Database["public"]["Enums"]["booking_status"];
 
@@ -95,13 +97,6 @@ const SOURCE_COLORS: Record<string, string> = {
   airbnb: "bg-rose-500/15 text-rose-700 border-rose-500/30",
 };
 
-/** Derive display payment status based on booking status */
-function getPaymentDisplay(b: Booking): { label: string; isDash: boolean } {
-  if (b.status === "cancelled" || b.status === "no_show") return { label: "—", isDash: true };
-  if (b.status === "completed") return { label: "Paid", isDash: false };
-  return { label: b.payment_status, isDash: false };
-}
-
 const SOURCE_OPTIONS = Object.keys(SOURCE_LABELS);
 
 async function fetchBookings(statusFilter: string, sourceFilter: string) {
@@ -145,6 +140,10 @@ export default function Bookings() {
     queryKey: ["admin-bookings", statusFilter, sourceFilter],
     queryFn: () => fetchBookings(statusFilter, sourceFilter),
     staleTime: 30_000,
+  });
+
+  useBookingLifecycleSync({
+    onSynced: () => queryClient.invalidateQueries({ queryKey: ["admin-bookings"] }),
   });
 
   const bookings = search.trim()
@@ -449,7 +448,7 @@ export default function Bookings() {
                         </td>
                         <td className="px-4 py-3">
                           <Badge variant="outline" className={`text-xs capitalize ${STATUS_COLORS[b.status] ?? ""}`}>
-                            {b.status.replace("_", " ")}
+                            {formatBookingLabel(pd.effectiveStatus)}
                           </Badge>
                         </td>
                         <td className="px-4 py-3">
@@ -459,10 +458,10 @@ export default function Bookings() {
                         </td>
                         <td className="px-4 py-3">
                           {pd.isDash ? (
-                            <span className="text-muted-foreground font-medium text-center block">—</span>
+                            <span className="text-muted-foreground font-medium text-center block">--</span>
                           ) : (
                             <Badge variant="outline" className={`text-xs capitalize ${PAYMENT_COLORS[pd.label] ?? ""}`}>
-                              {pd.label}
+                              {formatBookingLabel(pd.label)}
                             </Badge>
                           )}
                         </td>
@@ -485,7 +484,7 @@ export default function Bookings() {
                             </Button>
 
 
-                            {b.payment_method === "pay_at_hotel" && b.payment_status !== "paid" && b.status !== "cancelled" && b.status !== "no_show" && (
+                            {b.payment_method === "pay_at_hotel" && pd.label !== "paid" && pd.effectiveStatus !== "cancelled" && pd.effectiveStatus !== "no_show" && (
                               <Button
                                 variant="ghost"
                                 size="sm"
