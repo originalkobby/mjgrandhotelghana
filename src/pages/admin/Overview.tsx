@@ -26,6 +26,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { formatBookingLabel, getPaymentDisplay } from "@/lib/bookingLifecycle";
+import { useBookingLifecycleSync } from "@/hooks/useBookingLifecycleSync";
 
 interface KPI {
   label: string;
@@ -62,12 +64,6 @@ const PAYMENT_COLORS: Record<string, string> = {
   partial: "bg-gold-light/20 text-gold-dark",
   refunded: "bg-muted text-muted-foreground",
 };
-
-function getPaymentDisplay(b: Booking): { label: string; isDash: boolean } {
-  if (b.status === "cancelled" || b.status === "no_show") return { label: "—", isDash: true };
-  if (b.status === "completed") return { label: "Paid", isDash: false };
-  return { label: b.payment_status, isDash: false };
-}
 
 async function fetchOverviewData(dateFrom: string, dateTo: string) {
   const prevDuration = new Date(dateTo).getTime() - new Date(dateFrom).getTime();
@@ -144,6 +140,10 @@ export default function Overview() {
     queryKey: ["admin-overview", dateFrom, dateTo],
     queryFn: () => fetchOverviewData(dateFrom, dateTo),
     staleTime: 60_000,
+  });
+
+  useBookingLifecycleSync({
+    onSynced: () => queryClient.invalidateQueries({ queryKey: ["admin-overview"] }),
   });
 
   const kpis = data?.kpis ?? [];
@@ -298,9 +298,9 @@ export default function Overview() {
                         </td>
                         <td className="px-4 py-3">
                           {pd.isDash ? (
-                            <span className="text-muted-foreground font-medium text-center block">—</span>
+                            <span className="text-muted-foreground font-medium text-center block">--</span>
                           ) : (
-                            <Badge variant="secondary" className={`text-xs capitalize ${PAYMENT_COLORS[pd.label] ?? ""}`}>{pd.label}</Badge>
+                            <Badge variant="secondary" className={`text-xs capitalize ${PAYMENT_COLORS[pd.label] ?? ""}`}>{formatBookingLabel(pd.label)}</Badge>
                           )}
                         </td>
                       </tr>
