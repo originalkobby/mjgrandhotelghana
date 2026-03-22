@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import diningBg from "@/assets/dining-bg.jpg";
 import {
   ChevronLeft, UtensilsCrossed, Clock, Wine, GlassWater, Coffee,
   ConciergeBell, Moon, ShieldCheck, Sparkles, CalendarHeart, Users,
@@ -99,7 +100,12 @@ const Dining = () => {
       </div>
 
       {/* Hero */}
-      <section className="container mx-auto px-4 sm:px-6 lg:px-12 pt-16 pb-20 text-center">
+      <section
+        className="relative pt-16 pb-20 text-center bg-cover bg-center"
+        style={{ backgroundImage: `url(${diningBg})` }}
+      >
+        <div className="absolute inset-0 bg-overlay-heavy" />
+        <div className="relative container mx-auto px-4 sm:px-6 lg:px-12">
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -133,6 +139,7 @@ const Dining = () => {
         >
           Every dish is thoughtfully crafted, beautifully presented, and served within an atmosphere of contemporary elegance.
         </motion.p>
+        </div>
       </section>
 
       {/* The Restaurant */}
