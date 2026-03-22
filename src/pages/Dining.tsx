@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import diningBg from "@/assets/dining-bg.jpg";
 import {
   ChevronLeft, UtensilsCrossed, Clock, Wine, GlassWater, Coffee,
   ConciergeBell, Moon, ShieldCheck, Sparkles, CalendarHeart, Users,
