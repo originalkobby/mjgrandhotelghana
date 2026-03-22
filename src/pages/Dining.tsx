@@ -139,6 +139,7 @@ const Dining = () => {
         >
           Every dish is thoughtfully crafted, beautifully presented, and served within an atmosphere of contemporary elegance.
         </motion.p>
+        </div>
       </section>
 
       {/* The Restaurant */}
