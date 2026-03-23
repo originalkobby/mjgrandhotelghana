@@ -12,7 +12,7 @@ const Hero = () => {
           playsInline
           preload="auto"
           className="h-full w-full object-cover"
-          poster=""
+          poster="/videos/hero-poster.jpg"
         >
           <source src="/videos/hero.mp4" type="video/mp4" />
         </video>
