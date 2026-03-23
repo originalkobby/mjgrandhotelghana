@@ -360,7 +360,7 @@ const About = () => {
               We invite you to experience the elegance, tranquility, and superior service that define MJ Grand Hotel. Book your stay with us today and discover a new standard of luxury living.
             </p>
             <Link
-              to="/contact"
+              to="/booking"
               className="inline-block bg-gold px-8 py-3.5 font-sans text-sm font-semibold uppercase tracking-wider text-charcoal hover:shadow-lg hover:shadow-gold/20 transition-all duration-300"
             >
               Book Your Stay
