@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeft, Bed, Wifi, Wind, Tv, Bath, Clock, UtensilsCrossed, Wine, Building2, Waves, Dumbbell, Shield, Plane, Heart, Scale, Users, Lightbulb, Lock, MessageCircle, Award } from "lucide-react";
+import aboutHeroBg from "@/assets/about-hero.jpg";
 
 const ease = [0.3, 0, 0.2, 1] as const;
 
@@ -59,23 +60,30 @@ const coreValues = [
 ];
 
 const About = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-charcoal">
       {/* Header */}
       <div className="sticky top-0 z-50 glass-nav py-4">
         <div className="container mx-auto px-6 lg:px-12 flex items-center gap-6">
-          <Link
-            to="/"
+          <button
+            onClick={() => navigate(-1)}
             className="flex items-center gap-2 text-cream/80 hover:text-gold transition-colors duration-300 font-sans text-sm"
           >
             <ChevronLeft size={18} />
             Go back
-          </Link>
+          </button>
         </div>
       </div>
 
       {/* Hero */}
-      <section className="container mx-auto px-4 sm:px-6 lg:px-12 pt-16 pb-20 text-center">
+      <section className="relative w-full pt-16 pb-20 text-center overflow-hidden">
+        <div className="absolute inset-0 -z-10">
+          <img src={aboutHeroBg} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-charcoal/70" />
+        </div>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-12">
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -109,6 +117,7 @@ const About = () => {
         >
           Whether you are visiting for business, leisure, or a special occasion, our commitment is to deliver an unforgettable stay defined by excellence, comfort, and personalized service.
         </motion.p>
+        </div>
       </section>
 
       {/* Our Story */}
@@ -351,7 +360,7 @@ const About = () => {
               We invite you to experience the elegance, tranquility, and superior service that define MJ Grand Hotel. Book your stay with us today and discover a new standard of luxury living.
             </p>
             <Link
-              to="/contact"
+              to="/booking"
               className="inline-block bg-gold px-8 py-3.5 font-sans text-sm font-semibold uppercase tracking-wider text-charcoal hover:shadow-lg hover:shadow-gold/20 transition-all duration-300"
             >
               Book Your Stay
