@@ -117,6 +117,7 @@ const About = () => {
         >
           Whether you are visiting for business, leisure, or a special occasion, our commitment is to deliver an unforgettable stay defined by excellence, comfort, and personalized service.
         </motion.p>
+        </div>
       </section>
 
       {/* Our Story */}
