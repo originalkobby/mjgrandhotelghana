@@ -1,16 +1,21 @@
 import { motion } from "framer-motion";
-import heroImg from "@/assets/hero-hotel.jpg";
 
 const Hero = () => {
   return (
     <section id="home" className="relative h-screen w-full overflow-hidden">
-      {/* Background image with slow zoom */}
+      {/* Background video */}
       <div className="absolute inset-0">
-        <img
-          src={heroImg}
-          alt="MJ Grand Hotel exterior at golden hour"
-          className="h-full w-full object-cover animate-slow-zoom"
-        />
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          className="h-full w-full object-cover"
+          poster=""
+        >
+          <source src="/videos/hero.mp4" type="video/mp4" />
+        </video>
         <div className="absolute inset-0 bg-overlay-heavy" />
       </div>
 
