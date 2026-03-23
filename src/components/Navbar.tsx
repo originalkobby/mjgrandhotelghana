@@ -38,7 +38,7 @@ const Navbar = () => {
           scrolled ? "glass-nav py-3 shadow-lg" : "bg-transparent py-5"
         }`}
       >
-        <div className="container mx-auto flex items-center justify-between px-4 lg:px-8">
+        <div className="container mx-auto flex items-center justify-between px-2 lg:px-4">
           <Link to="/" className="flex items-center">
             <img src={logo} alt="MJ Grand Hotel" className="h-7 w-auto" />
           </Link>
