@@ -5,10 +5,10 @@ import galleryGarden from "@/assets/gallery-garden.jpg";
 import galleryBeach from "@/assets/gallery-beach.jpg";
 
 const images = [
-  { src: galleryPool, alt: "Infinity pool at sunset", span: "md:col-span-2" },
-  { src: galleryLobby, alt: "Grand lobby with chandelier", span: "" },
-  { src: galleryGarden, alt: "Garden terrace dining", span: "" },
-  { src: galleryBeach, alt: "Beach club with white cabanas", span: "md:col-span-2" },
+  { src: galleryPool, alt: "Hotel lounge with leather seating", span: "md:col-span-2" },
+  { src: galleryLobby, alt: "Poolside cabana and sun loungers", span: "" },
+  { src: galleryGarden, alt: "Fully equipped fitness center", span: "" },
+  { src: galleryBeach, alt: "MJ Pool Bar", span: "md:col-span-2" },
 ];
 
 const Gallery = () => {
