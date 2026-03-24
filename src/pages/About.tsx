@@ -83,7 +83,7 @@ const About = () => {
           <img src={aboutHeroBg} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-charcoal/50" />
         </div>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-12">
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-12">
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
