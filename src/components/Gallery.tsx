@@ -7,8 +7,8 @@ import galleryBeach from "@/assets/gallery-beach.jpg";
 const images = [
   { src: galleryPool, alt: "Hotel lounge with leather seating", span: "md:col-span-2" },
   { src: galleryLobby, alt: "Poolside cabana and sun loungers", span: "" },
-  { src: galleryGarden, alt: "Fully equipped fitness center", span: "" },
-  { src: galleryBeach, alt: "MJ Pool Bar", span: "md:col-span-2" },
+  { src: galleryGarden, alt: "MJ Pool Bar", span: "" },
+  { src: galleryBeach, alt: "Fully equipped fitness center", span: "md:col-span-2" },
 ];
 
 const Gallery = () => {
