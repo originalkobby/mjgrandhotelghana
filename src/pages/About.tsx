@@ -60,20 +60,18 @@ const coreValues = [
 ];
 
 const About = () => {
-  const navigate = useNavigate();
-
   return (
     <div className="min-h-screen bg-charcoal">
       {/* Header */}
       <div className="sticky top-0 z-50 glass-nav py-4">
         <div className="container mx-auto px-6 lg:px-12 flex items-center gap-6">
-          <button
-            onClick={() => navigate(-1)}
+          <Link
+            to="/"
             className="flex items-center gap-2 text-cream/80 hover:text-gold transition-colors duration-300 font-sans text-sm"
           >
             <ChevronLeft size={18} />
             Go back
-          </button>
+          </Link>
         </div>
       </div>
 
