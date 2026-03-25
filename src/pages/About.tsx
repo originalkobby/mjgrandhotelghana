@@ -121,7 +121,7 @@ const About = () => {
       </section>
 
       {/* Our Story */}
-      <section className="container mx-auto px-4 sm:px-6 lg:px-12 pt-14 pb-20">
+      <section className="container mx-auto px-4 sm:px-6 lg:px-12 pt-[19px] pb-20">
         <motion.div
           variants={containerVariants}
           initial="hidden"
