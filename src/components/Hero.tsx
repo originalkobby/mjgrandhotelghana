@@ -58,7 +58,6 @@ const Hero = () => {
           loop
           muted
           playsInline
-          defaultMuted
           disablePictureInPicture
           controlsList="nodownload noplaybackrate nofullscreen noremoteplayback"
           preload="auto"
