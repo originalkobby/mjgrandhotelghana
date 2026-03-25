@@ -56,7 +56,7 @@ const coreValues = [
   { icon: Users, title: "Commitment", subtitle: "Passion-Driven Excellence", desc: "We cultivate a culture of enthusiasm and dedication, inspiring our team to perform their roles with pride, integrity, and unwavering passion." },
   { icon: Lightbulb, title: "Innovation", subtitle: "Process Efficiency & Continuous Improvement", desc: "We continuously refine our systems and services to remain aligned with the evolving expectations of our guests, investors, and stakeholders." },
   { icon: Lock, title: "Confidentiality", subtitle: "Stakeholder Sensitivity & Trust", desc: "We uphold the highest standards of discretion, safeguarding all information entrusted to us in strict accordance with legal and ethical obligations." },
-  { icon: MessageCircle, title: "Dialogue", subtitle: "Strong Communication & Collaboration", desc: "We foster an environment that encourages open communication, constructive dialogue, and the free exchange of ideas to strengthen relationships and enhance service delivery." },
+  
 ];
 
 const About = () => {
