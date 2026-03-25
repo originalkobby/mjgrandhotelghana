@@ -1,15 +1,29 @@
 import { motion } from "framer-motion";
 
+import { useRef, useEffect } from "react";
+
 const Hero = () => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+      video.play().catch(() => {});
+    }
+  }, []);
+
   return (
     <section id="home" className="relative h-screen w-full overflow-hidden">
       {/* Background video */}
       <div className="absolute inset-0">
         <video
+          ref={videoRef}
           autoPlay
           loop
           muted
           playsInline
+          // @ts-ignore — webkit prefix for older iOS
+          webkit-playsinline=""
           preload="auto"
           className="h-full w-full object-cover"
           poster="/videos/hero-poster.jpg"
