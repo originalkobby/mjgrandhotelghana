@@ -7,9 +7,45 @@ const Hero = () => {
 
   useEffect(() => {
     const video = videoRef.current;
-    if (video) {
+    if (!video) return;
+
+    const attemptPlay = () => {
+      video.muted = true;
+      video.defaultMuted = true;
+      video.playsInline = true;
+      video.autoplay = true;
+      video.loop = true;
+      video.setAttribute("muted", "");
+      video.setAttribute("playsinline", "true");
+      video.setAttribute("webkit-playsinline", "true");
+      video.setAttribute("x5-playsinline", "true");
+
+      if (video.readyState === 0) {
+        video.load();
+      }
+
       video.play().catch(() => {});
-    }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        attemptPlay();
+      }
+    };
+
+    attemptPlay();
+
+    video.addEventListener("loadedmetadata", attemptPlay);
+    video.addEventListener("canplay", attemptPlay);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("touchstart", attemptPlay, { passive: true });
+
+    return () => {
+      video.removeEventListener("loadedmetadata", attemptPlay);
+      video.removeEventListener("canplay", attemptPlay);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("touchstart", attemptPlay);
+    };
   }, []);
 
   return (
@@ -22,11 +58,12 @@ const Hero = () => {
           loop
           muted
           playsInline
-          // @ts-ignore — webkit prefix for older iOS
-          webkit-playsinline=""
+          disablePictureInPicture
+          controlsList="nodownload noplaybackrate nofullscreen noremoteplayback"
           preload="auto"
           className="h-full w-full object-cover"
           poster="/videos/hero-poster.jpg"
+          aria-hidden="true"
         >
           <source src="/videos/hero.mp4" type="video/mp4" />
         </video>
