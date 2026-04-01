@@ -122,23 +122,31 @@ const Dining = () => {
         >
           A Culinary Experience Where Ghana Meets the World
         </motion.h1>
-        <div className="w-20 h-[2px] bg-gold mx-auto mb-6" />
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.8, ease }}
-          className="font-sans text-cream/60 max-w-2xl mx-auto text-base md:text-lg leading-relaxed"
-        >
-          At MJ Grand Hotel, dining is an immersive journey that celebrates the rich flavors of Ghana while embracing the finesse of international cuisine. Our culinary philosophy blends authentic local ingredients with modern global techniques, creating a refined fusion that delights both local and international guests.
-        </motion.p>
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 1.0, ease }}
-          className="font-sans text-cream/50 max-w-2xl mx-auto mt-4 text-sm leading-relaxed"
-        >
-          Every dish is thoughtfully crafted, beautifully presented, and served within an atmosphere of contemporary elegance.
-        </motion.p>
+        <div className="w-20 h-[2px] bg-gold mx-auto" />
+        </div>
+      </section>
+
+      {/* Introduction */}
+      <section className="py-16 border-b border-cream/10">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-12 max-w-3xl text-center">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, ease }}
+            className="font-sans text-cream/60 text-base md:text-lg leading-relaxed"
+          >
+            At MJ Grand Hotel, dining is an immersive journey that celebrates the rich flavors of Ghana while embracing the finesse of international cuisine. Our culinary philosophy blends authentic local ingredients with modern global techniques, creating a refined fusion that delights both local and international guests.
+          </motion.p>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2, ease }}
+            className="font-sans text-cream/50 mt-4 text-sm leading-relaxed"
+          >
+            Every dish is thoughtfully crafted, beautifully presented, and served within an atmosphere of contemporary elegance.
+          </motion.p>
         </div>
       </section>
 
