@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import MenuSection, { getItemVariants } from "@/components/MenuSection";
 import { usePublicMenu, MENU_SECTIONS } from "@/hooks/usePublicMenu";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -108,18 +109,7 @@ const Menu = () => {
 
   return (
     <div className="min-h-screen bg-charcoal">
-      {/* Header */}
-      <div className="sticky top-0 z-50 glass-nav py-4">
-        <div className="container mx-auto px-6 lg:px-12 flex items-center gap-6">
-          <Link
-            to="/"
-            className="flex items-center gap-2 text-cream/80 hover:text-gold transition-colors duration-300 font-sans text-sm"
-          >
-            <ChevronLeft size={18} />
-            Go back
-          </Link>
-        </div>
-      </div>
+      <Navbar />
 
       {/* Hero */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-12 pt-12">
@@ -205,13 +195,8 @@ const Menu = () => {
         <p className="font-sans text-cream/50 text-sm mb-4">
           To order, call: <span className="text-gold">+233 302544212</span> | <span className="text-gold">+233 302544211</span>
         </p>
-        <Link
-          to="/"
-          className="inline-block border border-gold/60 px-8 py-3 font-sans font-medium tracking-wide text-cream hover:bg-gold hover:text-charcoal transition-all duration-300"
-        >
-          Back to Home
-        </Link>
       </div>
+      <Footer />
     </div>
   );
 };

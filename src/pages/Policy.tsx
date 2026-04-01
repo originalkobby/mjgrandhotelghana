@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ChevronLeft, Shield, Clock, UtensilsCrossed, Key, Car, Waves, CircleX, Ban, MessageSquare, Lock, Search, Users, Banknote, Dumbbell } from "lucide-react";
+import { Shield, Clock, UtensilsCrossed, Key, Car, Waves, CircleX, Ban, MessageSquare, Lock, Search, Users, Banknote, Dumbbell } from "lucide-react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 
 const sections = [
@@ -91,18 +93,7 @@ const sections = [
 const Policy = () => {
   return (
     <div className="min-h-screen bg-secondary">
-      {/* Header */}
-      <div className="sticky top-0 z-50 glass-nav py-4">
-        <div className="container mx-auto px-6 lg:px-12 flex items-center gap-6">
-          <Link
-            to="/"
-            className="flex items-center gap-2 text-cream/80 hover:text-gold transition-colors duration-300 font-sans text-sm"
-          >
-            <ChevronLeft size={18} />
-            Go back
-          </Link>
-        </div>
-      </div>
+      <Navbar />
 
       <div className="container mx-auto px-6 lg:px-12 py-16 max-w-4xl">
         <motion.div
@@ -174,6 +165,7 @@ const Policy = () => {
           
         </motion.div>
       </div>
+      <Footer />
     </div>
   );
 };

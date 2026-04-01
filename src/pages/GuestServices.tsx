@@ -12,7 +12,6 @@ import {
   Users,
   Phone,
   ChevronDown,
-  ChevronLeft,
   QrCode,
   Clock,
   Droplets,
@@ -115,17 +114,6 @@ export default function GuestServices() {
 
       {/* HERO */}
       <section ref={heroRef} className="relative h-screen w-full overflow-hidden">
-        <div className="absolute inset-x-0 top-24 z-20">
-          <div className="mx-auto max-w-[1200px] px-6 lg:px-12">
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 rounded-full border border-cream/20 bg-charcoal/40 px-4 py-2 font-sans text-sm text-cream backdrop-blur-sm transition-all duration-300 hover:border-gold/40 hover:text-gold"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Go back
-            </Link>
-          </div>
-        </div>
 
         <motion.div className="absolute inset-0" style={{ y: heroY }}>
           <img

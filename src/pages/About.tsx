@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ChevronLeft, Bed, Wifi, Wind, Tv, Bath, Clock, UtensilsCrossed, Wine, Building2, Waves, Dumbbell, Shield, Plane, Heart, Scale, Users, Lightbulb, Lock, MessageCircle, Award } from "lucide-react";
+import { Bed, Wifi, Wind, Tv, Bath, Clock, UtensilsCrossed, Wine, Building2, Waves, Dumbbell, Shield, Plane, Heart, Scale, Users, Lightbulb, Lock, MessageCircle, Award } from "lucide-react";
 import aboutHeroBg from "@/assets/about-hero.jpg";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 const ease = [0.3, 0, 0.2, 1] as const;
 
@@ -62,18 +64,7 @@ const coreValues = [
 const About = () => {
   return (
     <div className="min-h-screen bg-charcoal">
-      {/* Header */}
-      <div className="sticky top-0 z-50 glass-nav py-4">
-        <div className="container mx-auto px-6 lg:px-12 flex items-center gap-6">
-          <Link
-            to="/"
-            className="flex items-center gap-2 text-cream/80 hover:text-gold transition-colors duration-300 font-sans text-sm"
-          >
-            <ChevronLeft size={18} />
-            Go back
-          </Link>
-        </div>
-      </div>
+      <Navbar />
 
       {/* Hero */}
       <section className="relative w-full pt-16 pb-20 text-center overflow-hidden">
@@ -374,6 +365,7 @@ const About = () => {
           </motion.div>
         </div>
       </section>
+      <Footer />
     </div>
   );
 };
