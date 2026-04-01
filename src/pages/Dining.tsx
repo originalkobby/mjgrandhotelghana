@@ -2,10 +2,12 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import diningBg from "@/assets/dining-bg.jpg";
 import {
-  ChevronLeft, UtensilsCrossed, Clock, Wine, GlassWater, Coffee,
+  UtensilsCrossed, Clock, Wine, GlassWater, Coffee,
   ConciergeBell, Moon, ShieldCheck, Sparkles, CalendarHeart, Users,
   Briefcase, PartyPopper, Heart, Leaf, ChefHat
 } from "lucide-react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 import highlightChicken from "@/assets/highlight-chicken.jpg";
 import highlightSpecials from "@/assets/highlight-specials.jpg";
