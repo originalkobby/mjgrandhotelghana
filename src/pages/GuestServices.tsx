@@ -12,7 +12,6 @@ import {
   Users,
   Phone,
   ChevronDown,
-  ChevronLeft,
   QrCode,
   Clock,
   Droplets,
