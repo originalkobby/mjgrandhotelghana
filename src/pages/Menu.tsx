@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import MenuSection, { getItemVariants } from "@/components/MenuSection";
 import { usePublicMenu, MENU_SECTIONS } from "@/hooks/usePublicMenu";
 import { Skeleton } from "@/components/ui/skeleton";
