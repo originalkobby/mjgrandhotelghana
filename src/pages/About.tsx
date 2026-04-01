@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ChevronLeft, Bed, Wifi, Wind, Tv, Bath, Clock, UtensilsCrossed, Wine, Building2, Waves, Dumbbell, Shield, Plane, Heart, Scale, Users, Lightbulb, Lock, MessageCircle, Award } from "lucide-react";
+import { Bed, Wifi, Wind, Tv, Bath, Clock, UtensilsCrossed, Wine, Building2, Waves, Dumbbell, Shield, Plane, Heart, Scale, Users, Lightbulb, Lock, MessageCircle, Award } from "lucide-react";
 import aboutHeroBg from "@/assets/about-hero.jpg";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 const ease = [0.3, 0, 0.2, 1] as const;
 
