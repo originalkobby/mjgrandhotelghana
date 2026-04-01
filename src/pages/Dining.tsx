@@ -104,7 +104,7 @@ const Dining = () => {
         className="relative pt-16 pb-20 text-center bg-cover bg-center"
         style={{ backgroundImage: `url(${diningBg})` }}
       >
-        <div className="absolute inset-0 bg-overlay-heavy" />
+        <div className="absolute inset-0 bg-black/50" />
         <div className="relative container mx-auto px-4 sm:px-6 lg:px-12">
         <motion.p
           initial={{ opacity: 0, y: 20 }}
