@@ -99,22 +99,30 @@ const About = () => {
           Experience Refined Luxury
         </motion.h1>
         <div className="w-20 h-[2px] bg-gold mx-auto mb-6" />
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.8, ease }}
-          className="font-sans text-cream/60 max-w-2xl mx-auto text-base md:text-lg leading-relaxed"
-        >
-          Welcome to MJ Grand Hotel, where sophistication meets exceptional hospitality. Designed for discerning travelers who appreciate comfort, elegance, and world-class service, MJ Grand Hotel offers a premium stay experience in a serene and secure environment.
-        </motion.p>
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 1.0, ease }}
-          className="font-sans text-cream/50 max-w-2xl mx-auto mt-4 text-sm leading-relaxed"
-        >
-          Whether you are visiting for business, leisure, or a special occasion, our commitment is to deliver an unforgettable stay defined by excellence, comfort, and personalized service.
-        </motion.p>
+        </div>
+      </section>
+
+      {/* Introduction */}
+      <section className="py-16 border-b border-cream/10">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-12 max-w-3xl text-center">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1, ease }}
+            className="font-sans text-cream/60 text-base md:text-lg leading-relaxed"
+          >
+            Welcome to MJ Grand Hotel, where sophistication meets exceptional hospitality. Designed for discerning travelers who appreciate comfort, elegance, and world-class service, MJ Grand Hotel offers a premium stay experience in a serene and secure environment.
+          </motion.p>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.25, ease }}
+            className="font-sans text-cream/50 mt-4 text-sm leading-relaxed"
+          >
+            Whether you are visiting for business, leisure, or a special occasion, our commitment is to deliver an unforgettable stay defined by excellence, comfort, and personalized service.
+          </motion.p>
         </div>
       </section>
 
