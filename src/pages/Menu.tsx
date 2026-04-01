@@ -195,13 +195,8 @@ const Menu = () => {
         <p className="font-sans text-cream/50 text-sm mb-4">
           To order, call: <span className="text-gold">+233 302544212</span> | <span className="text-gold">+233 302544211</span>
         </p>
-        <Link
-          to="/"
-          className="inline-block border border-gold/60 px-8 py-3 font-sans font-medium tracking-wide text-cream hover:bg-gold hover:text-charcoal transition-all duration-300"
-        >
-          Back to Home
-        </Link>
       </div>
+      <Footer />
     </div>
   );
 };

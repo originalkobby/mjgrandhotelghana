@@ -645,6 +645,7 @@ const Dining = () => {
           </motion.div>
         </div>
       </section>
+      <Footer />
     </div>
   );
 };

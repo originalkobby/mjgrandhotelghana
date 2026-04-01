@@ -165,6 +165,7 @@ const Policy = () => {
           
         </motion.div>
       </div>
+      <Footer />
     </div>
   );
 };
