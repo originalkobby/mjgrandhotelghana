@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ChevronLeft, Shield, Clock, UtensilsCrossed, Key, Car, Waves, CircleX, Ban, MessageSquare, Lock, Search, Users, Banknote, Dumbbell } from "lucide-react";
+import { Shield, Clock, UtensilsCrossed, Key, Car, Waves, CircleX, Ban, MessageSquare, Lock, Search, Users, Banknote, Dumbbell } from "lucide-react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 
 const sections = [
