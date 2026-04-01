@@ -109,18 +109,7 @@ const Menu = () => {
 
   return (
     <div className="min-h-screen bg-charcoal">
-      {/* Header */}
-      <div className="sticky top-0 z-50 glass-nav py-4">
-        <div className="container mx-auto px-6 lg:px-12 flex items-center gap-6">
-          <Link
-            to="/"
-            className="flex items-center gap-2 text-cream/80 hover:text-gold transition-colors duration-300 font-sans text-sm"
-          >
-            <ChevronLeft size={18} />
-            Go back
-          </Link>
-        </div>
-      </div>
+      <Navbar />
 
       {/* Hero */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-12 pt-12">
