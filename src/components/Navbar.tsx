@@ -47,13 +47,26 @@ const Navbar = () => {
         }`}
       >
         <div className="container mx-auto flex items-center justify-between px-2 lg:px-4">
-          <Link to="/" className="flex items-center">
-            <img src={logo} alt="MJ Grand Hotel" className="h-7 w-auto" />
-          </Link>
+          <div className="flex items-center gap-6">
+            <Link to="/" className="flex items-center">
+              <img src={logo} alt="MJ Grand Hotel" className="h-7 w-auto" />
+            </Link>
+            {!isHome && (
+              <Link
+                to="/"
+                className={`hidden lg:flex items-center gap-1.5 text-sm font-sans font-medium tracking-wide transition-colors duration-300 ${
+                  useLight ? "text-foreground/80 hover:text-foreground" : "text-cream/80 hover:text-cream"
+                }`}
+              >
+                <ArrowLeft size={16} />
+                Back to home
+              </Link>
+            )}
+          </div>
 
           {/* Desktop nav */}
           <div className="hidden lg:flex items-center gap-8">
-            {navItems.map((item) =>
+            {navItems.filter(item => item.label !== "Back to Home").map((item) =>
               item.isHash ? (
                 <a
                   key={item.label}
