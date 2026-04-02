@@ -138,7 +138,17 @@ const Navbar = () => {
                 <X size={24} />
               </button>
               <div className="flex flex-col gap-6">
-                {navItems.map((item, i) =>
+                {!isHome && (
+                  <Link
+                    to="/"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-1.5 font-serif text-2xl text-cream/80 hover:text-gold transition-colors duration-300"
+                  >
+                    <ArrowLeft size={20} />
+                    Back to home
+                  </Link>
+                )}
+                {navItems.filter(item => item.label !== "Back to Home").map((item, i) =>
                   item.isHash ? (
                     <motion.a
                       key={item.label}
