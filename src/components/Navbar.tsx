@@ -17,6 +17,14 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const isHome = location.pathname === "/";
+
+  const navItems = isHome
+    ? allNavItems
+    : [
+        { label: "Back to Home", href: "/", isHash: false, homeOnly: false },
+        ...allNavItems.filter((item) => !item.homeOnly),
+      ];
 
   // Pages with dark hero backgrounds where cream text works
   const isDarkHeroPage = location.pathname === "/" || location.pathname === "/dining" || location.pathname === "/about" || location.pathname === "/guest-services" || location.pathname === "/menu" || location.pathname === "/policy";
