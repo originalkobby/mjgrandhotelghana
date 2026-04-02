@@ -86,7 +86,7 @@ const Dining = () => {
 
       {/* Hero */}
       <section
-        className="relative pt-16 pb-20 text-center bg-cover bg-center"
+        className="relative pt-32 pb-32 md:pt-40 md:pb-40 text-center bg-cover bg-center"
         style={{ backgroundImage: `url(${diningBg})` }}
       >
         <div className="absolute inset-0 bg-black/50" />
