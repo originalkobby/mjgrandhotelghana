@@ -4,19 +4,27 @@ import { Menu, X } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "@/assets/logo.png";
 
-const navItems = [
-  { label: "About", href: "/about", isHash: false },
-  { label: "Rooms & Suites", href: "#rooms", isHash: true },
-  { label: "Experiences", href: "#experiences", isHash: true },
-  { label: "Dining", href: "/dining", isHash: false },
-  { label: "Gallery", href: "#gallery", isHash: true },
-  { label: "Guest Services", href: "/guest-services", isHash: false },
+const allNavItems = [
+  { label: "About", href: "/about", isHash: false, homeOnly: false },
+  { label: "Rooms & Suites", href: "#rooms", isHash: true, homeOnly: true },
+  { label: "Experiences", href: "#experiences", isHash: true, homeOnly: true },
+  { label: "Dining", href: "/dining", isHash: false, homeOnly: false },
+  { label: "Gallery", href: "#gallery", isHash: true, homeOnly: true },
+  { label: "Guest Services", href: "/guest-services", isHash: false, homeOnly: false },
 ];
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const isHome = location.pathname === "/";
+
+  const navItems = isHome
+    ? allNavItems
+    : [
+        { label: "Back to Home", href: "/", isHash: false, homeOnly: false },
+        ...allNavItems.filter((item) => !item.homeOnly),
+      ];
 
   // Pages with dark hero backgrounds where cream text works
   const isDarkHeroPage = location.pathname === "/" || location.pathname === "/dining" || location.pathname === "/about" || location.pathname === "/guest-services" || location.pathname === "/menu" || location.pathname === "/policy";
