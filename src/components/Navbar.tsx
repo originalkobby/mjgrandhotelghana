@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ArrowLeft } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "@/assets/logo.png";
 
@@ -47,13 +47,26 @@ const Navbar = () => {
         }`}
       >
         <div className="container mx-auto flex items-center justify-between px-2 lg:px-4">
-          <Link to="/" className="flex items-center">
-            <img src={logo} alt="MJ Grand Hotel" className="h-7 w-auto" />
-          </Link>
+          <div className="flex items-center gap-6">
+            <Link to="/" className="flex items-center">
+              <img src={logo} alt="MJ Grand Hotel" className="h-7 w-auto" />
+            </Link>
+            {!isHome && (
+              <Link
+                to="/"
+                className={`hidden lg:flex items-center gap-1.5 text-sm font-sans font-medium tracking-wide transition-colors duration-300 ${
+                  useLight ? "text-foreground/80 hover:text-foreground" : "text-cream/80 hover:text-cream"
+                }`}
+              >
+                <ArrowLeft size={16} />
+                Back to home
+              </Link>
+            )}
+          </div>
 
           {/* Desktop nav */}
           <div className="hidden lg:flex items-center gap-8">
-            {navItems.map((item) =>
+            {navItems.filter(item => item.label !== "Back to Home").map((item) =>
               item.isHash ? (
                 <a
                   key={item.label}
@@ -125,7 +138,17 @@ const Navbar = () => {
                 <X size={24} />
               </button>
               <div className="flex flex-col gap-6">
-                {navItems.map((item, i) =>
+                {!isHome && (
+                  <Link
+                    to="/"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-1.5 font-serif text-2xl text-cream/80 hover:text-gold transition-colors duration-300"
+                  >
+                    <ArrowLeft size={20} />
+                    Back to home
+                  </Link>
+                )}
+                {navItems.filter(item => item.label !== "Back to Home").map((item, i) =>
                   item.isHash ? (
                     <motion.a
                       key={item.label}
