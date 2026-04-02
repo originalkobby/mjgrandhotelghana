@@ -90,7 +90,7 @@ const Dining = () => {
         style={{ backgroundImage: `url(${diningBg})` }}
       >
         <div className="absolute inset-0 bg-black/50" />
-        <div className="relative container mx-auto px-4 sm:px-6 lg:px-12">
+        <div className="relative w-full max-w-7xl mx-auto px-6 sm:px-10 lg:px-20">
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
