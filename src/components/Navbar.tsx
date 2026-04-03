@@ -24,7 +24,7 @@ const Navbar = () => {
     ? allNavItems
     : [
         { label: "Back to Home", href: "/", isHash: false, homeOnly: false },
-        ...allNavItems.filter((item) => !item.homeOnly),
+        ...allNavItems.filter((item) => !item.homeOnly && item.href !== location.pathname),
       ];
 
   // Pages with dark hero backgrounds where cream text works
