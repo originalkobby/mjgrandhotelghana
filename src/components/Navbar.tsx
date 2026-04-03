@@ -21,7 +21,7 @@ const Navbar = () => {
   const isHome = location.pathname === "/";
 
   const navItems = isHome
-    ? allNavItems
+    ? allNavItems.filter((item) => !item.diningOnly)
     : [
         { label: "Back to Home", href: "/", isHash: false, homeOnly: false },
         ...allNavItems.filter((item) => {
