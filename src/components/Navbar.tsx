@@ -10,7 +10,7 @@ const allNavItems = [
   { label: "Experiences", href: "#experiences", isHash: true, homeOnly: true },
   { label: "Dining", href: "/dining", isHash: false, homeOnly: false },
   { label: "Gallery", href: "#gallery", isHash: true, homeOnly: true },
-  { label: "Menu", href: "/menu", isHash: false, homeOnly: false },
+  { label: "Menu", href: "/menu", isHash: false, homeOnly: false, diningOnly: true },
   { label: "Guest Services", href: "/guest-services", isHash: false, homeOnly: false },
 ];
 
