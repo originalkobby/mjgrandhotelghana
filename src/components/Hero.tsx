@@ -76,7 +76,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3, ease: [0.3, 0, 0.2, 1] }}
-          className="mb-4 font-sans text-sm uppercase tracking-[0.3em] text-gold"
+          className="mb-4 font-sans text-sm font-bold uppercase tracking-[0.3em] text-gold"
         >
           A Sanctuary of Elegance
         </motion.p>
