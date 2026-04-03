@@ -77,7 +77,7 @@ const About = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3, ease }}
-          className="mb-4 font-sans text-sm uppercase tracking-[0.3em] text-gold"
+          className="mb-4 font-sans text-sm font-bold uppercase tracking-[0.3em] text-gold"
         >
           About MJ Grand Hotel
         </motion.p>
