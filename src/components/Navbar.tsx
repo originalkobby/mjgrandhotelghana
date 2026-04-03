@@ -24,7 +24,12 @@ const Navbar = () => {
     ? allNavItems
     : [
         { label: "Back to Home", href: "/", isHash: false, homeOnly: false },
-        ...allNavItems.filter((item) => !item.homeOnly && item.href !== location.pathname),
+        ...allNavItems.filter((item) => {
+          if (item.homeOnly) return false;
+          if (item.href === location.pathname) return false;
+          if (item.label === "Menu" && location.pathname !== "/dining") return false;
+          return true;
+        }),
       ];
 
   // Pages with dark hero backgrounds where cream text works
