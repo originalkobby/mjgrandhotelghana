@@ -33,9 +33,9 @@ const Experiences = () => {
         </motion.div>
 
         <Carousel
-          opts={{ align: "start", loop: true }}
+          opts={{ align: "start", loop: true, direction: "ltr" }}
           plugins={[
-            Autoplay({ delay: 3000, stopOnInteraction: false, stopOnMouseEnter: true }),
+            Autoplay({ delay: 3000, stopOnInteraction: false, stopOnMouseEnter: true, playOnInit: true }),
           ]}
           className="w-full"
         >
