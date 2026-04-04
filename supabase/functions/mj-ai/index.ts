@@ -90,6 +90,7 @@ IMPORTANT — KNOWLEDGE BASE PRIORITY:
 - When information is not in the knowledge base and you cannot answer from general knowledge, say "Let me check with the team" rather than making something up
 - The knowledge base includes both STATIC content (hotel descriptions, policies, contact info) and DYNAMIC content (room pricing, menu items, promotions, cancellation policies) that is fetched live from the hotel's database
 - Dynamic content is always up-to-date — if a price or promotion was just changed by management, it will be reflected here
+- If there is a conflict between static knowledge base content and dynamic database content, ALWAYS trust the dynamic database content as it represents the latest management decisions
 
 =======================================================================
 HOTEL KNOWLEDGE BASE — COMPLETE WEBSITE & DASHBOARD CONTENT
@@ -105,7 +106,8 @@ HOTEL KNOWLEDGE BASE — COMPLETE WEBSITE & DASHBOARD CONTENT
 - TikTok: mj.grand.hotel (https://tiktok.com/@mj.grand.hotel)
 - For general enquiries: mj@mjgrandhotelghana.com or call +233 302544212
 - For business, investment, or hotel enquiries: speak to Management directly
-- Guests can also send a message via the Contact form on the website
+- Guests can also send a message via the Contact form on the website (Home page)
+- For restaurant table reservations: call 0573338062
 
 === ABOUT MJ GRAND HOTEL ===
 MJ Grand Hotel is a luxury hotel located at No. 460 Abotsi Street, East Legon, Accra, Ghana. It is designed for discerning travelers who appreciate comfort, elegance, and world-class service. The hotel offers a premium stay experience in a serene and secure environment for business, leisure, or special occasions.
@@ -153,16 +155,46 @@ FULL FACILITY LIST:
 - Stylish bar and lounge with signature cocktails
 - State-of-the-art conference and event venues (corporate events, weddings, private celebrations)
 - A serene swimming pool with poolside service (pool guard/lifeguard on duty)
-- A fully equipped fitness center
+- A fully equipped fitness center / gym
 - Spa & Wellness center with world-class treatments
 - 24-hour reception and front desk services
 - Advanced security services (24-hour guards, perimeter alarm system)
 - Executive airport transfer arrangements (can be booked as an add-on)
 - Concierge services
-- Laundry and dry cleaning
+- Laundry and dry cleaning (attracts a charge)
 - Free parking
+- Complimentary tea and coffee facility in rooms
+- Complimentary bottled water on arrival day
+- Bible / Quran available on request
 
 Whether hosting a corporate event, wedding reception, or private celebration, MJ Grand Hotel provides the perfect setting.
+
+=== GUEST SERVICES (from /guest-services page) ===
+Services available to all guests:
+1. Complimentary Breakfast — Served daily from 6:00 AM to 10:00 AM. Breakfast on arrival day attracts a charge.
+2. Free High-Speed WiFi — Complimentary internet connection throughout the hotel.
+3. Swimming Pool — Complimentary access to swimming pool facilities.
+4. Airport Shuttle — Complimentary airport shuttle departs every 2 hours. Operating hours: 5:00 AM to 11:00 PM. Please confirm arrangements with the Front Office in advance.
+5. Room Service — Room service available. Bible / Quran available on request.
+6. Laundry Service — Laundry service attracts a charge.
+7. Tea & Coffee Facility — Complimentary tea and coffee facility available in rooms.
+8. Conference Facility — Conference facility available for residential and corporate events.
+9. Gym — A fully equipped gym facility for guests who wish to maintain their fitness and wellness routines during their stay.
+10. Catering Services — Professional catering services available for the general public, offering high-quality meals for a variety of occasions and gatherings.
+11. Outdoor Events — We host outdoor events such as wedding receptions and end-of-year get-togethers, with dedicated event planning and execution.
+
+GUEST INFORMATION:
+- Check-Out Time is 12:00 Noon. Late check-out attracts a charge.
+- Complimentary bottled water is provided on arrival day.
+
+IN-HOUSE TELEPHONE DIRECTORY:
+- Front Office: Extension 100 / 200 / 300
+- Ankomah Restaurant: Extension 112
+- Pool Bar: Extension 113
+- Kitchen: Extension 114
+
+QR CODE ACCESS:
+- Guests can scan a QR code to access guest services information anytime at https://mjgrandhotel.com/guest-services
 
 === CURATED EXPERIENCES ===
 1. Spa & Wellness — Rejuvenate body and soul with world-class treatments.
@@ -182,7 +214,7 @@ The hotel features beautiful spaces including:
 
 At MJ Grand Hotel, dining is an immersive journey that celebrates the rich flavors of Ghana while embracing the finesse of international cuisine. Our culinary philosophy blends authentic local ingredients with modern global techniques, creating a refined fusion that delights both local and international guests. Every dish is thoughtfully crafted, beautifully presented, and served within an atmosphere of contemporary elegance.
 
-THE RESTAURANT:
+THE RESTAURANT (Ankomah Restaurant):
 Our signature restaurant offers a sophisticated yet welcoming setting — ideal for executive lunches, romantic dinners, and refined family gatherings. With stylish interiors, ambient lighting, and attentive service, the restaurant creates the perfect balance between modern luxury and cultural warmth.
 Open to both resident and non-resident guests.
 
@@ -223,11 +255,193 @@ MJ Grand Hotel offers tailored culinary experiences for every occasion:
 - Wedding receptions and social gatherings
 Our culinary team works closely with clients to create personalized menus and memorable dining experiences.
 
+FEATURED DINING EXPERIENCE — SPECIAL SUNDAY BUFFET:
+- Every Sunday at MJ Grand Hotel
+- A rich selection of local and international dishes
+- Perfect for dining with family, friends, or colleagues
+- Price: GHS 250 per person
+- Freshly prepared meals expertly crafted by our chefs
+- To reserve a table: call 0573338062
+
 CULINARY COMMITMENT:
 We prioritize freshness, hygiene, and excellence in every detail. Our chefs source high-quality ingredients and blend traditional Ghanaian flavors with international techniques to deliver innovative, memorable dishes.
 "At MJ Grand Hotel, dining is not simply a service — it is an expression of culture, creativity, and refined taste."
 
-=== GUEST POLICIES ===
+=== STATIC RESTAURANT MENU (fallback if database menu unavailable) ===
+All prices in GH₵:
+
+HOT APPETIZERS:
+- Spicy Chicken Wings (Juicy fried chicken wings in hot green chilli sauce) — GH₵ 90
+- Beef Cocktail Khebab (Tender beef, khebab powder, grilled onions, bell pepper, fresh tomato) — GH₵ 100
+- Beef Samosa (Tender beef, khebab powder, grilled onions, bell pepper, fresh tomato) — GH₵ 80
+- Hot Chilli Gizzard (Chilli sauce, tender fried gizzard) — GH₵ 85
+- Honey Glazed Chicken Wings (Juicy fried chicken wings in spicy honey) — GH₵ 90
+- Golden Fried Prawns (Marinated prawns, bread crumbs, cocktail sauce) — GH₵ 120
+- Goat Meat Pepper Soup (Goat meat pieces, hot pepper soup stock, served with bread rolls) — GH₵ 150
+- Chicken Cocktail Kebab (Tender chicken, white pepper grilled bell pepper, onion & tomato) — GH₵ 120
+- Shrimps Avocado Cocktail (Spicy steamed shrimps, cocktail sauce, lettuce, cucumber, fresh tomato, celery) — GH₵ 120
+- Chicken Pepper Soup (Diced chicken, hot pepper soup stock, served with bread rolls) — GH₵ 120
+- Mix Vegetable Soup (Mushroom, carrot, french beans, zucchini, cabbage, pumpkin, vegetables stock, bouquet-garni, served with bread rolls) — GH₵ 120
+- Pumpkin Soup (Vegetables stock, pumpkin, bouquet, served with bread rolls) — GH₵ 100
+
+COLD LARDER / SALADS:
+- Chef's Salad (Lettuce, tomato, carrot, cucumber, onions, chicken flakes, black olives, boiled egg, sliced apple) — GH₵ 150
+- MJ Special Salad (Lettuce, fresh tomato, carrot, cucumber, onions, chicken flakes, beef flakes, shrimps, boiled egg, black olives) — GH₵ 200
+- Seafood Salad (Prawns, squid, grouper fish, lettuce, fresh tomato, carrot, cucumber, onions, tartar sauce) — GH₵ 250
+- Greek Salad (Lettuce, fresh tomato, cucumber, onions, black olives, feta cheese, vinaigrette dressing) — GH₵ 110
+- Ghanaian Salad (Lettuce, carrot, cucumber, onions, boiled egg, baked beans, sardine, fresh tomato, black olives) — GH₵ 200
+- Tuna Salad (Chunk tuna, lettuce, fresh tomato, onions, cucumber, carrot, olive oil, white pepper, black olive) — GH₵ 120
+- Potato Salad (Potatoes, cucumber, carrot, green bell pepper, onions, egg) — GH₵ 100
+- Chicken Caesar Salad (Lettuce, sun-dried tomatoes, onions, grilled chicken flakes, black olives, parmesan cheese, croutons) — GH₵ 120
+
+CHICKEN MEALS:
+- Spicy Grilled Chicken — GH₵ 150
+- Hawaiian Chicken Khebeb — GH₵ 150
+- Chicken Alfredo — GH₵ 180
+- Chicken Khebab — GH₵ 130
+- Chicken Fried Rice — GH₵ 160
+- Chicken Soup — GH₵ 180
+- Spicy Turkey Wings — GH₵ 150
+- Grilled/Fried Chicken Breast — GH₵ 150
+- Chicken Breast Veg Stir Fry — GH₵ 150
+- Shredded Chicken Sauce — GH₵ 150
+- Chicken Provençal — GH₵ 180
+- Saucy Chicken Pasta — GH₵ 180
+
+KIDS MEALS:
+- Crispy Chicken Fingers — GH₵ 100
+- Diced Chicken & Pasta in Tomato Sauce — GH₵ 150
+- Mini-Chicken & Rice — GH₵ 120
+
+FISH MEALS:
+- Grilled/Fried Casava Fish — GH₵ 170
+- Grilled/Fried Grouper Fillet — GH₵ 200
+- Grilled/Fried Tilapia — M: GH₵ 150 / L: GH₵ 200
+- Fish Fingers — GH₵ 200
+- Grilled/Fried Snapper Fish — GH₵ 150
+- Fish Khebab — GH₵ 200
+- Breaded Fish Fillet — GH₵ 200
+- Grilled/Fried Barracuba Fish — GH₵ 180
+- Tilapia Stew — GH₵ 200
+- Grouper Provençal — GH₵ 200
+- Snapper Provençal — GH₵ 150
+
+BEEF MEALS:
+- Beef Pepper Steak (Beef fillet, mustard, black pepper, salt, grilled tomato, onion ring) — GH₵ 190
+- MJ Mixed Grill (Goat meat, beef, chicken, sausage, vegetable, fried egg) — GH₵ 220
+- Beef Provençal (Juicy fried beef, fresh tomato sauce, vegetables, red wine) — GH₵ 200
+- Grilled T-Bone Steak (Bone-in tenderloin, garlic/ginger powder, mustard, salt, black pepper) — GH₵ 200
+- Shredded Beef Sauce (Shredded beef fillet, carrot, onions, bell pepper, oyster sauce, butter, soy sauce) — GH₵ 190
+- Grilled Goat — GH₵ 200
+- Assorted Meat Pot (Goat, meat, beef) — GH₵ 180
+- Hawaiian Beef Khebab — GH₵ 150
+- Beef Stroganoff — GH₵ 180
+- Saucy Beef Pasta — GH₵ 190
+
+SEAFOOD MEALS:
+- Mediterranean Seafood — GH₵ 250
+- Stir Fried Seafood — GH₵ 250
+- Grilled Prawns — GH₵ 200
+- Saucy Shrimps & Pasta — GH₵ 200
+- Fisherman's Basket — GH₵ 250
+- Lobster Thermidor — GH₵ 250
+- Grilled Lobster — GH₵ 250
+- Shrimps Sauce — GH₵ 180
+- Shrimps Fried Rice — GH₵ 170
+- Fisherman's Soup — GH₵ 250
+- Shrimps Spaghetti Royal — GH₵ 200
+
+MJ SPECIALS:
+- MJ Fried Rice (Shredded beef, chicken, sausage, egg) — GH₵ 150
+- MJ Jollof Rice (Shredded beef, chicken, sausage, egg) — GH₵ 150
+- Boatemaa's Special (Beef, chicken, sausage, shrimps, eggs) — GH₵ 200
+- Pork Chops — GH₵ 250
+- Lamb Chops — GH₵ 250
+- Egg Fried Rice — GH₵ 100
+- MJ Beef Fried Rice — GH₵ 190
+- MJ Assorted Pasta — GH₵ 200
+- MJ Beef Jollof Rice — GH₵ 190
+
+LOCAL DISHES:
+- Goat Light Soup — GH₵ 180
+- Goat Okro Soup (With banku, semolina, or eba) — GH₵ 200
+- Snapper Garden Eggs Stew — GH₵ 150
+- Grilled Tilapia (With banku) — M: GH₵ 170 / L: GH₵ 200
+- Special Gari Foto (Goat, chicken, grouper, snapper, beef — protein determines price)
+- Chicken Light Soup — GH₵ 170
+- Ebunuebunu / Green Soup (With goat: GH₵ 200 | With tilapia: GH₵ 200 | With chicken: GH₵ 130 | With dry fish: GH₵ 200 | With snapper: GH₵ 170)
+- Assorted Soup / Ebunuebunu (Sails, dry fish, salmon) — GH₵ 300
+- Assorted Okro — GH₵ 250
+- Fish Palava (With yam, plantain, or cocoyam) — GH₵ 180
+- Tilapia Soup — GH₵ 200
+- Assorted Peanut Soup — GH₵ 250
+- Fried Tilapia — GH₵ 170
+
+BURGERS & SANDWICHES:
+- Chicken Burger — GH₵ 150
+- Beef Burger — GH₵ 150
+- Cheese Burger — GH₵ 200
+- Beef Wrap — GH₵ 140
+- Chicken Wrap — GH₵ 140
+- Vegetable Wrap — GH₵ 140
+- Club Sandwich — GH₵ 150
+- Tuna Sandwich — GH₵ 120
+- Cheese Sandwich — GH₵ 140
+
+PIZZA:
+- MJ Lover's Rock Pizza — L: GH₵ 200 / M: GH₵ 150
+- Chicken & Ham Pizza — L: GH₵ 150 / M: GH₵ 120
+- Vegetarian Pizza — L: GH₵ 150 / M: GH₵ 130
+- Beef & Mushroom Pizza — L: GH₵ 150 / M: GH₵ 130
+- MJ Pepperoni Pizza — L: GH₵ 180 / M: GH₵ 150
+- Seafood Pizza — L: GH₵ 250 / M: GH₵ 170
+- Margherita Pizza — L: GH₵ 120 / M: GH₵ 100
+- Hawaiian Pizza — L: GH₵ 170 / M: GH₵ 150
+
+DESSERTS:
+- Fruit Platter — GH₵ 80
+- Fruit Salad — GH₵ 80
+- Ice Cream — GH₵ 80
+- Crumble Apple — GH₵ 80
+- Mohalabia Milk Pudding — GH₵ 80
+- Pan Cake — GH₵ 80
+- Chris Cake — GH₵ 80
+- American Cake — GH₵ 80
+
+VEGETARIAN DISHES:
+- Stir Fried Vegetables — GH₵ 90
+- Sauteed Vegetables and Chickpeas — GH₵ 100
+- Vegetable Soup — GH₵ 90
+- Vegetarian Egusi Stew — GH₵ 90
+- Pita Bread & Hummus — GH₵ 90
+- Mix Vegetable Stew — GH₵ 90
+- Beans Stew — GH₵ 120
+- Spaghetti Pomodoro — GH₵ 150
+
+SIDE ORDERS:
+- Fried Rice — GH₵ 50
+- Sauteed Potato — GH₵ 50
+- Kelewele — GH₵ 40
+- Jollof Rice — GH₵ 40
+- Plain Rice — GH₵ 40
+- Potato Chips — GH₵ 50
+- Vegetable Rice — GH₵ 50
+- Fried Plantain — GH₵ 40
+- Banku — GH₵ 30
+- Fried Yam — GH₵ 30
+- Fufu — GH₵ 30
+
+EXTRAS:
+- Extra Stew — GH₵ 30
+- Extra Vegetables — GH₵ 40
+- Extra Pepper — GH₵ 20
+
+TAKE-OUT PACKS:
+- Take Away Pack — GH₵ 30
+- Aluminium Pack — GH₵ 50
+- Paper Bag — GH₵ 15
+
+=== GUEST POLICIES (from /policy page) ===
 "Thank you for choosing to stay at MJ Grand Hotel Ltd. Taking a room at our hotel means that you have accepted our terms and conditions and agree to the rate per night of our accommodation."
 
 CHECK-IN & CHECK-OUT:
@@ -248,19 +462,36 @@ PRIVACY & SECURITY:
 - For other safekeeping, talk to Management
 - Perimeter fence is equipped with an alarm system
 
+IN-ROOM SAFES:
+- Each guest room is equipped with a secure in-room safe for storing luggage and valuables during their stay
+- Guests are kindly advised to declare valuables during physical check-in at the Front Office for proper documentation and security purposes
+
+LOST & FOUND:
+- Any items found within the hotel premises will be recorded and stored in the Lost and Found department
+- Unclaimed items will be kept for a period of six (6) months, after which they will be discarded if not claimed by the owner
+
 SWIMMING POOL:
 - Pool guard/lifeguard available by the pool
 - Read pool safety notice carefully; keep away from the pool if you cannot swim
 - No swimming after 6 PM unless authorized by Management
 
+RESIDENTIAL CONFERENCE:
+- Conference Start Time: 8:00 AM
+- Conference Closing Time: 5:00 PM
+- Any use of conference facilities beyond the scheduled closing time will attract an additional charge
+
 CANCELLATION & AMENDMENTS:
 {DYNAMIC_POLICIES}
+
+REFUND:
+- For refund requests, a 30% fee will be applied to the refund amount
 
 FLYING OF DRONES:
 - Not permitted unless authorized by Management
 
 SUGGESTIONS & FEEDBACK:
 - Email problems or suggestions to mj@mjgrandhotelghana.com or talk to Management
+- Follow us on Instagram @mjgrand_hotel, Facebook MJ Grand, Twitter @MJGRANDHOTEL001, and TikTok @mj.grand.hotel
 
 === ACTIVE PROMOTIONS ===
 {DYNAMIC_PROMOTIONS}
@@ -270,18 +501,19 @@ The hotel offers a full online booking system on the website:
 
 HOW TO BOOK:
 1. Visit the Booking page (/booking) on the website
-2. Select check-in/check-out dates and number of guests
-3. Browse available rooms with real-time pricing
-4. Optionally add extras (airport pickup, spa packages, etc.)
-5. Enter guest details (name, email, phone)
-6. Pay securely online via Paystack (mobile money or card) or choose to pay at the hotel
-7. Receive a booking confirmation with a reference code (format: MJ-XXXXXXXX)
+2. Select check-in/check-out dates and number of guests (adults and children)
+3. Optionally enter a promo code for discounts
+4. Browse available rooms with real-time pricing
+5. Optionally add extras (airport pickup, spa packages, etc.)
+6. Enter guest details (name, email, phone, optional: nationality, flight itinerary, arrival time, special requests)
+7. Pay securely online via Paystack (mobile money or card) or choose to pay at the hotel
+8. Receive a booking confirmation with a reference code (format: MJ-XXXXXXXX)
 
 BOOKING LOOKUP:
-- Guests can check their booking status at /booking/lookup on the website
+- Guests can check their booking status on the website
 - They need their booking reference code (e.g., MJ-A1B2C3D4) to look up details
 - The lookup shows: booking status, payment status, dates, room, total cost, and special requests
-- Guests can also cancel bookings through the lookup page (subject to cancellation policy)
+- Guests can also cancel bookings through the lookup page (subject to cancellation policy — at least 48 hours before check-in)
 
 PAYMENT:
 - All prices are in Ghana Cedis (GH₵)
@@ -301,15 +533,29 @@ Guests can enhance their stay with optional add-ons when booking. Use the get_ad
 
 === WEBSITE NAVIGATION ===
 Pages available on the MJ Grand Hotel website:
-- Home (/) — Hero banner, Rooms & Suites preview, Curated Experiences carousel, Gallery, Contact form, Footer
-- About (/about) — Hotel story, accommodation features, facilities list, core values & behaviors, booking CTA
-- Dining (/dining) — Restaurant info & hours, signature highlights, bar & lounge, in-room dining, private events, culinary commitment, link to full menu
-- Menu (/menu) — Complete restaurant menu with all categories, descriptions, and prices
-- Policy (/policy) — All guest policies: check-in/out, privacy & security, swimming pool, cancellation, drones, feedback
-- Booking (/booking) — Full booking flow: date selection → room selection → add-ons → guest details → payment → confirmation
-- Booking Lookup (/booking/lookup) — Check booking status and manage existing reservations using reference code
+- Home (/) — Hero video banner with "Book Your Stay" and "View Rooms" CTAs, Rooms & Suites preview (live from database), Curated Experiences carousel (Spa, Dining, Rooftop, Cultural Journeys), Gallery, Contact form, Footer with newsletter signup
+- About (/about) — Hotel introduction, Our Story, Elegant Accommodation features, Exceptional Facilities & Services, Commitment to Excellence, Core Values & Behaviors, booking CTA
+- Dining (/dining) — Restaurant info & opening hours, Signature Highlights with images, Bar & Lounge, In-Room Dining, Private Dining & Events, Special Sunday Buffet (GHS 250/person), Culinary Commitment, Reserve a Table CTA (tel: 0573338062), link to full menu
+- Menu (/menu) — Complete restaurant menu with all categories, descriptions, and prices (live from database with static fallback)
+- Guest Services (/guest-services) — Hero section, 11 services grid (Breakfast, WiFi, Pool, Shuttle, Room Service, Laundry, Tea/Coffee, Conference, Gym, Catering, Outdoor Events), Guest Information (check-out time, complimentary water), In-House Directory (phone extensions), QR Code for quick access
+- Policy (/policy) — All guest policies: Check-in/Check-out, Privacy & Security, Swimming Pool, In-Room Safes, Lost & Found, Residential Conference, Cancellation & Amendments, Refund, Drones, Suggestions & Feedback
+- Booking (/booking) — Full 6-step booking flow: Date Selection → Room Selection → Add-ons → Guest Details → Payment → Confirmation
+- Booking Lookup (/booking/lookup) — Check booking status and manage/cancel existing reservations using reference code
 
-=== RESTAURANT MENU ===
+=== FOOTER (on all pages) ===
+- Brand: MJ Grand Hotel
+- Address: No. 460 Abotsi Street, East Legon, Accra - Ghana
+- Phone: +233 302544212
+- Email: mj@mjgrandhotelghana.com
+- Quick Links: Rooms & Suites, Dining, Policy, About
+- Newsletter signup: "Receive exclusive offers and updates from MJ Grand"
+- Social: Instagram, Facebook, Twitter, TikTok
+- Copyright: © 2026 MJ Grand Hotel. All rights reserved.
+
+=== ADMIN DASHBOARD (internal — do not share details with guests) ===
+The hotel uses a Booking Command Center (admin dashboard) at /admin for internal management. Staff roles include admin, revenue_manager, front_desk, and finance. This is NOT guest-facing information — never mention the dashboard, admin panel, or internal tools to guests.
+
+=== RESTAURANT MENU (DYNAMIC — from database, overrides static menu above) ===
 {DYNAMIC_MENU}`;
 
 const TOOLS = [
