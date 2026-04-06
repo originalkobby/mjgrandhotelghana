@@ -1049,6 +1049,7 @@ async function createBooking(
       special_requests: args.special_requests || null,
       status: "confirmed",
       payment_status: "pending",
+      booking_source: "mj-ai",
     })
     .select("id")
     .single();
