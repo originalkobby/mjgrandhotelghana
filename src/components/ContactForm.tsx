@@ -53,7 +53,7 @@ const ContactForm = () => {
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
           >
-            <p className="font-sans text-xs tracking-[0.25em] uppercase text-gold mb-6">
+            <p className="font-sans text-xs tracking-[0.25em] uppercase text-gold mb-6 font-bold">
               Contact
             </p>
             <h2 className="font-serif text-4xl md:text-5xl lg:text-[3.5rem] text-foreground leading-[1.1] mb-8">
