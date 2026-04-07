@@ -119,7 +119,7 @@ export default function GuestServices() {
           <img
             src={heroImg}
             alt="MJ Grand Hotel luxury lobby"
-            className="h-[120%] w-full object-cover"
+            className="h-[120%] w-full object-cover object-center"
             loading="eager"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-charcoal/60 via-charcoal/40 to-charcoal/70" />
