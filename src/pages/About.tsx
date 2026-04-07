@@ -67,7 +67,7 @@ const About = () => {
       <Navbar />
 
       {/* Hero */}
-      <section className="relative w-full pt-44 pb-44 md:pt-56 md:pb-56 text-center overflow-hidden">
+      <section className="relative w-full h-screen flex items-center justify-center text-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img src={aboutHeroBg} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-charcoal/50" />
