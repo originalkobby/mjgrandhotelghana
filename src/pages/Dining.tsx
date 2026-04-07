@@ -86,7 +86,7 @@ const Dining = () => {
 
       {/* Hero */}
       <section
-        className="relative pt-44 pb-44 md:pt-56 md:pb-56 text-center bg-cover bg-center"
+        className="relative h-screen flex items-center justify-center text-center bg-cover bg-center"
         style={{ backgroundImage: `url(${diningBg})` }}
       >
         <div className="absolute inset-0 bg-black/50" />

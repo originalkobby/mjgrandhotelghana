@@ -113,7 +113,7 @@ export default function GuestServices() {
       <Navbar />
 
       {/* HERO */}
-      <section ref={heroRef} className="relative h-screen w-full overflow-hidden">
+      <section ref={heroRef} className="relative h-screen w-full overflow-hidden flex items-center justify-center">
 
         <motion.div className="absolute inset-0" style={{ y: heroY }}>
           <img
