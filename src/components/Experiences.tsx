@@ -1,15 +1,15 @@
 import { useEffect } from "react";
 import { motion, useAnimationControls, useReducedMotion } from "framer-motion";
-import expSpa from "@/assets/exp-spa.jpg";
-import expDining from "@/assets/exp-dining.jpg";
-import expRooftop from "@/assets/exp-rooftop.jpg";
-import expCulture from "@/assets/exp-culture.jpg";
+import expPool from "@/assets/exp-pool.jpg";
+import expDining from "@/assets/exp-dining-new.jpg";
+import expKitchen from "@/assets/exp-kitchen.jpg";
+import expBreakfast from "@/assets/exp-breakfast.jpg";
 
 const experiences = [
-  { image: expSpa, title: "Spa & Wellness", desc: "Rejuvenate body and soul with our world-class treatments." },
-  { image: expDining, title: "Fine Dining", desc: "Savor exquisite cuisines crafted by Michelin-starred chefs." },
-  { image: expRooftop, title: "Rooftop Lounge", desc: "Breathtaking skyline views paired with artisanal cocktails." },
-  { image: expCulture, title: "Cultural Journeys", desc: "Curated excursions to discover the region's hidden treasures." },
+  { image: expPool, title: "Poolside Retreat", desc: "Unwind in crystal-clear waters and soak up the sun in style." },
+  { image: expDining, title: "Fine Dining", desc: "Savour exquisite dishes served with warmth and elegance." },
+  { image: expKitchen, title: "Culinary Craft", desc: "Fresh, locally sourced ingredients prepared by our expert chefs." },
+  { image: expBreakfast, title: "Breakfast in Bed", desc: "Start your morning with a lavish spread delivered to your suite." },
 ];
 
 const marqueeDuration = 20;
