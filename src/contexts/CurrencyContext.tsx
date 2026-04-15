@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
-import { fetchUsdToGhsRate, formatUsd, formatGhs, formatCurrency as formatCurrencyUtil, ghsToUsd } from "@/lib/currency";
+import { fetchUsdToGhsRate, formatUsd, formatGhs, formatCurrency as formatCurrencyUtil, usdToGhs } from "@/lib/currency";
 
 interface CurrencyContextValue {
   /** Live USD → GHS exchange rate */

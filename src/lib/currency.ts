@@ -38,27 +38,27 @@ export async function fetchUsdToGhsRate(): Promise<number> {
   return 16;
 }
 
-/** Convert GHS to USD */
-export function ghsToUsd(ghsAmount: number, rate: number): number {
-  return rate > 0 ? ghsAmount / rate : ghsAmount;
+/** Convert USD to GHS */
+export function usdToGhs(usdAmount: number, rate: number): number {
+  return usdAmount * rate;
 }
 
-/** Format a GHS amount as USD string */
-export function formatUsd(ghsAmount: number, rate: number): string {
-  const usd = ghsToUsd(ghsAmount, rate);
-  return `$ ${usd.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+/** Format a USD amount as USD string (displayed as-is) */
+export function formatUsd(usdAmount: number, _rate?: number): string {
+  return `$ ${usdAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 }
 
-/** Format a GHS amount as GH₵ string */
-export function formatGhs(ghsAmount: number): string {
-  return `GH₵ ${ghsAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+/** Format a USD amount as GH₵ string (converted via rate) */
+export function formatGhs(usdAmount: number, rate: number): string {
+  const ghs = usdToGhs(usdAmount, rate);
+  return `GH₵ ${ghs.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 }
 
 /** Format amount in the given currency mode */
 export function formatCurrency(
-  ghsAmount: number,
+  usdAmount: number,
   rate: number,
   mode: "usd" | "ghs" = "usd"
 ): string {
-  return mode === "usd" ? formatUsd(ghsAmount, rate) : formatGhs(ghsAmount);
+  return mode === "usd" ? formatUsd(usdAmount) : formatGhs(usdAmount, rate);
 }
