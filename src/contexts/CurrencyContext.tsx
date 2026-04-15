@@ -51,10 +51,10 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     loading,
     adminMode,
     setAdminMode: handleSetAdminMode,
-    toUsd: (ghs: number) => formatUsd(ghs, rate),
-    toGhs: (ghs: number) => formatGhs(ghs),
-    format: (ghs: number) => formatCurrencyUtil(ghs, rate, adminMode),
-    convertToUsd: (ghs: number) => ghsToUsd(ghs, rate),
+    toUsd: (amount: number) => formatUsd(amount),
+    toGhs: (amount: number) => formatGhs(amount, rate),
+    format: (amount: number) => formatCurrencyUtil(amount, rate, adminMode),
+    convertToUsd: (amount: number) => amount, // already USD
   };
 
   return (
