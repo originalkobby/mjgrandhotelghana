@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import type { SelectedAddOn, SelectedRoom } from "@/hooks/useBooking";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   car: Car,
@@ -34,6 +35,7 @@ interface Props {
 export default function AddOnsStep({ selectedRoom, selectedAddOns, onToggle, onNext, onBack }: Props) {
   const [addOns, setAddOns] = useState<AddOnData[]>([]);
   const [loading, setLoading] = useState(true);
+  const { toUsd, toGhs } = useCurrency();
 
   useEffect(() => {
     supabase
