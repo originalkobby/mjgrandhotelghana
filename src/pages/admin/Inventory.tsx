@@ -294,7 +294,6 @@ export default function Inventory() {
                           <p className="text-xs text-muted-foreground">
                             Base: {fc(Number(room.base_price_ghs))}
                           </p>
-                          </p>
                         </td>
                         {days.map((d) => {
                           const cell = getCell(room.id, d);
@@ -320,7 +319,6 @@ export default function Inventory() {
                                       {cell.rate_override
                                         ? fc(cell.rate_override)
                                         : fc(Number(room.base_price_ghs))}
-                                    </div>
                                     </div>
                                     <div className="text-[10px] mt-0.5 opacity-70">
                                       {cell.booked_count}/{cell.total_count} booked
