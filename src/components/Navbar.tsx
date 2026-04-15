@@ -63,7 +63,7 @@ const Navbar = () => {
                 }`}
               >
                 <ArrowLeft size={16} />
-                Back to home
+                BACK TO HOME
               </Link>
             )}
           </div>
