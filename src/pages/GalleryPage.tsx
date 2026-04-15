@@ -47,20 +47,6 @@ const GalleryPage = () => {
 
       <section className="pt-32 pb-24 md:pt-40 md:pb-32">
         <div className="container mx-auto px-6 lg:px-12">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
-            className="mb-6"
-          >
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 font-sans text-sm uppercase tracking-[0.2em] text-muted-foreground hover:text-accent transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Home
-            </Link>
-          </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
