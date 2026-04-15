@@ -118,11 +118,12 @@ export default function AddOnsStep({ selectedRoom, selectedAddOns, onToggle, onN
       {/* Summary bar */}
       <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
         <div className="font-sans text-sm text-muted-foreground">
-          <span className="text-foreground font-medium">Room:</span> GH₵{" "}
-          {selectedRoom.totalPrice.toLocaleString()}
+          <span className="text-foreground font-medium">Room:</span> {toUsd(selectedRoom.totalPrice)}
+          <span className="text-xs text-muted-foreground ml-1">({toGhs(selectedRoom.totalPrice)})</span>
           {addOnsTotal > 0 && (
             <>
-              {" "}+ <span className="text-accent font-medium">Extras:</span> GH₵ {addOnsTotal.toLocaleString()}
+              {" "}+ <span className="text-accent font-medium">Extras:</span> {toUsd(addOnsTotal)}
+              <span className="text-xs text-muted-foreground ml-1">({toGhs(addOnsTotal)})</span>
             </>
           )}
         </div>
