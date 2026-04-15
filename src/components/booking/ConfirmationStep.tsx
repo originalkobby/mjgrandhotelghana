@@ -244,7 +244,6 @@ export default function ConfirmationStep({ state }: Props) {
             <ConfirmationPrice amount={totalAmount} />
           </div>
         </div>
-        </div>
 
         {selectedAddOns.length > 0 && (
           <div className="mt-4 pt-4 border-t border-border">
