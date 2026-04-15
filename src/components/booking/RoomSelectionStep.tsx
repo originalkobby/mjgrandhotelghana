@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { differenceInDays } from "date-fns";
 import type { BookingSearch, SelectedRoom } from "@/hooks/useBooking";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 import roomDeluxe from "@/assets/room-deluxe.jpg";
 import roomSuite from "@/assets/room-suite.jpg";
@@ -222,6 +223,7 @@ function RoomCard({
   onSelect: () => void;
 }) {
   const imgSrc = IMAGE_MAP[room.images[0]] ?? room.images[0];
+  const { toUsd, toGhs } = useCurrency();
 
   return (
     <motion.div
@@ -302,12 +304,14 @@ function RoomCard({
             <div>
               <p className="font-sans text-xs text-muted-foreground">From</p>
               <p className="font-serif text-2xl text-foreground">
-                GH₵ {room.nightlyRate.toLocaleString()}
+                {toUsd(room.nightlyRate)}
               </p>
               <p className="font-sans text-xs text-muted-foreground">per night</p>
+              <p className="font-sans text-xs text-muted-foreground/70">{toGhs(room.nightlyRate)}/night</p>
               {nights > 1 && (
                 <p className="font-sans text-sm text-accent font-medium mt-1">
-                  GH₵ {(room.nightlyRate * nights).toLocaleString()} total
+                  {toUsd(room.nightlyRate * nights)} total
+                  <span className="block text-xs text-muted-foreground">{toGhs(room.nightlyRate * nights)}</span>
                 </p>
               )}
             </div>

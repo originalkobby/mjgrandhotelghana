@@ -22,6 +22,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addDays,
@@ -91,6 +92,7 @@ export default function Inventory() {
   });
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
+  const { format: fc } = useCurrency();
   const queryClient = useQueryClient();
 
   const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
@@ -290,7 +292,7 @@ export default function Inventory() {
                         <td className="px-4 py-3 sticky left-0 bg-card z-10">
                           <p className="font-medium text-foreground">{room.name}</p>
                           <p className="text-xs text-muted-foreground">
-                            Base: GH₵ {Number(room.base_price_ghs).toLocaleString()}
+                            Base: {fc(Number(room.base_price_ghs))}
                           </p>
                         </td>
                         {days.map((d) => {
@@ -315,8 +317,8 @@ export default function Inventory() {
                                   <>
                                     <div className="font-medium">
                                       {cell.rate_override
-                                        ? `₵${Math.round(cell.rate_override)}`
-                                        : `₵${Math.round(Number(room.base_price_ghs))}`}
+                                        ? fc(cell.rate_override)
+                                        : fc(Number(room.base_price_ghs))}
                                     </div>
                                     <div className="text-[10px] mt-0.5 opacity-70">
                                       {cell.booked_count}/{cell.total_count} booked
@@ -375,7 +377,7 @@ export default function Inventory() {
             <div className="space-y-4 font-sans">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-xs">Rate Override (GH₵)</Label>
+                  <Label className="text-xs">Rate Override</Label>
                   <Input
                     type="number"
                     value={editForm.rate_override}

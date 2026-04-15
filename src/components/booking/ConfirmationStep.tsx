@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import logoSrc from "@/assets/logo.png";
 import type { BookingState } from "@/hooks/useBooking";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface Props {
   state: BookingState;
@@ -175,6 +176,7 @@ async function generatePDF(state: BookingState): Promise<void> {
 
 export default function ConfirmationStep({ state }: Props) {
   const { selectedRoom, search, guestInfo, bookingReference, selectedAddOns, totalAmount } = state;
+  const { toUsd, toGhs } = useCurrency();
 
   return (
     <motion.div
@@ -240,7 +242,10 @@ export default function ConfirmationStep({ state }: Props) {
           </div>
           <div>
             <p className="text-muted-foreground">Total</p>
-            <p className="text-accent font-semibold text-lg">GH₵ {totalAmount.toLocaleString()}</p>
+            <p className="text-accent font-semibold text-lg">
+              {toUsd(totalAmount)}
+              <span className="block text-xs font-normal text-muted-foreground">{toGhs(totalAmount)}</span>
+            </p>
           </div>
         </div>
 

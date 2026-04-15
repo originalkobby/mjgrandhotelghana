@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import type { SelectedAddOn, SelectedRoom } from "@/hooks/useBooking";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   car: Car,
@@ -34,6 +35,7 @@ interface Props {
 export default function AddOnsStep({ selectedRoom, selectedAddOns, onToggle, onNext, onBack }: Props) {
   const [addOns, setAddOns] = useState<AddOnData[]>([]);
   const [loading, setLoading] = useState(true);
+  const { toUsd, toGhs } = useCurrency();
 
   useEffect(() => {
     supabase
@@ -104,7 +106,8 @@ export default function AddOnsStep({ selectedRoom, selectedAddOns, onToggle, onN
                 <h4 className="font-sans text-sm font-semibold text-foreground">{addOn.name}</h4>
                 <p className="font-sans text-xs text-muted-foreground mt-1 line-clamp-2">{addOn.description}</p>
                 <p className="font-sans text-sm font-semibold text-accent mt-3">
-                  GH₵ {addOn.price_ghs.toLocaleString()}
+                  {toUsd(addOn.price_ghs)}
+                  <span className="block text-xs font-normal text-muted-foreground">{toGhs(addOn.price_ghs)}</span>
                 </p>
               </motion.button>
             );
@@ -115,11 +118,12 @@ export default function AddOnsStep({ selectedRoom, selectedAddOns, onToggle, onN
       {/* Summary bar */}
       <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
         <div className="font-sans text-sm text-muted-foreground">
-          <span className="text-foreground font-medium">Room:</span> GH₵{" "}
-          {selectedRoom.totalPrice.toLocaleString()}
+          <span className="text-foreground font-medium">Room:</span> {toUsd(selectedRoom.totalPrice)}
+          <span className="text-xs text-muted-foreground ml-1">({toGhs(selectedRoom.totalPrice)})</span>
           {addOnsTotal > 0 && (
             <>
-              {" "}+ <span className="text-accent font-medium">Extras:</span> GH₵ {addOnsTotal.toLocaleString()}
+              {" "}+ <span className="text-accent font-medium">Extras:</span> {toUsd(addOnsTotal)}
+              <span className="text-xs text-muted-foreground ml-1">({toGhs(addOnsTotal)})</span>
             </>
           )}
         </div>

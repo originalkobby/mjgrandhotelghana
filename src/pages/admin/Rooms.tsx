@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { Plus, Pencil, BedDouble, RefreshCw } from "lucide-react";
 import ImageUpload from "@/components/admin/ImageUpload";
 import type { Tables } from "@/integrations/supabase/types";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 type Room = Tables<"rooms">;
 
@@ -34,6 +35,7 @@ const emptyForm = {
 
 export default function AdminRooms() {
   const qc = useQueryClient();
+  const { format: fc } = useCurrency();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
@@ -159,7 +161,7 @@ export default function AdminRooms() {
                 </div>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <Label>Base Price (GH₵) *</Label>
+                    <Label>Base Price ($) *</Label>
                     <Input type="number" value={form.base_price_ghs} onChange={(e) => set("base_price_ghs", +e.target.value)} />
                   </div>
                   <div>
@@ -241,7 +243,7 @@ export default function AdminRooms() {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>GH₵ {room.base_price_ghs.toLocaleString()}</TableCell>
+                  <TableCell>{fc(room.base_price_ghs)}</TableCell>
                   <TableCell>{room.bed_type || "—"}</TableCell>
                   <TableCell>{room.max_adults}A / {room.max_children}C</TableCell>
                   <TableCell>

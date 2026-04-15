@@ -4,6 +4,7 @@ import { ArrowLeft, CreditCard, Smartphone, Shield, CheckCircle2, Loader2 } from
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import type { SelectedRoom, SelectedAddOn, GuestInfo } from "@/hooks/useBooking";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface Props {
   selectedRoom: SelectedRoom;
@@ -26,6 +27,7 @@ export default function PaymentStep({
 }: Props) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { toUsd, toGhs } = useCurrency();
 
   const handlePayWithPaystack = async () => {
     if (!bookingReference) return;
@@ -90,17 +92,20 @@ export default function PaymentStep({
             <span className="text-muted-foreground">
               {selectedRoom.name} × {selectedRoom.totalNights} night{selectedRoom.totalNights !== 1 ? "s" : ""}
             </span>
-            <span className="text-foreground">GH₵ {selectedRoom.totalPrice.toLocaleString()}</span>
+            <span className="text-foreground">{toUsd(selectedRoom.totalPrice)}</span>
           </div>
           {selectedAddOns.map((a) => (
             <div key={a.id} className="flex justify-between">
               <span className="text-muted-foreground">{a.name}</span>
-              <span className="text-foreground">GH₵ {(a.price_ghs * a.quantity).toLocaleString()}</span>
+              <span className="text-foreground">{toUsd(a.price_ghs * a.quantity)}</span>
             </div>
           ))}
           <div className="border-t border-border pt-3 flex justify-between font-semibold text-base">
             <span className="text-foreground">Total Due</span>
-            <span className="text-accent">GH₵ {totalAmount.toLocaleString()}</span>
+            <span className="text-accent">
+              {toUsd(totalAmount)}
+              <span className="block text-xs font-normal text-muted-foreground">{toGhs(totalAmount)}</span>
+            </span>
           </div>
         </div>
       </div>

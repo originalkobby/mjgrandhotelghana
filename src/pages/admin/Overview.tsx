@@ -28,6 +28,7 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatBookingLabel, getPaymentDisplay } from "@/lib/bookingLifecycle";
 import { useBookingLifecycleSync } from "@/hooks/useBookingLifecycleSync";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface KPI {
   label: string;
@@ -109,13 +110,6 @@ async function fetchOverviewData(dateFrom: string, dateTo: string) {
 
   const pctChange = (c: number, p: number) => (p === 0 ? (c > 0 ? 100 : 0) : Math.round(((c - p) / p) * 100));
 
-  const kpis: KPI[] = [
-    { label: "Total Revenue", value: `GH₵ ${totalRevenue.toLocaleString()}`, change: pctChange(totalRevenue, prevRevenue), icon: DollarSign },
-    { label: "Bookings", value: totalBookings.toString(), change: pctChange(totalBookings, prevTotalBookings), icon: CalendarCheck },
-    { label: "Confirmed", value: confirmed.toString(), change: 0, icon: BedDouble },
-    { label: "Avg. Daily Rate", value: `GH₵ ${Math.round(adr).toLocaleString()}`, change: pctChange(adr, prevAdr), icon: TrendingUp },
-  ];
-
   const now = new Date(dateTo);
   const chartData: { day: string; revenue: number }[] = [];
   for (let i = 13; i >= 0; i--) {
@@ -127,11 +121,23 @@ async function fetchOverviewData(dateFrom: string, dateTo: string) {
     chartData.push({ day: dayLabel, revenue: dayRevenue });
   }
 
-  return { kpis, chartData, recentBookings: (recent as unknown as Booking[]) ?? [] };
+  return {
+    totalRevenue,
+    prevRevenue,
+    totalBookings,
+    prevTotalBookings,
+    confirmed,
+    adr,
+    prevAdr,
+    pctChange,
+    chartData,
+    recentBookings: (recent as unknown as Booking[]) ?? [],
+  };
 }
 
 export default function Overview() {
   const queryClient = useQueryClient();
+  const { format: fc } = useCurrency();
   const now = new Date();
   const [dateFrom, setDateFrom] = useState(format(startOfMonth(now), "yyyy-MM-dd"));
   const [dateTo, setDateTo] = useState(format(endOfMonth(now), "yyyy-MM-dd"));
@@ -146,10 +152,16 @@ export default function Overview() {
     onSynced: () => queryClient.invalidateQueries({ queryKey: ["admin-overview"] }),
   });
 
-  const kpis = data?.kpis ?? [];
   const chartData = data?.chartData ?? [];
   const recentBookings = data?.recentBookings ?? [];
   const refreshing = isLoading || isFetching;
+
+  const kpis: KPI[] = data ? [
+    { label: "Total Revenue", value: fc(data.totalRevenue), change: data.pctChange(data.totalRevenue, data.prevRevenue), icon: DollarSign },
+    { label: "Bookings", value: data.totalBookings.toString(), change: data.pctChange(data.totalBookings, data.prevTotalBookings), icon: CalendarCheck },
+    { label: "Confirmed", value: data.confirmed.toString(), change: 0, icon: BedDouble },
+    { label: "Avg. Daily Rate", value: fc(Math.round(data.adr)), change: data.pctChange(data.adr, data.prevAdr), icon: TrendingUp },
+  ] : [];
 
   if (isLoading) {
     return (
@@ -242,9 +254,9 @@ export default function Overview() {
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(30 15% 88%)" />
                 <XAxis dataKey="day" tick={{ fontSize: 11, fontFamily: "DM Sans" }} stroke="hsl(30 8% 45%)" />
-                <YAxis tick={{ fontSize: 11, fontFamily: "DM Sans" }} stroke="hsl(30 8% 45%)" tickFormatter={(v) => `₵${v}`} />
+                <YAxis tick={{ fontSize: 11, fontFamily: "DM Sans" }} stroke="hsl(30 8% 45%)" tickFormatter={(v) => fc(v)} />
                 <Tooltip
-                  formatter={(value: number) => [`GH₵ ${value.toLocaleString()}`, "Revenue"]}
+                  formatter={(value: number) => [fc(value), "Revenue"]}
                   contentStyle={{ fontFamily: "DM Sans", fontSize: 12, borderRadius: 8, border: "1px solid hsl(30 15% 88%)" }}
                 />
                 <Bar dataKey="revenue" fill="hsl(38 60% 52%)" radius={[4, 4, 0, 0]} />
@@ -292,7 +304,7 @@ export default function Overview() {
                         </td>
                         <td className="px-4 py-3 text-foreground">{b.rooms?.name ?? "—"}</td>
                         <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{formatDateGB(b.check_in)} → {formatDateGB(b.check_out)}</td>
-                        <td className="px-4 py-3 font-medium text-foreground">GH₵ {Number(b.final_total_ghs).toLocaleString()}</td>
+                        <td className="px-4 py-3 font-medium text-foreground">{fc(Number(b.final_total_ghs))}</td>
                         <td className="px-4 py-3">
                           <Badge variant="outline" className={`text-xs capitalize ${STATUS_COLORS[pd.effectiveStatus] ?? ""}`}>{formatBookingLabel(pd.effectiveStatus)}</Badge>
                         </td>

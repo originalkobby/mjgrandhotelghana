@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { CurrencyProvider } from "@/contexts/CurrencyContext";
 
 import Index from "./pages/Index";
 import Menu from "./pages/Menu";
@@ -28,7 +29,6 @@ import AdminSupport from "./pages/admin/SupportTickets";
 import AdminSettings from "./pages/admin/Settings";
 import AdminMenu from "./pages/admin/MenuManagement";
 import RevenueIntelligence from "./pages/admin/RevenueIntelligence";
-
 function ChatWidget() {
   const { pathname } = useLocation();
   if (pathname.startsWith("/admin")) return null;
@@ -39,6 +39,7 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    <CurrencyProvider>
     <TooltipProvider>
       <Toaster />
       <Sonner />
@@ -77,6 +78,7 @@ const App = () => (
         <ChatWidget />
       </BrowserRouter>
     </TooltipProvider>
+    </CurrencyProvider>
   </QueryClientProvider>
 );
 
