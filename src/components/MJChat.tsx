@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, Star } from "lucide-react";
+import { MessageSquareText, X, Send, Star } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ReactMarkdown from "react-markdown";
 import mjAvatar from "@/assets/mj-avatar.jpg";
@@ -227,7 +227,7 @@ const MJChat = () => {
             className="fixed bottom-6 right-6 z-[100] h-14 w-14 rounded-full bg-accent text-accent-foreground shadow-lg flex items-center justify-center"
             aria-label="Open chat with MJ"
           >
-            <MessageCircle size={24} />
+            <MessageSquareText size={24} />
           </motion.button>
         )}
       </AnimatePresence>
