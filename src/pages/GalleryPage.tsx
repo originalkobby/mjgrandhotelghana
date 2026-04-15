@@ -37,9 +37,12 @@ const GalleryPage = () => {
     },
   });
 
-  const images = dbImages && dbImages.length > 0
+  const dbMapped = dbImages && dbImages.length > 0
     ? dbImages.map((img) => ({ image_url: img.image_url, alt_text: img.alt_text, size: img.size }))
-    : fallbackImages;
+    : [];
+
+  // Always show fallback (homepage) images first, then DB images after
+  const images = [...fallbackImages, ...dbMapped];
 
   return (
     <div className="min-h-screen bg-background">
