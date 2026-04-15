@@ -12,14 +12,10 @@ import galleryGarden from "@/assets/gallery-garden.jpg";
 import galleryBeach from "@/assets/gallery-beach.jpg";
 
 const fallbackImages = [
-  { image_url: galleryPool, alt_text: "Hotel lounge with leather seating", size: "tall" },
-  { image_url: galleryBeach, alt_text: "Head chef preparing fresh ingredients", size: "wide" },
+  { image_url: galleryPool, alt_text: "Hotel lounge with leather seating", size: "wide" },
+  { image_url: galleryBeach, alt_text: "Head chef preparing fresh ingredients", size: "normal" },
   { image_url: galleryGarden, alt_text: "MJ Pool Bar", size: "normal" },
   { image_url: galleryLobby, alt_text: "Poolside cabana and sun loungers", size: "wide" },
-  { image_url: galleryPool, alt_text: "Hotel lounge — evening ambiance", size: "normal" },
-  { image_url: galleryBeach, alt_text: "Culinary excellence at MJ Grand", size: "tall" },
-  { image_url: galleryGarden, alt_text: "Garden terrace view", size: "normal" },
-  { image_url: galleryLobby, alt_text: "Lobby interior design", size: "normal" },
 ];
 
 const sizeClasses: Record<string, string> = {
