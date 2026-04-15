@@ -227,7 +227,7 @@ const MJChat = () => {
             className="fixed bottom-6 right-6 z-[100] h-14 w-14 rounded-full bg-accent text-accent-foreground shadow-lg flex items-center justify-center"
             aria-label="Open chat with MJ"
           >
-            <MessageSquareText size={24} />
+            <MessageSquareText size={24} fill="currentColor" strokeWidth={1.5} />
           </motion.button>
         )}
       </AnimatePresence>
