@@ -18,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDateGB, formatDateTimeGB } from "@/lib/dateUtils";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface Guest {
   id: string;
@@ -72,6 +73,7 @@ const STATUS_COLORS: Record<string, string> = {
 // SVG flag components for common nationalities based on phone codes
 
 export default function Guests() {
+  const { format: formatCurrency } = useCurrency();
   const [search, setSearch] = useState("");
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
   const [checkInTime, setCheckInTime] = useState("");
@@ -175,7 +177,7 @@ export default function Guests() {
       if (data?.error) throw new Error(data.error);
       toast({
         title: "Checkout Extended",
-        description: `+${data.extraNights} night(s), +GH₵ ${data.extraCost}. New total: GH₵ ${data.newFinalTotal}`,
+        description: `+${data.extraNights} night(s), +${formatCurrency(data.extraCost)}. New total: ${formatCurrency(data.newFinalTotal)}`,
       });
       setShowExtendDialog(false);
       setExtendBookingId(null);
@@ -394,7 +396,7 @@ export default function Guests() {
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="font-medium text-foreground text-xs">GH₵ {Number(b.final_total_ghs).toLocaleString()}</p>
+                            <p className="font-medium text-foreground text-xs">{formatCurrency(b.final_total_ghs)}</p>
                             <Badge variant="outline" className={`text-[10px] capitalize ${STATUS_COLORS[b.status] ?? ""}`}>
                               {b.status.replace("_", " ")}
                             </Badge>

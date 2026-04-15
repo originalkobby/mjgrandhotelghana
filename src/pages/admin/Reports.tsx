@@ -7,6 +7,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Legend } from "recharts";
 import { TrendingUp, BedDouble, DollarSign, Users } from "lucide-react";
 import { format, subDays, startOfMonth, endOfMonth, eachDayOfInterval, parseISO } from "date-fns";
+import { useCurrency } from "@/contexts/CurrencyContext";
+import PriceDisplay from "@/components/PriceDisplay";
 
 const COLORS = ["hsl(var(--primary))", "hsl(var(--accent))", "hsl(var(--muted-foreground))", "hsl(var(--destructive))"];
 
@@ -14,6 +16,7 @@ type Range = "7d" | "30d" | "90d";
 
 export default function Reports() {
   const [range, setRange] = useState<Range>("30d");
+  const { format: formatCurrency } = useCurrency();
 
   const daysBack = range === "7d" ? 7 : range === "30d" ? 30 : 90;
   const startDate = format(subDays(new Date(), daysBack), "yyyy-MM-dd");
@@ -106,10 +109,10 @@ export default function Reports() {
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Revenue", value: `GH₵ ${totalRevenue.toLocaleString()}`, icon: DollarSign },
+          { label: "Total Revenue", value: formatCurrency(totalRevenue), icon: DollarSign },
           { label: "Total Bookings", value: totalBookings, icon: Users },
           { label: "Paid Bookings", value: paidBookings, icon: TrendingUp },
-          { label: "Avg Booking Value", value: `GH₵ ${avgBookingValue.toFixed(0)}`, icon: BedDouble },
+          { label: "Avg Booking Value", value: formatCurrency(Math.round(avgBookingValue)), icon: BedDouble },
         ].map((kpi) => (
           <Card key={kpi.label}>
             <CardContent className="pt-6">

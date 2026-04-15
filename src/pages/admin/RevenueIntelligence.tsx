@@ -37,6 +37,7 @@ import {
 } from "recharts";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 /* ─── Types ─── */
 
@@ -130,6 +131,7 @@ async function fetchRevenueIntelligence() {
 export default function RevenueIntelligence() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { format: formatCurrency, convertToUsd } = useCurrency();
 
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ["revenue-intelligence"],
@@ -306,7 +308,7 @@ export default function RevenueIntelligence() {
             Revenue Intelligence
           </h1>
           <p className="font-sans text-sm text-muted-foreground mt-1">
-            AI-powered revenue optimization • Target: GH₵ {TARGET_6M.toLocaleString()} / 6 months
+            AI-powered revenue optimization • Target: {formatCurrency(TARGET_6M)} / 6 months
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -338,9 +340,9 @@ export default function RevenueIntelligence() {
                     6-Month Revenue Target
                   </p>
                   <p className="font-serif text-2xl text-foreground">
-                    GH₵ {paidRevenue.toLocaleString()}{" "}
+                    {formatCurrency(paidRevenue)}{" "}
                     <span className="text-muted-foreground text-base">
-                      / {TARGET_6M.toLocaleString()}
+                      / {formatCurrency(TARGET_6M)}
                     </span>
                   </p>
                 </div>
@@ -355,19 +357,19 @@ export default function RevenueIntelligence() {
                 <div className="text-center">
                   <p className="text-muted-foreground">Daily Rate</p>
                   <p className="font-medium text-foreground">
-                    GH₵ {Math.round(dailyRate).toLocaleString()}
+                    {formatCurrency(Math.round(dailyRate))}
                   </p>
                 </div>
                 <div className="text-center">
                   <p className="text-muted-foreground">Needed/Day</p>
                   <p className={`font-medium ${dailyNeeded > dailyRate ? "text-destructive" : "text-accent"}`}>
-                    GH₵ {Math.round(dailyNeeded).toLocaleString()}
+                    {formatCurrency(Math.round(dailyNeeded))}
                   </p>
                 </div>
                 <div className="text-center">
                   <p className="text-muted-foreground">Projected</p>
                   <p className={`font-medium ${onTrack ? "text-accent" : "text-destructive"}`}>
-                    GH₵ {Math.round(projectedRevenue).toLocaleString()}
+                    {formatCurrency(Math.round(projectedRevenue))}
                   </p>
                 </div>
               </div>
@@ -386,11 +388,11 @@ export default function RevenueIntelligence() {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {[
-          { label: "Revenue (180d)", value: `GH₵ ${Math.round(paidRevenue).toLocaleString()}`, icon: DollarSign, color: "text-accent" },
-          { label: "ADR", value: `GH₵ ${Math.round(adr).toLocaleString()}`, icon: TrendingUp, color: "text-primary" },
-          { label: "RevPAR", value: `GH₵ ${Math.round(revpar).toLocaleString()}`, icon: BarChart3, color: "text-primary" },
+          { label: "Revenue (180d)", value: formatCurrency(Math.round(paidRevenue)), icon: DollarSign, color: "text-accent" },
+          { label: "ADR", value: formatCurrency(Math.round(adr)), icon: TrendingUp, color: "text-primary" },
+          { label: "RevPAR", value: formatCurrency(Math.round(revpar)), icon: BarChart3, color: "text-primary" },
           { label: "Bookings", value: totalBookings.toString(), icon: BedDouble, color: "text-muted-foreground" },
-          { label: "Discount Leakage", value: `GH₵ ${Math.round(totalDiscount).toLocaleString()}`, icon: AlertTriangle, color: totalDiscount > paidRevenue * 0.1 ? "text-destructive" : "text-muted-foreground" },
+          { label: "Discount Leakage", value: formatCurrency(Math.round(totalDiscount)), icon: AlertTriangle, color: totalDiscount > paidRevenue * 0.1 ? "text-destructive" : "text-muted-foreground" },
         ].map((kpi, i) => (
           <motion.div
             key={kpi.label}
@@ -550,7 +552,7 @@ export default function RevenueIntelligence() {
                     type="number"
                     tick={{ fontSize: 10, fontFamily: "DM Sans" }}
                     stroke="hsl(30 8% 45%)"
-                    tickFormatter={(v) => `₵${(v / 1000).toFixed(0)}k`}
+                    tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
                   />
                   <YAxis
                     dataKey="source"
@@ -560,7 +562,7 @@ export default function RevenueIntelligence() {
                     width={90}
                   />
                   <Tooltip
-                    formatter={(value: number) => [`GH₵ ${value.toLocaleString()}`, "Revenue"]}
+                    formatter={(value: number) => [formatCurrency(value), "Revenue"]}
                     contentStyle={{ fontFamily: "DM Sans", fontSize: 12, borderRadius: 8 }}
                   />
                   <Bar dataKey="revenue" fill="hsl(38 60% 52%)" radius={[0, 4, 4, 0]} />
@@ -590,10 +592,10 @@ export default function RevenueIntelligence() {
                   <YAxis
                     tick={{ fontSize: 10, fontFamily: "DM Sans" }}
                     stroke="hsl(30 8% 45%)"
-                    tickFormatter={(v) => `₵${(v / 1000).toFixed(0)}k`}
+                    tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
                   />
                   <Tooltip
-                    formatter={(value: number) => [`GH₵ ${value.toLocaleString()}`, "Revenue"]}
+                    formatter={(value: number) => [formatCurrency(value), "Revenue"]}
                     contentStyle={{ fontFamily: "DM Sans", fontSize: 12, borderRadius: 8 }}
                   />
                   <Bar dataKey="revenue" fill="hsl(150 50% 40%)" radius={[4, 4, 0, 0]} />
@@ -650,12 +652,12 @@ export default function RevenueIntelligence() {
                         {room.name}
                       </p>
                       <p className="font-sans text-xs text-muted-foreground">
-                        Base: GH₵ {Number(room.base_price_ghs).toLocaleString()}
+                        Base: {formatCurrency(Number(room.base_price_ghs))}
                       </p>
                     </div>
                     <div className="text-right">
                       <p className="font-sans text-sm font-medium text-foreground">
-                        GH₵ {Math.round(avgRate).toLocaleString()}
+                        {formatCurrency(Math.round(avgRate))}
                       </p>
                       <div className="flex items-center gap-2 text-xs">
                         <span
