@@ -323,7 +323,6 @@ export default function BookingLookupSection() {
                       {toUsd(Number(result.final_total_ghs))}
                       <span className="text-xs font-normal text-muted-foreground ml-1">{toGhs(Number(result.final_total_ghs))}</span>
                     </span>
-                    </span>
                   </div>
                 </div>
 
