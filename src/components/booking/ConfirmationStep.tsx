@@ -243,7 +243,7 @@ export default function ConfirmationStep({ state }: Props) {
             <p className="text-muted-foreground">Total</p>
             <ConfirmationPrice amount={totalAmount} />
           </div>
-          </div>
+        </div>
         </div>
 
         {selectedAddOns.length > 0 && (

@@ -434,7 +434,6 @@ export default function GuestDetailsStep({
                 <span className="block text-xs font-normal text-muted-foreground">{toGhs(totalAmount)}</span>
               </span>
             </div>
-            </div>
           </div>
 
           <Button
