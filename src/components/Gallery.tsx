@@ -35,13 +35,16 @@ const Gallery = () => {
     },
   });
 
-  const images = dbImages && dbImages.length > 0
+  const dbMapped = dbImages && dbImages.length > 0
     ? dbImages.map((img) => ({
         image_url: img.image_url,
         alt_text: img.alt_text,
         span: sizeToSpan[img.size] || "",
       }))
-    : fallbackImages;
+    : [];
+
+  // Always show fallback (homepage) images first, then DB images after
+  const images = [...fallbackImages, ...dbMapped].slice(0, 4);
 
   return (
     <section id="gallery" className="py-24 md:py-32 bg-background">
