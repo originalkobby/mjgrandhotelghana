@@ -18,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDateGB, formatDateTimeGB } from "@/lib/dateUtils";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface Guest {
   id: string;

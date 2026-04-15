@@ -29,6 +29,7 @@ import { formatDateGB } from "@/lib/dateUtils";
 import type { Database } from "@/integrations/supabase/types";
 import { formatBookingLabel, getPaymentDisplay } from "@/lib/bookingLifecycle";
 import { useBookingLifecycleSync } from "@/hooks/useBookingLifecycleSync";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 type BookingStatus = Database["public"]["Enums"]["booking_status"];
 
@@ -135,6 +136,7 @@ export default function Bookings() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAdminAuth();
+  const { format: formatCurrency } = useCurrency();
 
   const { data: allBookings = [], isLoading: loading, isFetching } = useQuery({
     queryKey: ["admin-bookings", statusFilter, sourceFilter],
@@ -267,7 +269,7 @@ export default function Bookings() {
 
       toast({
         title: "Payment Recorded",
-        description: `GH₵ ${amount.toLocaleString()} recorded for ${paymentBooking.reference_code}. Status: ${newPaymentStatus}`,
+        description: `${formatCurrency(amount)} recorded for ${paymentBooking.reference_code}. Status: ${newPaymentStatus}`,
       });
       setShowPaymentDialog(false);
       setPaymentBooking(null);
@@ -444,7 +446,7 @@ export default function Bookings() {
                           {b.adults}A{b.children > 0 ? ` ${b.children}C` : ""}
                         </td>
                         <td className="px-4 py-3 font-medium text-foreground">
-                          GH₵ {Number(b.final_total_ghs).toLocaleString()}
+                          {formatCurrency(b.final_total_ghs)}
                         </td>
                         <td className="px-4 py-3">
                           <Badge variant="outline" className={`text-xs capitalize ${STATUS_COLORS[b.status] ?? ""}`}>
@@ -537,10 +539,10 @@ export default function Bookings() {
                 <div>
                   <p className="text-xs uppercase tracking-wider mb-1">Total</p>
                   <div className="text-foreground font-medium">
-                    GH₵ {Number(selectedBooking.final_total_ghs).toLocaleString()}
+                    {formatCurrency(selectedBooking.final_total_ghs)}
                     {selectedBooking.discount_ghs > 0 && (
                       <span className="text-xs text-accent ml-1">
-                        (−GH₵ {Number(selectedBooking.discount_ghs).toLocaleString()} promo{selectedBooking.promo_code ? `: ${selectedBooking.promo_code}` : ""})
+                        (−{formatCurrency(selectedBooking.discount_ghs)} promo{selectedBooking.promo_code ? `: ${selectedBooking.promo_code}` : ""})
                       </span>
                     )}
                   </div>
@@ -637,7 +639,7 @@ export default function Bookings() {
             <DialogDescription className="font-sans">
               {paymentBooking?.reference_code} — {paymentBooking?.guests?.full_name}
               <br />
-              Total due: <strong>GH₵ {Number(paymentBooking?.final_total_ghs ?? 0).toLocaleString()}</strong>
+              Total due: <strong>{formatCurrency(paymentBooking?.final_total_ghs ?? 0)}</strong>
             </DialogDescription>
           </DialogHeader>
 

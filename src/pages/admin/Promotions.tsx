@@ -42,6 +42,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface Promotion {
   id: string;
@@ -105,6 +106,7 @@ export default function Promotions() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { format: formatCurrency } = useCurrency();
 
   const { data: promotions = [], isLoading } = useQuery({
     queryKey: ["admin-promotions"],
@@ -313,7 +315,7 @@ export default function Promotions() {
                         <span className="font-medium text-foreground">
                           {p.discount_type === "percentage"
                             ? `${p.discount_value}%`
-                            : `GH₵ ${Number(p.discount_value).toLocaleString()}`}
+                            : formatCurrency(p.discount_value)}
                         </span>
                         <span className="text-xs text-muted-foreground ml-1">
                           {p.discount_type === "percentage" ? "off" : "flat"}

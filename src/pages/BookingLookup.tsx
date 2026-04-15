@@ -21,6 +21,8 @@ import { useToast } from "@/hooks/use-toast";
 import { formatBookingLabel, getPaymentDisplay } from "@/lib/bookingLifecycle";
 import { lookupBookingByReference } from "@/lib/bookingLookup";
 import { useBookingLifecycleSync } from "@/hooks/useBookingLifecycleSync";
+import { useCurrency } from "@/contexts/CurrencyContext";
+import PriceDisplay from "@/components/PriceDisplay";
 
 interface BookingResult {
   id: string;
@@ -329,25 +331,25 @@ const BookingLookup = () => {
                   <div className="border-t border-border pt-4 space-y-2 text-sm font-sans">
                     <div className="flex justify-between text-muted-foreground">
                       <span>Room Total</span>
-                      <span>GH₵ {Number(result.base_total_ghs).toLocaleString()}</span>
+                      <PriceDisplay amount={result.base_total_ghs} showBoth />
                     </div>
                     {Number(result.add_ons_total_ghs) > 0 && (
                       <div className="flex justify-between text-muted-foreground">
                         <span>Add-ons</span>
-                        <span>GH₵ {Number(result.add_ons_total_ghs).toLocaleString()}</span>
+                        <PriceDisplay amount={result.add_ons_total_ghs} showBoth />
                       </div>
                     )}
                     {Number(result.discount_ghs) > 0 && (
                       <div className="flex justify-between text-accent">
                         <span>Discount</span>
-                        <span>-GH₵ {Number(result.discount_ghs).toLocaleString()}</span>
+                        <PriceDisplay amount={result.discount_ghs} showBoth prefix="-" />
                       </div>
                     )}
                     <div className="flex justify-between font-semibold text-foreground text-base pt-1 border-t border-border">
                       <span>Total</span>
                       <span className="flex items-center gap-1">
                         <CreditCard className="w-4 h-4" />
-                        GH₵ {Number(result.final_total_ghs).toLocaleString()}
+                        <PriceDisplay amount={result.final_total_ghs} showBoth />
                       </span>
                     </div>
                   </div>

@@ -51,7 +51,7 @@ export function NotificationBell() {
           addNotification({
             type: "booking",
             title: "New Booking",
-            body: `Ref ${b.reference_code} — GH₵${Number(b.final_total_ghs).toLocaleString()}`,
+            body: `Ref ${b.reference_code} — $${Math.round(Number(b.final_total_ghs) / 16).toLocaleString()}`,
           });
         }
       )
