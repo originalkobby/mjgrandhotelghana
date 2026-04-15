@@ -137,6 +137,7 @@ async function fetchOverviewData(dateFrom: string, dateTo: string) {
 
 export default function Overview() {
   const queryClient = useQueryClient();
+  const { format: fc } = useCurrency();
   const now = new Date();
   const [dateFrom, setDateFrom] = useState(format(startOfMonth(now), "yyyy-MM-dd"));
   const [dateTo, setDateTo] = useState(format(endOfMonth(now), "yyyy-MM-dd"));
@@ -151,10 +152,16 @@ export default function Overview() {
     onSynced: () => queryClient.invalidateQueries({ queryKey: ["admin-overview"] }),
   });
 
-  const kpis = data?.kpis ?? [];
   const chartData = data?.chartData ?? [];
   const recentBookings = data?.recentBookings ?? [];
   const refreshing = isLoading || isFetching;
+
+  const kpis: KPI[] = data ? [
+    { label: "Total Revenue", value: fc(data.totalRevenue), change: data.pctChange(data.totalRevenue, data.prevRevenue), icon: DollarSign },
+    { label: "Bookings", value: data.totalBookings.toString(), change: data.pctChange(data.totalBookings, data.prevTotalBookings), icon: CalendarCheck },
+    { label: "Confirmed", value: data.confirmed.toString(), change: 0, icon: BedDouble },
+    { label: "Avg. Daily Rate", value: fc(Math.round(data.adr)), change: data.pctChange(data.adr, data.prevAdr), icon: TrendingUp },
+  ] : [];
 
   if (isLoading) {
     return (
