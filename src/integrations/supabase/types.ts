@@ -378,6 +378,33 @@ export type Database = {
           },
         ]
       }
+      gallery_images: {
+        Row: {
+          alt_text: string
+          created_at: string | null
+          id: string
+          image_url: string
+          size: string
+          sort_order: number
+        }
+        Insert: {
+          alt_text?: string
+          created_at?: string | null
+          id?: string
+          image_url: string
+          size?: string
+          sort_order?: number
+        }
+        Update: {
+          alt_text?: string
+          created_at?: string | null
+          id?: string
+          image_url?: string
+          size?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       guests: {
         Row: {
           created_at: string
