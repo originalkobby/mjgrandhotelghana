@@ -61,7 +61,7 @@ const RoomCard = ({ room, index }: { room: RoomRow; index: number }) => {
         <h3 className="font-serif text-xl text-foreground group-hover:text-accent transition-colors duration-300">
           {room.name}
         </h3>
-        <p className="mt-2 font-sans text-sm text-muted-foreground leading-relaxed line-clamp-2">
+        <p className="mt-2 font-sans text-sm text-muted-foreground leading-relaxed">
           {room.description ?? "Experience luxury and comfort."}
         </p>
         <a
