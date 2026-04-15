@@ -104,7 +104,8 @@ export default function AddOnsStep({ selectedRoom, selectedAddOns, onToggle, onN
                 <h4 className="font-sans text-sm font-semibold text-foreground">{addOn.name}</h4>
                 <p className="font-sans text-xs text-muted-foreground mt-1 line-clamp-2">{addOn.description}</p>
                 <p className="font-sans text-sm font-semibold text-accent mt-3">
-                  GH₵ {addOn.price_ghs.toLocaleString()}
+                  {toUsd(addOn.price_ghs)}
+                  <span className="block text-xs font-normal text-muted-foreground">{toGhs(addOn.price_ghs)}</span>
                 </p>
               </motion.button>
             );

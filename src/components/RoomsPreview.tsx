@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 import roomSuite from "@/assets/room-suite.jpg";
 import roomDeluxe from "@/assets/room-deluxe.jpg";
@@ -29,6 +30,7 @@ function resolveImage(images: string[] | null): string {
 
 const RoomCard = ({ room, index }: { room: RoomRow; index: number }) => {
   const imgSrc = resolveImage(room.images);
+  const { toUsd, toGhs } = useCurrency();
 
   return (
     <motion.div
@@ -48,7 +50,10 @@ const RoomCard = ({ room, index }: { room: RoomRow; index: number }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-charcoal/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
           <span className="font-sans text-sm font-medium text-gold">
-            From GH₵ {room.base_price_ghs.toLocaleString()}/night
+            From {toUsd(room.base_price_ghs)}/night
+          </span>
+          <span className="block font-sans text-xs text-gold/70">
+            {toGhs(room.base_price_ghs)}
           </span>
         </div>
       </div>
