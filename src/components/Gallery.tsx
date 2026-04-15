@@ -1,4 +1,6 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 import galleryPool from "@/assets/gallery-pool.jpg";
 import galleryLobby from "@/assets/gallery-lobby.jpg";
 import galleryGarden from "@/assets/gallery-garden.jpg";
@@ -35,6 +37,22 @@ const Gallery = () => {
             <GalleryImage key={img.alt} img={img} index={i} />
           ))}
         </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.5, delay: 0.4, ease: [0.3, 0, 0.2, 1] }}
+          className="text-center mt-12"
+        >
+          <Link
+            to="/gallery"
+            className="inline-flex items-center gap-2 font-sans text-sm uppercase tracking-[0.2em] text-accent hover:text-accent/80 transition-colors border-b border-accent/40 pb-1"
+          >
+            View More
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </motion.div>
       </div>
     </section>
   );

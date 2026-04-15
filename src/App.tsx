@@ -13,6 +13,7 @@ import About from "./pages/About";
 import Booking from "./pages/Booking";
 import NotFound from "./pages/NotFound";
 import GuestServices from "./pages/GuestServices";
+import GalleryPage from "./pages/GalleryPage";
 import MJChat from "./components/MJChat";
 import { ScrollToTop } from "./components/ScrollToTop";
 import AdminLogin from "./pages/admin/Login";
@@ -54,6 +55,7 @@ const App = () => (
           <Route path="/booking" element={<Booking />} />
           <Route path="/booking/lookup" element={<Navigate to="/booking" replace />} />
           <Route path="/guest-services" element={<GuestServices />} />
+          <Route path="/gallery" element={<GalleryPage />} />
 
           {/* Admin Dashboard */}
           <Route path="/admin/login" element={<AdminLogin />} />
