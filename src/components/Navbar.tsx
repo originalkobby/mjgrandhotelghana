@@ -75,7 +75,7 @@ const Navbar = () => {
                 <a
                   key={item.label}
                   href={item.href}
-                  className={`group relative text-sm font-sans font-medium tracking-wide transition-colors duration-300 ${
+                  className={`group relative text-xs font-sans font-semibold uppercase tracking-[0.2em] transition-colors duration-300 ${
                     useLight ? "text-foreground/80 hover:text-foreground" : "text-cream/80 hover:text-cream"
                   }`}
                 >
@@ -86,7 +86,7 @@ const Navbar = () => {
                 <Link
                   key={item.label}
                   to={item.href}
-                  className={`group relative text-sm font-sans font-medium tracking-wide transition-colors duration-300 ${
+                  className={`group relative text-xs font-sans font-semibold uppercase tracking-[0.2em] transition-colors duration-300 ${
                     useLight ? "text-foreground/80 hover:text-foreground" : "text-cream/80 hover:text-cream"
                   }`}
                 >
@@ -97,7 +97,7 @@ const Navbar = () => {
             )}
             <Link
               to="/booking"
-              className={`ml-2 border border-gold/60 px-5 py-2 text-sm font-sans font-medium tracking-wide transition-all duration-300 ${
+              className={`ml-4 border border-gold/60 px-6 py-2 text-xs font-sans font-semibold uppercase tracking-[0.2em] transition-all duration-300 ${
                 useLight ? "text-foreground hover:bg-gold hover:text-charcoal" : "text-cream hover:bg-gold hover:text-charcoal"
               }`}
             >
