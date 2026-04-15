@@ -69,7 +69,7 @@ const Navbar = () => {
           </div>
 
           {/* Desktop nav */}
-          <div className="hidden lg:flex items-center gap-8">
+          <div className="hidden lg:flex items-center gap-12">
             {navItems.filter(item => item.label !== "Back to Home").map((item) =>
               item.isHash ? (
                 <a
