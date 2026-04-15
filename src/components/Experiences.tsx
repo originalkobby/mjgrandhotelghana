@@ -9,7 +9,7 @@ import expPoolbar from "@/assets/exp-poolbar.jpg";
 const experiences = [
   { image: expPool, title: "Poolside Retreat", desc: "Unwind in crystal-clear waters and soak up the sun in style." },
   { image: expDining, title: "Fine Dining", desc: "Savour exquisite dishes served with warmth and elegance." },
-  { image: expKitchen, title: "Culinary Craft", desc: "Fresh, locally sourced ingredients prepared by our expert chefs." },
+  { image: expKitchen, title: "Fitness Centre", desc: "Stay on top of your routine with our fully equipped gym, open to all guests." },
   { image: expBreakfast, title: "Breakfast in Bed", desc: "Start your morning with a lavish spread delivered to your suite." },
   { image: expPoolbar, title: "Pool Bar Vibes", desc: "Sip refreshing cocktails and catch the game at our lively poolside bar." },
 ];
