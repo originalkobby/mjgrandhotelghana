@@ -304,7 +304,7 @@ export default function Overview() {
                         </td>
                         <td className="px-4 py-3 text-foreground">{b.rooms?.name ?? "—"}</td>
                         <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{formatDateGB(b.check_in)} → {formatDateGB(b.check_out)}</td>
-                        <td className="px-4 py-3 font-medium text-foreground">GH₵ {Number(b.final_total_ghs).toLocaleString()}</td>
+                        <td className="px-4 py-3 font-medium text-foreground">{fc(Number(b.final_total_ghs))}</td>
                         <td className="px-4 py-3">
                           <Badge variant="outline" className={`text-xs capitalize ${STATUS_COLORS[pd.effectiveStatus] ?? ""}`}>{formatBookingLabel(pd.effectiveStatus)}</Badge>
                         </td>
