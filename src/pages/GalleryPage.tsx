@@ -1,22 +1,25 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { Skeleton } from "@/components/ui/skeleton";
 import galleryPool from "@/assets/gallery-pool.jpg";
 import galleryLobby from "@/assets/gallery-lobby.jpg";
 import galleryGarden from "@/assets/gallery-garden.jpg";
 import galleryBeach from "@/assets/gallery-beach.jpg";
 
-const galleryImages = [
-  { src: galleryPool, alt: "Hotel lounge with leather seating", size: "tall" },
-  { src: galleryBeach, alt: "Head chef preparing fresh ingredients in the hotel kitchen", size: "wide" },
-  { src: galleryGarden, alt: "MJ Pool Bar", size: "normal" },
-  { src: galleryLobby, alt: "Poolside cabana and sun loungers", size: "wide" },
-  { src: galleryPool, alt: "Hotel lounge — evening ambiance", size: "normal" },
-  { src: galleryBeach, alt: "Culinary excellence at MJ Grand", size: "tall" },
-  { src: galleryGarden, alt: "Garden terrace view", size: "normal" },
-  { src: galleryLobby, alt: "Lobby interior design", size: "normal" },
+const fallbackImages = [
+  { image_url: galleryPool, alt_text: "Hotel lounge with leather seating", size: "tall" },
+  { image_url: galleryBeach, alt_text: "Head chef preparing fresh ingredients", size: "wide" },
+  { image_url: galleryGarden, alt_text: "MJ Pool Bar", size: "normal" },
+  { image_url: galleryLobby, alt_text: "Poolside cabana and sun loungers", size: "wide" },
+  { image_url: galleryPool, alt_text: "Hotel lounge — evening ambiance", size: "normal" },
+  { image_url: galleryBeach, alt_text: "Culinary excellence at MJ Grand", size: "tall" },
+  { image_url: galleryGarden, alt_text: "Garden terrace view", size: "normal" },
+  { image_url: galleryLobby, alt_text: "Lobby interior design", size: "normal" },
 ];
 
 const sizeClasses: Record<string, string> = {
@@ -26,6 +29,22 @@ const sizeClasses: Record<string, string> = {
 };
 
 const GalleryPage = () => {
+  const { data: dbImages, isLoading } = useQuery({
+    queryKey: ["public-gallery"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("gallery_images")
+        .select("*")
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const images = dbImages && dbImages.length > 0
+    ? dbImages.map((img) => ({ image_url: img.image_url, alt_text: img.alt_text, size: img.size }))
+    : fallbackImages;
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -61,28 +80,36 @@ const GalleryPage = () => {
             </h1>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 auto-rows-[280px]">
-            {galleryImages.map((img, i) => (
-              <motion.div
-                key={`${img.alt}-${i}`}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: 0.6,
-                  delay: 0.15 + i * 0.08,
-                  ease: [0.3, 0, 0.2, 1],
-                }}
-                className={`overflow-hidden ${sizeClasses[img.size]}`}
-              >
-                <img
-                  src={img.src}
-                  alt={img.alt}
-                  className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.3,0,0.2,1)] hover:scale-105 cursor-pointer"
-                  loading="lazy"
-                />
-              </motion.div>
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 auto-rows-[280px]">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-full rounded-lg" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 auto-rows-[280px]">
+              {images.map((img, i) => (
+                <motion.div
+                  key={`${img.alt_text}-${i}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.6,
+                    delay: 0.15 + i * 0.08,
+                    ease: [0.3, 0, 0.2, 1],
+                  }}
+                  className={`overflow-hidden ${sizeClasses[img.size] || ""}`}
+                >
+                  <img
+                    src={img.image_url}
+                    alt={img.alt_text}
+                    className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.3,0,0.2,1)] hover:scale-105 cursor-pointer"
+                    loading="lazy"
+                  />
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

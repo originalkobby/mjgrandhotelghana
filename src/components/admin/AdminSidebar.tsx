@@ -13,6 +13,7 @@ import {
   Settings2,
   UtensilsCrossed,
   Brain,
+  ImageIcon,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
@@ -39,6 +40,7 @@ const NAV_ITEMS = [
   { title: "Inventory", url: "/admin/inventory", icon: CalendarRange, end: false, roles: ["admin", "revenue_manager"] },
   { title: "Promotions", url: "/admin/promotions", icon: Tag, end: false, roles: ["admin"] },
   { title: "Menu", url: "/admin/menu", icon: UtensilsCrossed, end: false, roles: ["admin"] },
+  { title: "Gallery", url: "/admin/gallery", icon: ImageIcon, end: false, roles: ["admin"] },
   { title: "Revenue Intel", url: "/admin/revenue", icon: Brain, end: false, roles: ["admin", "revenue_manager"] },
   { title: "Reports", url: "/admin/reports", icon: BarChart3, end: false, roles: ["admin", "revenue_manager", "finance"] },
   { title: "Support", url: "/admin/support", icon: TicketCheck, end: false, roles: ["admin", "front_desk"] },
