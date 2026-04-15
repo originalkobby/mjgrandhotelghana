@@ -6,9 +6,9 @@ import galleryBeach from "@/assets/gallery-beach.jpg";
 
 const images = [
   { src: galleryPool, alt: "Hotel lounge with leather seating", span: "md:col-span-2" },
-  { src: galleryLobby, alt: "Poolside cabana and sun loungers", span: "" },
+  { src: galleryBeach, alt: "Head chef preparing fresh ingredients in the hotel kitchen", span: "" },
   { src: galleryGarden, alt: "MJ Pool Bar", span: "" },
-  { src: galleryBeach, alt: "Head chef preparing fresh ingredients in the hotel kitchen", span: "md:col-span-2" },
+  { src: galleryLobby, alt: "Poolside cabana and sun loungers", span: "md:col-span-2" },
 ];
 
 const Gallery = () => {
