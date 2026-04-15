@@ -64,7 +64,7 @@ const Experiences = () => {
         </motion.div>
 
         <div className="overflow-hidden" aria-label="Curated experiences carousel" role="region">
-          <motion.div initial={{ x: "0%" }} animate={controls} className="flex w-max gap-3">
+          <motion.div initial={{ x: "0%" }} animate={controls} className="flex w-max gap-2">
             {scrollingExperiences.map((exp, i) => (
               <div
                 key={`${exp.title}-${i}`}
