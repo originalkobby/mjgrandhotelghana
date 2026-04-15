@@ -254,9 +254,9 @@ export default function Overview() {
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(30 15% 88%)" />
                 <XAxis dataKey="day" tick={{ fontSize: 11, fontFamily: "DM Sans" }} stroke="hsl(30 8% 45%)" />
-                <YAxis tick={{ fontSize: 11, fontFamily: "DM Sans" }} stroke="hsl(30 8% 45%)" tickFormatter={(v) => `₵${v}`} />
+                <YAxis tick={{ fontSize: 11, fontFamily: "DM Sans" }} stroke="hsl(30 8% 45%)" tickFormatter={(v) => fc(v)} />
                 <Tooltip
-                  formatter={(value: number) => [`GH₵ ${value.toLocaleString()}`, "Revenue"]}
+                  formatter={(value: number) => [fc(value), "Revenue"]}
                   contentStyle={{ fontFamily: "DM Sans", fontSize: 12, borderRadius: 8, border: "1px solid hsl(30 15% 88%)" }}
                 />
                 <Bar dataKey="revenue" fill="hsl(38 60% 52%)" radius={[4, 4, 0, 0]} />
