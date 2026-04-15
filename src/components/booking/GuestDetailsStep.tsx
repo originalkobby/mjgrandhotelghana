@@ -11,6 +11,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import type { GuestInfo, SelectedRoom, SelectedAddOn } from "@/hooks/useBooking";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 const COUNTRY_CODES = [
   { code: "+93", iso: "af", country: "Afghanistan" },
@@ -259,6 +260,7 @@ export default function GuestDetailsStep({
     phoneNumber.trim().length >= 6;
 
   const addOnsTotal = selectedAddOns.reduce((s, a) => s + a.price_ghs * a.quantity, 0);
+  const { toUsd, toGhs } = useCurrency();
 
   return (
     <motion.div
@@ -402,12 +404,13 @@ export default function GuestDetailsStep({
             <div className="flex justify-between">
               <span className="text-muted-foreground">{selectedRoom.name}</span>
               <span className="text-foreground font-medium">
-                GH₵ {selectedRoom.nightlyRate.toLocaleString()} × {selectedRoom.totalNights}
+                {toUsd(selectedRoom.nightlyRate)} × {selectedRoom.totalNights}
+                <span className="block text-xs text-muted-foreground">{toGhs(selectedRoom.nightlyRate)}/night</span>
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Room subtotal</span>
-              <span className="text-foreground">GH₵ {selectedRoom.totalPrice.toLocaleString()}</span>
+              <span className="text-foreground">{toUsd(selectedRoom.totalPrice)}</span>
             </div>
 
             {selectedAddOns.length > 0 && (
@@ -415,18 +418,22 @@ export default function GuestDetailsStep({
                 <div className="border-t border-border pt-3 mt-3">
                   <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Extras</p>
                   {selectedAddOns.map((a) => (
-                    <div key={a.id} className="flex justify-between py-0.5">
-                      <span className="text-muted-foreground">{a.name}</span>
-                      <span className="text-foreground">GH₵ {a.price_ghs.toLocaleString()}</span>
-                    </div>
+                     <div key={a.id} className="flex justify-between py-0.5">
+                       <span className="text-muted-foreground">{a.name}</span>
+                       <span className="text-foreground">{toUsd(a.price_ghs)}</span>
+                     </div>
                   ))}
                 </div>
               </>
             )}
 
-            <div className="border-t border-border pt-3 mt-3 flex justify-between font-semibold text-base">
+             <div className="border-t border-border pt-3 mt-3 flex justify-between font-semibold text-base">
               <span className="text-foreground">Total</span>
-              <span className="text-accent">GH₵ {totalAmount.toLocaleString()}</span>
+              <span className="text-accent">
+                {toUsd(totalAmount)}
+                <span className="block text-xs font-normal text-muted-foreground">{toGhs(totalAmount)}</span>
+              </span>
+            </div>
             </div>
           </div>
 
