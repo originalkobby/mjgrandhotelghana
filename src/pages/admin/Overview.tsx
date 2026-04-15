@@ -28,6 +28,7 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatBookingLabel, getPaymentDisplay } from "@/lib/bookingLifecycle";
 import { useBookingLifecycleSync } from "@/hooks/useBookingLifecycleSync";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface KPI {
   label: string;
@@ -109,13 +110,6 @@ async function fetchOverviewData(dateFrom: string, dateTo: string) {
 
   const pctChange = (c: number, p: number) => (p === 0 ? (c > 0 ? 100 : 0) : Math.round(((c - p) / p) * 100));
 
-  const kpis: KPI[] = [
-    { label: "Total Revenue", value: `GH₵ ${totalRevenue.toLocaleString()}`, change: pctChange(totalRevenue, prevRevenue), icon: DollarSign },
-    { label: "Bookings", value: totalBookings.toString(), change: pctChange(totalBookings, prevTotalBookings), icon: CalendarCheck },
-    { label: "Confirmed", value: confirmed.toString(), change: 0, icon: BedDouble },
-    { label: "Avg. Daily Rate", value: `GH₵ ${Math.round(adr).toLocaleString()}`, change: pctChange(adr, prevAdr), icon: TrendingUp },
-  ];
-
   const now = new Date(dateTo);
   const chartData: { day: string; revenue: number }[] = [];
   for (let i = 13; i >= 0; i--) {
@@ -127,7 +121,18 @@ async function fetchOverviewData(dateFrom: string, dateTo: string) {
     chartData.push({ day: dayLabel, revenue: dayRevenue });
   }
 
-  return { kpis, chartData, recentBookings: (recent as unknown as Booking[]) ?? [] };
+  return {
+    totalRevenue,
+    prevRevenue,
+    totalBookings,
+    prevTotalBookings,
+    confirmed,
+    adr,
+    prevAdr,
+    pctChange,
+    chartData,
+    recentBookings: (recent as unknown as Booking[]) ?? [],
+  };
 }
 
 export default function Overview() {
