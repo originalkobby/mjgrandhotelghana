@@ -22,7 +22,7 @@ import {
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import heroImg from "@/assets/guest-services-hero.jpg";
-import roomImg from "@/assets/room-suite.jpg";
+import roomImg from "@/assets/guest-services-reception.jpg";
 
 const ease = [0.3, 0, 0.2, 1] as const;
 
