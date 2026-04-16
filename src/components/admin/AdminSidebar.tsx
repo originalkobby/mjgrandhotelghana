@@ -12,7 +12,6 @@ import {
   Headset,
   Settings,
   UtensilsCrossed,
-  Brain,
   ImageIcon,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
