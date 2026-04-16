@@ -220,7 +220,7 @@ export default function GuestServices() {
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center shrink-0 group-hover:bg-gold/10 transition-colors duration-300">
                   <s.icon className="w-4 h-4 text-gold" />
-          </motion.div>
+                </div>
                 <h3 className="font-serif text-base text-foreground">{s.title}</h3>
               </div>
               <p className="font-sans text-xs text-muted-foreground leading-relaxed whitespace-pre-line pl-13">
@@ -228,7 +228,7 @@ export default function GuestServices() {
                 </p>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
