@@ -114,69 +114,16 @@ const BookingLookup = () => {
     setCancelling(true);
 
     try {
-      const checkInDate = new Date(result.check_in);
-      const now = new Date();
-      const hoursUntilCheckIn = (checkInDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+      const { data, error: fnError } = await supabase.functions.invoke("cancel-booking", {
+        body: { referenceCode: result.reference_code },
+      });
 
-      if (hoursUntilCheckIn < 48) {
-        toast({
-          title: "Cannot Cancel",
-          description: "Bookings can only be cancelled at least 48 hours before check-in.",
-          variant: "destructive",
-        });
-        setCancelling(false);
-        setShowCancelDialog(false);
-        return;
-      }
-
-      // Fetch the booking's room_id to decrement inventory
-      const { data: bookingRow } = await supabase
-        .from("bookings")
-        .select("room_id, check_in, check_out")
-        .eq("id", result.id)
-        .single();
-
-      const { error } = await supabase
-        .from("bookings")
-        .update({ status: "cancelled" as any })
-        .eq("id", result.id)
-        .in("status", ["confirmed", "pending"] as any);
-
-      if (error) throw error;
-
-      // Decrement room_inventory.booked_count for each night
-      if (bookingRow) {
-        const ciDate = new Date(bookingRow.check_in);
-        const coDate = new Date(bookingRow.check_out);
-        const d = new Date(ciDate);
-        while (d < coDate) {
-          const dateStr = d.toISOString().split("T")[0];
-          const { data: inv } = await supabase
-            .from("room_inventory")
-            .select("id, booked_count")
-            .eq("room_id", bookingRow.room_id)
-            .eq("date", dateStr)
-            .maybeSingle();
-          if (inv && inv.booked_count > 0) {
-            await supabase
-              .from("room_inventory")
-              .update({ booked_count: inv.booked_count - 1 })
-              .eq("id", inv.id);
-          }
-          d.setDate(d.getDate() + 1);
-        }
-      }
+      if (fnError) throw new Error(fnError.message);
+      if (data?.error) throw new Error(data.error);
 
       setResult({ ...result, status: "cancelled" });
       setShowCancelDialog(false);
       toast({ title: "Booking Cancelled", description: `Booking ${result.reference_code} has been cancelled.` });
-
-      // Fire-and-forget cancellation email
-      supabase.functions.invoke("send-cancellation-email", {
-        body: { bookingId: result.id },
-      }).then(({ error: emailErr }) => {
-        if (emailErr) console.error("Cancellation email failed:", emailErr);
-      });
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     } finally {

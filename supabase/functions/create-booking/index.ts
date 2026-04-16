@@ -51,6 +51,98 @@ serve(async (req) => {
       );
     }
 
+    // --- Validate required booking fields ---
+    if (!booking?.roomId || !booking?.checkIn || !booking?.checkOut) {
+      return new Response(JSON.stringify({ error: "roomId, checkIn, and checkOut are required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // --- Server-side price computation ---
+    // Fetch room to get base price
+    const { data: room, error: roomErr } = await supabase
+      .from("rooms")
+      .select("id, base_price_ghs, is_active")
+      .eq("id", booking.roomId)
+      .single();
+
+    if (roomErr || !room || !room.is_active) {
+      return new Response(JSON.stringify({ error: "Room not found or inactive" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Calculate nights and per-night rates from inventory
+    const checkInDate = new Date(booking.checkIn);
+    const checkOutDate = new Date(booking.checkOut);
+    const dates: string[] = [];
+    const d = new Date(checkInDate);
+    while (d < checkOutDate) {
+      dates.push(d.toISOString().split("T")[0]);
+      d.setDate(d.getDate() + 1);
+    }
+
+    if (dates.length === 0) {
+      return new Response(JSON.stringify({ error: "Invalid date range" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Fetch inventory rate overrides for the date range
+    const { data: inventory } = await supabase
+      .from("room_inventory")
+      .select("date, rate_override, booked_count, total_count, is_closed")
+      .eq("room_id", booking.roomId)
+      .in("date", dates);
+
+    const invMap = new Map((inventory || []).map(i => [i.date, i]));
+
+    // Compute server-side base total using DB rates
+    let baseTotalGhs = 0;
+    for (const date of dates) {
+      const inv = invMap.get(date);
+      if (inv?.is_closed) {
+        return new Response(JSON.stringify({ error: `Room is closed on ${date}` }), {
+          status: 409,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (inv && inv.booked_count >= inv.total_count) {
+        return new Response(JSON.stringify({ error: `Room not available on ${date}` }), {
+          status: 409,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const nightlyRate = inv?.rate_override ?? room.base_price_ghs;
+      baseTotalGhs += nightlyRate;
+    }
+
+    // --- Server-side add-on pricing ---
+    let addOnsTotalGhs = 0;
+    const validatedAddOns: { id: string; quantity: number; unit_price_ghs: number; total_price_ghs: number }[] = [];
+    if (addOns && Array.isArray(addOns) && addOns.length > 0) {
+      const addOnIds = addOns.map((a: any) => a.id);
+      const { data: dbAddOns } = await supabase
+        .from("add_ons")
+        .select("id, price_ghs")
+        .in("id", addOnIds)
+        .eq("is_active", true);
+
+      const addOnPriceMap = new Map((dbAddOns || []).map(a => [a.id, a.price_ghs]));
+
+      for (const a of addOns) {
+        const dbPrice = addOnPriceMap.get(a.id);
+        if (dbPrice === undefined) continue; // skip invalid add-ons
+        const qty = Math.max(1, Math.min(100, Math.floor(Number(a.quantity) || 1)));
+        const total = dbPrice * qty;
+        addOnsTotalGhs += total;
+        validatedAddOns.push({ id: a.id, quantity: qty, unit_price_ghs: dbPrice, total_price_ghs: total });
+      }
+    }
+
     // --- Duplicate Detection ---
     const { data: recentDuplicate } = await supabase
       .from("bookings")
@@ -99,12 +191,11 @@ serve(async (req) => {
 
         if (validStart && validEnd && withinLimit && roomAllowed) {
           if (promo.discount_type === "percentage") {
-            discountGhs = Math.round((booking.baseTotalGhs * promo.discount_value) / 100);
+            discountGhs = Math.round((baseTotalGhs * promo.discount_value) / 100);
           } else if (promo.discount_type === "fixed") {
-            discountGhs = Math.min(promo.discount_value, booking.baseTotalGhs);
+            discountGhs = Math.min(promo.discount_value, baseTotalGhs);
           }
 
-          // Increment usage count
           await supabase
             .from("promotions")
             .update({ usage_count: promo.usage_count + 1 })
@@ -113,9 +204,8 @@ serve(async (req) => {
       }
     }
 
-    // Recalculate final total with discount
-    const addOnsTotal = booking.addOnsTotalGhs || 0;
-    const finalTotal = booking.baseTotalGhs + addOnsTotal - discountGhs;
+    // Server-computed final total
+    const finalTotal = baseTotalGhs + addOnsTotalGhs - discountGhs;
 
     // --- Upsert guest ---
     let guestId: string | null = null;
@@ -127,7 +217,6 @@ serve(async (req) => {
 
     if (existingGuest) {
       guestId = existingGuest.id;
-      // Update preferences with flight itinerary if provided
       if (booking.flightItinerary) {
         await supabase
           .from("guests")
@@ -151,7 +240,7 @@ serve(async (req) => {
     // Generate reference
     const refCode = "MJ-" + Math.random().toString(36).substring(2, 10).toUpperCase();
 
-    // Create booking
+    // Create booking with SERVER-COMPUTED prices
     const { data: bookingData, error: bookingError } = await supabase
       .from("bookings")
       .insert({
@@ -162,8 +251,8 @@ serve(async (req) => {
         check_out: booking.checkOut,
         adults: booking.adults,
         children: booking.children,
-        base_total_ghs: booking.baseTotalGhs,
-        add_ons_total_ghs: addOnsTotal,
+        base_total_ghs: baseTotalGhs,
+        add_ons_total_ghs: addOnsTotalGhs,
         discount_ghs: discountGhs,
         final_total_ghs: finalTotal,
         promo_code: booking.promoCode || null,
@@ -178,58 +267,40 @@ serve(async (req) => {
 
     if (bookingError) {
       console.error("Booking insert error:", bookingError);
-      return new Response(JSON.stringify({ error: bookingError.message }), {
+      return new Response(JSON.stringify({ error: "Failed to create booking" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     // --- Increment room_inventory.booked_count for each night ---
-    const checkInDate = new Date(booking.checkIn);
-    const checkOutDate = new Date(booking.checkOut);
-    const dates: string[] = [];
-    const d = new Date(checkInDate);
-    while (d < checkOutDate) {
-      dates.push(d.toISOString().split("T")[0]);
-      d.setDate(d.getDate() + 1);
-    }
-
     for (const date of dates) {
-      // Try to find existing inventory row
-      const { data: inv } = await supabase
-        .from("room_inventory")
-        .select("id, booked_count")
-        .eq("room_id", booking.roomId)
-        .eq("date", date)
-        .maybeSingle();
-
+      const inv = invMap.get(date);
       if (inv) {
         await supabase
           .from("room_inventory")
-          .update({ booked_count: inv.booked_count + 1 })
-          .eq("id", inv.id);
+          .update({ booked_count: (inv.booked_count || 0) + 1 })
+          .eq("room_id", booking.roomId)
+          .eq("date", date);
       } else {
-        // Create inventory row with booked_count = 1
-        await supabase
-          .from("room_inventory")
-          .insert({
-            room_id: booking.roomId,
-            date,
-            total_count: 1,
-            booked_count: 1,
-          });
+        await supabase.from("room_inventory").insert({
+          room_id: booking.roomId,
+          date,
+          total_count: 1,
+          booked_count: 1,
+        });
       }
     }
 
     // Insert add-ons
-    if (addOns && addOns.length > 0 && bookingData) {
+    if (validatedAddOns.length > 0 && bookingData) {
       await supabase.from("booking_add_ons").insert(
-        addOns.map((a: any) => ({
+        validatedAddOns.map((a) => ({
           booking_id: bookingData.id,
           add_on_id: a.id,
           quantity: a.quantity,
-          unit_price_ghs: a.priceGhs,
-          total_price_ghs: a.priceGhs * a.quantity,
+          unit_price_ghs: a.unit_price_ghs,
+          total_price_ghs: a.total_price_ghs,
         }))
       );
     }
@@ -245,7 +316,7 @@ serve(async (req) => {
     );
   } catch (err) {
     console.error("Create booking error:", err);
-    return new Response(JSON.stringify({ error: err.message }), {
+    return new Response(JSON.stringify({ error: "An unexpected error occurred" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

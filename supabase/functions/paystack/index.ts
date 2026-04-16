@@ -28,7 +28,38 @@ serve(async (req) => {
 
     // ── Initialize transaction ──
     if (action === "initialize") {
-      const { email, amount_ghs, booking_reference, callback_url } = payload;
+      const { email, booking_reference, callback_url } = payload;
+
+      if (!booking_reference || !email) {
+        return new Response(JSON.stringify({ error: "booking_reference and email are required" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Look up the booking from DB to get the authoritative amount
+      const { data: booking, error: bookingErr } = await supabase
+        .from("bookings")
+        .select("final_total_ghs, status, payment_status")
+        .eq("reference_code", booking_reference)
+        .single();
+
+      if (bookingErr || !booking) {
+        return new Response(JSON.stringify({ error: "Booking not found" }), {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      if (booking.payment_status === "paid") {
+        return new Response(JSON.stringify({ error: "Booking is already paid" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Use server-side amount from DB, never from client
+      const amount_ghs = Number(booking.final_total_ghs);
 
       const res = await fetch("https://api.paystack.co/transaction/initialize", {
         method: "POST",
@@ -63,7 +94,7 @@ serve(async (req) => {
     if (action === "verify") {
       const { reference } = payload;
 
-      const res = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
+      const res = await fetch(`https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`, {
         headers: { Authorization: `Bearer ${PAYSTACK_SECRET}` },
       });
 
@@ -108,7 +139,7 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
+    return new Response(JSON.stringify({ error: "An unexpected error occurred" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
