@@ -195,7 +195,7 @@ export default function RoomSelectionStep({ search, onSelect, onBack }: Props) {
           ))}
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {rooms.map((room, index) => (
             <RoomCard
               key={room.id}
@@ -234,9 +234,9 @@ function RoomCard({
         !room.available ? "opacity-50" : ""
       }`}
     >
-      <div className="grid grid-cols-1 md:grid-cols-[320px_1fr] lg:grid-cols-[380px_1fr]">
+      <div className="flex flex-col">
         {/* Image */}
-        <div className="relative h-56 md:h-full">
+        <div className="relative h-36 md:h-32">
           <img
             src={imgSrc}
             alt={room.name}
@@ -244,83 +244,75 @@ function RoomCard({
             loading="lazy"
           />
           {room.available && room.availableCount <= 3 && room.availableCount > 0 && (
-            <span className="absolute top-3 left-3 bg-destructive text-destructive-foreground text-xs font-sans font-medium px-2.5 py-1 rounded-full">
+            <span className="absolute top-2 left-2 bg-destructive text-destructive-foreground text-[10px] font-sans font-medium px-2 py-0.5 rounded-full">
               Only {room.availableCount} left
             </span>
           )}
         </div>
 
         {/* Details */}
-        <div className="p-6 flex flex-col">
-          <div className="flex-1">
-            <h3 className="font-serif text-xl md:text-2xl text-foreground">{room.name}</h3>
-            <p className="font-sans text-sm text-muted-foreground mt-2 leading-relaxed line-clamp-2">
-              {room.description}
-            </p>
+        <div className="p-3 md:p-4 flex flex-col flex-1">
+          <h3 className="font-serif text-base text-foreground">{room.name}</h3>
+          <p className="font-sans text-xs text-muted-foreground mt-1 leading-relaxed line-clamp-2">
+            {room.description}
+          </p>
 
-            {/* Meta */}
-            <div className="flex flex-wrap gap-4 mt-4 text-xs font-sans text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Maximize className="w-3.5 h-3.5" /> {room.size_sqm} sqm
-              </span>
-              <span className="flex items-center gap-1">
-                <BedDouble className="w-3.5 h-3.5" /> {room.bed_type}
-              </span>
-              <span className="flex items-center gap-1">
-                <Users className="w-3.5 h-3.5" /> Up to {room.max_adults} guests
-              </span>
-            </div>
+          {/* Meta */}
+          <div className="flex flex-wrap gap-2 mt-2 text-[10px] font-sans text-muted-foreground">
+            <span className="flex items-center gap-0.5">
+              <Maximize className="w-3 h-3" /> {room.size_sqm} sqm
+            </span>
+            <span className="flex items-center gap-0.5">
+              <BedDouble className="w-3 h-3" /> {room.bed_type}
+            </span>
+            <span className="flex items-center gap-0.5">
+              <Users className="w-3 h-3" /> Up to {room.max_adults}
+            </span>
+          </div>
 
-            {/* Amenities */}
-            <div className="flex flex-wrap gap-2 mt-4">
-              {room.amenities.slice(0, 6).map((amenity) => {
-                const Icon = AMENITY_ICONS[amenity];
-                return (
-                  <span
-                    key={amenity}
-                    className="inline-flex items-center gap-1 bg-secondary text-secondary-foreground text-xs font-sans px-2.5 py-1 rounded-full"
-                  >
-                    {Icon && <Icon className="w-3 h-3" />}
-                    {amenity}
-                  </span>
-                );
-              })}
-              {room.amenities.length > 6 && (
-                <span className="text-xs text-accent font-sans">
-                  +{room.amenities.length - 6} more
+          {/* Amenities */}
+          <div className="flex flex-wrap gap-1 mt-2">
+            {room.amenities.slice(0, 4).map((amenity) => {
+              const Icon = AMENITY_ICONS[amenity];
+              return (
+                <span
+                  key={amenity}
+                  className="inline-flex items-center gap-0.5 bg-secondary text-secondary-foreground text-[10px] font-sans px-1.5 py-0.5 rounded-full"
+                >
+                  {Icon && <Icon className="w-2.5 h-2.5" />}
+                  {amenity}
                 </span>
-              )}
-            </div>
+              );
+            })}
+            {room.amenities.length > 4 && (
+              <span className="text-[10px] text-accent font-sans">
+                +{room.amenities.length - 4} more
+              </span>
+            )}
+          </div>
 
-            {/* Cancellation policy */}
-            <div className="flex items-center gap-1.5 mt-3 text-xs font-sans text-accent">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              Free cancellation available
-            </div>
+          {/* Cancellation */}
+          <div className="flex items-center gap-1 mt-2 text-[10px] font-sans text-accent">
+            <ShieldCheck className="w-3 h-3" />
+            Free cancellation
           </div>
 
           {/* Price & CTA */}
-          <div className="flex items-end justify-between mt-6 pt-4 border-t border-border">
+          <div className="flex items-end justify-between mt-auto pt-3 border-t border-border">
             <div>
-              <p className="font-sans text-xs text-muted-foreground">From</p>
-              <p className="font-serif text-2xl text-foreground">
+              <p className="font-sans text-[10px] text-muted-foreground">From</p>
+              <p className="font-serif text-lg text-foreground leading-tight">
                 {toUsd(room.nightlyRate)}
               </p>
-              <p className="font-sans text-xs text-muted-foreground">per night</p>
-              <p className="font-sans text-xs text-muted-foreground/70">{toGhs(room.nightlyRate)}/night</p>
-              {nights > 1 && (
-                <p className="font-sans text-sm text-accent font-medium mt-1">
-                  {toUsd(room.nightlyRate * nights)} total
-                  <span className="block text-xs text-muted-foreground">{toGhs(room.nightlyRate * nights)}</span>
-                </p>
-              )}
+              <p className="font-sans text-[10px] text-muted-foreground">{toGhs(room.nightlyRate)}/night</p>
             </div>
             <Button
               onClick={onSelect}
               disabled={!room.available}
-              className="h-11 px-6 bg-accent text-accent-foreground hover:bg-accent/90 font-sans text-sm font-semibold uppercase tracking-wider"
+              size="sm"
+              className="h-8 px-3 bg-accent text-accent-foreground hover:bg-accent/90 font-sans text-xs font-semibold uppercase tracking-wider"
             >
-              {room.available ? "Select Room" : "Unavailable"}
+              {room.available ? "Select" : "Unavailable"}
             </Button>
           </div>
         </div>
