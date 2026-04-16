@@ -150,12 +150,18 @@ const About = () => {
             className="text-center mb-12"
           >
             <h2 className="font-serif text-3xl md:text-4xl text-cream mb-4">Elegant Accommodation</h2>
-            <div className="w-12 h-[2px] bg-gold mx-auto mb-6" />
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
               viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6, delay: 0.3, ease }}
+              transition={{ duration: 0.8, delay: 0.15, ease }}
+              className="w-12 h-[2px] bg-gold mx-auto mb-6"
+            />
+            <motion.p
+              initial={{ opacity: 0, x: 60 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.7, delay: 0.25, ease }}
               className="font-sans text-cream/60 max-w-2xl mx-auto leading-relaxed"
             >
               Our luxury rooms and suites are designed to provide the perfect balance of comfort and style.
@@ -209,12 +215,18 @@ const About = () => {
             className="text-center mb-12"
           >
             <h2 className="font-serif text-3xl md:text-4xl text-cream mb-4">Exceptional Facilities & Services</h2>
-            <div className="w-12 h-[2px] bg-gold mx-auto mb-6" />
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
               viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6, delay: 0.3, ease }}
+              transition={{ duration: 0.8, delay: 0.15, ease }}
+              className="w-12 h-[2px] bg-gold mx-auto mb-6"
+            />
+            <motion.p
+              initial={{ opacity: 0, x: -60 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.7, delay: 0.25, ease }}
               className="font-sans text-cream/60 max-w-2xl mx-auto leading-relaxed"
             >
               At MJ Grand Hotel, we go beyond accommodation to provide a complete hospitality experience.
@@ -298,12 +310,18 @@ const About = () => {
             className="text-center mb-14"
           >
             <h2 className="font-serif text-3xl md:text-4xl text-cream mb-4">Core Values & Behaviors</h2>
-            <div className="w-12 h-[2px] bg-gold mx-auto mb-6" />
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
               viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6, delay: 0.3, ease }}
+              transition={{ duration: 0.8, delay: 0.15, ease }}
+              className="w-12 h-[2px] bg-gold mx-auto mb-6"
+            />
+            <motion.p
+              initial={{ opacity: 0, x: 60 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.7, delay: 0.25, ease }}
               className="font-sans text-cream/60 max-w-2xl mx-auto leading-relaxed"
             >
               At MJ Grand Hotel, our culture is shaped by principles that guide our service delivery and define our standard of excellence.
@@ -354,10 +372,22 @@ const About = () => {
             className="text-center max-w-2xl mx-auto"
           >
             <h2 className="font-serif text-3xl md:text-4xl text-cream mb-4">Discover True Hospitality</h2>
-            <div className="w-12 h-[2px] bg-gold mx-auto mb-6" />
-            <p className="font-sans text-cream/60 leading-relaxed mb-8">
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.8, delay: 0.15, ease }}
+              className="w-12 h-[2px] bg-gold mx-auto mb-6"
+            />
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.6, delay: 0.3, ease }}
+              className="font-sans text-cream/60 leading-relaxed mb-8"
+            >
               We invite you to experience the elegance, tranquility, and superior service that define MJ Grand Hotel. Book your stay with us today and discover a new standard of luxury living.
-            </p>
+            </motion.p>
             <Link
               to="/booking"
               className="inline-block bg-gold px-8 py-3.5 font-sans text-sm font-semibold uppercase tracking-wider text-charcoal hover:shadow-lg hover:shadow-gold/20 transition-all duration-300"
