@@ -121,26 +121,33 @@ serve(async (req) => {
     }
 
     // --- Server-side add-on pricing ---
+    // Compute average nightly rate for dynamic add-on pricing
+    const avgNightlyRate = baseTotalGhs / dates.length;
+    const DYNAMIC_ADDON_NAMES = ["Early Check-in", "Late Checkout"];
+
     let addOnsTotalGhs = 0;
     const validatedAddOns: { id: string; quantity: number; unit_price_ghs: number; total_price_ghs: number }[] = [];
     if (addOns && Array.isArray(addOns) && addOns.length > 0) {
       const addOnIds = addOns.map((a: any) => a.id);
       const { data: dbAddOns } = await supabase
         .from("add_ons")
-        .select("id, price_ghs")
+        .select("id, name, price_ghs")
         .in("id", addOnIds)
         .eq("is_active", true);
 
-      const addOnPriceMap = new Map((dbAddOns || []).map(a => [a.id, a.price_ghs]));
+      const addOnInfoMap = new Map((dbAddOns || []).map(a => [a.id, a]));
 
       for (const a of addOns) {
-        const dbPrice = addOnPriceMap.get(a.id);
-        if (dbPrice === undefined) continue; // skip invalid add-ons
+        const dbAddOn = addOnInfoMap.get(a.id);
+        if (!dbAddOn) continue; // skip invalid add-ons
+        // Dynamic pricing: Early Check-in & Late Checkout = 50% of avg nightly rate
+        const unitPrice = DYNAMIC_ADDON_NAMES.includes(dbAddOn.name)
+          ? avgNightlyRate / 2
+          : dbAddOn.price_ghs;
         const qty = Math.max(1, Math.min(100, Math.floor(Number(a.quantity) || 1)));
-        const total = dbPrice * qty;
+        const total = unitPrice * qty;
         addOnsTotalGhs += total;
-        validatedAddOns.push({ id: a.id, quantity: qty, unit_price_ghs: dbPrice, total_price_ghs: total });
-      }
+        validatedAddOns.push({ id: a.id, quantity: qty, unit_price_ghs: unitPrice, total_price_ghs: total });
     }
 
     // --- Duplicate Detection ---

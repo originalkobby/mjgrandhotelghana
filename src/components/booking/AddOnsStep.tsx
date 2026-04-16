@@ -37,6 +37,8 @@ export default function AddOnsStep({ selectedRoom, selectedAddOns, onToggle, onN
   const [loading, setLoading] = useState(true);
   const { toUsd, toGhs } = useCurrency();
 
+  const DYNAMIC_ADDONS = ["Early Check-in", "Late Checkout"];
+
   useEffect(() => {
     supabase
       .from("add_ons")
@@ -44,10 +46,16 @@ export default function AddOnsStep({ selectedRoom, selectedAddOns, onToggle, onN
       .eq("is_active", true)
       .order("sort_order")
       .then(({ data }) => {
-        setAddOns((data as AddOnData[]) ?? []);
+        const items = ((data as AddOnData[]) ?? []).map((a) => {
+          if (DYNAMIC_ADDONS.includes(a.name)) {
+            return { ...a, price_ghs: selectedRoom.nightlyRate / 2 };
+          }
+          return a;
+        });
+        setAddOns(items);
         setLoading(false);
       });
-  }, []);
+  }, [selectedRoom.nightlyRate]);
 
   const addOnsTotal = selectedAddOns.reduce((sum, a) => sum + a.price_ghs, 0);
 
