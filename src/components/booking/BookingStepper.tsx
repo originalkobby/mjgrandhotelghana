@@ -11,18 +11,22 @@ const STEP_LABELS: Record<BookingStep, string> = {
   confirmation: "Confirm",
 };
 
-const STEPS: BookingStep[] = ["search", "rooms", "addons", "details", "payment", "confirmation"];
+const ALL_STEPS: BookingStep[] = ["search", "rooms", "addons", "details", "payment", "confirmation"];
 
 interface Props {
   currentStep: BookingStep;
   currentIndex: number;
+  roomPreselected?: boolean;
 }
 
-export default function BookingStepper({ currentStep, currentIndex }: Props) {
+export default function BookingStepper({ currentStep, currentIndex, roomPreselected }: Props) {
+  const steps = roomPreselected ? ALL_STEPS.filter((s) => s !== "rooms") : ALL_STEPS;
+  const visibleIndex = steps.indexOf(currentStep);
+
   return (
     <div className="flex items-center justify-center gap-1 sm:gap-2 py-6">
-      {STEPS.map((step, i) => {
-        const isCompleted = i < currentIndex;
+      {steps.map((step, i) => {
+        const isCompleted = i < visibleIndex;
         const isCurrent = step === currentStep;
 
         return (
@@ -57,10 +61,10 @@ export default function BookingStepper({ currentStep, currentIndex }: Props) {
                 {STEP_LABELS[step]}
               </span>
             </div>
-            {i < STEPS.length - 1 && (
+            {i < steps.length - 1 && (
               <div
                 className={`w-6 sm:w-10 h-px mb-5 ${
-                  i < currentIndex ? "bg-accent" : "bg-border"
+                  i < visibleIndex ? "bg-accent" : "bg-border"
                 }`}
               />
             )}
