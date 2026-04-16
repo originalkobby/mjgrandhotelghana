@@ -26,13 +26,29 @@ import roomImg from "@/assets/guest-services-reception.jpg";
 
 const ease = [0.3, 0, 0.2, 1] as const;
 
+const containerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+};
+
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, delay: i * 0.08, ease },
-  }),
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease } },
+};
+
+const fadeIn = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.7, ease } },
+};
+
+const slideFromLeft = {
+  hidden: { opacity: 0, x: -60 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease } },
+};
+
+const slideFromRight = {
+  hidden: { opacity: 0, x: 60 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease } },
 };
 
 const services = [
@@ -165,19 +181,19 @@ export default function GuestServices() {
       <section className="py-20 md:py-28">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-12 text-center">
           <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            variants={slideFromLeft}
+            initial="hidden"
+            whileInView="visible"
             viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.5, ease }}
             className="font-serif text-3xl md:text-4xl lg:text-5xl text-foreground"
           >
             Services for Our Royal Guests
           </motion.h2>
           <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            variants={slideFromRight}
+            initial="hidden"
+            whileInView="visible"
             viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.5, delay: 0.1, ease }}
             className="mt-4 max-w-2xl mx-auto font-sans text-base md:text-lg text-muted-foreground leading-relaxed"
           >
             We are pleased to offer a range of services designed to make your stay comfortable and memorable.
@@ -188,15 +204,17 @@ export default function GuestServices() {
       {/* SECTION 3 — SERVICES GRID */}
       <section className="pb-20 md:pb-28">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-60px" }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
             {services.map((s, i) => (
               <motion.div
                 key={s.title}
-                custom={i}
                 variants={fadeUp}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: "-60px" }}
                 className="group bg-card rounded-xl border border-border p-5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300"
               >
               <div className="flex items-center gap-3 mb-3">
@@ -210,7 +228,7 @@ export default function GuestServices() {
                 </p>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -219,10 +237,10 @@ export default function GuestServices() {
         <div className="max-w-[1200px] mx-auto px-6 lg:px-12">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              variants={slideFromLeft}
+              initial="hidden"
+              whileInView="visible"
               viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.5, ease }}
             >
               <h2 className="font-serif text-3xl md:text-4xl text-foreground mb-6">
                 Guest Information
@@ -245,10 +263,10 @@ export default function GuestServices() {
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              variants={slideFromRight}
+              initial="hidden"
+              whileInView="visible"
               viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.5, delay: 0.1, ease }}
               className="overflow-hidden rounded-2xl"
             >
               <img
@@ -266,40 +284,42 @@ export default function GuestServices() {
       <section className="py-20 md:py-28">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-12 text-center">
           <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            variants={slideFromLeft}
+            initial="hidden"
+            whileInView="visible"
             viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.5, ease }}
             className="font-serif text-3xl md:text-4xl text-foreground"
           >
             In-House Directory
           </motion.h2>
           <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            variants={slideFromRight}
+            initial="hidden"
+            whileInView="visible"
             viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.5, delay: 0.1, ease }}
             className="mt-3 font-sans text-muted-foreground"
           >
             Use the following internal extensions to contact hotel departments.
           </motion.p>
 
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            variants={fadeIn}
+            initial="hidden"
+            whileInView="visible"
             viewport={{ once: true, margin: "-60px" }}
-            transition={{ duration: 0.5, delay: 0.15, ease }}
             className="mt-10 max-w-[800px] mx-auto bg-card rounded-[20px] border border-border shadow-sm p-8 md:p-10"
           >
-            <div className="divide-y divide-border">
-              {directory.map((d, i) => (
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="divide-y divide-border"
+            >
+              {directory.map((d) => (
                 <motion.div
                   key={d.dept}
-                  custom={i}
                   variants={fadeUp}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true }}
                   className="group flex items-center justify-between py-4 px-2 hover:bg-muted/30 rounded-lg transition-colors duration-200"
                 >
                   <div className="flex items-center gap-3">
@@ -309,7 +329,7 @@ export default function GuestServices() {
                   <span className="font-mono text-sm text-muted-foreground">{d.ext}</span>
                 </motion.div>
               ))}
-            </div>
+            </motion.div>
           </motion.div>
         </div>
       </section>
