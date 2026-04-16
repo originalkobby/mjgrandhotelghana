@@ -51,6 +51,7 @@ export interface BookingState {
   guestInfo: GuestInfo;
   bookingReference: string | null;
   totalAmount: number;
+  roomPreselected: boolean;
 }
 
 const STEPS: BookingStep[] = ["search", "rooms", "addons", "details", "payment", "confirmation"];
@@ -78,6 +79,7 @@ export function useBooking() {
     },
     bookingReference: null,
     totalAmount: 0,
+    roomPreselected: false,
   });
 
   const setStep = useCallback((step: BookingStep) => {
@@ -90,6 +92,10 @@ export function useBooking() {
 
   const setSelectedRoom = useCallback((room: SelectedRoom | null) => {
     setState((prev) => ({ ...prev, selectedRoom: room }));
+  }, []);
+
+  const setRoomPreselected = useCallback((val: boolean) => {
+    setState((prev) => ({ ...prev, roomPreselected: val }));
   }, []);
 
   const toggleAddOn = useCallback((addOn: Omit<SelectedAddOn, "quantity">) => {
@@ -114,13 +120,31 @@ export function useBooking() {
 
   const goNext = useCallback(() => {
     const idx = STEPS.indexOf(state.step);
-    if (idx < STEPS.length - 1) setState((prev) => ({ ...prev, step: STEPS[idx + 1] }));
-  }, [state.step]);
+    if (idx < STEPS.length - 1) {
+      let nextIdx = idx + 1;
+      // Skip "rooms" step (index 1) when room is pre-selected
+      if (STEPS[nextIdx] === "rooms" && state.roomPreselected) {
+        nextIdx++;
+      }
+      if (nextIdx < STEPS.length) {
+        setState((prev) => ({ ...prev, step: STEPS[nextIdx] }));
+      }
+    }
+  }, [state.step, state.roomPreselected]);
 
   const goBack = useCallback(() => {
     const idx = STEPS.indexOf(state.step);
-    if (idx > 0) setState((prev) => ({ ...prev, step: STEPS[idx - 1] }));
-  }, [state.step]);
+    if (idx > 0) {
+      let prevIdx = idx - 1;
+      // Skip "rooms" step (index 1) when room is pre-selected
+      if (STEPS[prevIdx] === "rooms" && state.roomPreselected) {
+        prevIdx--;
+      }
+      if (prevIdx >= 0) {
+        setState((prev) => ({ ...prev, step: STEPS[prevIdx] }));
+      }
+    }
+  }, [state.step, state.roomPreselected]);
 
   const addOnsTotal = state.selectedAddOns.reduce((sum, a) => sum + a.price_ghs * a.quantity, 0);
   const totalAmount = (state.selectedRoom?.totalPrice ?? 0) + addOnsTotal;
@@ -130,6 +154,7 @@ export function useBooking() {
     setStep,
     setSearch,
     setSelectedRoom,
+    setRoomPreselected,
     toggleAddOn,
     setGuestInfo,
     setBookingReference,

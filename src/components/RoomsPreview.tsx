@@ -83,7 +83,7 @@ const RoomCard = ({ room, index }: { room: RoomRow; index: number }) => {
           )}
         </p>
         <a
-          href="/booking"
+          href={`/booking?room=${room.id}`}
           className="inline-block mt-4 font-sans text-sm font-medium text-accent hover:text-gold-dark transition-colors duration-300 underline underline-offset-4 decoration-accent/30 hover:decoration-accent"
         >
           Book Now

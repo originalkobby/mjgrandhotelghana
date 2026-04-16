@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useSearchParams } from "react-router-dom";
+import { differenceInDays } from "date-fns";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BookingStepper from "@/components/booking/BookingStepper";
@@ -21,6 +22,7 @@ const Booking = () => {
     setStep,
     setSearch,
     setSelectedRoom,
+    setRoomPreselected,
     toggleAddOn,
     setGuestInfo,
     setBookingReference,
@@ -33,19 +35,84 @@ const Booking = () => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
 
+  // Pre-select room from query param
+  useEffect(() => {
+    const roomId = searchParams.get("room");
+    if (roomId && !state.selectedRoom) {
+      (async () => {
+        const { data: room } = await supabase
+          .from("rooms")
+          .select("*")
+          .eq("id", roomId)
+          .eq("is_active", true)
+          .maybeSingle();
+
+        if (room) {
+          setRoomPreselected(true);
+          // Store basic room info; totalPrice will be computed after dates are chosen
+          setSelectedRoom({
+            id: room.id,
+            name: room.name,
+            slug: room.slug,
+            description: room.description ?? "",
+            size_sqm: room.size_sqm ?? 0,
+            bed_type: room.bed_type ?? "",
+            base_price_ghs: room.base_price_ghs,
+            amenities: (room.amenities as string[]) ?? [],
+            images: (room.images as string[]) ?? [],
+            nightlyRate: room.base_price_ghs,
+            totalNights: 0,
+            totalPrice: 0,
+          });
+        }
+      })();
+    }
+  }, [searchParams]);
+
+  // Recompute room pricing when dates change (for pre-selected rooms)
+  useEffect(() => {
+    if (!state.roomPreselected || !state.selectedRoom || !state.search.checkIn || !state.search.checkOut) return;
+
+    const roomId = state.selectedRoom.id;
+    const checkIn = state.search.checkIn.toISOString().split("T")[0];
+    const checkOut = state.search.checkOut.toISOString().split("T")[0];
+    const nights = differenceInDays(state.search.checkOut, state.search.checkIn);
+    if (nights <= 0) return;
+
+    (async () => {
+      const { data: inventory } = await supabase
+        .from("room_inventory")
+        .select("rate_override")
+        .eq("room_id", roomId)
+        .gte("date", checkIn)
+        .lt("date", checkOut);
+
+      let avgRate = state.selectedRoom!.base_price_ghs;
+      if (inventory && inventory.length > 0) {
+        const rates = inventory.map((inv) => inv.rate_override ?? state.selectedRoom!.base_price_ghs);
+        avgRate = rates.reduce((a, b) => a + b, 0) / rates.length;
+      }
+
+      setSelectedRoom({
+        ...state.selectedRoom!,
+        nightlyRate: avgRate,
+        totalNights: nights,
+        totalPrice: avgRate * nights,
+      });
+    })();
+  }, [state.roomPreselected, state.search.checkIn, state.search.checkOut]);
+
   // Handle Paystack callback verification — restore booking state from DB
   useEffect(() => {
     const verifyRef = searchParams.get("verify");
     if (verifyRef && state.step !== "confirmation") {
       (async () => {
         try {
-          // Verify payment with Paystack
           const { data } = await supabase.functions.invoke("paystack", {
             body: { action: "verify", reference: verifyRef },
           });
 
           if (data?.verified) {
-            // Look up the booking by reference to restore state
             const { data: booking } = await supabase
               .from("bookings")
               .select("reference_code, check_in, check_out, adults, children, final_total_ghs, rooms(name), guests(full_name, email)")
@@ -55,7 +122,6 @@ const Booking = () => {
             setBookingReference(verifyRef);
 
             if (booking) {
-              // Restore minimal state for confirmation display
               setSearch({
                 checkIn: new Date(booking.check_in),
                 checkOut: new Date(booking.check_out),
@@ -144,7 +210,11 @@ const Booking = () => {
       <main className="pt-24 pb-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-12">
           {state.step !== "confirmation" && (
-            <BookingStepper currentStep={state.step} currentIndex={currentStepIndex} />
+            <BookingStepper
+              currentStep={state.step}
+              currentIndex={currentStepIndex}
+              roomPreselected={state.roomPreselected}
+            />
           )}
 
           <AnimatePresence mode="wait">
