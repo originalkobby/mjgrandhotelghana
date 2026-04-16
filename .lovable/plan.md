@@ -1,68 +1,46 @@
 
 
-## Plan: Admin Gallery Management
+## Plan: Pre-select Room from "Book Now" Button
 
-### Summary
-Add a Gallery Management page to the admin dashboard where you can upload images, choose display sizes (normal, wide, tall), reorder them, and have the public gallery page pull images dynamically from Supabase.
+### What Changes
 
-### What You'll Get
-- A new "Gallery" section in the admin sidebar
-- Upload images to your existing `hotel-uploads` bucket
-- Choose a size (normal, wide, tall) for each image
-- Set alt text and reorder images via drag or sort controls
-- The public `/gallery` page will load images from the database instead of hardcoded assets
+1. **RoomsPreview.tsx** — Change the `<a href="/booking">` to a `<Link>` (or `<a>`) that passes the room's `id` and `slug` as a URL query parameter, e.g. `/booking?room=<room-id>`.
 
-### Technical Steps
+2. **Booking.tsx** — On mount, read the `room` query param. If present:
+   - Fetch that room's details from Supabase (name, price, images, amenities, etc.)
+   - Store it in booking state via `setSelectedRoom()`
+   - Set a flag (e.g. `roomPreselected`) so the flow knows to skip the "rooms" step
 
-**1. Create `gallery_images` table (migration)**
-```sql
-CREATE TABLE public.gallery_images (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  image_url text NOT NULL,
-  alt_text text NOT NULL DEFAULT '',
-  size text NOT NULL DEFAULT 'normal' CHECK (size IN ('normal', 'wide', 'tall')),
-  sort_order integer NOT NULL DEFAULT 0,
-  created_at timestamptz DEFAULT now()
-);
+3. **useBooking.ts** — Add a small enhancement:
+   - Accept an optional `skipRoom` flag or expose a `setRoomPreselected` setter
+   - Modify `goNext` so that when stepping from "search", if a room is already selected, it jumps to "addons" instead of "rooms"
+   - Modify `goBack` similarly so that going back from "addons" returns to "search" (not "rooms") when the room was pre-selected
 
-ALTER TABLE public.gallery_images ENABLE ROW LEVEL SECURITY;
+4. **BookingStepper.tsx** — Optionally hide or grey out the "Room" step dot when pre-selected, so the stepper shows: Dates → Extras → Details → Payment → Confirm.
 
--- Public read
-CREATE POLICY "Anyone can view gallery" ON public.gallery_images
-  FOR SELECT USING (true);
+### Flow Summary
 
--- Admin write
-CREATE POLICY "Admins can manage gallery" ON public.gallery_images
-  FOR ALL TO authenticated
-  USING (public.has_role(auth.uid(), 'admin'))
-  WITH CHECK (public.has_role(auth.uid(), 'admin'));
+```text
+Current:      Search → Room → Extras → Details → Payment → Confirm
+Pre-selected: Search → [skip] → Extras → Details → Payment → Confirm
 ```
 
-**2. Create admin page `src/pages/admin/GalleryManagement.tsx`**
-- Grid of uploaded images with size badge and sort order
-- "Add Image" dialog using the existing `ImageUpload` component
-- Fields: image upload, alt text, size dropdown (normal/wide/tall), sort order
-- Edit and delete actions per image
-- Reuses existing patterns from Rooms/Menu management pages
+The existing flow (without a query param) remains completely unchanged.
 
-**3. Add "Gallery" to admin sidebar and routes**
-- New nav item in `AdminSidebar.tsx` (admin-only, using `ImageIcon`)
-- New route `/admin/gallery` in `App.tsx`
+### Technical Details
 
-**4. Update `GalleryPage.tsx` to fetch from Supabase**
-- Replace hardcoded `galleryImages` array with a query to `gallery_images` table ordered by `sort_order`
-- Keep existing masonry grid layout and animations
-- Show skeleton loaders while fetching
+- **Query param**: `/booking?room=<uuid>` — parsed via `useSearchParams`
+- **Room fetch**: Single Supabase query on the `rooms` table by ID, computing `nightlyRate` and `totalPrice` once dates are set (deferred to after search step)
+- **Step skipping logic**: A boolean `roomPreselected` in `BookingState` controls whether `goNext`/`goBack` skip index 1 ("rooms")
+- **Price computation**: Since dates aren't known until after the search step, the room's `totalPrice` will be computed when the user completes the search step (using the same inventory/rate logic as `RoomSelectionStep`)
+- **Stepper**: Filter the visible steps array when `roomPreselected` is true
 
-**5. Update `Gallery.tsx` (homepage preview) to also pull from DB**
-- Fetch first 4-5 images from `gallery_images` for the homepage preview
-- Fall back to existing static images if table is empty
+### Files Modified
 
-### Files Changed
-- **New**: `src/pages/admin/GalleryManagement.tsx`
-- **Edit**: `src/components/admin/AdminSidebar.tsx` — add Gallery nav item
-- **Edit**: `src/App.tsx` — add admin gallery route
-- **Edit**: `src/pages/GalleryPage.tsx` — fetch from Supabase
-- **Edit**: `src/components/Gallery.tsx` — fetch from Supabase
-- **Migration**: create `gallery_images` table
+| File | Change |
+|------|--------|
+| `src/components/RoomsPreview.tsx` | Link to `/booking?room={id}` |
+| `src/hooks/useBooking.ts` | Add `roomPreselected` flag; adjust `goNext`/`goBack` to skip "rooms" step |
+| `src/pages/Booking.tsx` | Read `room` query param; fetch room data; set pre-selected state; compute price after dates are chosen |
+| `src/components/booking/BookingStepper.tsx` | Hide "Room" step when pre-selected |
 
