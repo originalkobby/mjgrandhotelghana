@@ -9,7 +9,7 @@ import {
   Tag,
   BarChart3,
   BedDouble,
-  TicketCheck,
+  Headset,
   Settings,
   UtensilsCrossed,
   Brain,
@@ -43,7 +43,7 @@ const NAV_ITEMS = [
   { title: "Gallery", url: "/admin/gallery", icon: ImageIcon, end: false, roles: ["admin"] },
   { title: "Revenue Intel", url: "/admin/revenue", icon: Brain, end: false, roles: ["admin", "revenue_manager"] },
   { title: "Reports", url: "/admin/reports", icon: BarChart3, end: false, roles: ["admin", "revenue_manager", "finance"] },
-  { title: "Support", url: "/admin/support", icon: TicketCheck, end: false, roles: ["admin", "front_desk"] },
+  { title: "Support", url: "/admin/support", icon: Headset, end: false, roles: ["admin", "front_desk"] },
   { title: "Messages", url: "/admin/messages", icon: MessageSquareText, end: false, roles: null },
   { title: "Settings", url: "/admin/settings", icon: Settings, end: false, roles: ["admin"] },
 ];
