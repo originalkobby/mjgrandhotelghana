@@ -193,7 +193,7 @@ const SlideshowCard = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 1.2, ease: [0.3, 0, 0.2, 1] }}
+          transition={{ duration: 3, ease: [0.3, 0, 0.2, 1] }}
           className="w-full h-64 md:h-80 object-cover cursor-pointer absolute inset-0"
           loading="lazy"
         />
