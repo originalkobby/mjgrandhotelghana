@@ -1,4 +1,5 @@
-import { motion } from "framer-motion";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -43,8 +44,10 @@ const Gallery = () => {
       }))
     : [];
 
-  // Always show fallback (homepage) images first, then DB images after
   const images = [...fallbackImages, ...dbMapped].slice(0, 4);
+
+  // Collect the image URLs used in the other 3 static cards (indices 0, 1, 3)
+  const staticUrls = [images[0]?.image_url, images[1]?.image_url, images[3]?.image_url].filter(Boolean);
 
   return (
     <section id="gallery" className="py-24 md:py-32 bg-background">
@@ -65,9 +68,18 @@ const Gallery = () => {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {images.map((img, i) => (
-            <GalleryImage key={`${img.alt_text}-${i}`} img={img} index={i} />
-          ))}
+          {images.map((img, i) =>
+            i === 2 ? (
+              <SlideshowCard
+                key="slideshow"
+                fallbackImg={img}
+                excludeUrls={staticUrls}
+                index={i}
+              />
+            ) : (
+              <GalleryImage key={`${img.alt_text}-${i}`} img={img} index={i} />
+            )
+          )}
         </div>
 
         <motion.div
@@ -90,21 +102,104 @@ const Gallery = () => {
   );
 };
 
-const GalleryImage = ({ img, index }: { img: { image_url: string; alt_text: string; span: string }; index: number }) => {
+/* ── Static card ── */
+const GalleryImage = ({ img, index }: { img: { image_url: string; alt_text: string; span: string }; index: number }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: "-50px" }}
+    transition={{ duration: 0.6, delay: index * 0.1, ease: [0.3, 0, 0.2, 1] }}
+    className={`overflow-hidden ${img.span}`}
+  >
+    <img
+      src={img.image_url}
+      alt={img.alt_text}
+      className="w-full h-64 md:h-80 object-cover transition-transform duration-700 ease-[cubic-bezier(0.3,0,0.2,1)] hover:scale-105 cursor-pointer"
+      loading="lazy"
+    />
+  </motion.div>
+);
+
+/* ── Slideshow card (3rd position) ── */
+const SlideshowCard = ({
+  fallbackImg,
+  excludeUrls,
+  index,
+}: {
+  fallbackImg: { image_url: string; alt_text: string; span: string };
+  excludeUrls: string[];
+  index: number;
+}) => {
+  const { data: allDbImages } = useQuery({
+    queryKey: ["public-gallery"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("gallery_images")
+        .select("*")
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Build pool excluding images shown in the other 3 cards
+  const pool = (allDbImages || []).filter(
+    (img) => !excludeUrls.includes(img.image_url)
+  );
+
+  const seenRef = useRef<Set<string>>(new Set());
+  const [currentImg, setCurrentImg] = useState<{ url: string; alt: string }>({
+    url: fallbackImg.image_url,
+    alt: fallbackImg.alt_text,
+  });
+
+  const pickNext = useCallback(() => {
+    if (pool.length === 0) return;
+
+    let unseen = pool.filter((img) => !seenRef.current.has(img.id));
+    if (unseen.length === 0) {
+      seenRef.current = new Set();
+      unseen = pool;
+    }
+
+    const next = unseen[Math.floor(Math.random() * unseen.length)];
+    seenRef.current.add(next.id);
+    setCurrentImg({ url: next.image_url, alt: next.alt_text });
+  }, [pool]);
+
+  useEffect(() => {
+    if (pool.length === 0) return;
+    // Show first DB image immediately
+    pickNext();
+    const id = setInterval(pickNext, 4000);
+    return () => clearInterval(id);
+    // Re-run when pool changes (new images added)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pool.length]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.6, delay: index * 0.1, ease: [0.3, 0, 0.2, 1] }}
-      className={`overflow-hidden ${img.span}`}
+      className={`overflow-hidden relative ${fallbackImg.span}`}
     >
-      <img
-        src={img.image_url}
-        alt={img.alt_text}
-        className="w-full h-64 md:h-80 object-cover transition-transform duration-700 ease-[cubic-bezier(0.3,0,0.2,1)] hover:scale-105 cursor-pointer"
-        loading="lazy"
-      />
+      <AnimatePresence mode="popLayout">
+        <motion.img
+          key={currentImg.url}
+          src={currentImg.url}
+          alt={currentImg.alt}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.7, ease: [0.3, 0, 0.2, 1] }}
+          className="w-full h-64 md:h-80 object-cover cursor-pointer absolute inset-0"
+          loading="lazy"
+        />
+      </AnimatePresence>
+      {/* Spacer to maintain height */}
+      <div className="w-full h-64 md:h-80" />
     </motion.div>
   );
 };
