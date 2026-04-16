@@ -199,11 +199,13 @@ export default function GuestServices() {
                 viewport={{ once: true, margin: "-60px" }}
                 className="group bg-card rounded-xl border border-border p-5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300"
               >
-                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center mb-4 group-hover:bg-gold/10 transition-colors duration-300">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center shrink-0 group-hover:bg-gold/10 transition-colors duration-300">
                   <s.icon className="w-4 h-4 text-gold" />
                 </div>
-                <h3 className="font-serif text-base text-foreground mb-1.5">{s.title}</h3>
-                <p className="font-sans text-xs text-muted-foreground leading-relaxed whitespace-pre-line">
+                <h3 className="font-serif text-base text-foreground">{s.title}</h3>
+              </div>
+              <p className="font-sans text-xs text-muted-foreground leading-relaxed whitespace-pre-line pl-13">
                   {s.text}
                 </p>
               </motion.div>
