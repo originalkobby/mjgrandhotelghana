@@ -236,7 +236,7 @@ function RoomCard({
     >
       <div className="flex flex-col">
         {/* Image */}
-        <div className="relative h-44 md:h-44">
+        <div className="relative h-52 md:h-52">
           <img
             src={imgSrc}
             alt={room.name}
