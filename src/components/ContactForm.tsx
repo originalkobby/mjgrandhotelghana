@@ -48,10 +48,10 @@ const ContactForm = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-start">
           {/* Left — Text */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, x: -60 }}
+            whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
+            transition={{ duration: 0.7, ease: [0.3, 0, 0.2, 1] }}
           >
             <p className="font-sans text-xs tracking-[0.25em] uppercase text-gold mb-6 font-bold">
               Contact
@@ -73,10 +73,10 @@ const ContactForm = () => {
 
           {/* Right — Form */}
           <motion.form
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, x: 60 }}
+            whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.6, delay: 0.15, ease: [0.3, 0, 0.2, 1] }}
+            transition={{ duration: 0.7, delay: 0.1, ease: [0.3, 0, 0.2, 1] }}
             onSubmit={handleSubmit}
             className="space-y-8 pt-2"
           >
