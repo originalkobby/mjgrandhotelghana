@@ -114,7 +114,7 @@ export default function AdminSettings() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Settings2 className="h-6 w-6 text-primary" />
+        
         <h1 className="text-2xl font-serif text-foreground">Settings</h1>
       </div>
 
