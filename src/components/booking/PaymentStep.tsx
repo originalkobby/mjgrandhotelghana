@@ -45,7 +45,6 @@ export default function PaymentStep({
         body: {
           action: "initialize",
           email: guestInfo.email,
-          amount_ghs: totalAmount,
           booking_reference: bookingReference,
           callback_url: `${window.location.origin}/booking?verify=${bookingReference}`,
         },
