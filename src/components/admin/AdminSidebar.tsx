@@ -5,7 +5,7 @@ import {
   MessageSquareText,
   Users,
   LogOut,
-  Hotel,
+  Globe,
   Tag,
   BarChart3,
   BedDouble,
@@ -103,7 +103,7 @@ export function AdminSidebar({ role }: Props) {
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <a href="/" target="_blank" rel="noopener noreferrer" className="hover:bg-sidebar-accent/50">
-                <img src={logo} alt="MJ" className="h-4 w-4 object-contain shrink-0 rounded-full mr-2" />
+                <Globe className="mr-2 h-4 w-4" />
                 {!collapsed && <span>View Website</span>}
               </a>
             </SidebarMenuButton>
