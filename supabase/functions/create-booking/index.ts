@@ -148,6 +148,7 @@ serve(async (req) => {
         const total = unitPrice * qty;
         addOnsTotalGhs += total;
         validatedAddOns.push({ id: a.id, quantity: qty, unit_price_ghs: unitPrice, total_price_ghs: total });
+      }
     }
 
     // --- Duplicate Detection ---
