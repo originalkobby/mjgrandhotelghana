@@ -66,7 +66,7 @@ export default function SupportTickets() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <TicketCheck className="h-6 w-6 text-primary" />
+        
         <h1 className="text-2xl font-serif text-foreground">Support Tickets</h1>
         <Badge variant="secondary" className="ml-auto">{tickets?.length || 0} tickets</Badge>
         <Button
