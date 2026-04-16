@@ -48,20 +48,26 @@ const Experiences = () => {
   return (
     <section id="experiences" className="py-24 md:py-32 bg-secondary">
       <div className="container mx-auto px-6 lg:px-12">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
-          className="text-center mb-16"
-        >
-          <p className="font-sans text-sm uppercase tracking-[0.25em] text-accent mb-3">
+        <div className="text-center mb-16">
+          <motion.p
+            initial={{ opacity: 0, x: -60 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.7, ease: [0.3, 0, 0.2, 1] }}
+            className="font-sans text-sm uppercase tracking-[0.25em] text-accent mb-3"
+          >
             Discover
-          </p>
-          <h2 className="font-serif text-4xl md:text-5xl text-foreground">
+          </motion.p>
+          <motion.h2
+            initial={{ opacity: 0, x: 60 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.7, ease: [0.3, 0, 0.2, 1] }}
+            className="font-serif text-4xl md:text-5xl text-foreground"
+          >
             Curated Experiences
-          </h2>
-        </motion.div>
+          </motion.h2>
+        </div>
 
         <div className="overflow-hidden" aria-label="Curated experiences carousel" role="region">
           <motion.div initial={{ x: "0%" }} animate={controls} className="flex w-max gap-2">
@@ -84,10 +90,10 @@ const Experiences = () => {
 const ExperienceCard = ({ exp, index }: { exp: typeof experiences[0]; index: number }) => {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.6, delay: index * 0.12, ease: [0.3, 0, 0.2, 1] }}
+      transition={{ duration: 0.7, delay: index * 0.08, ease: [0.3, 0, 0.2, 1] }}
       className="group cursor-pointer"
     >
       <div className="relative overflow-hidden aspect-[3/4]">

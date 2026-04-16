@@ -29,6 +29,28 @@ function resolveImage(images: string[] | null): string {
   return FALLBACK_IMAGES[src] ?? src;
 }
 
+const ease: [number, number, number, number] = [0.3, 0, 0.2, 1];
+
+const containerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease } },
+};
+
+const slideFromLeft = {
+  hidden: { opacity: 0, x: -60 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease } },
+};
+
+const slideFromRight = {
+  hidden: { opacity: 0, x: 60 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease } },
+};
+
 const TRUNCATE_LENGTH = 80;
 
 const RoomCard = ({ room, index }: { room: RoomRow; index: number }) => {
@@ -44,10 +66,7 @@ const RoomCard = ({ room, index }: { room: RoomRow; index: number }) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.6, delay: index * 0.15, ease: [0.3, 0, 0.2, 1] }}
+      variants={fadeUp}
       className="group cursor-pointer"
     >
       <div className="relative overflow-hidden">
@@ -111,23 +130,35 @@ const RoomsPreview = () => {
   return (
     <section id="rooms" className="py-24 md:py-32 bg-background">
       <div className="container mx-auto px-6 lg:px-12">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
-          className="text-center mb-16"
-        >
-          <p className="font-sans text-sm uppercase tracking-[0.25em] text-accent mb-3">
+        <div className="text-center mb-16">
+          <motion.p
+            variants={slideFromLeft}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+            className="font-sans text-sm uppercase tracking-[0.25em] text-accent mb-3"
+          >
             Accommodations
-          </p>
-          <h2 className="font-serif text-4xl md:text-5xl text-foreground">
+          </motion.p>
+          <motion.h2
+            variants={slideFromRight}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+            className="font-serif text-4xl md:text-5xl text-foreground"
+          >
             Rooms & Suites
-          </h2>
-          <p className="mt-4 max-w-lg mx-auto font-sans text-muted-foreground">
+          </motion.h2>
+          <motion.p
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+            className="mt-4 max-w-lg mx-auto font-sans text-muted-foreground"
+          >
             Each room is a masterful blend of comfort and elegance, designed for the discerning traveler.
-          </p>
-        </motion.div>
+          </motion.p>
+        </div>
 
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6">
@@ -140,11 +171,17 @@ const RoomsPreview = () => {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6">
-            {rooms?.map((room, i) => (
-              <RoomCard key={room.id} room={room} index={i} />
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6"
+          >
+            {rooms?.map((room) => (
+              <RoomCard key={room.id} room={room} index={0} />
             ))}
-          </div>
+          </motion.div>
         )}
       </div>
     </section>

@@ -5,10 +5,10 @@ const Footer = () => {
   return (
     <footer id="contact" className="bg-charcoal py-20">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-50px" }}
-        transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
+        transition={{ duration: 0.7, ease: [0.3, 0, 0.2, 1] }}
         className="container mx-auto px-6 lg:px-12"
       >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
