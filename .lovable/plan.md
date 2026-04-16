@@ -1,33 +1,25 @@
 
 
-## Suggested Prompt
+## Plan: Dynamic Pricing for Early Check-In & Late Checkout
 
-You can copy and send this directly:
+**Goal**: Make "Early Check-In" and "Late Checkout" add-ons automatically priced at **50% of the selected room's nightly rate**, instead of using fixed database values.
 
-> **"Apply the Dining page's animation system to all homepage sections (except the Hero). Specifically: use `slideFromLeft` and `slideFromRight` for alternating headings and text blocks, `fadeUp` with staggered `containerVariants` for grid/card groups (rooms, gallery, experiences), and `fadeIn` for decorative dividers. Keep the same easing curve and 0.7s duration used on the Dining page. Don't change any content or layout — only upgrade the motion."**
+### How It Works
 
-## What This Prompt Achieves
+The database will still store a placeholder price for these two add-ons, but the UI will override it at runtime based on the selected room's `nightlyRate`. This keeps the logic simple and ensures the price always matches the room.
 
-The Dining page uses four distinct animation variants that create visual depth:
+### Changes
 
-| Variant | Effect | Currently on Homepage? |
-|---------|--------|----------------------|
-| `fadeUp` (y: 30 → 0) | Cards/items staggered in grids | No — homepage uses simpler y: 20 |
-| `slideFromLeft` (x: -60 → 0) | Section headings, alternating text | No |
-| `slideFromRight` (x: 60 → 0) | Alternating text blocks | No |
-| `containerVariants` (stagger 0.08s) | Parent wrapper for card grids | No — homepage has no stagger |
+**1. `src/components/booking/AddOnsStep.tsx`**
+- After fetching add-ons from the database, override `price_ghs` for items named "Early Check-in" and "Late Checkout" with `selectedRoom.nightlyRate / 2`.
+- This affects display and the price passed to `onToggle`, so downstream steps (guest details, payment, create-booking) automatically use the correct amount.
 
-The homepage currently uses a uniform `opacity: 0, y: 20` on everything, which feels flat. The prompt above tells the AI to apply the richer directional and staggered patterns without touching Hero or layout.
+**2. `supabase/functions/create-booking/index.ts`**
+- In the server-side pricing validation, apply the same rule: when computing add-on totals, if an add-on is "Early Check-in" or "Late Checkout", use `room.base_price_ghs / 2` (or the inventory-derived nightly rate) instead of the stored `price_ghs`. This prevents price manipulation from the client side.
 
-## Files That Would Change
+### Technical Detail
 
-| File | What Changes |
-|------|-------------|
-| `src/components/RoomsPreview.tsx` | Section heading gets `slideFromLeft`/`slideFromRight`; room cards get `containerVariants` + `fadeUp` with stagger |
-| `src/components/Experiences.tsx` | Section heading gets directional slides; card wrapper already scrolls so minimal change |
-| `src/components/Gallery.tsx` | Heading gets directional animation; grid gets staggered `fadeUp` |
-| `src/components/ContactForm.tsx` | Heading and form fields get directional slide animations |
-| `src/components/Footer.tsx` | Optionally apply `fadeIn` to footer columns |
-
-No structural, content, or layout changes — purely motion upgrades.
+- **Matching logic**: Add-ons identified by name (`Early Check-in`, `Late Checkout`). This is safe since add-on names are admin-controlled.
+- **Price flow**: The overridden price propagates through `onToggle` → `selectedAddOns` → `handleSubmitBooking` → edge function, where it's re-validated server-side.
+- **No database schema changes** required.
 
