@@ -29,9 +29,18 @@ function resolveImage(images: string[] | null): string {
   return FALLBACK_IMAGES[src] ?? src;
 }
 
+const TRUNCATE_LENGTH = 80;
+
 const RoomCard = ({ room, index }: { room: RoomRow; index: number }) => {
   const imgSrc = resolveImage(room.images);
   const { toUsd, toGhs } = useCurrency();
+  const [expanded, setExpanded] = useState(false);
+
+  const description = room.description ?? "Experience luxury and comfort.";
+  const needsTruncation = description.length > TRUNCATE_LENGTH;
+  const displayText = !needsTruncation || expanded
+    ? description
+    : description.slice(0, TRUNCATE_LENGTH).trimEnd() + "…";
 
   return (
     <motion.div
@@ -63,7 +72,15 @@ const RoomCard = ({ room, index }: { room: RoomRow; index: number }) => {
           {room.name}
         </h3>
         <p className="mt-2 font-sans text-sm text-muted-foreground leading-relaxed">
-          {room.description ?? "Experience luxury and comfort."}
+          {displayText}
+          {needsTruncation && (
+            <button
+              onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
+              className="ml-1 font-sans text-sm font-medium text-accent hover:text-accent/80 transition-colors duration-200"
+            >
+              {expanded ? "Show less" : "Read more"}
+            </button>
+          )}
         </p>
         <a
           href="/booking"
