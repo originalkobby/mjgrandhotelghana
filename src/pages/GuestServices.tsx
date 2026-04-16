@@ -142,10 +142,18 @@ export default function GuestServices() {
         </motion.div>
 
         <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3, ease }}
+            className="mb-4 font-sans text-sm font-bold uppercase tracking-[0.3em] text-gold"
+          >
+            A Sanctuary of Elegance
+          </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, y: 30, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.5, ease }}
             className="font-serif text-5xl md:text-6xl lg:text-7xl font-semibold text-cream leading-tight max-w-4xl"
           >
             Guest Services & Information
@@ -153,8 +161,8 @@ export default function GuestServices() {
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5, ease }}
-            className="mt-6 max-w-xl font-sans text-lg md:text-xl text-cream/80 leading-relaxed"
+            transition={{ duration: 0.6, delay: 0.8, ease }}
+            className="mt-6 max-w-xl font-sans text-base md:text-lg text-cream/70 leading-relaxed"
           >
             Everything you need for a comfortable stay at MJ Grand Hotel
           </motion.p>
@@ -164,16 +172,15 @@ export default function GuestServices() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.2 }}
+          transition={{ delay: 1.5 }}
           className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
         >
           <span className="font-sans text-xs uppercase tracking-widest text-cream/40">Scroll</span>
           <motion.div
             animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <ChevronDown className="w-5 h-5 text-cream/40" />
-          </motion.div>
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            className="w-px h-8 bg-gradient-to-b from-cream/40 to-transparent"
+          />
         </motion.div>
       </section>
 
