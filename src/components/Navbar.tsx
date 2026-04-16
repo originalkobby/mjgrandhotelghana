@@ -32,7 +32,8 @@ const Navbar = () => {
 
   // Pages with dark hero backgrounds where cream text works
   const isDarkHeroPage = location.pathname === "/" || location.pathname === "/dining" || location.pathname === "/about" || location.pathname === "/guest-services" || location.pathname === "/menu" || location.pathname === "/policy";
-  const useLight = scrolled || !isDarkHeroPage;
+  // Use light text only when not scrolled AND not on dark hero page (glass-nav is always dark, so needs light text when scrolled)
+  const useLight = !scrolled && !isDarkHeroPage;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
