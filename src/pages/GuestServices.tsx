@@ -237,10 +237,10 @@ export default function GuestServices() {
         <div className="max-w-[1200px] mx-auto px-6 lg:px-12">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              variants={slideFromLeft}
+              initial="hidden"
+              whileInView="visible"
               viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.5, ease }}
             >
               <h2 className="font-serif text-3xl md:text-4xl text-foreground mb-6">
                 Guest Information
@@ -263,10 +263,10 @@ export default function GuestServices() {
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              variants={slideFromRight}
+              initial="hidden"
+              whileInView="visible"
               viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.5, delay: 0.1, ease }}
               className="overflow-hidden rounded-2xl"
             >
               <img
@@ -284,40 +284,42 @@ export default function GuestServices() {
       <section className="py-20 md:py-28">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-12 text-center">
           <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            variants={slideFromLeft}
+            initial="hidden"
+            whileInView="visible"
             viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.5, ease }}
             className="font-serif text-3xl md:text-4xl text-foreground"
           >
             In-House Directory
           </motion.h2>
           <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            variants={slideFromRight}
+            initial="hidden"
+            whileInView="visible"
             viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.5, delay: 0.1, ease }}
             className="mt-3 font-sans text-muted-foreground"
           >
             Use the following internal extensions to contact hotel departments.
           </motion.p>
 
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            variants={fadeIn}
+            initial="hidden"
+            whileInView="visible"
             viewport={{ once: true, margin: "-60px" }}
-            transition={{ duration: 0.5, delay: 0.15, ease }}
             className="mt-10 max-w-[800px] mx-auto bg-card rounded-[20px] border border-border shadow-sm p-8 md:p-10"
           >
-            <div className="divide-y divide-border">
-              {directory.map((d, i) => (
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="divide-y divide-border"
+            >
+              {directory.map((d) => (
                 <motion.div
                   key={d.dept}
-                  custom={i}
                   variants={fadeUp}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true }}
                   className="group flex items-center justify-between py-4 px-2 hover:bg-muted/30 rounded-lg transition-colors duration-200"
                 >
                   <div className="flex items-center gap-3">
@@ -327,7 +329,7 @@ export default function GuestServices() {
                   <span className="font-mono text-sm text-muted-foreground">{d.ext}</span>
                 </motion.div>
               ))}
-            </div>
+            </motion.div>
           </motion.div>
         </div>
       </section>
