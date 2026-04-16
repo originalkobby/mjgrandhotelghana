@@ -120,25 +120,10 @@ const BookingLookup = () => {
 
       if (fnError) throw new Error(fnError.message);
       if (data?.error) throw new Error(data.error);
-            await supabase
-              .from("room_inventory")
-              .update({ booked_count: inv.booked_count - 1 })
-              .eq("id", inv.id);
-          }
-          d.setDate(d.getDate() + 1);
-        }
-      }
 
       setResult({ ...result, status: "cancelled" });
       setShowCancelDialog(false);
       toast({ title: "Booking Cancelled", description: `Booking ${result.reference_code} has been cancelled.` });
-
-      // Fire-and-forget cancellation email
-      supabase.functions.invoke("send-cancellation-email", {
-        body: { bookingId: result.id },
-      }).then(({ error: emailErr }) => {
-        if (emailErr) console.error("Cancellation email failed:", emailErr);
-      });
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     } finally {
