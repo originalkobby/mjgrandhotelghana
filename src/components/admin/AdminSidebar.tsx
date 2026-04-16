@@ -10,7 +10,7 @@ import {
   BarChart3,
   BedDouble,
   TicketCheck,
-  Settings2,
+  Settings,
   UtensilsCrossed,
   Brain,
   ImageIcon,
@@ -45,7 +45,7 @@ const NAV_ITEMS = [
   { title: "Reports", url: "/admin/reports", icon: BarChart3, end: false, roles: ["admin", "revenue_manager", "finance"] },
   { title: "Support", url: "/admin/support", icon: TicketCheck, end: false, roles: ["admin", "front_desk"] },
   { title: "Messages", url: "/admin/messages", icon: MessageSquareText, end: false, roles: null },
-  { title: "Settings", url: "/admin/settings", icon: Settings2, end: false, roles: ["admin"] },
+  { title: "Settings", url: "/admin/settings", icon: Settings, end: false, roles: ["admin"] },
 ];
 
 interface Props {
