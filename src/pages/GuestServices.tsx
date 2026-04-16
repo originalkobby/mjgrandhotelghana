@@ -181,19 +181,19 @@ export default function GuestServices() {
       <section className="py-20 md:py-28">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-12 text-center">
           <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            variants={slideFromLeft}
+            initial="hidden"
+            whileInView="visible"
             viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.5, ease }}
             className="font-serif text-3xl md:text-4xl lg:text-5xl text-foreground"
           >
             Services for Our Royal Guests
           </motion.h2>
           <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            variants={slideFromRight}
+            initial="hidden"
+            whileInView="visible"
             viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.5, delay: 0.1, ease }}
             className="mt-4 max-w-2xl mx-auto font-sans text-base md:text-lg text-muted-foreground leading-relaxed"
           >
             We are pleased to offer a range of services designed to make your stay comfortable and memorable.
@@ -204,21 +204,23 @@ export default function GuestServices() {
       {/* SECTION 3 — SERVICES GRID */}
       <section className="pb-20 md:pb-28">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-60px" }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
             {services.map((s, i) => (
               <motion.div
                 key={s.title}
-                custom={i}
                 variants={fadeUp}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: "-60px" }}
                 className="group bg-card rounded-xl border border-border p-5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300"
               >
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center shrink-0 group-hover:bg-gold/10 transition-colors duration-300">
                   <s.icon className="w-4 h-4 text-gold" />
-                </div>
+          </motion.div>
                 <h3 className="font-serif text-base text-foreground">{s.title}</h3>
               </div>
               <p className="font-sans text-xs text-muted-foreground leading-relaxed whitespace-pre-line pl-13">
