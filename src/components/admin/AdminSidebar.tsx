@@ -88,7 +88,11 @@ export function AdminSidebar({ role }: Props) {
                       className="hover:bg-sidebar-accent/50"
                       activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                     >
-                      <item.icon className="mr-2 h-4 w-4" />
+                      {item.customIcon ? (
+                        <img src={item.customIcon} alt="" className="mr-2 h-4 w-4 object-contain" />
+                      ) : (
+                        <item.icon className="mr-2 h-4 w-4" />
+                      )}
                       {!collapsed && <span>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
