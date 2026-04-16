@@ -328,12 +328,14 @@ const About = () => {
                   transition={{ type: "tween", duration: 0.25, ease }}
                   className="p-6 rounded-xl border border-cream/5 bg-cream/[0.02] hover:bg-cream/[0.06] hover:border-gold/20 hover:shadow-[0_0_20px_rgba(212,175,55,0.08)] transition-colors duration-300"
                 >
-                  <value.icon size={24} className="text-gold mb-4" />
+                <div className="flex items-center gap-3 mb-3">
+                  <value.icon size={24} className="text-gold shrink-0" />
                   <h3 className="font-serif text-lg text-cream font-semibold">{value.title}</h3>
-                  {value.subtitle && (
-                    <p className="font-sans text-[11px] uppercase tracking-wider text-gold/60 mt-1 mb-3">{value.subtitle}</p>
-                  )}
-                  <p className="font-sans text-sm text-cream/50 leading-relaxed mt-2">{value.desc}</p>
+                </div>
+                {value.subtitle && (
+                  <p className="font-sans text-[11px] uppercase tracking-wider text-gold/60 mb-3">{value.subtitle}</p>
+                )}
+                <p className="font-sans text-sm text-cream/50 leading-relaxed">{value.desc}</p>
                 </motion.div>
               );
             })}
