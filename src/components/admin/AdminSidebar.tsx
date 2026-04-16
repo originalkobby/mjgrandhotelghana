@@ -88,7 +88,7 @@ export function AdminSidebar({ role }: Props) {
                       activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                     >
                       {item.customIcon ? (
-                        <img src={item.customIcon} alt="" className="mr-2 h-4 w-4 object-contain" />
+                        <img src={item.customIcon} alt="" className="mr-2 h-5 w-5 object-contain" />
                       ) : (
                         <item.icon className="mr-2 h-4 w-4" />
                       )}
