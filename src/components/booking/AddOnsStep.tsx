@@ -102,8 +102,10 @@ export default function AddOnsStep({ selectedRoom, selectedAddOns, onToggle, onN
                     <Check className="w-3.5 h-3.5 text-accent-foreground" />
                   </span>
                 )}
-                <Icon className={`w-6 h-6 mb-3 ${isSelected ? "text-accent" : "text-muted-foreground"}`} />
-                <h4 className="font-sans text-sm font-semibold text-foreground">{addOn.name}</h4>
+                <div className="flex items-center gap-2 mb-1">
+                  <Icon className={`w-5 h-5 ${isSelected ? "text-accent" : "text-muted-foreground"}`} />
+                  <h4 className="font-sans text-sm font-semibold text-foreground">{addOn.name}</h4>
+                </div>
                 <p className="font-sans text-xs text-muted-foreground mt-1 line-clamp-2">{addOn.description}</p>
                 <p className="font-sans text-sm font-semibold text-accent mt-3">
                   {toUsd(addOn.price_ghs)}
