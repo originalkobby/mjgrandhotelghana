@@ -75,7 +75,6 @@ const BookingLookup = () => {
       const latest = await lookupBookingByReference<BookingResult>(
         supabase,
         result?.reference_code ?? reference,
-        "id, reference_code, status, payment_status, check_in, check_out, adults, children, final_total_ghs, base_total_ghs, add_ons_total_ghs, discount_ghs, special_requests, arrival_time, created_at, rooms(name), guests(full_name, email)"
       );
 
       if (latest) setResult(latest);
@@ -94,7 +93,6 @@ const BookingLookup = () => {
       const data = await lookupBookingByReference<BookingResult>(
         supabase,
         ref,
-        "id, reference_code, status, payment_status, check_in, check_out, adults, children, final_total_ghs, base_total_ghs, add_ons_total_ghs, discount_ghs, special_requests, arrival_time, created_at, rooms(name), guests(full_name, email)"
       );
 
       if (data) {
