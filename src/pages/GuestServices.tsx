@@ -312,32 +312,6 @@ export default function GuestServices() {
         </div>
       </section>
 
-      {/* SECTION 6 — QR ACCESS */}
-      <section className="py-16 md:py-20 bg-secondary/30">
-        <div className="max-w-[1200px] mx-auto px-6 lg:px-12 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-60px" }}
-            transition={{ duration: 0.5, ease }}
-            className="max-w-md mx-auto"
-          >
-            <QrCode className="w-10 h-10 text-gold mx-auto mb-4" />
-            <h3 className="font-serif text-2xl text-foreground mb-2">Quick Access</h3>
-            <p className="font-sans text-sm text-muted-foreground">
-              Scan the QR code to access guest services information anytime.
-            </p>
-            <div className="mt-6 inline-block bg-card border border-border rounded-xl p-4">
-              <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://mjgrandhotel.com/guest-services&format=svg`}
-                alt="QR code for MJ Grand Hotel Guest Services"
-                className="w-40 h-40"
-                loading="lazy"
-              />
-            </div>
-          </motion.div>
-        </div>
-      </section>
 
       <Footer />
     </div>
