@@ -76,7 +76,7 @@ const RoomCard = ({ room, index }: { room: RoomRow; index: number }) => {
           {needsTruncation && (
             <button
               onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
-              className="ml-1 font-sans text-sm font-medium text-accent hover:text-accent/80 transition-colors duration-200"
+              className="ml-1 font-sans text-sm font-medium text-primary hover:text-primary/80 transition-colors duration-200"
             >
               {expanded ? "Show less" : "Read more"}
             </button>
