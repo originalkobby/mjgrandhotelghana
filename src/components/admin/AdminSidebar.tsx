@@ -12,7 +12,6 @@ import {
   Headset,
   Settings,
   UtensilsCrossed,
-  Brain,
   ImageIcon,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
@@ -31,6 +30,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import logo from "@/assets/logo.png";
+import revenueIntelIcon from "@/assets/revenue-intel-icon.jpeg";
 
 const NAV_ITEMS = [
   { title: "Overview", url: "/admin", icon: LayoutDashboard, end: true, roles: ["admin", "revenue_manager", "finance"] },
@@ -41,7 +41,7 @@ const NAV_ITEMS = [
   { title: "Promotions", url: "/admin/promotions", icon: Tag, end: false, roles: ["admin"] },
   { title: "Menu", url: "/admin/menu", icon: UtensilsCrossed, end: false, roles: ["admin"] },
   { title: "Gallery", url: "/admin/gallery", icon: ImageIcon, end: false, roles: ["admin"] },
-  { title: "Revenue Intel", url: "/admin/revenue", icon: Brain, end: false, roles: ["admin", "revenue_manager"] },
+  { title: "Revenue Intel", url: "/admin/revenue", icon: null, customIcon: revenueIntelIcon, end: false, roles: ["admin", "revenue_manager"] },
   { title: "Reports", url: "/admin/reports", icon: BarChart3, end: false, roles: ["admin", "revenue_manager", "finance"] },
   { title: "Support", url: "/admin/support", icon: Headset, end: false, roles: ["admin", "front_desk"] },
   { title: "Messages", url: "/admin/messages", icon: MessageSquareText, end: false, roles: null },
@@ -87,7 +87,11 @@ export function AdminSidebar({ role }: Props) {
                       className="hover:bg-sidebar-accent/50"
                       activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                     >
-                      <item.icon className="mr-2 h-4 w-4" />
+                      {item.customIcon ? (
+                        <img src={item.customIcon} alt="" className="mr-2 h-4 w-4 object-contain" />
+                      ) : (
+                        <item.icon className="mr-2 h-4 w-4" />
+                      )}
                       {!collapsed && <span>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
