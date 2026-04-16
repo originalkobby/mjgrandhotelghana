@@ -1,46 +1,32 @@
 
 
-## Plan: Pre-select Room from "Book Now" Button
+## Plan: Auto-Slideshow on 3rd Gallery Card
 
-### What Changes
+### What It Does
+The 3rd card in the homepage Gallery section becomes an automatic picture slideshow. It cycles through all gallery images from the database (excluding the 3 other images already visible in this section), never repeating until all have been shown, then loops. New images added to the gallery are picked up automatically via React Query.
 
-1. **RoomsPreview.tsx** — Change the `<a href="/booking">` to a `<Link>` (or `<a>`) that passes the room's `id` and `slug` as a URL query parameter, e.g. `/booking?room=<room-id>`.
+### How It Works
 
-2. **Booking.tsx** — On mount, read the `room` query param. If present:
-   - Fetch that room's details from Supabase (name, price, images, amenities, etc.)
-   - Store it in booking state via `setSelectedRoom()`
-   - Set a flag (e.g. `roomPreselected`) so the flow knows to skip the "rooms" step
+1. **Gallery.tsx** — Change the 3rd card (index 2) from a static image to a `SlideshowCard` component:
+   - Fetch all gallery images from the `gallery_images` table (same query as `GalleryPage`)
+   - Filter out the 3 images currently displayed in the other cards
+   - Cycle through the remaining images with a crossfade transition every ~4 seconds
+   - Track shown images in local state; reset the "seen" list only after all have been displayed
+   - React Query's background refetch ensures newly added images appear in the next cycle
 
-3. **useBooking.ts** — Add a small enhancement:
-   - Accept an optional `skipRoom` flag or expose a `setRoomPreselected` setter
-   - Modify `goNext` so that when stepping from "search", if a room is already selected, it jumps to "addons" instead of "rooms"
-   - Modify `goBack` similarly so that going back from "addons" returns to "search" (not "rooms") when the room was pre-selected
+2. **Crossfade animation** — Two stacked `<img>` tags with opacity transitions (Framer Motion or CSS). The outgoing image fades out while the incoming fades in over ~700ms.
 
-4. **BookingStepper.tsx** — Optionally hide or grey out the "Room" step dot when pre-selected, so the stepper shows: Dates → Extras → Details → Payment → Confirm.
-
-### Flow Summary
-
-```text
-Current:      Search → Room → Extras → Details → Payment → Confirm
-Pre-selected: Search → [skip] → Extras → Details → Payment → Confirm
-```
-
-The existing flow (without a query param) remains completely unchanged.
-
-### Technical Details
-
-- **Query param**: `/booking?room=<uuid>` — parsed via `useSearchParams`
-- **Room fetch**: Single Supabase query on the `rooms` table by ID, computing `nightlyRate` and `totalPrice` once dates are set (deferred to after search step)
-- **Step skipping logic**: A boolean `roomPreselected` in `BookingState` controls whether `goNext`/`goBack` skip index 1 ("rooms")
-- **Price computation**: Since dates aren't known until after the search step, the room's `totalPrice` will be computed when the user completes the search step (using the same inventory/rate logic as `RoomSelectionStep`)
-- **Stepper**: Filter the visible steps array when `roomPreselected` is true
+3. **No repeat logic** — Maintain a `Set` of shown image IDs. Pick randomly from unseen images. When the set equals the pool size, clear it and restart.
 
 ### Files Modified
 
 | File | Change |
 |------|--------|
-| `src/components/RoomsPreview.tsx` | Link to `/booking?room={id}` |
-| `src/hooks/useBooking.ts` | Add `roomPreselected` flag; adjust `goNext`/`goBack` to skip "rooms" step |
-| `src/pages/Booking.tsx` | Read `room` query param; fetch room data; set pre-selected state; compute price after dates are chosen |
-| `src/components/booking/BookingStepper.tsx` | Hide "Room" step when pre-selected |
+| `src/components/Gallery.tsx` | Replace the 3rd card with a `SlideshowCard` component; add slideshow logic with crossfade and no-repeat cycling |
+
+### Technical Details
+- Reuses the existing `public-gallery` React Query key for data
+- `useEffect` with `setInterval` drives the timer; cleanup on unmount
+- Fallback: if no DB images exist beyond the static ones, the card shows the original static image
+- No database or schema changes required
 
