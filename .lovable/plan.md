@@ -1,32 +1,33 @@
 
 
-## Plan: Auto-Slideshow on 3rd Gallery Card
+## Suggested Prompt
 
-### What It Does
-The 3rd card in the homepage Gallery section becomes an automatic picture slideshow. It cycles through all gallery images from the database (excluding the 3 other images already visible in this section), never repeating until all have been shown, then loops. New images added to the gallery are picked up automatically via React Query.
+You can copy and send this directly:
 
-### How It Works
+> **"Apply the Dining page's animation system to all homepage sections (except the Hero). Specifically: use `slideFromLeft` and `slideFromRight` for alternating headings and text blocks, `fadeUp` with staggered `containerVariants` for grid/card groups (rooms, gallery, experiences), and `fadeIn` for decorative dividers. Keep the same easing curve and 0.7s duration used on the Dining page. Don't change any content or layout — only upgrade the motion."**
 
-1. **Gallery.tsx** — Change the 3rd card (index 2) from a static image to a `SlideshowCard` component:
-   - Fetch all gallery images from the `gallery_images` table (same query as `GalleryPage`)
-   - Filter out the 3 images currently displayed in the other cards
-   - Cycle through the remaining images with a crossfade transition every ~4 seconds
-   - Track shown images in local state; reset the "seen" list only after all have been displayed
-   - React Query's background refetch ensures newly added images appear in the next cycle
+## What This Prompt Achieves
 
-2. **Crossfade animation** — Two stacked `<img>` tags with opacity transitions (Framer Motion or CSS). The outgoing image fades out while the incoming fades in over ~700ms.
+The Dining page uses four distinct animation variants that create visual depth:
 
-3. **No repeat logic** — Maintain a `Set` of shown image IDs. Pick randomly from unseen images. When the set equals the pool size, clear it and restart.
+| Variant | Effect | Currently on Homepage? |
+|---------|--------|----------------------|
+| `fadeUp` (y: 30 → 0) | Cards/items staggered in grids | No — homepage uses simpler y: 20 |
+| `slideFromLeft` (x: -60 → 0) | Section headings, alternating text | No |
+| `slideFromRight` (x: 60 → 0) | Alternating text blocks | No |
+| `containerVariants` (stagger 0.08s) | Parent wrapper for card grids | No — homepage has no stagger |
 
-### Files Modified
+The homepage currently uses a uniform `opacity: 0, y: 20` on everything, which feels flat. The prompt above tells the AI to apply the richer directional and staggered patterns without touching Hero or layout.
 
-| File | Change |
-|------|--------|
-| `src/components/Gallery.tsx` | Replace the 3rd card with a `SlideshowCard` component; add slideshow logic with crossfade and no-repeat cycling |
+## Files That Would Change
 
-### Technical Details
-- Reuses the existing `public-gallery` React Query key for data
-- `useEffect` with `setInterval` drives the timer; cleanup on unmount
-- Fallback: if no DB images exist beyond the static ones, the card shows the original static image
-- No database or schema changes required
+| File | What Changes |
+|------|-------------|
+| `src/components/RoomsPreview.tsx` | Section heading gets `slideFromLeft`/`slideFromRight`; room cards get `containerVariants` + `fadeUp` with stagger |
+| `src/components/Experiences.tsx` | Section heading gets directional slides; card wrapper already scrolls so minimal change |
+| `src/components/Gallery.tsx` | Heading gets directional animation; grid gets staggered `fadeUp` |
+| `src/components/ContactForm.tsx` | Heading and form fields get directional slide animations |
+| `src/components/Footer.tsx` | Optionally apply `fadeIn` to footer columns |
+
+No structural, content, or layout changes — purely motion upgrades.
 
