@@ -171,7 +171,7 @@ const SlideshowCard = ({
     if (pool.length === 0) return;
     // Show first DB image immediately
     pickNext();
-    const id = setInterval(pickNext, 4000);
+    const id = setInterval(pickNext, 6000);
     return () => clearInterval(id);
     // Re-run when pool changes (new images added)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -193,7 +193,7 @@ const SlideshowCard = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.7, ease: [0.3, 0, 0.2, 1] }}
+          transition={{ duration: 1.2, ease: [0.3, 0, 0.2, 1] }}
           className="w-full h-64 md:h-80 object-cover cursor-pointer absolute inset-0"
           loading="lazy"
         />
