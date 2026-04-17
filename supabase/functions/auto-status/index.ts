@@ -66,9 +66,10 @@ serve(async (req) => {
       let shouldReleaseInventory = false;
 
       if (booking.payment_status === "paid") {
-        // Paid → Completed (guest stayed; nights remain consumed, no release)
+        // Paid → Completed (release nights back to availability)
         newStatus = "completed";
         results.completed++;
+        shouldReleaseInventory = true;
       } else {
         // Not paid → No Show (release the nights back to availability)
         newStatus = "no_show";

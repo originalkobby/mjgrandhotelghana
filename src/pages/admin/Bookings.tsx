@@ -60,11 +60,19 @@ interface Booking {
 
 const STATUS_OPTIONS: BookingStatus[] = ["pending", "confirmed", "cancelled", "completed", "no_show"];
 
+const STATUS_LABELS: Record<string, string> = {
+  pending: "pending",
+  confirmed: "confirmed",
+  cancelled: "cancelled",
+  completed: "release",
+  no_show: "no show",
+};
+
 const STATUS_COLORS: Record<string, string> = {
   confirmed: "bg-accent/20 text-accent border-accent/30",
   pending: "bg-gold-light/20 text-gold-dark border-gold-light/30",
   cancelled: "bg-destructive/10 text-destructive border-destructive/20",
-  completed: "bg-accent/20 text-accent border-accent/30",
+  completed: "bg-emerald-100 text-emerald-700 border-emerald-300",
   no_show: "bg-muted text-muted-foreground border-border",
 };
 
@@ -339,7 +347,7 @@ export default function Bookings() {
             <SelectItem value="all">All Statuses</SelectItem>
             {STATUS_OPTIONS.map((s) => (
               <SelectItem key={s} value={s} className="capitalize">
-                {s.replace("_", " ")}
+                {STATUS_LABELS[s] ?? s.replace("_", " ")}
               </SelectItem>
             ))}
           </SelectContent>
@@ -441,8 +449,8 @@ export default function Bookings() {
                           {formatCurrency(b.final_total_ghs)}
                         </td>
                         <td className="px-4 py-3">
-                          <Badge variant="outline" className={`text-xs capitalize ${STATUS_COLORS[b.status] ?? ""}`}>
-                            {formatBookingLabel(pd.effectiveStatus)}
+                          <Badge variant="outline" className={`text-xs capitalize ${STATUS_COLORS[pd.effectiveStatus] ?? STATUS_COLORS[b.status] ?? ""}`}>
+                            {STATUS_LABELS[pd.effectiveStatus] ?? formatBookingLabel(pd.effectiveStatus)}
                           </Badge>
                         </td>
                         <td className="px-4 py-3">
@@ -593,7 +601,7 @@ export default function Bookings() {
                   <SelectContent>
                     {STATUS_OPTIONS.map((s) => (
                       <SelectItem key={s} value={s} className="capitalize">
-                        {s.replace("_", " ")}
+                        {STATUS_LABELS[s] ?? s.replace("_", " ")}
                       </SelectItem>
                     ))}
                   </SelectContent>
