@@ -83,7 +83,7 @@ serve(async (req) => {
     // 1. Fetch all active rooms
     const { data: rooms, error: roomsErr } = await supabase
       .from("rooms")
-      .select("id, base_price_ghs")
+      .select("id, base_price_ghs, total_units")
       .eq("is_active", true);
 
     if (roomsErr) throw roomsErr;
@@ -145,6 +145,7 @@ serve(async (req) => {
 
     for (const room of rooms) {
       const basePrice = Number(room.base_price_ghs);
+      const roomTotalUnits = Math.max(1, Number(room.total_units) || 1);
 
       for (let d = 0; d < daysAhead; d++) {
         const dateObj = new Date(today.getTime() + d * 86400000);
@@ -152,7 +153,7 @@ serve(async (req) => {
         const key = `${room.id}|${dateStr}`;
 
         const inv = invMap.get(key);
-        const totalCount = inv?.total_count ?? 1;
+        const totalCount = inv?.total_count ?? roomTotalUnits;
         const bookedCount = inv?.booked_count ?? 0;
         const isClosed = inv?.is_closed ?? false;
 
