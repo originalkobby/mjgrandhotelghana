@@ -64,7 +64,7 @@ const STATUS_LABELS: Record<string, string> = {
   pending: "pending",
   confirmed: "confirmed",
   cancelled: "cancelled",
-  completed: "release",
+  completed: "released",
   no_show: "no show",
 };
 
