@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Wifi, Wind, Coffee, Tv, BedDouble, Maximize, Users, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -57,78 +57,119 @@ export default function RoomSelectionStep({ search, onSelect, onBack }: Props) {
     ? differenceInDays(search.checkOut, search.checkIn)
     : 1;
 
-  useEffect(() => {
-    async function fetchRooms() {
-      setLoading(true);
-      const { data: roomsData } = await supabase
-        .from("rooms")
-        .select("*")
-        .eq("is_active", true)
-        .order("sort_order");
+  const fetchRooms = useCallback(async () => {
+    if (!search.checkIn || !search.checkOut) return;
+    const checkInStr = search.checkIn.toISOString().split("T")[0];
+    const checkOutStr = search.checkOut.toISOString().split("T")[0];
 
-      if (!roomsData) {
-        setLoading(false);
-        return;
-      }
+    const { data: roomsData } = await supabase
+      .from("rooms")
+      .select("*")
+      .eq("is_active", true)
+      .order("sort_order");
 
-      // Check inventory for each room
-      const roomResults: RoomData[] = [];
-      for (const room of roomsData) {
-        const { data: inventory } = await supabase
-          .from("room_inventory")
-          .select("total_count, booked_count, is_closed, rate_override")
-          .eq("room_id", room.id)
-          .gte("date", search.checkIn?.toISOString().split("T")[0] ?? "")
-          .lt("date", search.checkOut?.toISOString().split("T")[0] ?? "");
-
-        let available = true;
-        let minAvailable = 999;
-        let avgRate = room.base_price_ghs;
-
-        if (inventory && inventory.length > 0) {
-          const rates: number[] = [];
-          for (const inv of inventory) {
-            if (inv.is_closed || inv.booked_count >= inv.total_count) {
-              available = false;
-              break;
-            }
-            const avail = inv.total_count - inv.booked_count;
-            if (avail < minAvailable) minAvailable = avail;
-            rates.push(inv.rate_override ?? room.base_price_ghs);
-          }
-          if (rates.length > 0) {
-            avgRate = rates.reduce((a, b) => a + b, 0) / rates.length;
-          }
-        }
-
-        roomResults.push({
-          id: room.id,
-          name: room.name,
-          slug: room.slug,
-          description: room.description ?? "",
-          size_sqm: room.size_sqm ?? 0,
-          bed_type: room.bed_type ?? "",
-          max_adults: room.max_adults,
-          max_children: room.max_children ?? 0,
-          base_price_ghs: room.base_price_ghs,
-          amenities: (room.amenities as string[]) ?? [],
-          images: (room.images as string[]) ?? [],
-          available,
-          availableCount: minAvailable === 999 ? 0 : minAvailable,
-          nightlyRate: avgRate,
-        });
-      }
-
-      if (sortBy === "price") {
-        roomResults.sort((a, b) => a.nightlyRate - b.nightlyRate);
-      }
-
-      setRooms(roomResults);
+    if (!roomsData) {
       setLoading(false);
+      return;
     }
 
-    fetchRooms();
+    // Build the list of nights in the stay window.
+    const nightsList: string[] = [];
+    const cursor = new Date(search.checkIn);
+    const end = new Date(search.checkOut);
+    while (cursor < end) {
+      nightsList.push(cursor.toISOString().split("T")[0]);
+      cursor.setDate(cursor.getDate() + 1);
+    }
+
+    const roomResults: RoomData[] = [];
+    for (const room of roomsData) {
+      const { data: inventory } = await supabase
+        .from("room_inventory")
+        .select("date, total_count, booked_count, is_closed, rate_override")
+        .eq("room_id", room.id)
+        .gte("date", checkInStr)
+        .lt("date", checkOutStr);
+
+      const invByDate = new Map<string, typeof inventory[number]>();
+      (inventory ?? []).forEach((row) => invByDate.set(row.date, row));
+
+      let available = true;
+      let minAvailable = room.total_units;
+      const rates: number[] = [];
+
+      // Evaluate every night — missing inventory rows fall back to rooms.total_units
+      // with booked_count = 0, so availability still respects the configured cap.
+      for (const dateStr of nightsList) {
+        const inv = invByDate.get(dateStr);
+        const totalForDate = inv?.total_count ?? room.total_units;
+        const bookedForDate = inv?.booked_count ?? 0;
+        const closed = inv?.is_closed ?? false;
+
+        if (closed || bookedForDate >= totalForDate) {
+          available = false;
+          break;
+        }
+        const avail = totalForDate - bookedForDate;
+        if (avail < minAvailable) minAvailable = avail;
+        rates.push(inv?.rate_override ?? room.base_price_ghs);
+      }
+
+      const avgRate = rates.length > 0
+        ? rates.reduce((a, b) => a + b, 0) / rates.length
+        : room.base_price_ghs;
+
+      roomResults.push({
+        id: room.id,
+        name: room.name,
+        slug: room.slug,
+        description: room.description ?? "",
+        size_sqm: room.size_sqm ?? 0,
+        bed_type: room.bed_type ?? "",
+        max_adults: room.max_adults,
+        max_children: room.max_children ?? 0,
+        base_price_ghs: room.base_price_ghs,
+        amenities: (room.amenities as string[]) ?? [],
+        images: (room.images as string[]) ?? [],
+        available,
+        availableCount: available ? minAvailable : 0,
+        nightlyRate: avgRate,
+      });
+    }
+
+    if (sortBy === "price") {
+      roomResults.sort((a, b) => a.nightlyRate - b.nightlyRate);
+    }
+
+    setRooms(roomResults);
+    setLoading(false);
   }, [search.checkIn, search.checkOut, sortBy]);
+
+  useEffect(() => {
+    setLoading(true);
+    fetchRooms();
+  }, [fetchRooms]);
+
+  // Real-time availability: refetch when inventory or bookings change so the
+  // grid reflects fresh check-ins (blocked) and check-outs/cancellations (released).
+  useEffect(() => {
+    const channel = supabase
+      .channel("public-availability")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "room_inventory" },
+        () => fetchRooms()
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "bookings" },
+        () => fetchRooms()
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchRooms]);
 
   const handleSelect = (room: RoomData) => {
     onSelect({
