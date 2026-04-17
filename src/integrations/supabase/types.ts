@@ -706,6 +706,7 @@ export type Database = {
           max_adults: number
           max_children: number
           name: string
+          room_numbers: string[]
           size_sqm: number | null
           slug: string
           sort_order: number | null
@@ -722,6 +723,7 @@ export type Database = {
           max_adults?: number
           max_children?: number
           name: string
+          room_numbers?: string[]
           size_sqm?: number | null
           slug: string
           sort_order?: number | null
@@ -738,6 +740,7 @@ export type Database = {
           max_adults?: number
           max_children?: number
           name?: string
+          room_numbers?: string[]
           size_sqm?: number | null
           slug?: string
           sort_order?: number | null
