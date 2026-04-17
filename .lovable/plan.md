@@ -1,25 +1,33 @@
 
+The user wants to add a "room number" field to the room creation/edit form in the admin dashboard. Let me explore the current Rooms admin page and the rooms table schema.
 
-## Plan: Dynamic Pricing for Early Check-In & Late Checkout
+Looking at the schema:
+- `rooms` table has: id, name, slug, description, base_price_ghs, bed_type, size_sqm, max_adults, max_children, amenities, images, is_active, sort_order
+- There's no `room_number` column on the `rooms` table currently
+- The `bookings` table has a `room_number` field (text), but that's per-booking assignment
 
-**Goal**: Make "Early Check-In" and "Late Checkout" add-ons automatically priced at **50% of the selected room's nightly rate**, instead of using fixed database values.
+Important consideration: A "room type" (e.g., Deluxe Suite) can have multiple physical rooms (101, 102, 103). The current `rooms` table represents room *types*, with `room_inventory.total_count` tracking how many physical units exist per type per date. So there are two interpretations:
 
-### How It Works
+1. **Single room number** — add one `room_number` text column to `rooms` (simple, but limiting if a type has multiple units)
+2. **Multiple room numbers** — add `room_numbers text[]` array column so each room type can list its physical units (e.g., `['101','102','103']`)
 
-The database will still store a placeholder price for these two add-ons, but the UI will override it at runtime based on the selected room's `nightlyRate`. This keeps the logic simple and ensures the price always matches the room.
+Option 2 aligns with how `total_count` already works in inventory. I should ask the user which they want before building.
 
-### Changes
+Actually, the user said "the room number" (singular) and mentioned "tracking inventory and room availability". Given the inventory system already supports multiple units per type via `total_count`, a list of room numbers is more meaningful. But I'll ask to be safe.
 
-**1. `src/components/booking/AddOnsStep.tsx`**
-- After fetching add-ons from the database, override `price_ghs` for items named "Early Check-in" and "Late Checkout" with `selectedRoom.nightlyRate / 2`.
-- This affects display and the price passed to `onToggle`, so downstream steps (guest details, payment, create-booking) automatically use the correct amount.
+## Plan: Add Room Number(s) to Room Form
 
-**2. `supabase/functions/create-booking/index.ts`**
-- In the server-side pricing validation, apply the same rule: when computing add-on totals, if an add-on is "Early Check-in" or "Late Checkout", use `room.base_price_ghs / 2` (or the inventory-derived nightly rate) instead of the stored `price_ghs`. This prevents price manipulation from the client side.
+### Database
+- Add a new `room_numbers text[]` column (default `'{}'`) to the `rooms` table via migration. Array supports room types with multiple physical units (e.g., Deluxe has rooms 201, 202, 203).
 
-### Technical Detail
+### Admin Form (`src/pages/admin/Rooms.tsx`)
+- Add a "Room Numbers" input to the dialog form (comma-separated entry, same UX pattern as Amenities).
+- Include `room_numbers` in `emptyForm`, `openEdit`, and the insert/update mutation payload (split by comma, trim, filter empty).
+- Add a "Rooms" column to the table listing showing the room numbers as small badges (or comma-separated text).
 
-- **Matching logic**: Add-ons identified by name (`Early Check-in`, `Late Checkout`). This is safe since add-on names are admin-controlled.
-- **Price flow**: The overridden price propagates through `onToggle` → `selectedAddOns` → `handleSubmitBooking` → edge function, where it's re-validated server-side.
-- **No database schema changes** required.
+### No changes needed to
+- Booking flow (bookings already have their own `room_number` text field for assignment).
+- Inventory logic (`total_count` continues to track availability count).
 
+### Optional follow-up (not in this plan)
+- Auto-suggesting available room numbers when assigning a booking, drawn from the room type's `room_numbers` list.
