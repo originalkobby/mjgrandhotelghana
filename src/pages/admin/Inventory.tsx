@@ -384,7 +384,9 @@ export default function Inventory() {
                     onChange={(e) => setEditForm({ ...editForm, rate_override: e.target.value })}
                     placeholder={`Base: ${Number(selectedCell.room.base_price_ghs)}`}
                   />
-                  <p className="text-[10px] text-muted-foreground">Leave empty to use dynamic/base rate</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    Leave blank to use the room type's base price ({fc(Number(selectedCell.room.base_price_ghs))}). Per-date overrides take precedence over the dynamic pricing engine.
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs">Total Rooms</Label>
