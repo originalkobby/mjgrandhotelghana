@@ -30,6 +30,7 @@ import type { Database } from "@/integrations/supabase/types";
 import { formatBookingLabel, getPaymentDisplay } from "@/lib/bookingLifecycle";
 import { useBookingLifecycleSync } from "@/hooks/useBookingLifecycleSync";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { releaseInventory, reserveInventory, getInventoryAction } from "@/lib/inventorySync";
 
 type BookingStatus = Database["public"]["Enums"]["booking_status"];
 
