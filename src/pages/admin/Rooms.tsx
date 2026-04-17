@@ -30,7 +30,7 @@ const emptyForm = {
   max_children: 1,
   is_active: true,
   amenities: "",
-  room_numbers: "",
+  total_units: 1,
   image_url: "",
 };
 
@@ -68,9 +68,7 @@ export default function AdminRooms() {
         max_children: form.max_children,
         is_active: form.is_active,
         amenities: form.amenities ? form.amenities.split(",").map((a) => a.trim()) : null,
-        room_numbers: form.room_numbers
-          ? form.room_numbers.split(",").map((n) => n.trim()).filter(Boolean)
-          : [],
+        total_units: Math.max(1, Number(form.total_units) || 1),
         images,
       } as any;
       if (editId) {
@@ -108,7 +106,7 @@ export default function AdminRooms() {
       max_children: room.max_children,
       is_active: room.is_active,
       amenities: room.amenities?.join(", ") || "",
-      room_numbers: ((room as any).room_numbers as string[] | null)?.join(", ") || "",
+      total_units: (room as any).total_units ?? 1,
       image_url: room.images?.[0] || "",
     });
     setOpen(true);
@@ -193,14 +191,16 @@ export default function AdminRooms() {
                   <Input value={form.amenities} onChange={(e) => set("amenities", e.target.value)} placeholder="WiFi, Pool, AC" />
                 </div>
                 <div>
-                  <Label>Room Numbers (comma-separated)</Label>
+                  <Label>Total Rooms (units) *</Label>
                   <Input
-                    value={form.room_numbers}
-                    onChange={(e) => set("room_numbers", e.target.value)}
-                    placeholder="201, 202, 203"
+                    type="number"
+                    min={1}
+                    value={form.total_units}
+                    onChange={(e) => set("total_units", +e.target.value)}
+                    placeholder="e.g. 5"
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    Physical units of this room type. Used for inventory & assignment.
+                    How many physical rooms exist of this type. Used for inventory & availability.
                   </p>
                 </div>
                 <div>
@@ -237,7 +237,7 @@ export default function AdminRooms() {
                 <TableHead>Price/Night</TableHead>
                 <TableHead>Bed</TableHead>
                 <TableHead>Capacity</TableHead>
-                <TableHead>Room Numbers</TableHead>
+                <TableHead>Total Units</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="w-12" />
               </TableRow>
@@ -264,17 +264,9 @@ export default function AdminRooms() {
                   <TableCell>{room.bed_type || "—"}</TableCell>
                   <TableCell>{room.max_adults}A / {room.max_children}C</TableCell>
                   <TableCell>
-                    {(() => {
-                      const nums = ((room as any).room_numbers as string[] | null) || [];
-                      if (nums.length === 0) return <span className="text-xs text-muted-foreground">—</span>;
-                      return (
-                        <div className="flex flex-wrap gap-1 max-w-[180px]">
-                          {nums.map((n) => (
-                            <Badge key={n} variant="outline" className="text-xs">{n}</Badge>
-                          ))}
-                        </div>
-                      );
-                    })()}
+                    <Badge variant="outline" className="text-xs">
+                      {(room as any).total_units ?? 1} {((room as any).total_units ?? 1) === 1 ? "unit" : "units"}
+                    </Badge>
                   </TableCell>
                   <TableCell>
                     <Badge variant={room.is_active ? "default" : "secondary"}>

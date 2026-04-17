@@ -710,6 +710,7 @@ export type Database = {
           size_sqm: number | null
           slug: string
           sort_order: number | null
+          total_units: number
         }
         Insert: {
           amenities?: string[] | null
@@ -727,6 +728,7 @@ export type Database = {
           size_sqm?: number | null
           slug: string
           sort_order?: number | null
+          total_units?: number
         }
         Update: {
           amenities?: string[] | null
@@ -744,6 +746,7 @@ export type Database = {
           size_sqm?: number | null
           slug?: string
           sort_order?: number | null
+          total_units?: number
         }
         Relationships: []
       }
