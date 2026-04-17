@@ -1,44 +1,50 @@
 
-The user wants the inventory section (`/admin/inventory`) to automatically reflect the `total_units` value set on each room type in the Rooms admin page. Currently, `room_inventory.total_count` is set per row (per room×date), defaulting to 1, and is edited manually in the Inventory dialog. This creates a disconnect: setting "Total Rooms = 5" on a room type doesn't propagate to the inventory grid.
+The user wants the same auto-sync behavior we set up for `total_units` → `room_inventory.total_count` to also apply to room **rates**: when a room's `base_price_ghs` changes in `/admin/rooms`, the inventory grid and public booking engine should reflect the new rate.
 
-## Goal
-When a room's `total_units` changes (or a new room is created), all `room_inventory` rows for that room should reflect this as their `total_count`. New inventory rows created by the dynamic pricing engine or on-the-fly bookings should also use `total_units` as their default.
+## Current state
+- `rooms.base_price_ghs` is the canonical rate per room type.
+- `room_inventory.rate_override` is a per-date override (nullable). When NULL, the booking flow falls back to `base_price_ghs`.
+- The dynamic-pricing engine writes computed `rate_override` values per date.
+- Editing `base_price_ghs` today does NOT touch existing inventory rows, so future dates keep stale `rate_override` values from the last pricing run.
 
-## Plan
+## The fix
 
-### 1. Database trigger — auto-sync `total_count` from `rooms.total_units`
-Add a Postgres trigger on `rooms` (AFTER UPDATE OF total_units): when `total_units` changes, update all `room_inventory` rows for that room where `date >= today` to set `total_count = NEW.total_units`. Past dates are left untouched to preserve historical accuracy.
+### 1. Database trigger — propagate base price changes
+Extend the existing `sync_inventory_total_count()` pattern with a second trigger on `rooms` that fires when `base_price_ghs` changes. It will **clear** `rate_override` (set to NULL) for all future inventory rows for that room, so the booking flow falls back to the new base price immediately.
 
 ```sql
-CREATE OR REPLACE FUNCTION sync_inventory_total_count()
+CREATE OR REPLACE FUNCTION sync_inventory_rate_on_base_change()
 RETURNS trigger AS $$
 BEGIN
-  IF NEW.total_units IS DISTINCT FROM OLD.total_units THEN
+  IF NEW.base_price_ghs IS DISTINCT FROM OLD.base_price_ghs THEN
     UPDATE room_inventory
-    SET total_count = NEW.total_units
+    SET rate_override = NULL
     WHERE room_id = NEW.id AND date >= CURRENT_DATE;
   END IF;
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
-
-CREATE TRIGGER rooms_sync_inventory
-AFTER UPDATE ON rooms
-FOR EACH ROW EXECUTE FUNCTION sync_inventory_total_count();
 ```
 
-### 2. One-time backfill
-Update existing `room_inventory` rows (date >= today) so `total_count = rooms.total_units` for each room. This brings current inventory in sync with the values just configured.
+Why clear instead of overwrite? `rate_override` exists specifically as a per-date override layer. Setting it to NULL means "use the room's base price," which is exactly the desired behavior after a base-price change. Admins or the dynamic-pricing engine can then re-set per-date overrides as needed.
 
-### 3. Dynamic pricing edge function — use `total_units` as default
-In `supabase/functions/dynamic-pricing/index.ts`, when inserting new `room_inventory` rows, set `total_count` to the room's `total_units` instead of the hard-coded default (1).
+### 2. Auto re-run dynamic pricing
+After clearing overrides, immediately invoke the `dynamic-pricing` edge function from `src/pages/admin/Rooms.tsx` after a successful save. This regenerates seasonal/occupancy/day-of-week adjusted rates against the new base price for the next 90 days. Show a subtle toast: "Inventory rates re-synced."
 
-### 4. Inventory admin UI — read-only `total_count` with hint
-In `src/pages/admin/Inventory.tsx`, the "Total Rooms" input in the edit dialog stays editable for one-off date overrides (e.g., closing 2 of 5 rooms for maintenance on a specific date), but add a small helper text under the field: "Default comes from the room type's Total Rooms setting. Change here only for date-specific overrides."
+### 3. Booking flow already works
+- `RoomSelectionStep` and `create-booking` already use `rate_override ?? base_price_ghs`, so clearing overrides immediately makes new rates live.
+- `Inventory.tsx` already displays `rate_override || base_price_ghs` per cell.
 
-### No changes needed
-- `create-booking` already increments `booked_count` against existing inventory rows.
-- `RoomSelectionStep` reads `total_count - booked_count` directly, so it picks up changes automatically.
+### 4. Helper hint in Inventory edit dialog
+Add a one-liner under the "Rate Override" field: "Leave blank to use the room type's base price (GH₵ X)."
 
-### Result
-Editing "Total Rooms" on a room type instantly updates all future inventory rows for that room, keeping the Inventory grid, public availability, and the booking engine in sync.
+## No changes needed
+- Database schema (no new columns).
+- `create-booking` edge function (already falls back correctly).
+- `RoomSelectionStep` (already falls back correctly).
+
+## Result
+Editing a room's base price in `/admin/rooms` instantly:
+1. Clears stale per-date rate overrides for that room.
+2. Triggers a dynamic-pricing run to recompute fresh rates from the new base.
+3. Public booking engine and inventory grid show the new rates immediately.
