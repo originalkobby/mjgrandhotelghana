@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   RefreshCw,
@@ -104,6 +104,32 @@ export default function Inventory() {
     queryFn: () => fetchInventoryData(weekStart, weekEnd),
     staleTime: 30_000,
   });
+
+  // Realtime: refetch grid whenever a room_inventory row changes (booking created,
+  // cancelled, completed, no-showed, or admin edit from any tab/session).
+  useEffect(() => {
+    const channel = supabase
+      .channel("admin-inventory-sync")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "room_inventory" },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["admin-inventory"] });
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "bookings" },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["admin-inventory"] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   const rooms = data?.rooms ?? [];
   const inventory = data?.inventory ?? new Map<string, InvCell>();
