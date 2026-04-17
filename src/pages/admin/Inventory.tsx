@@ -394,6 +394,9 @@ export default function Inventory() {
                     value={editForm.total_count}
                     onChange={(e) => setEditForm({ ...editForm, total_count: e.target.value })}
                   />
+                  <p className="text-[10px] text-muted-foreground">
+                    Default comes from the room type's Total Rooms setting. Change here only for date-specific overrides (e.g. maintenance).
+                  </p>
                 </div>
               </div>
 
