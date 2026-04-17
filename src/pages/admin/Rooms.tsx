@@ -57,11 +57,12 @@ export default function AdminRooms() {
   const saveMutation = useMutation({
     mutationFn: async () => {
       const images = form.image_url.trim() ? [form.image_url.trim()] : null;
+      const newBasePrice = Number(form.base_price_ghs) || 0;
       const payload = {
         name: form.name,
         slug: form.slug || form.name.toLowerCase().replace(/\s+/g, "-"),
         description: form.description || null,
-        base_price_ghs: form.base_price_ghs,
+        base_price_ghs: newBasePrice,
         bed_type: form.bed_type || null,
         size_sqm: form.size_sqm || null,
         max_adults: form.max_adults,
@@ -71,19 +72,41 @@ export default function AdminRooms() {
         total_units: Math.max(1, Number(form.total_units) || 1),
         images,
       } as any;
+
+      // Detect base-price change to trigger downstream rate re-sync
+      let basePriceChanged = false;
       if (editId) {
+        const existing = rooms?.find((r) => r.id === editId);
+        basePriceChanged = !!existing && Number(existing.base_price_ghs) !== newBasePrice;
         const { error } = await supabase.from("rooms").update(payload).eq("id", editId);
         if (error) throw error;
       } else {
         const { error } = await supabase.from("rooms").insert(payload);
         if (error) throw error;
       }
+      return { basePriceChanged };
     },
-    onSuccess: () => {
+    onSuccess: async (result) => {
       qc.invalidateQueries({ queryKey: ["admin-rooms"] });
       toast.success(editId ? "Room updated" : "Room created");
       setOpen(false);
       resetForm();
+
+      // If base price changed, the DB trigger has already cleared stale
+      // rate_overrides. Re-run the dynamic pricing engine so fresh rates
+      // are computed from the new base price across the next 90 days.
+      if (result?.basePriceChanged) {
+        try {
+          await supabase.functions.invoke("dynamic-pricing", {
+            body: { days_ahead: 90 },
+          });
+          qc.invalidateQueries({ queryKey: ["admin-inventory"] });
+          toast.success("Inventory rates re-synced");
+        } catch (err) {
+          console.error("Dynamic pricing re-sync failed", err);
+          toast.error("Saved, but rate re-sync failed. Run pricing engine manually.");
+        }
+      }
     },
     onError: (e) => toast.error(e.message),
   });
