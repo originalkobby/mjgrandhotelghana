@@ -63,15 +63,17 @@ serve(async (req) => {
 
     for (const booking of expiredBookings || []) {
       let newStatus: string;
+      let shouldReleaseInventory = false;
 
       if (booking.payment_status === "paid") {
-        // Paid → Completed
+        // Paid → Completed (guest stayed; nights remain consumed, no release)
         newStatus = "completed";
         results.completed++;
       } else {
-        // Not paid → No Show
+        // Not paid → No Show (release the nights back to availability)
         newStatus = "no_show";
         results.noShow++;
+        shouldReleaseInventory = true;
       }
 
       // Update booking status
@@ -88,7 +90,9 @@ serve(async (req) => {
         note: `Auto-status: check-out date ${booking.check_out} reached. Payment: ${booking.payment_status}`,
       });
 
-      results.inventoryReleased += await releaseInventoryForBooking(supabase, booking);
+      if (shouldReleaseInventory) {
+        results.inventoryReleased += await releaseInventoryForBooking(supabase, booking);
+      }
     }
 
     return new Response(
