@@ -30,6 +30,7 @@ import type { Database } from "@/integrations/supabase/types";
 import { formatBookingLabel, getPaymentDisplay } from "@/lib/bookingLifecycle";
 import { useBookingLifecycleSync } from "@/hooks/useBookingLifecycleSync";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { releaseInventory, reserveInventory, getInventoryAction } from "@/lib/inventorySync";
 
 type BookingStatus = Database["public"]["Enums"]["booking_status"];
 
@@ -145,7 +146,11 @@ export default function Bookings() {
   });
 
   useBookingLifecycleSync({
-    onSynced: () => queryClient.invalidateQueries({ queryKey: ["admin-bookings"] }),
+    onSynced: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-inventory"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-overview"] });
+    },
   });
 
   const bookings = search.trim()
@@ -183,46 +188,30 @@ export default function Bookings() {
       .eq("id", selectedBooking.id);
 
     if (!error) {
+      // Sync inventory based on status transition
+      const action = getInventoryAction(oldStatus, newStatus);
+      let inventoryNote: string | null = null;
+      if (action === "release") {
+        const nights = await releaseInventory(selectedBooking.id);
+        inventoryNote = `Released ${nights} night${nights === 1 ? "" : "s"} of inventory`;
+      } else if (action === "reserve") {
+        const nights = await reserveInventory(selectedBooking.id);
+        inventoryNote = `Re-booked ${nights} night${nights === 1 ? "" : "s"} of inventory`;
+      }
+
+      const noteParts: string[] = [];
+      if (roomNumber && roomNumber !== (selectedBooking.room_number ?? "")) {
+        noteParts.push(`Room number assigned: ${roomNumber}`);
+      }
+      if (inventoryNote) noteParts.push(inventoryNote);
+
       await supabase.from("booking_audit_log" as any).insert({
         booking_id: selectedBooking.id,
         old_status: oldStatus,
         new_status: newStatus,
         changed_by: user?.id || null,
-        note: roomNumber && roomNumber !== (selectedBooking.room_number ?? "")
-          ? `Room number assigned: ${roomNumber}`
-          : null,
+        note: noteParts.length > 0 ? noteParts.join(" · ") : null,
       });
-
-      // Decrement room_inventory when cancelling from a non-cancelled state
-      if (newStatus === "cancelled" && oldStatus !== "cancelled") {
-        const { data: bookingRow } = await supabase
-          .from("bookings")
-          .select("room_id, check_in, check_out")
-          .eq("id", selectedBooking.id)
-          .single();
-
-        if (bookingRow) {
-          const ciDate = new Date(bookingRow.check_in);
-          const coDate = new Date(bookingRow.check_out);
-          const d = new Date(ciDate);
-          while (d < coDate) {
-            const dateStr = d.toISOString().split("T")[0];
-            const { data: inv } = await supabase
-              .from("room_inventory")
-              .select("id, booked_count")
-              .eq("room_id", bookingRow.room_id)
-              .eq("date", dateStr)
-              .maybeSingle();
-            if (inv && inv.booked_count > 0) {
-              await supabase
-                .from("room_inventory")
-                .update({ booked_count: inv.booked_count - 1 })
-                .eq("id", inv.id);
-            }
-            d.setDate(d.getDate() + 1);
-          }
-        }
-      }
     }
 
     setUpdating(false);
@@ -235,6 +224,8 @@ export default function Bookings() {
     } else {
       toast({ title: "Updated", description: `Booking ${selectedBooking.reference_code} → ${newStatus}` });
       queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-inventory"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-overview"] });
     }
   };
 
@@ -275,6 +266,7 @@ export default function Bookings() {
       setPaymentBooking(null);
       setPaymentAmount("");
       queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-overview"] });
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     } finally {
