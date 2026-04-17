@@ -347,7 +347,7 @@ export default function Bookings() {
             <SelectItem value="all">All Statuses</SelectItem>
             {STATUS_OPTIONS.map((s) => (
               <SelectItem key={s} value={s} className="capitalize">
-                {s.replace("_", " ")}
+                {STATUS_LABELS[s] ?? s.replace("_", " ")}
               </SelectItem>
             ))}
           </SelectContent>
@@ -449,8 +449,8 @@ export default function Bookings() {
                           {formatCurrency(b.final_total_ghs)}
                         </td>
                         <td className="px-4 py-3">
-                          <Badge variant="outline" className={`text-xs capitalize ${STATUS_COLORS[b.status] ?? ""}`}>
-                            {formatBookingLabel(pd.effectiveStatus)}
+                          <Badge variant="outline" className={`text-xs capitalize ${STATUS_COLORS[pd.effectiveStatus] ?? STATUS_COLORS[b.status] ?? ""}`}>
+                            {STATUS_LABELS[pd.effectiveStatus] ?? formatBookingLabel(pd.effectiveStatus)}
                           </Badge>
                         </td>
                         <td className="px-4 py-3">
@@ -601,7 +601,7 @@ export default function Bookings() {
                   <SelectContent>
                     {STATUS_OPTIONS.map((s) => (
                       <SelectItem key={s} value={s} className="capitalize">
-                        {s.replace("_", " ")}
+                        {STATUS_LABELS[s] ?? s.replace("_", " ")}
                       </SelectItem>
                     ))}
                   </SelectContent>
