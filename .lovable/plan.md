@@ -1,33 +1,44 @@
 
-The user wants to add a "room number" field to the room creation/edit form in the admin dashboard. Let me explore the current Rooms admin page and the rooms table schema.
+The user wants the inventory section (`/admin/inventory`) to automatically reflect the `total_units` value set on each room type in the Rooms admin page. Currently, `room_inventory.total_count` is set per row (per room×date), defaulting to 1, and is edited manually in the Inventory dialog. This creates a disconnect: setting "Total Rooms = 5" on a room type doesn't propagate to the inventory grid.
 
-Looking at the schema:
-- `rooms` table has: id, name, slug, description, base_price_ghs, bed_type, size_sqm, max_adults, max_children, amenities, images, is_active, sort_order
-- There's no `room_number` column on the `rooms` table currently
-- The `bookings` table has a `room_number` field (text), but that's per-booking assignment
+## Goal
+When a room's `total_units` changes (or a new room is created), all `room_inventory` rows for that room should reflect this as their `total_count`. New inventory rows created by the dynamic pricing engine or on-the-fly bookings should also use `total_units` as their default.
 
-Important consideration: A "room type" (e.g., Deluxe Suite) can have multiple physical rooms (101, 102, 103). The current `rooms` table represents room *types*, with `room_inventory.total_count` tracking how many physical units exist per type per date. So there are two interpretations:
+## Plan
 
-1. **Single room number** — add one `room_number` text column to `rooms` (simple, but limiting if a type has multiple units)
-2. **Multiple room numbers** — add `room_numbers text[]` array column so each room type can list its physical units (e.g., `['101','102','103']`)
+### 1. Database trigger — auto-sync `total_count` from `rooms.total_units`
+Add a Postgres trigger on `rooms` (AFTER UPDATE OF total_units): when `total_units` changes, update all `room_inventory` rows for that room where `date >= today` to set `total_count = NEW.total_units`. Past dates are left untouched to preserve historical accuracy.
 
-Option 2 aligns with how `total_count` already works in inventory. I should ask the user which they want before building.
+```sql
+CREATE OR REPLACE FUNCTION sync_inventory_total_count()
+RETURNS trigger AS $$
+BEGIN
+  IF NEW.total_units IS DISTINCT FROM OLD.total_units THEN
+    UPDATE room_inventory
+    SET total_count = NEW.total_units
+    WHERE room_id = NEW.id AND date >= CURRENT_DATE;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
-Actually, the user said "the room number" (singular) and mentioned "tracking inventory and room availability". Given the inventory system already supports multiple units per type via `total_count`, a list of room numbers is more meaningful. But I'll ask to be safe.
+CREATE TRIGGER rooms_sync_inventory
+AFTER UPDATE ON rooms
+FOR EACH ROW EXECUTE FUNCTION sync_inventory_total_count();
+```
 
-## Plan: Add Room Number(s) to Room Form
+### 2. One-time backfill
+Update existing `room_inventory` rows (date >= today) so `total_count = rooms.total_units` for each room. This brings current inventory in sync with the values just configured.
 
-### Database
-- Add a new `room_numbers text[]` column (default `'{}'`) to the `rooms` table via migration. Array supports room types with multiple physical units (e.g., Deluxe has rooms 201, 202, 203).
+### 3. Dynamic pricing edge function — use `total_units` as default
+In `supabase/functions/dynamic-pricing/index.ts`, when inserting new `room_inventory` rows, set `total_count` to the room's `total_units` instead of the hard-coded default (1).
 
-### Admin Form (`src/pages/admin/Rooms.tsx`)
-- Add a "Room Numbers" input to the dialog form (comma-separated entry, same UX pattern as Amenities).
-- Include `room_numbers` in `emptyForm`, `openEdit`, and the insert/update mutation payload (split by comma, trim, filter empty).
-- Add a "Rooms" column to the table listing showing the room numbers as small badges (or comma-separated text).
+### 4. Inventory admin UI — read-only `total_count` with hint
+In `src/pages/admin/Inventory.tsx`, the "Total Rooms" input in the edit dialog stays editable for one-off date overrides (e.g., closing 2 of 5 rooms for maintenance on a specific date), but add a small helper text under the field: "Default comes from the room type's Total Rooms setting. Change here only for date-specific overrides."
 
-### No changes needed to
-- Booking flow (bookings already have their own `room_number` text field for assignment).
-- Inventory logic (`total_count` continues to track availability count).
+### No changes needed
+- `create-booking` already increments `booked_count` against existing inventory rows.
+- `RoomSelectionStep` reads `total_count - booked_count` directly, so it picks up changes automatically.
 
-### Optional follow-up (not in this plan)
-- Auto-suggesting available room numbers when assigning a booking, drawn from the room type's `room_numbers` list.
+### Result
+Editing "Total Rooms" on a room type instantly updates all future inventory rows for that room, keeping the Inventory grid, public availability, and the booking engine in sync.
