@@ -1,50 +1,74 @@
 
-The user wants the same auto-sync behavior we set up for `total_units` → `room_inventory.total_count` to also apply to room **rates**: when a room's `base_price_ghs` changes in `/admin/rooms`, the inventory grid and public booking engine should reflect the new rate.
+The user wants the admin Bookings page (`/admin/bookings`) to be fully bidirectionally synced with the Inventory page (`/admin/inventory`), so that any booking lifecycle action (create, status change, check-in, check-out, cancellation, no-show) immediately and correctly reflects in `room_inventory.booked_count`, and the Inventory grid stays accurate.
 
-## Current state
-- `rooms.base_price_ghs` is the canonical rate per room type.
-- `room_inventory.rate_override` is a per-date override (nullable). When NULL, the booking flow falls back to `base_price_ghs`.
-- The dynamic-pricing engine writes computed `rate_override` values per date.
-- Editing `base_price_ghs` today does NOT touch existing inventory rows, so future dates keep stale `rate_override` values from the last pricing run.
+## Current state audit
+
+**What works:**
+- `create-booking` edge function increments `booked_count` per night.
+- `auto-status` edge function releases inventory on completed/no-show via `releaseInventoryForBooking`.
+- `cancel-booking` edge function releases inventory on guest-side cancellation.
+- `extend-checkout` edge function increments inventory for added nights.
+- DB triggers sync `total_units` → `total_count` and `base_price_ghs` → clear `rate_override`.
+
+**Gaps in `src/pages/admin/Bookings.tsx`:**
+1. **Status changes are NOT inventory-aware.** `handleStatusUpdate` only decrements inventory when status moves to `cancelled`. It does NOT release inventory for `no_show` or `completed`. It does NOT re-book inventory if an admin reverses a cancellation back to `confirmed`. It does NOT adjust inventory if `check_in`/`check_out` dates change.
+2. **No inventory cache invalidation.** After a status update or payment, only `["admin-bookings"]` is invalidated. The Inventory grid (`["admin-inventory"]`) keeps showing stale `booked_count` until a manual refresh.
+3. **Check-in/check-out timestamps** (recorded from the Guests page) don't trigger inventory recheck. While `actual_check_in/out` is metadata-only and shouldn't change `booked_count`, an early checkout should optionally release the remaining nights — currently nothing does that.
+4. **No lifecycle sync hook** on the Bookings page. Overview uses `useBookingLifecycleSync` to auto-run `auto-status` every 30s; Bookings doesn't, so expired bookings keep blocking inventory until someone visits Overview.
+5. **Date edits not supported.** There's no UI to edit `check_in`/`check_out` of an existing booking, but if status changes to cancelled, the release loop does run — however it doesn't write an audit-log style note and may double-decrement if the booking was already cancelled.
 
 ## The fix
 
-### 1. Database trigger — propagate base price changes
-Extend the existing `sync_inventory_total_count()` pattern with a second trigger on `rooms` that fires when `base_price_ghs` changes. It will **clear** `rate_override` (set to NULL) for all future inventory rows for that room, so the booking flow falls back to the new base price immediately.
+### 1. Centralize inventory mutations in a shared helper
+Create `src/lib/inventorySync.ts` exporting:
+- `releaseInventory(bookingId)` — decrements `booked_count` for each night between `check_in` and `check_out`, clamped at 0.
+- `reserveInventory(bookingId)` — increments `booked_count` for each night (used when reversing a cancellation).
 
-```sql
-CREATE OR REPLACE FUNCTION sync_inventory_rate_on_base_change()
-RETURNS trigger AS $$
-BEGIN
-  IF NEW.base_price_ghs IS DISTINCT FROM OLD.base_price_ghs THEN
-    UPDATE room_inventory
-    SET rate_override = NULL
-    WHERE room_id = NEW.id AND date >= CURRENT_DATE;
-  END IF;
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+Both read the booking, iterate dates, and update `room_inventory` rows. Reused by Bookings UI and any future surface.
+
+### 2. Make `handleStatusUpdate` fully lifecycle-aware
+In `src/pages/admin/Bookings.tsx`, expand the status transition logic:
+
+| Old status | New status | Inventory action |
+|---|---|---|
+| confirmed/pending | cancelled | release |
+| confirmed/pending | no_show | release |
+| confirmed/pending | completed | release (room is free again) |
+| cancelled/no_show | confirmed | reserve (re-book) |
+| confirmed | confirmed (no change) | none |
+
+Apply the action via the helper, then write a descriptive audit-log note (e.g., "Released 3 nights of inventory") and invalidate both `["admin-bookings"]` and `["admin-inventory"]`.
+
+### 3. Invalidate inventory on every booking write
+After `handleStatusUpdate`, `handleRecordPayment`, and the room assignment flow, call:
+```
+queryClient.invalidateQueries({ queryKey: ["admin-inventory"] });
+queryClient.invalidateQueries({ queryKey: ["admin-overview"] });
 ```
 
-Why clear instead of overwrite? `rate_override` exists specifically as a per-date override layer. Setting it to NULL means "use the room's base price," which is exactly the desired behavior after a base-price change. Admins or the dynamic-pricing engine can then re-set per-date overrides as needed.
+### 4. Wire `useBookingLifecycleSync` into Bookings page
+Add the same 30-second poll the Overview uses, with `onSynced` invalidating `["admin-bookings"]` and `["admin-inventory"]`. Expired bookings auto-flip to completed/no-show and inventory releases without anyone visiting Overview.
 
-### 2. Auto re-run dynamic pricing
-After clearing overrides, immediately invoke the `dynamic-pricing` edge function from `src/pages/admin/Rooms.tsx` after a successful save. This regenerates seasonal/occupancy/day-of-week adjusted rates against the new base price for the next 90 days. Show a subtle toast: "Inventory rates re-synced."
+### 5. Optional early-checkout release (Guests page)
+When a front-desk user records `actual_check_out` earlier than the scheduled `check_out`, prompt: "Release remaining N nights to inventory?" If yes, update `bookings.check_out` to today and call `releaseInventory` for the freed nights, plus audit log.
 
-### 3. Booking flow already works
-- `RoomSelectionStep` and `create-booking` already use `rate_override ?? base_price_ghs`, so clearing overrides immediately makes new rates live.
-- `Inventory.tsx` already displays `rate_override || base_price_ghs` per cell.
+### 6. Realtime channel (lightweight)
+Subscribe Inventory page to Supabase Realtime on `room_inventory` changes (already pattern-friendly since RLS allows public select). When any row changes, refetch. This guarantees cross-tab sync without polling.
 
-### 4. Helper hint in Inventory edit dialog
-Add a one-liner under the "Rate Override" field: "Leave blank to use the room type's base price (GH₵ X)."
+```text
+Bookings UI ──status change──▶ inventorySync helper ──update room_inventory──▶ Realtime
+                                       │                                          │
+                                       ▼                                          ▼
+                              audit log entry                          Inventory grid refetch
+```
 
-## No changes needed
-- Database schema (no new columns).
-- `create-booking` edge function (already falls back correctly).
-- `RoomSelectionStep` (already falls back correctly).
+## Files touched
+- `src/lib/inventorySync.ts` — new shared helper
+- `src/pages/admin/Bookings.tsx` — expanded status logic, invalidations, lifecycle sync hook
+- `src/pages/admin/Inventory.tsx` — Realtime subscription on `room_inventory`
+- `src/pages/admin/Guests.tsx` — early-checkout prompt (optional, can defer)
+
+No DB schema changes. No edge function changes (existing `auto-status`, `cancel-booking`, `extend-checkout` already do the right thing).
 
 ## Result
-Editing a room's base price in `/admin/rooms` instantly:
-1. Clears stale per-date rate overrides for that room.
-2. Triggers a dynamic-pricing run to recompute fresh rates from the new base.
-3. Public booking engine and inventory grid show the new rates immediately.
+Every booking action in the admin dashboard — manual status change, payment, auto-expiry, cancellation, extension — instantly and correctly updates `room_inventory`, and the Inventory grid reflects it within seconds via Realtime. No more stale `booked_count` and no more drift between the two pages.
