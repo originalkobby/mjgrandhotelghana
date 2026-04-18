@@ -198,19 +198,25 @@ export default function AddOnsStep({ selectedRoom, selectedAddOns, onToggle, onN
                     </option>
                     {SPA_TREATMENTS.map((t) => (
                       <optgroup key={t.name} label={t.name}>
-                        {t.prices.map((p) => (
-                          <option key={`${t.name}-${p.duration}`} value={`${t.name}|${p.duration}`}>
-                            {t.name} – {p.duration} min · GH₵ {p.price_ghs}
-                          </option>
-                        ))}
+                        {t.prices.map((p) => {
+                          const usd = rate > 0 ? p.price_ghs / rate : p.price_ghs;
+                          return (
+                            <option key={`${t.name}-${p.duration}`} value={`${t.name}|${p.duration}`}>
+                              {t.name} – {p.duration} min · {toUsd(usd)} (GH₵ {p.price_ghs})
+                            </option>
+                          );
+                        })}
                       </optgroup>
                     ))}
                     <optgroup label="Other">
-                      {SPA_FLAT.map((f) => (
-                        <option key={f.name} value={`${f.name}|flat`}>
-                          {f.name} · GH₵ {f.price_ghs}
-                        </option>
-                      ))}
+                      {SPA_FLAT.map((f) => {
+                        const usd = rate > 0 ? f.price_ghs / rate : f.price_ghs;
+                        return (
+                          <option key={f.name} value={`${f.name}|flat`}>
+                            {f.name} · {toUsd(usd)} (GH₵ {f.price_ghs})
+                          </option>
+                        );
+                      })}
                     </optgroup>
                   </select>
                 )}
