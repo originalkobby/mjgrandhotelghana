@@ -110,7 +110,11 @@ export default function AddOnsStep({ selectedRoom, selectedAddOns, onToggle, onN
     const isSelected = selectedAddOns.some((a) => a.id === addOn.id);
     const payload = { id: addOn.id, name: `Spa – ${label}`, price_ghs: priceUsd, icon: addOn.icon };
     if (isSelected) {
+      // Already selected: remove then re-add to update price/label
       onToggle(payload);
+      onToggle(payload);
+    } else {
+      // Not selected yet: auto-select with the chosen treatment
       onToggle(payload);
     }
   };
