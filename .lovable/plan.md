@@ -1,74 +1,53 @@
 
-The user wants the admin Bookings page (`/admin/bookings`) to be fully bidirectionally synced with the Inventory page (`/admin/inventory`), so that any booking lifecycle action (create, status change, check-in, check-out, cancellation, no-show) immediately and correctly reflects in `room_inventory.booked_count`, and the Inventory grid stays accurate.
 
-## Current state audit
+## Goal
+On the Spa Package card in `src/components/booking/AddOnsStep.tsx`, add an inline dropdown that lets the guest pick a massage treatment + duration (45/60/90 min) from the uploaded price list. The selected option drives the add-on price. Card visual size stays the same as the other add-on cards.
 
-**What works:**
-- `create-booking` edge function increments `booked_count` per night.
-- `auto-status` edge function releases inventory on completed/no-show via `releaseInventoryForBooking`.
-- `cancel-booking` edge function releases inventory on guest-side cancellation.
-- `extend-checkout` edge function increments inventory for added nights.
-- DB triggers sync `total_units` → `total_count` and `base_price_ghs` → clear `rate_override`.
+## Spa price list (from image, in GH₵)
 
-**Gaps in `src/pages/admin/Bookings.tsx`:**
-1. **Status changes are NOT inventory-aware.** `handleStatusUpdate` only decrements inventory when status moves to `cancelled`. It does NOT release inventory for `no_show` or `completed`. It does NOT re-book inventory if an admin reverses a cancellation back to `confirmed`. It does NOT adjust inventory if `check_in`/`check_out` dates change.
-2. **No inventory cache invalidation.** After a status update or payment, only `["admin-bookings"]` is invalidated. The Inventory grid (`["admin-inventory"]`) keeps showing stale `booked_count` until a manual refresh.
-3. **Check-in/check-out timestamps** (recorded from the Guests page) don't trigger inventory recheck. While `actual_check_in/out` is metadata-only and shouldn't change `booked_count`, an early checkout should optionally release the remaining nights — currently nothing does that.
-4. **No lifecycle sync hook** on the Bookings page. Overview uses `useBookingLifecycleSync` to auto-run `auto-status` every 30s; Bookings doesn't, so expired bookings keep blocking inventory until someone visits Overview.
-5. **Date edits not supported.** There's no UI to edit `check_in`/`check_out` of an existing booking, but if status changes to cancelled, the release loop does run — however it doesn't write an audit-log style note and may double-decrement if the booking was already cancelled.
+| Treatment | 45 min | 60 min | 90 min |
+|---|---|---|---|
+| Neck and Shoulder | 450 | 670 | 900 |
+| Swedish Massage | 450 | 670 | 900 |
+| Deep Tissue | 450 | 670 | 900 |
+| Thailand Oil | 480 | 720 | 950 |
+| Thailand Traditional | 480 | 720 | 950 |
+| Sports Massage | 500 | 750 | 1000 |
+| Body Scrub | 500 | 750 | 1000 |
+| Hot Stones | 500 | 750 | 1000 |
+| Hot Oil | 500 | 750 | 1000 |
+| Reflexology | 500 | 750 | 1000 |
+| Therapeutic Massage | 500 | 750 | 1000 |
+| Aromatherapy | 500 | 750 | 1000 |
+| Herbal Ball | 600 | 900 | 1200 |
+| Lotion Massage | 500 | 750 | 1000 |
+| Couple Massage | 800 | 1200 | 1600 |
+| Combo Massage | 800 | 1200 | 1600 |
+| Four Hands Massage | 800 | 1200 | 1600 |
+| Sauna | 250 (flat) | — | — |
 
-## The fix
+Stored as a static `SPA_OPTIONS` const inside `AddOnsStep.tsx` flattened to `{ label: "Swedish Massage – 60 min", price_ghs: 670 }` entries. Sauna appears once with no duration.
 
-### 1. Centralize inventory mutations in a shared helper
-Create `src/lib/inventorySync.ts` exporting:
-- `releaseInventory(bookingId)` — decrements `booked_count` for each night between `check_in` and `check_out`, clamped at 0.
-- `reserveInventory(bookingId)` — increments `booked_count` for each night (used when reversing a cancellation).
+## Implementation outline
 
-Both read the booking, iterate dates, and update `room_inventory` rows. Reused by Bookings UI and any future surface.
-
-### 2. Make `handleStatusUpdate` fully lifecycle-aware
-In `src/pages/admin/Bookings.tsx`, expand the status transition logic:
-
-| Old status | New status | Inventory action |
-|---|---|---|
-| confirmed/pending | cancelled | release |
-| confirmed/pending | no_show | release |
-| confirmed/pending | completed | release (room is free again) |
-| cancelled/no_show | confirmed | reserve (re-book) |
-| confirmed | confirmed (no change) | none |
-
-Apply the action via the helper, then write a descriptive audit-log note (e.g., "Released 3 nights of inventory") and invalidate both `["admin-bookings"]` and `["admin-inventory"]`.
-
-### 3. Invalidate inventory on every booking write
-After `handleStatusUpdate`, `handleRecordPayment`, and the room assignment flow, call:
-```
-queryClient.invalidateQueries({ queryKey: ["admin-inventory"] });
-queryClient.invalidateQueries({ queryKey: ["admin-overview"] });
-```
-
-### 4. Wire `useBookingLifecycleSync` into Bookings page
-Add the same 30-second poll the Overview uses, with `onSynced` invalidating `["admin-bookings"]` and `["admin-inventory"]`. Expired bookings auto-flip to completed/no-show and inventory releases without anyone visiting Overview.
-
-### 5. Optional early-checkout release (Guests page)
-When a front-desk user records `actual_check_out` earlier than the scheduled `check_out`, prompt: "Release remaining N nights to inventory?" If yes, update `bookings.check_out` to today and call `releaseInventory` for the freed nights, plus audit log.
-
-### 6. Realtime channel (lightweight)
-Subscribe Inventory page to Supabase Realtime on `room_inventory` changes (already pattern-friendly since RLS allows public select). When any row changes, refetch. This guarantees cross-tab sync without polling.
-
-```text
-Bookings UI ──status change──▶ inventorySync helper ──update room_inventory──▶ Realtime
-                                       │                                          │
-                                       ▼                                          ▼
-                              audit log entry                          Inventory grid refetch
-```
+1. **Detect the Spa Package card** by name (`addOn.name === "Spa Package"`) inside the `addOns.map`.
+2. **Extract the card markup** into a small inline render so non-spa cards stay as `<motion.button>` (no behavior change), and the spa card becomes a `<motion.div>` to legally host an interactive `<select>`.
+3. **Inside the spa card**, below the description and above the price line, add a compact native `<select>` (uses existing shadcn `Select` would push height; native select keeps height unchanged):
+   - `h-8 text-xs w-full rounded-md border border-border bg-background px-2`
+   - First option: "Choose treatment…" (disabled, value `""`).
+   - Remaining options grouped by `<optgroup>` per treatment with 45/60/90 entries; Sauna as a flat option.
+4. **Local state** `const [spaChoice, setSpaChoice] = useState<{ label: string; price_ghs: number } | null>(null)`.
+5. **Click behavior on the spa card**: tapping the card body (outside the select) toggles selection only when a treatment has been picked. If `spaChoice` is null, show a tiny inline hint "Pick a treatment to add" instead of the Check toggle. The select's `onClick`/`onChange` use `e.stopPropagation()` so opening the dropdown does not toggle selection.
+6. **Price display** in the spa card uses `spaChoice?.price_ghs ?? minSpaPrice` (250) so the card always shows a sensible "from" value; once a treatment is picked, it shows the exact price. Format: when no choice, prefix "From"; when chosen, show exact.
+7. **Toggle integration**: when user clicks the spa card after a choice, call `onToggle({ id: addOn.id, name: \`Spa – ${spaChoice.label}\`, price_ghs: spaChoice.price_ghs, icon: addOn.icon })`. If `spaChoice` changes while the spa add-on is already selected, re-toggle so the booking total reflects the new price (toggle off then on with the new payload).
+8. **Selection state lookup** for the spa card uses `selectedAddOns.some(a => a.id === addOn.id)` (unchanged), so the green check still appears.
+9. **Size parity**: native `<select>` is `h-8`, replacing the previously empty space between description and price. The card's existing `p-5` padding and 2-line description clamp keep total height aligned with neighbors. Verified mentally against current 1116×682 viewport: spa card height matches the others.
 
 ## Files touched
-- `src/lib/inventorySync.ts` — new shared helper
-- `src/pages/admin/Bookings.tsx` — expanded status logic, invalidations, lifecycle sync hook
-- `src/pages/admin/Inventory.tsx` — Realtime subscription on `room_inventory`
-- `src/pages/admin/Guests.tsx` — early-checkout prompt (optional, can defer)
+- `src/components/booking/AddOnsStep.tsx` — add `SPA_OPTIONS` constant, branch render for `Spa Package`, dropdown + state + toggle wiring. No other files change.
 
-No DB schema changes. No edge function changes (existing `auto-status`, `cancel-booking`, `extend-checkout` already do the right thing).
+## Out of scope
+- No DB schema change (spa price list is static UI; the `add_ons.price_ghs` for "Spa Package" stays as a default/from-price).
+- No edge function or `create-booking` changes — the chosen price flows through the existing add-on payload exactly like any other add-on price.
+- Other add-on cards untouched.
 
-## Result
-Every booking action in the admin dashboard — manual status change, payment, auto-expiry, cancellation, extension — instantly and correctly updates `room_inventory`, and the Inventory grid reflects it within seconds via Realtime. No more stale `booked_count` and no more drift between the two pages.
