@@ -58,8 +58,8 @@ const SPA_MIN_PRICE = 250;
 export default function AddOnsStep({ selectedRoom, selectedAddOns, onToggle, onNext, onBack }: Props) {
   const [addOns, setAddOns] = useState<AddOnData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [spaChoice, setSpaChoice] = useState<{ label: string; price_ghs: number } | null>(null);
-  const { toUsd, toGhs } = useCurrency();
+  const [spaChoice, setSpaChoice] = useState<{ label: string; priceUsd: number } | null>(null);
+  const { toUsd, toGhs, rate } = useCurrency();
 
   const DYNAMIC_ADDONS = ["Early Check-in", "Late Checkout"];
 
