@@ -58,8 +58,8 @@ const SPA_MIN_PRICE = 250;
 export default function AddOnsStep({ selectedRoom, selectedAddOns, onToggle, onNext, onBack }: Props) {
   const [addOns, setAddOns] = useState<AddOnData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [spaChoice, setSpaChoice] = useState<{ label: string; price_ghs: number } | null>(null);
-  const { toUsd, toGhs } = useCurrency();
+  const [spaChoice, setSpaChoice] = useState<{ label: string; priceUsd: number } | null>(null);
+  const { toUsd, toGhs, rate } = useCurrency();
 
   const DYNAMIC_ADDONS = ["Early Check-in", "Late Checkout"];
 
@@ -86,36 +86,38 @@ export default function AddOnsStep({ selectedRoom, selectedAddOns, onToggle, onN
   const handleSpaChange = (value: string, addOn: AddOnData) => {
     if (!value) return;
     const [name, durationStr] = value.split("|");
-    let price = 0;
+    let priceGhs = 0;
     let label = "";
     if (durationStr === "flat") {
       const flat = SPA_FLAT.find((f) => f.name === name);
       if (!flat) return;
-      price = flat.price_ghs;
+      priceGhs = flat.price_ghs;
       label = name;
     } else {
       const treatment = SPA_TREATMENTS.find((t) => t.name === name);
       const opt = treatment?.prices.find((p) => p.duration === Number(durationStr));
       if (!treatment || !opt) return;
-      price = opt.price_ghs;
+      priceGhs = opt.price_ghs;
       label = `${name} – ${opt.duration} min`;
     }
 
-    const newChoice = { label, price_ghs: price };
+    // Convert GH₵ list price → USD so it matches the platform convention
+    // (other add-ons store USD values in `price_ghs` field).
+    const priceUsd = rate > 0 ? priceGhs / rate : priceGhs;
+    const newChoice = { label, priceUsd };
     setSpaChoice(newChoice);
 
     const isSelected = selectedAddOns.some((a) => a.id === addOn.id);
-    const payload = { id: addOn.id, name: `Spa – ${label}`, price_ghs: price, icon: addOn.icon };
+    const payload = { id: addOn.id, name: `Spa – ${label}`, price_ghs: priceUsd, icon: addOn.icon };
     if (isSelected) {
-      // Re-toggle so total reflects the updated treatment price
-      onToggle(payload); // remove existing
-      onToggle(payload); // re-add with new price
+      onToggle(payload);
+      onToggle(payload);
     }
   };
 
   const handleSpaCardClick = (addOn: AddOnData) => {
     if (!spaChoice) return;
-    onToggle({ id: addOn.id, name: `Spa – ${spaChoice.label}`, price_ghs: spaChoice.price_ghs, icon: addOn.icon });
+    onToggle({ id: addOn.id, name: `Spa – ${spaChoice.label}`, price_ghs: spaChoice.priceUsd, icon: addOn.icon });
   };
 
   return (
@@ -156,8 +158,8 @@ export default function AddOnsStep({ selectedRoom, selectedAddOns, onToggle, onN
                 : "border-border bg-card hover:border-accent/40"
             }`;
 
-            const displayPrice = isSpa ? (spaChoice?.price_ghs ?? SPA_MIN_PRICE) : addOn.price_ghs;
-            const pricePrefix = isSpa && !spaChoice ? "From " : "";
+            const spaDescription = "Choose from 17 treatments — 45, 60, or 90 min sessions. Sauna available.";
+            const description = isSpa ? spaDescription : addOn.description;
 
             const cardInner = (
               <>
@@ -170,7 +172,7 @@ export default function AddOnsStep({ selectedRoom, selectedAddOns, onToggle, onN
                   <Icon className={`w-5 h-5 ${isSelected ? "text-accent" : "text-muted-foreground"}`} />
                   <h4 className="font-sans text-sm font-semibold text-foreground">{addOn.name}</h4>
                 </div>
-                <p className="font-sans text-xs text-muted-foreground mt-1 line-clamp-2">{addOn.description}</p>
+                <p className="font-sans text-xs text-muted-foreground mt-1 line-clamp-2">{description}</p>
                 {isSpa && (
                   <select
                     value={
@@ -212,16 +214,24 @@ export default function AddOnsStep({ selectedRoom, selectedAddOns, onToggle, onN
                     </optgroup>
                   </select>
                 )}
-                <p className="font-sans text-sm font-semibold text-accent mt-3">
-                  {pricePrefix}
-                  {toUsd(displayPrice)}
-                  <span className="block text-xs font-normal text-muted-foreground">
-                    {pricePrefix}
-                    {toGhs(displayPrice)}
-                  </span>
-                </p>
-                {isSpa && !spaChoice && !isSelected && (
-                  <p className="mt-1 text-[10px] text-muted-foreground italic">Pick a treatment to add</p>
+                {isSpa ? (
+                  spaChoice ? (
+                    <p className="font-sans text-sm font-semibold text-accent mt-3">
+                      {toUsd(spaChoice.priceUsd)}
+                      <span className="block text-xs font-normal text-muted-foreground">
+                        {toGhs(spaChoice.priceUsd)}
+                      </span>
+                    </p>
+                  ) : (
+                    <p className="mt-3 text-[11px] text-muted-foreground italic">Pick a treatment to see price</p>
+                  )
+                ) : (
+                  <p className="font-sans text-sm font-semibold text-accent mt-3">
+                    {toUsd(addOn.price_ghs)}
+                    <span className="block text-xs font-normal text-muted-foreground">
+                      {toGhs(addOn.price_ghs)}
+                    </span>
+                  </p>
                 )}
               </>
             );
