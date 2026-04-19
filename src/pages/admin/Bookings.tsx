@@ -161,8 +161,33 @@ export default function Bookings() {
     },
   });
 
+  // Try to parse the search as a date (DD/MM/YYYY, D/M/YYYY, or YYYY-MM-DD)
+  const parseSearchDate = (raw: string): string | null => {
+    const s = raw.trim();
+    // ISO YYYY-MM-DD
+    const iso = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if (iso) {
+      const [, y, m, d] = iso;
+      return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+    }
+    // British DD/MM/YYYY or D/M/YY(YY)
+    const gb = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+    if (gb) {
+      const [, d, m, yRaw] = gb;
+      const y = yRaw.length === 2 ? `20${yRaw}` : yRaw;
+      return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+    }
+    return null;
+  };
+
+  const searchDate = parseSearchDate(search);
+
   const bookings = search.trim()
     ? allBookings.filter((b) => {
+        // If query is a valid date, only return bookings whose stay covers that date
+        if (searchDate) {
+          return b.check_in <= searchDate && searchDate <= b.check_out;
+        }
         const q = search.toLowerCase();
         return (
           b.reference_code.toLowerCase().includes(q) ||
@@ -170,12 +195,7 @@ export default function Bookings() {
           b.guests?.full_name?.toLowerCase().includes(q) ||
           b.guests?.email?.toLowerCase().includes(q) ||
           b.guests?.phone?.toLowerCase().includes(q) ||
-          b.room_number?.toLowerCase().includes(q) ||
-          formatDateGB(b.check_in).toLowerCase().includes(q) ||
-          formatDateGB(b.check_out).toLowerCase().includes(q) ||
-          formatDateGB(b.created_at).toLowerCase().includes(q) ||
-          b.check_in.includes(q) ||
-          b.check_out.includes(q)
+          b.room_number?.toLowerCase().includes(q)
         );
       })
     : allBookings;
