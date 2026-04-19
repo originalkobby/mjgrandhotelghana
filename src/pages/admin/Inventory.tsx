@@ -294,7 +294,7 @@ export default function Inventory() {
       <Card>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm font-sans border-collapse">
+            <table className="text-sm font-sans border-collapse">
               <thead>
                 <tr className="border-b border-border">
                   <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider sticky left-0 bg-card z-10 min-w-[140px]">
@@ -303,7 +303,7 @@ export default function Inventory() {
                   {days.map((d) => (
                     <th
                       key={d.toISOString()}
-                      className={`text-center px-2 py-3 text-xs font-medium uppercase tracking-wider min-w-[100px] ${
+                      className={`text-center px-2 py-3 text-xs font-medium uppercase tracking-wider w-[100px] ${
                         isSameDay(d, new Date()) ? "text-accent bg-accent/5" : "text-muted-foreground"
                       }`}
                     >
