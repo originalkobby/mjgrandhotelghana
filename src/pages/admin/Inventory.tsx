@@ -20,6 +20,12 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrency } from "@/contexts/CurrencyContext";
@@ -325,39 +331,71 @@ export default function Inventory() {
                         {days.map((d) => {
                           const cell = getCell(room.id, d);
                           const avail = cell.total_count - cell.booked_count;
+                          const pct = cell.total_count > 0 ? Math.round((cell.booked_count / cell.total_count) * 100) : 0;
+                          const rate = cell.rate_override ?? Number(room.base_price_ghs);
                           return (
                             <td key={d.toISOString()} className="px-1 py-1">
-                              <button
-                                onClick={() => openEdit(room, d)}
-                                className={`w-full rounded-md p-2 text-xs transition-colors hover:ring-2 hover:ring-ring/50 cursor-pointer ${occupancyColor(
-                                  cell.booked_count,
-                                  cell.total_count,
-                                  cell.is_closed
-                                )}`}
-                              >
-                                {cell.is_closed ? (
-                                  <div className="flex items-center justify-center gap-1">
-                                    <Lock className="w-3 h-3" />
-                                    <span>Closed</span>
-                                  </div>
-                                ) : (
-                                  <>
-                                    <div className="font-medium">
-                                      {cell.rate_override
-                                        ? fc(cell.rate_override)
-                                        : fc(Number(room.base_price_ghs))}
+                              <TooltipProvider delayDuration={200}>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <button
+                                      onClick={() => openEdit(room, d)}
+                                      className={`w-full rounded-md p-2 text-xs transition-colors hover:ring-2 hover:ring-ring/50 cursor-pointer ${occupancyColor(
+                                        cell.booked_count,
+                                        cell.total_count,
+                                        cell.is_closed
+                                      )}`}
+                                    >
+                                      {cell.is_closed ? (
+                                        <div className="flex items-center justify-center gap-1">
+                                          <Lock className="w-3 h-3" />
+                                          <span>Closed</span>
+                                        </div>
+                                      ) : (
+                                        <>
+                                          <div className="font-medium">
+                                            {cell.rate_override
+                                              ? fc(cell.rate_override)
+                                              : fc(Number(room.base_price_ghs))}
+                                          </div>
+                                          <div className="text-[10px] mt-0.5 opacity-70">
+                                            {cell.booked_count}/{cell.total_count} booked
+                                          </div>
+                                          {avail <= 2 && avail > 0 && (
+                                            <div className="text-[10px] font-semibold mt-0.5">
+                                              {avail} left
+                                            </div>
+                                          )}
+                                        </>
+                                      )}
+                                    </button>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" className="font-sans text-xs">
+                                    <div className="space-y-1">
+                                      <p className="font-semibold">
+                                        {room.name} · {format(d, "EEE, MMM d")}
+                                      </p>
+                                      {cell.is_closed ? (
+                                        <p className="text-muted-foreground">
+                                          Closed — no bookings accepted
+                                        </p>
+                                      ) : (
+                                        <>
+                                          <p>
+                                            Occupancy: <span className="font-medium">{pct}%</span> ({cell.booked_count}/{cell.total_count} booked, {avail} left)
+                                          </p>
+                                          <p>
+                                            Rate: <span className="font-medium">{fc(rate)}</span>
+                                            {cell.rate_override && (
+                                              <span className="text-muted-foreground"> (override)</span>
+                                            )}
+                                          </p>
+                                        </>
+                                      )}
                                     </div>
-                                    <div className="text-[10px] mt-0.5 opacity-70">
-                                      {cell.booked_count}/{cell.total_count} booked
-                                    </div>
-                                    {avail <= 2 && avail > 0 && (
-                                      <div className="text-[10px] font-semibold mt-0.5">
-                                        {avail} left
-                                      </div>
-                                    )}
-                                  </>
-                                )}
-                              </button>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
                             </td>
                           );
                         })}
