@@ -170,7 +170,12 @@ export default function Bookings() {
           b.guests?.full_name?.toLowerCase().includes(q) ||
           b.guests?.email?.toLowerCase().includes(q) ||
           b.guests?.phone?.toLowerCase().includes(q) ||
-          b.room_number?.toLowerCase().includes(q)
+          b.room_number?.toLowerCase().includes(q) ||
+          formatDateGB(b.check_in).toLowerCase().includes(q) ||
+          formatDateGB(b.check_out).toLowerCase().includes(q) ||
+          formatDateGB(b.created_at).toLowerCase().includes(q) ||
+          b.check_in.includes(q) ||
+          b.check_out.includes(q)
         );
       })
     : allBookings;
