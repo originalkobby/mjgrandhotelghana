@@ -367,11 +367,6 @@ export default function Inventory() {
                                         </div>
                                       ) : (
                                         <>
-                                          <div className="font-medium">
-                                            {cell.rate_override
-                                              ? fc(cell.rate_override)
-                                              : fc(Number(room.base_price_ghs))}
-                                          </div>
                                           <div className="text-[10px] mt-0.5 opacity-70">
                                             {cell.booked_count}/{cell.total_count} booked
                                           </div>
