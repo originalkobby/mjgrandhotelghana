@@ -1,30 +1,23 @@
 
 
 ## Goal
-Repaint the inventory grid cells in `src/pages/admin/Inventory.tsx` so the booked-vs-total ratio reads instantly as a heatmap: red = 0 bookings, green = fully booked, with amber/yellow gradient in between. Closed dates stay neutral (muted) since they're a separate concept from occupancy.
+Make the inventory grid render as a tight, evenly-spaced grid of square cells (like the screenshot) on all viewports including full desktop — not stretched across the available width.
 
-## Color mapping (occupancy = booked / total)
-
-| Occupancy | Color | Tailwind classes |
-|-----------|-------|------------------|
-| 0% (empty) | Red | `bg-red-100 text-red-700` |
-| 1–39% (near zero) | Orange | `bg-orange-100 text-orange-700` |
-| 40–69% (halfway) | Amber/yellow | `bg-amber-100 text-amber-800` |
-| 70–99% (near full) | Lime | `bg-lime-100 text-lime-700` |
-| 100% (full) | Green | `bg-green-100 text-green-800` |
-| Closed | Muted (unchanged) | `bg-muted text-muted-foreground` |
-
-These tones are soft enough to keep the minimalist luxury feel and stay readable against the existing card surface.
+## Observation
+The screenshot shows: room label column on the left + 6–7 fixed-size square cells per row with consistent small gaps. Currently on wide desktops the table stretches and `min-w-[100px]` columns expand; the screenshot's compact density is what we want preserved.
 
 ## Change
 **File:** `src/pages/admin/Inventory.tsx`
 
-Replace the `occupancyColor` helper (currently uses accent/gold/destructive thresholds) with the 5-step red→green ramp above. Order matters — check `closed` first, then `pct === 0`, then `pct >= 1`, then descending bands.
+1. Remove the table's `w-full` so it sizes to its content instead of filling the container.
+2. Lock the day-column header width to match the cell (`w-[100px]`, drop `min-w-[100px]`) so headers don't stretch on wide screens.
+3. Keep cells at fixed `w-[100px] h-[100px]` (already done).
+4. Wrap the table inside the existing `overflow-x-auto` so on narrow screens it still scrolls horizontally.
+5. Keep small consistent padding (`px-1 py-1`) on the cell `<td>` to mimic the gap rhythm in the screenshot.
 
-Update the legend swatches at the bottom of the page to match the new ramp:
-- Empty (red) · Low (orange) · Half (amber) · Near Full (lime) · Full (green) · Closed (muted)
+Net effect: on a 1920px monitor the grid no longer stretches — it stays compact and left-aligned exactly like the screenshot, while still scrolling on small screens.
 
 ## Out of scope
-- No change to the edit dialog, dynamic pricing, or data fetching.
-- No tailwind config change — the `red/orange/amber/lime/green` palettes are stock Tailwind v3 and already available.
+- No change to colors, tooltips, edit dialog, or data fetching.
+- No change to the room label column width.
 
