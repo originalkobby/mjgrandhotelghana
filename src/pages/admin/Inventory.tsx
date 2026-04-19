@@ -225,10 +225,11 @@ export default function Inventory() {
   const occupancyColor = (booked: number, total: number, closed: boolean) => {
     if (closed) return "bg-muted text-muted-foreground";
     const pct = total > 0 ? booked / total : 0;
-    if (pct >= 0.9) return "bg-destructive/15 text-destructive";
-    if (pct >= 0.7) return "bg-gold-light/20 text-gold-dark";
-    if (pct >= 0.4) return "bg-accent/15 text-accent";
-    return "bg-accent/5 text-foreground";
+    if (pct >= 1) return "bg-green-100 text-green-800";
+    if (pct >= 0.7) return "bg-lime-100 text-lime-700";
+    if (pct >= 0.4) return "bg-amber-100 text-amber-800";
+    if (pct > 0) return "bg-orange-100 text-orange-700";
+    return "bg-red-100 text-red-700";
   };
 
   return (
@@ -371,16 +372,19 @@ export default function Inventory() {
       {/* Legend */}
       <div className="flex flex-wrap gap-4 text-xs font-sans text-muted-foreground">
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-accent/5 border border-border" /> Low
+          <span className="w-3 h-3 rounded bg-red-100 border border-border" /> Empty
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-accent/15" /> Moderate
+          <span className="w-3 h-3 rounded bg-orange-100" /> Low
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-gold-light/20" /> High
+          <span className="w-3 h-3 rounded bg-amber-100" /> Half
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-destructive/15" /> Near Full
+          <span className="w-3 h-3 rounded bg-lime-100" /> Near Full
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-3 h-3 rounded bg-green-100" /> Full
         </span>
         <span className="flex items-center gap-1.5">
           <span className="w-3 h-3 rounded bg-muted" /> Closed
