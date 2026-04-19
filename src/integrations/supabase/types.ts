@@ -655,6 +655,7 @@ export type Database = {
       room_inventory: {
         Row: {
           booked_count: number
+          closure_reason: string | null
           date: string
           id: string
           is_closed: boolean
@@ -665,6 +666,7 @@ export type Database = {
         }
         Insert: {
           booked_count?: number
+          closure_reason?: string | null
           date: string
           id?: string
           is_closed?: boolean
@@ -675,6 +677,7 @@ export type Database = {
         }
         Update: {
           booked_count?: number
+          closure_reason?: string | null
           date?: string
           id?: string
           is_closed?: boolean
