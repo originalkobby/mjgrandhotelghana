@@ -53,6 +53,7 @@ interface InvCell {
   booked_count: number;
   is_closed: boolean;
   rate_override: number | null;
+  closure_reason: string | null;
 }
 
 async function fetchInventoryData(weekStart: Date, weekEnd: Date) {
@@ -67,7 +68,7 @@ async function fetchInventoryData(weekStart: Date, weekEnd: Date) {
       .order("sort_order"),
     supabase
       .from("room_inventory")
-      .select("id, room_id, date, total_count, booked_count, is_closed, rate_override")
+      .select("id, room_id, date, total_count, booked_count, is_closed, rate_override, closure_reason")
       .gte("date", startStr)
       .lte("date", endStr),
   ]);
@@ -95,6 +96,7 @@ export default function Inventory() {
     rate_override: "",
     total_count: "",
     is_closed: false,
+    closure_reason: "",
   });
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
@@ -150,6 +152,7 @@ export default function Inventory() {
         booked_count: 0,
         is_closed: false,
         rate_override: null,
+        closure_reason: null,
       }
     );
   };
@@ -161,6 +164,7 @@ export default function Inventory() {
       rate_override: cell.rate_override?.toString() ?? "",
       total_count: cell.total_count.toString(),
       is_closed: cell.is_closed,
+      closure_reason: cell.closure_reason ?? "",
     });
   };
 
@@ -176,6 +180,9 @@ export default function Inventory() {
       is_closed: editForm.is_closed,
       rate_override: editForm.rate_override
         ? parseFloat(editForm.rate_override)
+        : null,
+      closure_reason: editForm.is_closed && editForm.closure_reason.trim()
+        ? editForm.closure_reason.trim()
         : null,
     };
 
@@ -347,9 +354,16 @@ export default function Inventory() {
                                       )}`}
                                     >
                                       {cell.is_closed ? (
-                                        <div className="flex items-center justify-center gap-1">
-                                          <Lock className="w-3 h-3" />
-                                          <span>Closed</span>
+                                        <div className="flex flex-col items-center justify-center gap-0.5">
+                                          <div className="flex items-center gap-1">
+                                            <Lock className="w-3 h-3" />
+                                            <span>Closed</span>
+                                          </div>
+                                          {cell.closure_reason && (
+                                            <span className="text-[10px] opacity-70 truncate max-w-full">
+                                              {cell.closure_reason}
+                                            </span>
+                                          )}
                                         </div>
                                       ) : (
                                         <>
@@ -376,9 +390,16 @@ export default function Inventory() {
                                         {room.name} · {format(d, "EEE, MMM d")}
                                       </p>
                                       {cell.is_closed ? (
-                                        <p className="text-muted-foreground">
-                                          Closed — no bookings accepted
-                                        </p>
+                                        <>
+                                          <p className="text-muted-foreground">
+                                            Closed — no bookings accepted
+                                          </p>
+                                          {cell.closure_reason && (
+                                            <p>
+                                              Reason: <span className="font-medium">{cell.closure_reason}</span>
+                                            </p>
+                                          )}
+                                        </>
                                       ) : (
                                         <>
                                           <p>
@@ -470,15 +491,30 @@ export default function Inventory() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between rounded-md border border-border p-3">
-                <div>
-                  <p className="text-sm font-medium text-foreground">Close Date</p>
-                  <p className="text-xs text-muted-foreground">Block all bookings for this date</p>
+              <div className="space-y-3 rounded-md border border-border p-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Close Date</p>
+                    <p className="text-xs text-muted-foreground">Block all bookings for this date</p>
+                  </div>
+                  <Switch
+                    checked={editForm.is_closed}
+                    onCheckedChange={(v) => setEditForm({ ...editForm, is_closed: v })}
+                  />
                 </div>
-                <Switch
-                  checked={editForm.is_closed}
-                  onCheckedChange={(v) => setEditForm({ ...editForm, is_closed: v })}
-                />
+                {editForm.is_closed && (
+                  <div className="space-y-2">
+                    <Label className="text-xs">Closure Reason</Label>
+                    <Input
+                      value={editForm.closure_reason}
+                      onChange={(e) => setEditForm({ ...editForm, closure_reason: e.target.value })}
+                      placeholder="e.g. Maintenance, Private event, Deep cleaning"
+                    />
+                    <p className="text-[10px] text-muted-foreground">
+                      Shown on hover and inside the closed cell. Optional.
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="bg-muted/50 rounded-md p-3 text-xs text-muted-foreground">
