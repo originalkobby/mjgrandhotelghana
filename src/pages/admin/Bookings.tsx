@@ -334,7 +334,7 @@ export default function Bookings() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search ref, OTA ref, name, room #…"
+            placeholder="Search ref, OTA ref, name, room #, date…"
             className="pl-10"
           />
         </div>
