@@ -347,7 +347,7 @@ export default function Inventory() {
                                   <TooltipTrigger asChild>
                                     <button
                                       onClick={() => openEdit(room, d)}
-                                      className={`w-full rounded-md p-2 text-xs transition-colors hover:ring-2 hover:ring-ring/50 cursor-pointer ${occupancyColor(
+                                      className={`w-[100px] h-[100px] rounded-md p-2 text-xs transition-colors hover:ring-2 hover:ring-ring/50 cursor-pointer flex flex-col items-center justify-center ${occupancyColor(
                                         cell.booked_count,
                                         cell.total_count,
                                         cell.is_closed
