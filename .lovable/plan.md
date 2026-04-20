@@ -1,28 +1,25 @@
 
 
 ## Goal
-Recolor the booking status badges in `src/pages/admin/Bookings.tsx` per the new spec, and confirm that Cancelled / Released (`completed`) / No Show all auto-release inventory.
+Recolor the booking source badges so all 8 sources flow visually from green → blue → purple, with `Direct` at green and `STAAH` at purple.
 
-## Color spec → Tailwind
-| Status (DB) | UI label | Class |
-|---|---|---|
-| `confirmed` | Confirmed | `bg-green-600 text-white border-green-700` |
-| `cancelled` | Cancelled | `bg-red-600 text-white border-red-700` |
-| `completed` | Released | `bg-amber-800 text-white border-amber-900` (brown) |
-| `no_show` | No Show | `bg-[#722F37] text-white border-[#5a252c]` (wine) |
-| `pending` | Pending | keep existing gold |
+## Spectrum mapping (8 sources)
+| # | Source key | Label | Tailwind classes |
+|---|---|---|---|
+| 1 | `direct` | Direct | `bg-green-500/15 text-green-700 border-green-500/30` |
+| 2 | `booking_com` | Booking.com | `bg-emerald-500/15 text-emerald-700 border-emerald-500/30` |
+| 3 | `expedia` | Expedia | `bg-teal-500/15 text-teal-700 border-teal-500/30` |
+| 4 | `airbnb` | Airbnb | `bg-cyan-500/15 text-cyan-700 border-cyan-500/30` |
+| 5 | `agoda` | Agoda | `bg-sky-500/15 text-sky-700 border-sky-500/30` |
+| 6 | `siteminder` | SiteMinder | `bg-blue-500/15 text-blue-700 border-blue-500/30` |
+| 7 | `cloudbeds` | Cloudbeds | `bg-indigo-500/15 text-indigo-700 border-indigo-500/30` |
+| 8 | `staah` | STAAH | `bg-purple-500/15 text-purple-700 border-purple-500/30` |
 
-## Inventory release — already correct, no code change needed
-`src/lib/inventorySync.ts` already defines:
-```
-RELEASED = { "cancelled", "no_show", "completed" }
-```
-and `handleStatusUpdate` in `Bookings.tsx` already calls `getInventoryAction(oldStatus, newStatus)` → `releaseInventory()` whenever a booking moves from `pending`/`confirmed` into any of those three. So setting status to Cancelled, Released, or No Show from the dialog automatically increments room availability for every night of the stay and writes an audit-log note. No additional wiring required.
+This creates a smooth green → teal/cyan → blue → indigo → purple transition.
 
 ## Single edit
-**File:** `src/pages/admin/Bookings.tsx`, lines 71–77 — replace the `STATUS_COLORS` map with the values above.
+**File:** `src/pages/admin/Bookings.tsx`, lines 103–108 — replace the `SOURCE_COLORS` map with all 8 entries above.
 
 ## Out of scope
-- No DB / edge-function changes.
-- No change to `STATUS_LABELS`, payment colors, or the status update flow.
+- No change to `SOURCE_LABELS`, status colors, or filtering logic.
 
