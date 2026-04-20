@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Search, Filter, RefreshCw, Download, Banknote, Trash2 } from "lucide-react";
+import { Search, Filter, RefreshCw, Download, Banknote, Trash2, X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -156,8 +157,9 @@ export default function Bookings() {
   const [paymentAmount, setPaymentAmount] = useState("");
   const [recordingPayment, setRecordingPayment] = useState(false);
 
-  // Delete booking
-  const [deleteBooking, setDeleteBooking] = useState<Booking | null>(null);
+  // Bulk delete bookings
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   const { toast } = useToast();
@@ -326,37 +328,86 @@ export default function Bookings() {
     }
   };
 
-  const handleDeleteBooking = async () => {
-    if (!deleteBooking) return;
+  const handleBulkDelete = async () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
     setDeleting(true);
-    try {
-      // Release inventory if booking is currently holding rooms
-      if (deleteBooking.status === "pending" || deleteBooking.status === "confirmed") {
-        try { await releaseInventory(deleteBooking.id); } catch { /* non-fatal */ }
+
+    const idToBooking = new Map(bookings.map((b) => [b.id, b]));
+    let success = 0;
+    let failed = 0;
+
+    for (const id of ids) {
+      const b = idToBooking.get(id);
+      try {
+        if (b && (b.status === "pending" || b.status === "confirmed")) {
+          try { await releaseInventory(id); } catch { /* non-fatal */ }
+        }
+        await supabase.from("booking_add_ons").delete().eq("booking_id", id);
+        await supabase.from("payment_logs").delete().eq("booking_id", id);
+        await supabase.from("booking_audit_log" as any).delete().eq("booking_id", id);
+        const { error } = await supabase.from("bookings").delete().eq("id", id);
+        if (error) throw error;
+        success++;
+      } catch {
+        failed++;
       }
-
-      // Remove dependent rows first (no DB cascade defined)
-      await supabase.from("booking_add_ons").delete().eq("booking_id", deleteBooking.id);
-      await supabase.from("payment_logs").delete().eq("booking_id", deleteBooking.id);
-      await supabase.from("booking_audit_log" as any).delete().eq("booking_id", deleteBooking.id);
-
-      const { error } = await supabase.from("bookings").delete().eq("id", deleteBooking.id);
-      if (error) throw error;
-
-      toast({
-        title: "Booking deleted",
-        description: `${deleteBooking.reference_code} was permanently removed.`,
-      });
-      setDeleteBooking(null);
-      queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
-      queryClient.invalidateQueries({ queryKey: ["admin-inventory"] });
-      queryClient.invalidateQueries({ queryKey: ["admin-overview"] });
-    } catch (err: any) {
-      toast({ title: "Delete failed", description: err.message, variant: "destructive" });
-    } finally {
-      setDeleting(false);
     }
+
+    setDeleting(false);
+    setBulkDeleteOpen(false);
+    setSelectedIds(new Set());
+
+    if (failed === 0) {
+      toast({ title: "Bookings deleted", description: `${success} booking${success === 1 ? "" : "s"} permanently removed.` });
+    } else {
+      toast({
+        title: "Partial delete",
+        description: `${success} deleted, ${failed} failed.`,
+        variant: failed === ids.length ? "destructive" : "default",
+      });
+    }
+    queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
+    queryClient.invalidateQueries({ queryKey: ["admin-inventory"] });
+    queryClient.invalidateQueries({ queryKey: ["admin-overview"] });
   };
+
+  // Selection helpers
+  const visibleIds = useMemo(() => bookings.map((b) => b.id), [bookings]);
+  const selectedVisibleCount = useMemo(
+    () => visibleIds.filter((id) => selectedIds.has(id)).length,
+    [visibleIds, selectedIds]
+  );
+  const allVisibleSelected = visibleIds.length > 0 && selectedVisibleCount === visibleIds.length;
+  const someVisibleSelected = selectedVisibleCount > 0 && selectedVisibleCount < visibleIds.length;
+
+  const toggleRow = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleAll = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (allVisibleSelected) {
+        visibleIds.forEach((id) => next.delete(id));
+      } else {
+        visibleIds.forEach((id) => next.add(id));
+      }
+      return next;
+    });
+  };
+
+  const clearSelection = () => setSelectedIds(new Set());
+
+  const selectedBookingsList = useMemo(
+    () => bookings.filter((b) => selectedIds.has(b.id)),
+    [bookings, selectedIds]
+  );
 
   const exportCSV = () => {
     if (bookings.length === 0) return;
@@ -462,6 +513,34 @@ export default function Bookings() {
         </Button>
       </div>
 
+      {/* Bulk selection toolbar (admin only) */}
+      {isAdmin && selectedIds.size > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-lg bg-muted border border-border"
+        >
+          <p className="text-sm font-sans text-foreground">
+            <span className="font-medium">{selectedIds.size}</span> booking{selectedIds.size === 1 ? "" : "s"} selected
+          </p>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={clearSelection} className="text-xs">
+              <X className="w-3.5 h-3.5 mr-1" />
+              Clear selection
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setBulkDeleteOpen(true)}
+              className="text-xs"
+            >
+              <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+              Delete {selectedIds.size} selected
+            </Button>
+          </div>
+        </motion.div>
+      )}
+
       {/* Table */}
       <Card>
         <CardContent className="p-0">
@@ -469,6 +548,15 @@ export default function Bookings() {
             <table className="w-full text-sm font-sans">
               <thead>
                 <tr className="border-b border-border">
+                  {isAdmin && (
+                    <th className="w-10 px-4 py-3">
+                      <Checkbox
+                        checked={allVisibleSelected ? true : someVisibleSelected ? "indeterminate" : false}
+                        onCheckedChange={toggleAll}
+                        aria-label="Select all bookings"
+                      />
+                    </th>
+                  )}
                   {["Ref", "Guest", "Room", "Check-in", "Check-out", "Guests", "Total", "Status", "Source", "Payment", "Method", "Actions"].map((h) => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       {h}
@@ -480,7 +568,7 @@ export default function Bookings() {
                 {loading ? (
                   Array.from({ length: 5 }).map((_, i) => (
                     <tr key={i} className="border-b border-border/50">
-                      {Array.from({ length: 12 }).map((_, j) => (
+                      {Array.from({ length: isAdmin ? 13 : 12 }).map((_, j) => (
                         <td key={j} className="px-4 py-3">
                           <div className="h-4 bg-muted rounded animate-pulse" />
                         </td>
@@ -489,7 +577,7 @@ export default function Bookings() {
                   ))
                 ) : bookings.length === 0 ? (
                   <tr>
-                    <td colSpan={12} className="text-center py-12 text-muted-foreground">
+                    <td colSpan={isAdmin ? 13 : 12} className="text-center py-12 text-muted-foreground">
                       No bookings found
                     </td>
                   </tr>
@@ -504,6 +592,15 @@ export default function Bookings() {
                         transition={{ delay: i * 0.02 }}
                         className="border-b border-border/50 hover:bg-muted/30 transition-colors"
                       >
+                        {isAdmin && (
+                          <td className="px-4 py-3">
+                            <Checkbox
+                              checked={selectedIds.has(b.id)}
+                              onCheckedChange={() => toggleRow(b.id)}
+                              aria-label={`Select ${b.reference_code}`}
+                            />
+                          </td>
+                        )}
                         <td className="px-4 py-3 font-mono text-xs">
                           {b.booking_source !== "direct" && b.ota_reference ? (
                             <div title={`Internal: ${b.reference_code}`}>{b.ota_reference}</div>
@@ -578,17 +675,6 @@ export default function Bookings() {
                               </Button>
                             )}
 
-                            {isAdmin && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
-                                title="Delete booking permanently"
-                                onClick={() => setDeleteBooking(b)}
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </Button>
-                            )}
                           </div>
                         </td>
                       </motion.tr>
@@ -767,22 +853,27 @@ export default function Bookings() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog (admin only) */}
-      <AlertDialog open={!!deleteBooking} onOpenChange={(o) => { if (!o && !deleting) setDeleteBooking(null); }}>
+      {/* Bulk Delete Confirmation Dialog (admin only) */}
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={(o) => { if (!o && !deleting) setBulkDeleteOpen(false); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-serif">Delete this booking?</AlertDialogTitle>
+            <AlertDialogTitle className="font-serif">
+              Delete {selectedIds.size} booking{selectedIds.size === 1 ? "" : "s"}?
+            </AlertDialogTitle>
             <AlertDialogDescription className="font-sans">
-              This will permanently remove booking{" "}
-              <strong>{deleteBooking?.reference_code}</strong>
-              {deleteBooking?.guests?.full_name ? <> for <strong>{deleteBooking.guests.full_name}</strong></> : null},
-              along with its add-ons, payment logs and audit history. This action cannot be undone.
+              This will permanently remove the following booking{selectedIds.size === 1 ? "" : "s"} along with related add-ons, payment logs and audit history. This action cannot be undone.
+              <span className="block mt-3 font-mono text-xs text-foreground">
+                {selectedBookingsList.slice(0, 5).map((b) => b.ota_reference || b.reference_code).join(", ")}
+                {selectedBookingsList.length > 5 && (
+                  <span className="text-muted-foreground"> …and {selectedBookingsList.length - 5} more</span>
+                )}
+              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={(e) => { e.preventDefault(); handleDeleteBooking(); }}
+              onClick={(e) => { e.preventDefault(); handleBulkDelete(); }}
               disabled={deleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
