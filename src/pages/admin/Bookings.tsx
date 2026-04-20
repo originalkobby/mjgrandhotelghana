@@ -157,8 +157,9 @@ export default function Bookings() {
   const [paymentAmount, setPaymentAmount] = useState("");
   const [recordingPayment, setRecordingPayment] = useState(false);
 
-  // Delete booking
-  const [deleteBooking, setDeleteBooking] = useState<Booking | null>(null);
+  // Bulk delete bookings
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   const { toast } = useToast();
