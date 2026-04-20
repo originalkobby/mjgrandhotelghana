@@ -328,37 +328,86 @@ export default function Bookings() {
     }
   };
 
-  const handleDeleteBooking = async () => {
-    if (!deleteBooking) return;
+  const handleBulkDelete = async () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
     setDeleting(true);
-    try {
-      // Release inventory if booking is currently holding rooms
-      if (deleteBooking.status === "pending" || deleteBooking.status === "confirmed") {
-        try { await releaseInventory(deleteBooking.id); } catch { /* non-fatal */ }
+
+    const idToBooking = new Map(bookings.map((b) => [b.id, b]));
+    let success = 0;
+    let failed = 0;
+
+    for (const id of ids) {
+      const b = idToBooking.get(id);
+      try {
+        if (b && (b.status === "pending" || b.status === "confirmed")) {
+          try { await releaseInventory(id); } catch { /* non-fatal */ }
+        }
+        await supabase.from("booking_add_ons").delete().eq("booking_id", id);
+        await supabase.from("payment_logs").delete().eq("booking_id", id);
+        await supabase.from("booking_audit_log" as any).delete().eq("booking_id", id);
+        const { error } = await supabase.from("bookings").delete().eq("id", id);
+        if (error) throw error;
+        success++;
+      } catch {
+        failed++;
       }
-
-      // Remove dependent rows first (no DB cascade defined)
-      await supabase.from("booking_add_ons").delete().eq("booking_id", deleteBooking.id);
-      await supabase.from("payment_logs").delete().eq("booking_id", deleteBooking.id);
-      await supabase.from("booking_audit_log" as any).delete().eq("booking_id", deleteBooking.id);
-
-      const { error } = await supabase.from("bookings").delete().eq("id", deleteBooking.id);
-      if (error) throw error;
-
-      toast({
-        title: "Booking deleted",
-        description: `${deleteBooking.reference_code} was permanently removed.`,
-      });
-      setDeleteBooking(null);
-      queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
-      queryClient.invalidateQueries({ queryKey: ["admin-inventory"] });
-      queryClient.invalidateQueries({ queryKey: ["admin-overview"] });
-    } catch (err: any) {
-      toast({ title: "Delete failed", description: err.message, variant: "destructive" });
-    } finally {
-      setDeleting(false);
     }
+
+    setDeleting(false);
+    setBulkDeleteOpen(false);
+    setSelectedIds(new Set());
+
+    if (failed === 0) {
+      toast({ title: "Bookings deleted", description: `${success} booking${success === 1 ? "" : "s"} permanently removed.` });
+    } else {
+      toast({
+        title: "Partial delete",
+        description: `${success} deleted, ${failed} failed.`,
+        variant: failed === ids.length ? "destructive" : "default",
+      });
+    }
+    queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
+    queryClient.invalidateQueries({ queryKey: ["admin-inventory"] });
+    queryClient.invalidateQueries({ queryKey: ["admin-overview"] });
   };
+
+  // Selection helpers
+  const visibleIds = useMemo(() => bookings.map((b) => b.id), [bookings]);
+  const selectedVisibleCount = useMemo(
+    () => visibleIds.filter((id) => selectedIds.has(id)).length,
+    [visibleIds, selectedIds]
+  );
+  const allVisibleSelected = visibleIds.length > 0 && selectedVisibleCount === visibleIds.length;
+  const someVisibleSelected = selectedVisibleCount > 0 && selectedVisibleCount < visibleIds.length;
+
+  const toggleRow = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleAll = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (allVisibleSelected) {
+        visibleIds.forEach((id) => next.delete(id));
+      } else {
+        visibleIds.forEach((id) => next.add(id));
+      }
+      return next;
+    });
+  };
+
+  const clearSelection = () => setSelectedIds(new Set());
+
+  const selectedBookingsList = useMemo(
+    () => bookings.filter((b) => selectedIds.has(b.id)),
+    [bookings, selectedIds]
+  );
 
   const exportCSV = () => {
     if (bookings.length === 0) return;
