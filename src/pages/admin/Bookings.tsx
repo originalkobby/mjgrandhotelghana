@@ -69,11 +69,11 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  confirmed: "bg-accent/20 text-accent border-accent/30",
+  confirmed: "bg-green-600 text-white border-green-700",
   pending: "bg-gold-light/20 text-gold-dark border-gold-light/30",
-  cancelled: "bg-destructive/10 text-destructive border-destructive/20",
-  completed: "bg-emerald-100 text-emerald-700 border-emerald-300",
-  no_show: "bg-muted text-muted-foreground border-border",
+  cancelled: "bg-red-600 text-white border-red-700",
+  completed: "bg-amber-800 text-white border-amber-900",
+  no_show: "bg-[#722F37] text-white border-[#5a252c]",
 };
 
 const PAYMENT_COLORS: Record<string, string> = {
