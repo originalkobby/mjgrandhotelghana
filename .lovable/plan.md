@@ -1,23 +1,28 @@
 
 
 ## Goal
-Make the inventory grid render as a tight, evenly-spaced grid of square cells (like the screenshot) on all viewports including full desktop — not stretched across the available width.
+Recolor the booking status badges in `src/pages/admin/Bookings.tsx` per the new spec, and confirm that Cancelled / Released (`completed`) / No Show all auto-release inventory.
 
-## Observation
-The screenshot shows: room label column on the left + 6–7 fixed-size square cells per row with consistent small gaps. Currently on wide desktops the table stretches and `min-w-[100px]` columns expand; the screenshot's compact density is what we want preserved.
+## Color spec → Tailwind
+| Status (DB) | UI label | Class |
+|---|---|---|
+| `confirmed` | Confirmed | `bg-green-600 text-white border-green-700` |
+| `cancelled` | Cancelled | `bg-red-600 text-white border-red-700` |
+| `completed` | Released | `bg-amber-800 text-white border-amber-900` (brown) |
+| `no_show` | No Show | `bg-[#722F37] text-white border-[#5a252c]` (wine) |
+| `pending` | Pending | keep existing gold |
 
-## Change
-**File:** `src/pages/admin/Inventory.tsx`
+## Inventory release — already correct, no code change needed
+`src/lib/inventorySync.ts` already defines:
+```
+RELEASED = { "cancelled", "no_show", "completed" }
+```
+and `handleStatusUpdate` in `Bookings.tsx` already calls `getInventoryAction(oldStatus, newStatus)` → `releaseInventory()` whenever a booking moves from `pending`/`confirmed` into any of those three. So setting status to Cancelled, Released, or No Show from the dialog automatically increments room availability for every night of the stay and writes an audit-log note. No additional wiring required.
 
-1. Remove the table's `w-full` so it sizes to its content instead of filling the container.
-2. Lock the day-column header width to match the cell (`w-[100px]`, drop `min-w-[100px]`) so headers don't stretch on wide screens.
-3. Keep cells at fixed `w-[100px] h-[100px]` (already done).
-4. Wrap the table inside the existing `overflow-x-auto` so on narrow screens it still scrolls horizontally.
-5. Keep small consistent padding (`px-1 py-1`) on the cell `<td>` to mimic the gap rhythm in the screenshot.
-
-Net effect: on a 1920px monitor the grid no longer stretches — it stays compact and left-aligned exactly like the screenshot, while still scrolling on small screens.
+## Single edit
+**File:** `src/pages/admin/Bookings.tsx`, lines 71–77 — replace the `STATUS_COLORS` map with the values above.
 
 ## Out of scope
-- No change to colors, tooltips, edit dialog, or data fetching.
-- No change to the room label column width.
+- No DB / edge-function changes.
+- No change to `STATUS_LABELS`, payment colors, or the status update flow.
 
