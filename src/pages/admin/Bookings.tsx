@@ -853,22 +853,27 @@ export default function Bookings() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog (admin only) */}
-      <AlertDialog open={!!deleteBooking} onOpenChange={(o) => { if (!o && !deleting) setDeleteBooking(null); }}>
+      {/* Bulk Delete Confirmation Dialog (admin only) */}
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={(o) => { if (!o && !deleting) setBulkDeleteOpen(false); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-serif">Delete this booking?</AlertDialogTitle>
+            <AlertDialogTitle className="font-serif">
+              Delete {selectedIds.size} booking{selectedIds.size === 1 ? "" : "s"}?
+            </AlertDialogTitle>
             <AlertDialogDescription className="font-sans">
-              This will permanently remove booking{" "}
-              <strong>{deleteBooking?.reference_code}</strong>
-              {deleteBooking?.guests?.full_name ? <> for <strong>{deleteBooking.guests.full_name}</strong></> : null},
-              along with its add-ons, payment logs and audit history. This action cannot be undone.
+              This will permanently remove the following booking{selectedIds.size === 1 ? "" : "s"} along with related add-ons, payment logs and audit history. This action cannot be undone.
+              <span className="block mt-3 font-mono text-xs text-foreground">
+                {selectedBookingsList.slice(0, 5).map((b) => b.ota_reference || b.reference_code).join(", ")}
+                {selectedBookingsList.length > 5 && (
+                  <span className="text-muted-foreground"> …and {selectedBookingsList.length - 5} more</span>
+                )}
+              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={(e) => { e.preventDefault(); handleDeleteBooking(); }}
+              onClick={(e) => { e.preventDefault(); handleBulkDelete(); }}
               disabled={deleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
