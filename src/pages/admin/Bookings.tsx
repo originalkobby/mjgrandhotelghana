@@ -70,7 +70,7 @@ const STATUS_LABELS: Record<string, string> = {
 
 const STATUS_COLORS: Record<string, string> = {
   confirmed: "bg-green-600 text-white border-green-700",
-  pending: "bg-gold-light/20 text-gold-dark border-gold-light/30",
+  pending: "bg-amber-400 text-amber-950 border-amber-500",
   cancelled: "bg-red-600 text-white border-red-700",
   completed: "bg-amber-800 text-white border-amber-900",
   no_show: "bg-[#722F37] text-white border-[#5a252c]",
