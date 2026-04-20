@@ -675,17 +675,6 @@ export default function Bookings() {
                               </Button>
                             )}
 
-                            {isAdmin && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
-                                title="Delete booking permanently"
-                                onClick={() => setDeleteBooking(b)}
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </Button>
-                            )}
                           </div>
                         </td>
                       </motion.tr>
