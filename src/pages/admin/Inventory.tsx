@@ -236,13 +236,13 @@ export default function Inventory() {
   };
 
   const occupancyColor = (booked: number, total: number, closed: boolean) => {
-    if (closed) return "bg-muted text-muted-foreground";
+    if (closed) return "bg-slate-700 text-white";
     const pct = total > 0 ? booked / total : 0;
-    if (pct >= 1) return "bg-green-100 text-green-800";
-    if (pct >= 0.7) return "bg-lime-100 text-lime-700";
-    if (pct >= 0.4) return "bg-amber-100 text-amber-800";
-    if (pct > 0) return "bg-orange-100 text-orange-700";
-    return "bg-red-100 text-red-700";
+    if (pct >= 1) return "bg-green-600 text-white";
+    if (pct >= 0.7) return "bg-lime-500 text-white";
+    if (pct >= 0.4) return "bg-amber-500 text-white";
+    if (pct > 0) return "bg-orange-500 text-white";
+    return "bg-red-600 text-white";
   };
 
   return (
