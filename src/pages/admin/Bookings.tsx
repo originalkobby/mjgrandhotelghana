@@ -77,11 +77,11 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const PAYMENT_COLORS: Record<string, string> = {
-  paid: "bg-emerald-100 text-emerald-700 border-emerald-300",
-  pending: "bg-gold-light/20 text-gold-dark border-gold-light/30",
-  failed: "bg-destructive/10 text-destructive border-destructive/20",
-  partial: "bg-gold-light/20 text-gold-dark border-gold-light/30",
-  refunded: "bg-muted text-muted-foreground border-border",
+  paid: "bg-emerald-600 text-white border-emerald-700",
+  pending: "bg-amber-400 text-amber-950 border-amber-500",
+  failed: "bg-red-600 text-white border-red-700",
+  partial: "bg-orange-500 text-white border-orange-600",
+  refunded: "bg-slate-600 text-white border-slate-700",
 };
 
 const PAYMENT_METHOD_LABELS: Record<string, string> = {
