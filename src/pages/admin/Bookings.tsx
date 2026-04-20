@@ -513,6 +513,34 @@ export default function Bookings() {
         </Button>
       </div>
 
+      {/* Bulk selection toolbar (admin only) */}
+      {isAdmin && selectedIds.size > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-lg bg-muted border border-border"
+        >
+          <p className="text-sm font-sans text-foreground">
+            <span className="font-medium">{selectedIds.size}</span> booking{selectedIds.size === 1 ? "" : "s"} selected
+          </p>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={clearSelection} className="text-xs">
+              <X className="w-3.5 h-3.5 mr-1" />
+              Clear selection
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setBulkDeleteOpen(true)}
+              className="text-xs"
+            >
+              <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+              Delete {selectedIds.size} selected
+            </Button>
+          </div>
+        </motion.div>
+      )}
+
       {/* Table */}
       <Card>
         <CardContent className="p-0">
@@ -520,6 +548,15 @@ export default function Bookings() {
             <table className="w-full text-sm font-sans">
               <thead>
                 <tr className="border-b border-border">
+                  {isAdmin && (
+                    <th className="w-10 px-4 py-3">
+                      <Checkbox
+                        checked={allVisibleSelected ? true : someVisibleSelected ? "indeterminate" : false}
+                        onCheckedChange={toggleAll}
+                        aria-label="Select all bookings"
+                      />
+                    </th>
+                  )}
                   {["Ref", "Guest", "Room", "Check-in", "Check-out", "Guests", "Total", "Status", "Source", "Payment", "Method", "Actions"].map((h) => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       {h}
