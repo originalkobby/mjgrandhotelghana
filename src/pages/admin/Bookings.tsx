@@ -1,6 +1,16 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Filter, RefreshCw, Download, Banknote } from "lucide-react";
+import { Search, Filter, RefreshCw, Download, Banknote, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -146,10 +156,15 @@ export default function Bookings() {
   const [paymentAmount, setPaymentAmount] = useState("");
   const [recordingPayment, setRecordingPayment] = useState(false);
 
+  // Delete booking
+  const [deleteBooking, setDeleteBooking] = useState<Booking | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { user } = useAdminAuth();
+  const { user, role } = useAdminAuth();
   const { format: formatCurrency } = useCurrency();
+  const isAdmin = role === "admin";
 
   const { data: allBookings = [], isLoading: loading, isFetching } = useQuery({
     queryKey: ["admin-bookings", statusFilter, sourceFilter],
@@ -308,6 +323,38 @@ export default function Bookings() {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     } finally {
       setRecordingPayment(false);
+    }
+  };
+
+  const handleDeleteBooking = async () => {
+    if (!deleteBooking) return;
+    setDeleting(true);
+    try {
+      // Release inventory if booking is currently holding rooms
+      if (deleteBooking.status === "pending" || deleteBooking.status === "confirmed") {
+        try { await releaseInventory(deleteBooking.id); } catch { /* non-fatal */ }
+      }
+
+      // Remove dependent rows first (no DB cascade defined)
+      await supabase.from("booking_add_ons").delete().eq("booking_id", deleteBooking.id);
+      await supabase.from("payment_logs").delete().eq("booking_id", deleteBooking.id);
+      await supabase.from("booking_audit_log" as any).delete().eq("booking_id", deleteBooking.id);
+
+      const { error } = await supabase.from("bookings").delete().eq("id", deleteBooking.id);
+      if (error) throw error;
+
+      toast({
+        title: "Booking deleted",
+        description: `${deleteBooking.reference_code} was permanently removed.`,
+      });
+      setDeleteBooking(null);
+      queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-inventory"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-overview"] });
+    } catch (err: any) {
+      toast({ title: "Delete failed", description: err.message, variant: "destructive" });
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -530,6 +577,18 @@ export default function Bookings() {
                                 <Banknote className="w-3.5 h-3.5" />
                               </Button>
                             )}
+
+                            {isAdmin && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
+                                title="Delete booking permanently"
+                                onClick={() => setDeleteBooking(b)}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            )}
                           </div>
                         </td>
                       </motion.tr>
@@ -707,6 +766,31 @@ export default function Bookings() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog (admin only) */}
+      <AlertDialog open={!!deleteBooking} onOpenChange={(o) => { if (!o && !deleting) setDeleteBooking(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-serif">Delete this booking?</AlertDialogTitle>
+            <AlertDialogDescription className="font-sans">
+              This will permanently remove booking{" "}
+              <strong>{deleteBooking?.reference_code}</strong>
+              {deleteBooking?.guests?.full_name ? <> for <strong>{deleteBooking.guests.full_name}</strong></> : null},
+              along with its add-ons, payment logs and audit history. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); handleDeleteBooking(); }}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? "Deleting…" : "Delete permanently"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
