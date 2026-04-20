@@ -487,9 +487,9 @@ export default function Bookings() {
                             {SOURCE_LABELS[b.booking_source] ?? b.booking_source}
                           </Badge>
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-3 text-center">
                           {pd.isDash ? (
-                            <span className="text-muted-foreground font-medium text-center block">--</span>
+                            <span className="text-muted-foreground font-medium">--</span>
                           ) : (
                             <Badge variant="outline" className={`text-xs capitalize ${PAYMENT_COLORS[pd.label] ?? ""}`}>
                               {formatBookingLabel(pd.label)}
