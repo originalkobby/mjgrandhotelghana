@@ -1,6 +1,16 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Filter, RefreshCw, Download, Banknote } from "lucide-react";
+import { Search, Filter, RefreshCw, Download, Banknote, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -146,10 +156,15 @@ export default function Bookings() {
   const [paymentAmount, setPaymentAmount] = useState("");
   const [recordingPayment, setRecordingPayment] = useState(false);
 
+  // Delete booking
+  const [deleteBooking, setDeleteBooking] = useState<Booking | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { user } = useAdminAuth();
+  const { user, role } = useAdminAuth();
   const { format: formatCurrency } = useCurrency();
+  const isAdmin = role === "admin";
 
   const { data: allBookings = [], isLoading: loading, isFetching } = useQuery({
     queryKey: ["admin-bookings", statusFilter, sourceFilter],
