@@ -568,7 +568,7 @@ export default function Bookings() {
                 {loading ? (
                   Array.from({ length: 5 }).map((_, i) => (
                     <tr key={i} className="border-b border-border/50">
-                      {Array.from({ length: 12 }).map((_, j) => (
+                      {Array.from({ length: isAdmin ? 13 : 12 }).map((_, j) => (
                         <td key={j} className="px-4 py-3">
                           <div className="h-4 bg-muted rounded animate-pulse" />
                         </td>
@@ -577,7 +577,7 @@ export default function Bookings() {
                   ))
                 ) : bookings.length === 0 ? (
                   <tr>
-                    <td colSpan={12} className="text-center py-12 text-muted-foreground">
+                    <td colSpan={isAdmin ? 13 : 12} className="text-center py-12 text-muted-foreground">
                       No bookings found
                     </td>
                   </tr>
@@ -592,6 +592,15 @@ export default function Bookings() {
                         transition={{ delay: i * 0.02 }}
                         className="border-b border-border/50 hover:bg-muted/30 transition-colors"
                       >
+                        {isAdmin && (
+                          <td className="px-4 py-3">
+                            <Checkbox
+                              checked={selectedIds.has(b.id)}
+                              onCheckedChange={() => toggleRow(b.id)}
+                              aria-label={`Select ${b.reference_code}`}
+                            />
+                          </td>
+                        )}
                         <td className="px-4 py-3 font-mono text-xs">
                           {b.booking_source !== "direct" && b.ota_reference ? (
                             <div title={`Internal: ${b.reference_code}`}>{b.ota_reference}</div>
