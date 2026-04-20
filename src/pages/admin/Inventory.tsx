@@ -239,9 +239,7 @@ export default function Inventory() {
     if (closed) return "bg-slate-700 text-white";
     const pct = total > 0 ? booked / total : 0;
     if (pct >= 1) return "bg-green-600 text-white";
-    if (pct >= 0.7) return "bg-lime-500 text-white";
-    if (pct >= 0.4) return "bg-amber-500 text-white";
-    if (pct > 0) return "bg-orange-500 text-white";
+    if (pct > 0) return "bg-amber-500 text-white";
     return "bg-red-600 text-white";
   };
 
