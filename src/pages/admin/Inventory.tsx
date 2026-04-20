@@ -426,22 +426,22 @@ export default function Inventory() {
       {/* Legend */}
       <div className="flex flex-wrap gap-4 text-xs font-sans text-muted-foreground">
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-red-100 border border-border" /> Empty
+          <span className="w-3 h-3 rounded bg-red-600" /> Empty
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-orange-100" /> Low
+          <span className="w-3 h-3 rounded bg-orange-500" /> Low
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-amber-100" /> Half
+          <span className="w-3 h-3 rounded bg-amber-500" /> Half
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-lime-100" /> Near Full
+          <span className="w-3 h-3 rounded bg-lime-500" /> Near Full
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-green-100" /> Full
+          <span className="w-3 h-3 rounded bg-green-600" /> Full
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-muted" /> Closed
+          <span className="w-3 h-3 rounded bg-slate-700" /> Closed
         </span>
       </div>
 
