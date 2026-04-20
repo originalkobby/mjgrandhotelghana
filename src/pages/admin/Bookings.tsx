@@ -101,10 +101,14 @@ const SOURCE_LABELS: Record<string, string> = {
 };
 
 const SOURCE_COLORS: Record<string, string> = {
-  direct: "bg-accent/20 text-accent border-accent/30",
-  booking_com: "bg-blue-500/15 text-blue-700 border-blue-500/30",
-  expedia: "bg-yellow-500/15 text-yellow-700 border-yellow-500/30",
-  airbnb: "bg-rose-500/15 text-rose-700 border-rose-500/30",
+  direct: "bg-green-500/15 text-green-700 border-green-500/30",
+  booking_com: "bg-emerald-500/15 text-emerald-700 border-emerald-500/30",
+  expedia: "bg-teal-500/15 text-teal-700 border-teal-500/30",
+  airbnb: "bg-cyan-500/15 text-cyan-700 border-cyan-500/30",
+  agoda: "bg-sky-500/15 text-sky-700 border-sky-500/30",
+  siteminder: "bg-blue-500/15 text-blue-700 border-blue-500/30",
+  cloudbeds: "bg-indigo-500/15 text-indigo-700 border-indigo-500/30",
+  staah: "bg-purple-500/15 text-purple-700 border-purple-500/30",
 };
 
 const SOURCE_OPTIONS = Object.keys(SOURCE_LABELS);
