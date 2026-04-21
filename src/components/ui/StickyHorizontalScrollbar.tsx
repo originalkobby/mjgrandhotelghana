@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface StickyHorizontalScrollbarProps {
   targetRef: RefObject<HTMLElement>;
