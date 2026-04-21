@@ -179,6 +179,7 @@ export default function Bookings() {
   const { user, role } = useAdminAuth();
   const { format: formatCurrency } = useCurrency();
   const isAdmin = role === "admin";
+  const tableScrollRef = useRef<HTMLDivElement>(null);
 
   const { data: allBookings = [], isLoading: loading, isFetching } = useQuery({
     queryKey: ["admin-bookings", statusFilter, sourceFilter],
@@ -556,7 +557,7 @@ export default function Bookings() {
       {/* Table */}
       <Card>
         <CardContent className="p-0">
-          <div className="scrollbar-x-always">
+          <div ref={tableScrollRef} className="scrollbar-x-always">
             <table className="w-full text-sm font-sans">
               <thead>
                 <tr className="border-b border-border">
@@ -696,6 +697,7 @@ export default function Bookings() {
               </tbody>
             </table>
           </div>
+          <StickyHorizontalScrollbar targetRef={tableScrollRef} />
         </CardContent>
       </Card>
 
