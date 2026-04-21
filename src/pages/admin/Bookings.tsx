@@ -769,6 +769,43 @@ export default function Bookings() {
                 </div>
               </div>
 
+              {selectedBooking.arrival_time && (
+                <div>
+                  <p className="text-xs uppercase tracking-wider mb-1 text-muted-foreground">Estimated Arrival Time</p>
+                  <p className="text-foreground bg-muted p-2 rounded text-xs">{selectedBooking.arrival_time}</p>
+                </div>
+              )}
+
+              {selectedBooking.guests?.preferences?.flight_itinerary && (
+                <div>
+                  <p className="text-xs uppercase tracking-wider mb-1 text-muted-foreground">Flight Itinerary</p>
+                  <p className="text-foreground bg-muted p-2 rounded text-xs whitespace-pre-wrap">
+                    {selectedBooking.guests.preferences.flight_itinerary}
+                  </p>
+                </div>
+              )}
+
+              {selectedBooking.booking_add_ons && selectedBooking.booking_add_ons.length > 0 && (
+                <div>
+                  <p className="text-xs uppercase tracking-wider mb-2 text-muted-foreground">Extras</p>
+                  <div className="bg-muted rounded p-2 space-y-1.5">
+                    {selectedBooking.booking_add_ons.map((ao) => (
+                      <div key={ao.id} className="flex items-center justify-between text-xs">
+                        <span className="text-foreground">
+                          {ao.add_ons?.name ?? "Extra"}
+                          {ao.quantity > 1 && <span className="text-muted-foreground"> ×{ao.quantity}</span>}
+                        </span>
+                        <span className="text-foreground font-medium">{formatCurrency(ao.total_price_ghs)}</span>
+                      </div>
+                    ))}
+                    <div className="flex items-center justify-between pt-1.5 border-t border-border text-xs">
+                      <span className="text-muted-foreground">Extras subtotal</span>
+                      <span className="text-foreground font-medium">{formatCurrency(selectedBooking.add_ons_total_ghs)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {selectedBooking.special_requests && (
                 <div>
                   <p className="text-xs uppercase tracking-wider mb-1 text-muted-foreground">Special Requests</p>
