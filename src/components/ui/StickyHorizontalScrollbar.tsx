@@ -5,6 +5,20 @@ interface StickyHorizontalScrollbarProps {
   targetRef: RefObject<HTMLElement>;
 }
 
+function getScrollParent(element: HTMLElement | null): HTMLElement | Window {
+  let current = element?.parentElement ?? null;
+
+  while (current) {
+    const { overflowY } = window.getComputedStyle(current);
+    if ((overflowY === "auto" || overflowY === "scroll" || overflowY === "overlay") && current.scrollHeight > current.clientHeight) {
+      return current;
+    }
+    current = current.parentElement;
+  }
+
+  return window;
+}
+
 /**
  * A sticky proxy horizontal scrollbar that mirrors the scrollLeft of `targetRef`.
  * Stays visible at the bottom of the surrounding scrollable region (via position: sticky)
@@ -25,6 +39,7 @@ export function StickyHorizontalScrollbar({ targetRef }: StickyHorizontalScrollb
   useEffect(() => {
     const target = targetRef.current;
     if (!target) return;
+    const scrollParent = getScrollParent(target);
 
     const sync = () => {
       const { scrollLeft, scrollWidth, clientWidth } = target;
@@ -56,12 +71,14 @@ export function StickyHorizontalScrollbar({ targetRef }: StickyHorizontalScrollb
     if (target.firstElementChild) ro.observe(target.firstElementChild);
     window.addEventListener("resize", sync);
     window.addEventListener("scroll", sync, { passive: true });
+    scrollParent.addEventListener("scroll", sync, { passive: true });
 
     return () => {
       target.removeEventListener("scroll", sync);
       ro.disconnect();
       window.removeEventListener("resize", sync);
       window.removeEventListener("scroll", sync);
+      scrollParent.removeEventListener("scroll", sync);
     };
   }, [targetRef]);
 
