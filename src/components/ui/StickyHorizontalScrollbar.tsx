@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
+import { createPortal } from "react-dom";
 
 interface StickyHorizontalScrollbarProps {
   targetRef: RefObject<HTMLElement>;
@@ -12,43 +13,58 @@ interface StickyHorizontalScrollbarProps {
 export function StickyHorizontalScrollbar({ targetRef }: StickyHorizontalScrollbarProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const thumbRef = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-  const [thumbWidthPct, setThumbWidthPct] = useState(0);
-  const [thumbLeftPct, setThumbLeftPct] = useState(0);
+  const [metrics, setMetrics] = useState({
+    visible: false,
+    left: 0,
+    width: 0,
+    thumbWidthPct: 0,
+    thumbLeftPct: 0,
+  });
   const draggingRef = useRef<{ startX: number; startScrollLeft: number } | null>(null);
 
-  // Sync thumb position/size from target
   useEffect(() => {
     const target = targetRef.current;
     if (!target) return;
 
     const sync = () => {
       const { scrollLeft, scrollWidth, clientWidth } = target;
-      if (scrollWidth <= clientWidth) {
-        setVisible(false);
-        return;
-      }
-      setVisible(true);
-      setThumbWidthPct((clientWidth / scrollWidth) * 100);
-      setThumbLeftPct((scrollLeft / scrollWidth) * 100);
+      const canScroll = scrollWidth > clientWidth;
+      const rawThumbWidthPct = canScroll ? (clientWidth / scrollWidth) * 100 : 0;
+      const thumbWidthPct = Math.min(Math.max(rawThumbWidthPct, 0), 100);
+      const maxScrollLeft = Math.max(scrollWidth - clientWidth, 0);
+      const thumbLeftPct = maxScrollLeft === 0 ? 0 : (scrollLeft / maxScrollLeft) * (100 - thumbWidthPct);
+
+      const rect = target.getBoundingClientRect();
+      const left = Math.max(rect.left, 0);
+      const right = Math.min(rect.right, window.innerWidth);
+      const width = Math.max(right - left, 0);
+      const inViewport = rect.bottom > 0 && rect.top < window.innerHeight;
+
+      setMetrics({
+        visible: canScroll && inViewport && width > 0,
+        left,
+        width,
+        thumbWidthPct,
+        thumbLeftPct,
+      });
     };
 
     sync();
     target.addEventListener("scroll", sync, { passive: true });
     const ro = new ResizeObserver(sync);
     ro.observe(target);
-    // Also observe child to catch column changes
     if (target.firstElementChild) ro.observe(target.firstElementChild);
     window.addEventListener("resize", sync);
+    window.addEventListener("scroll", sync, { passive: true });
 
     return () => {
       target.removeEventListener("scroll", sync);
       ro.disconnect();
       window.removeEventListener("resize", sync);
+      window.removeEventListener("scroll", sync);
     };
   }, [targetRef]);
 
-  // Drag handling
   useEffect(() => {
     const onMove = (e: PointerEvent) => {
       const target = targetRef.current;
@@ -93,10 +109,16 @@ export function StickyHorizontalScrollbar({ targetRef }: StickyHorizontalScrollb
     target.scrollLeft = Math.max(0, newScroll);
   };
 
-  return (
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <div
-      className="sticky bottom-0 left-0 right-0 z-20 px-2 py-1.5 bg-background/80 backdrop-blur-sm border-t border-border"
-      style={{ display: visible ? "block" : "none" }}
+      className="fixed bottom-0 z-40 px-2 py-1.5 bg-background/80 backdrop-blur-sm border-t border-border"
+      style={{
+        display: metrics.visible ? "block" : "none",
+        left: `${metrics.left}px`,
+        width: `${metrics.width}px`,
+      }}
     >
       <div
         ref={trackRef}
@@ -108,12 +130,13 @@ export function StickyHorizontalScrollbar({ targetRef }: StickyHorizontalScrollb
           onPointerDown={onThumbDown}
           className="absolute top-0 h-full rounded-full bg-muted-foreground/40 hover:bg-muted-foreground/60 transition-colors cursor-grab active:cursor-grabbing"
           style={{
-            width: `${thumbWidthPct}%`,
-            left: `${thumbLeftPct}%`,
+            width: `${metrics.thumbWidthPct}%`,
+            left: `${metrics.thumbLeftPct}%`,
             minWidth: "24px",
           }}
         />
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
