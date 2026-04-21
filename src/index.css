@@ -135,6 +135,27 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
   }
+  .scrollbar-x-always {
+    overflow-x: scroll;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--gold) / 0.5) hsl(var(--muted));
+  }
+  .scrollbar-x-always::-webkit-scrollbar {
+    height: 10px;
+    -webkit-appearance: none;
+  }
+  .scrollbar-x-always::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+    border-radius: 9999px;
+  }
+  .scrollbar-x-always::-webkit-scrollbar-thumb {
+    background: hsl(var(--gold) / 0.5);
+    border-radius: 9999px;
+  }
+  .scrollbar-x-always::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--gold));
+  }
 }
 
 /* Smooth scroll */
