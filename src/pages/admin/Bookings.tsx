@@ -45,6 +45,14 @@ import { releaseInventory, reserveInventory, getInventoryAction } from "@/lib/in
 
 type BookingStatus = Database["public"]["Enums"]["booking_status"];
 
+interface BookingAddOn {
+  id: string;
+  quantity: number;
+  unit_price_ghs: number;
+  total_price_ghs: number;
+  add_ons: { name: string; icon: string | null } | null;
+}
+
 interface Booking {
   id: string;
   reference_code: string;
@@ -64,9 +72,12 @@ interface Booking {
   final_total_ghs: number;
   promo_code: string | null;
   special_requests: string | null;
+  arrival_time: string | null;
+  nationality: string | null;
   created_at: string;
   rooms: { name: string } | null;
-  guests: { full_name: string; email: string; phone: string } | null;
+  guests: { full_name: string; email: string; phone: string; preferences: any } | null;
+  booking_add_ons: BookingAddOn[];
 }
 
 const STATUS_OPTIONS: BookingStatus[] = ["pending", "confirmed", "cancelled", "completed", "no_show"];
@@ -127,7 +138,7 @@ const SOURCE_OPTIONS = Object.keys(SOURCE_LABELS);
 async function fetchBookings(statusFilter: string, sourceFilter: string) {
   let query = supabase
     .from("bookings")
-    .select("id, reference_code, status, payment_status, payment_method, booking_source, ota_reference, room_number, check_in, check_out, adults, children, base_total_ghs, discount_ghs, add_ons_total_ghs, final_total_ghs, promo_code, special_requests, created_at, rooms(name), guests(full_name, email, phone)")
+    .select("id, reference_code, status, payment_status, payment_method, booking_source, ota_reference, room_number, check_in, check_out, adults, children, base_total_ghs, discount_ghs, add_ons_total_ghs, final_total_ghs, promo_code, special_requests, arrival_time, nationality, created_at, rooms(name), guests(full_name, email, phone, preferences), booking_add_ons(id, quantity, unit_price_ghs, total_price_ghs, add_ons(name, icon))")
     .order("created_at", { ascending: false })
     .limit(100);
 
@@ -757,6 +768,43 @@ export default function Bookings() {
                   <p className="text-foreground">{selectedBooking.guests?.email ?? "—"}</p>
                 </div>
               </div>
+
+              {selectedBooking.arrival_time && (
+                <div>
+                  <p className="text-xs uppercase tracking-wider mb-1 text-muted-foreground">Estimated Arrival Time</p>
+                  <p className="text-foreground bg-muted p-2 rounded text-xs">{selectedBooking.arrival_time}</p>
+                </div>
+              )}
+
+              {selectedBooking.guests?.preferences?.flight_itinerary && (
+                <div>
+                  <p className="text-xs uppercase tracking-wider mb-1 text-muted-foreground">Flight Itinerary</p>
+                  <p className="text-foreground bg-muted p-2 rounded text-xs whitespace-pre-wrap">
+                    {selectedBooking.guests.preferences.flight_itinerary}
+                  </p>
+                </div>
+              )}
+
+              {selectedBooking.booking_add_ons && selectedBooking.booking_add_ons.length > 0 && (
+                <div>
+                  <p className="text-xs uppercase tracking-wider mb-2 text-muted-foreground">Extras</p>
+                  <div className="bg-muted rounded p-2 space-y-1.5">
+                    {selectedBooking.booking_add_ons.map((ao) => (
+                      <div key={ao.id} className="flex items-center justify-between text-xs">
+                        <span className="text-foreground">
+                          {ao.add_ons?.name ?? "Extra"}
+                          {ao.quantity > 1 && <span className="text-muted-foreground"> ×{ao.quantity}</span>}
+                        </span>
+                        <span className="text-foreground font-medium">{formatCurrency(ao.total_price_ghs)}</span>
+                      </div>
+                    ))}
+                    <div className="flex items-center justify-between pt-1.5 border-t border-border text-xs">
+                      <span className="text-muted-foreground">Extras subtotal</span>
+                      <span className="text-foreground font-medium">{formatCurrency(selectedBooking.add_ons_total_ghs)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {selectedBooking.special_requests && (
                 <div>
