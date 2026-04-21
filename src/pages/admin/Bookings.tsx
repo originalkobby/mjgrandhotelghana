@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
+import { StickyHorizontalScrollbar } from "@/components/ui/StickyHorizontalScrollbar";
 import { motion } from "framer-motion";
 import { Search, Filter, RefreshCw, Download, Banknote, Trash2, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
