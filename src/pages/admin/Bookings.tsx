@@ -555,7 +555,7 @@ export default function Bookings() {
       {/* Table */}
       <Card>
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
+          <div className="scrollbar-x-always">
             <table className="w-full text-sm font-sans">
               <thead>
                 <tr className="border-b border-border">
