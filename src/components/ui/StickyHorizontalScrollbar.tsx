@@ -127,21 +127,51 @@ export function StickyHorizontalScrollbar({ targetRef }: StickyHorizontalScrollb
     target.scrollLeft = Math.max(0, newScroll);
   };
 
+  const scrollByStep = (direction: -1 | 1) => {
+    const target = targetRef.current;
+    if (!target) return;
+    const step = Math.max(target.clientWidth * 0.5, 120);
+    target.scrollBy({ left: direction * step, behavior: "smooth" });
+  };
+
+  const holdTimerRef = useRef<number | null>(null);
+  const startHold = (direction: -1 | 1) => {
+    scrollByStep(direction);
+    holdTimerRef.current = window.setInterval(() => scrollByStep(direction), 200);
+  };
+  const stopHold = () => {
+    if (holdTimerRef.current !== null) {
+      window.clearInterval(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+  };
+
   if (typeof document === "undefined") return null;
 
   return createPortal(
     <div
-      className="fixed bottom-0 z-40 px-2 py-1.5 bg-background/80 backdrop-blur-sm border-t border-border"
+      className="fixed bottom-0 z-40 flex items-center gap-1 px-1.5 py-1.5 bg-background/80 backdrop-blur-sm border-t border-border"
       style={{
-        display: metrics.visible ? "block" : "none",
+        display: metrics.visible ? "flex" : "none",
         left: `${metrics.left}px`,
         width: `${metrics.width}px`,
       }}
     >
+      <button
+        type="button"
+        aria-label="Scroll left"
+        onPointerDown={() => startHold(-1)}
+        onPointerUp={stopHold}
+        onPointerLeave={stopHold}
+        onPointerCancel={stopHold}
+        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </button>
       <div
         ref={trackRef}
         onPointerDown={onTrackDown}
-        className="relative h-2.5 w-full rounded-full bg-muted cursor-pointer"
+        className="relative h-2.5 flex-1 rounded-full bg-muted cursor-pointer"
       >
         <div
           ref={thumbRef}
@@ -154,6 +184,17 @@ export function StickyHorizontalScrollbar({ targetRef }: StickyHorizontalScrollb
           }}
         />
       </div>
+      <button
+        type="button"
+        aria-label="Scroll right"
+        onPointerDown={() => startHold(1)}
+        onPointerUp={stopHold}
+        onPointerLeave={stopHold}
+        onPointerCancel={stopHold}
+        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+      >
+        <ChevronRight className="h-4 w-4" />
+      </button>
     </div>,
     document.body,
   );
