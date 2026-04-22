@@ -1,6 +1,4 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -16,6 +14,21 @@ const fallbackImages = [
   { image_url: galleryBeach, alt_text: "Head chef preparing fresh ingredients", size: "normal" },
   { image_url: galleryGarden, alt_text: "MJ Pool Bar", size: "normal" },
   { image_url: galleryLobby, alt_text: "Poolside cabana and sun loungers", size: "wide" },
+];
+
+const pixiesetGridPattern = [
+  "sm:row-span-2 lg:row-span-2",
+  "sm:row-span-1 lg:row-span-1",
+  "sm:row-span-2 lg:col-span-2 lg:row-span-2",
+  "sm:row-span-3 lg:row-span-3",
+  "sm:row-span-2 lg:row-span-2",
+  "sm:row-span-1 lg:col-span-2 lg:row-span-1",
+  "sm:row-span-3 lg:row-span-2",
+  "sm:row-span-2 lg:row-span-3",
+  "sm:row-span-1 lg:row-span-1",
+  "sm:row-span-2 lg:col-span-2 lg:row-span-2",
+  "sm:row-span-2 lg:row-span-2",
+  "sm:row-span-1 lg:row-span-1",
 ];
 
 const GalleryPage = () => {
@@ -60,13 +73,13 @@ const GalleryPage = () => {
           </motion.div>
 
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[6px] md:gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 grid-flow-dense auto-rows-[230px] sm:auto-rows-[145px] md:auto-rows-[165px] lg:auto-rows-[150px] gap-[6px] md:gap-2">
               {Array.from({ length: 8 }).map((_, i) => (
-                <Skeleton key={i} className="aspect-[3/4] w-full rounded-none" />
+                <Skeleton key={i} className={`h-full w-full rounded-none ${pixiesetGridPattern[i % pixiesetGridPattern.length]}`} />
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[6px] md:gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 grid-flow-dense auto-rows-[230px] sm:auto-rows-[145px] md:auto-rows-[165px] lg:auto-rows-[150px] gap-[6px] md:gap-2">
               {images.map((img, i) => (
                 <motion.figure
                   key={`${img.alt_text}-${i}`}
@@ -77,12 +90,12 @@ const GalleryPage = () => {
                     delay: 0.15 + i * 0.08,
                     ease: [0.3, 0, 0.2, 1],
                   }}
-                  className="group relative overflow-hidden bg-muted"
+                  className={`group relative overflow-hidden bg-muted ${pixiesetGridPattern[i % pixiesetGridPattern.length]}`}
                 >
                   <img
                     src={img.image_url}
                     alt={img.alt_text}
-                    className="aspect-[3/4] w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.3,0,0.2,1)] group-hover:scale-[1.025]"
+                    className="h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.3,0,0.2,1)] group-hover:scale-[1.025]"
                     loading="lazy"
                   />
                 </motion.figure>
