@@ -184,6 +184,7 @@ export default function Inventory() {
 
   const rooms = data?.rooms ?? [];
   const inventory = data?.inventory ?? new Map<string, InvCell>();
+  const dailyStats = data?.dailyStats ?? new Map<string, DailyOperations>();
 
   const getCell = (roomId: string, date: Date): InvCell => {
     const dateStr = format(date, "yyyy-MM-dd");
@@ -333,9 +334,10 @@ export default function Inventory() {
         </Button>
       </div>
 
-      {/* Grid */}
-      <Card>
-        <CardContent className="p-0">
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+        {/* Grid */}
+        <Card className="min-w-0">
+          <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="text-sm font-sans border-collapse">
               <thead>
@@ -463,8 +465,87 @@ export default function Inventory() {
               </tbody>
             </table>
           </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        <Card className="xl:sticky xl:top-24 xl:self-start">
+          <CardContent className="p-4 space-y-4">
+            <div>
+              <h2 className="font-serif text-lg text-foreground">Weekly Operations</h2>
+              <p className="font-sans text-xs text-muted-foreground">
+                Booked rooms, arrivals, and departures by day
+              </p>
+            </div>
+            <div className="space-y-3">
+              {days.map((day) => {
+                const date = format(day, "yyyy-MM-dd");
+                const stats = dailyStats.get(date) ?? {
+                  date,
+                  bookedRooms: 0,
+                  expectedCheckIns: 0,
+                  expectedCheckOuts: 0,
+                };
+                const maxValue = Math.max(
+                  1,
+                  stats.bookedRooms,
+                  stats.expectedCheckIns,
+                  stats.expectedCheckOuts
+                );
+
+                return (
+                  <div key={date} className="rounded-md border border-border bg-card p-3 font-sans">
+                    <div className="mb-3 flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          {format(day, "EEE")}
+                        </p>
+                        <p className="text-sm font-medium text-foreground">{format(day, "MMM d")}</p>
+                      </div>
+                      <CalendarDays className="h-4 w-4 text-accent" />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="grid grid-cols-[88px_1fr_24px] items-center gap-2 text-xs">
+                        <span className="text-muted-foreground">Booked</span>
+                        <div className="h-2 overflow-hidden rounded-full bg-muted">
+                          <div
+                            className="h-full rounded-full bg-accent"
+                            style={{ width: `${(stats.bookedRooms / maxValue) * 100}%` }}
+                          />
+                        </div>
+                        <span className="text-right font-semibold text-foreground">{stats.bookedRooms}</span>
+                      </div>
+                      <div className="grid grid-cols-[88px_1fr_24px] items-center gap-2 text-xs">
+                        <span className="flex items-center gap-1 text-muted-foreground">
+                          <LogIn className="h-3 w-3" /> In
+                        </span>
+                        <div className="h-2 overflow-hidden rounded-full bg-muted">
+                          <div
+                            className="h-full rounded-full bg-primary"
+                            style={{ width: `${(stats.expectedCheckIns / maxValue) * 100}%` }}
+                          />
+                        </div>
+                        <span className="text-right font-semibold text-foreground">{stats.expectedCheckIns}</span>
+                      </div>
+                      <div className="grid grid-cols-[88px_1fr_24px] items-center gap-2 text-xs">
+                        <span className="flex items-center gap-1 text-muted-foreground">
+                          <LogOut className="h-3 w-3" /> Out
+                        </span>
+                        <div className="h-2 overflow-hidden rounded-full bg-muted">
+                          <div
+                            className="h-full rounded-full bg-secondary-foreground"
+                            style={{ width: `${(stats.expectedCheckOuts / maxValue) * 100}%` }}
+                          />
+                        </div>
+                        <span className="text-right font-semibold text-foreground">{stats.expectedCheckOuts}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Legend */}
       <div className="flex flex-wrap gap-4 text-xs font-sans text-muted-foreground">
