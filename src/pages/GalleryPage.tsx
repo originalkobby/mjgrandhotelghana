@@ -18,12 +18,6 @@ const fallbackImages = [
   { image_url: galleryLobby, alt_text: "Poolside cabana and sun loungers", size: "wide" },
 ];
 
-const sizeClasses: Record<string, string> = {
-  normal: "col-span-1 row-span-1",
-  wide: "md:col-span-2 row-span-1",
-  tall: "col-span-1 md:row-span-2",
-};
-
 const GalleryPage = () => {
   const { data: dbImages, isLoading } = useQuery({
     queryKey: ["public-gallery"],
@@ -49,7 +43,7 @@ const GalleryPage = () => {
       <Navbar />
 
       <section className="pt-32 pb-24 md:pt-40 md:pb-32">
-        <div className="container mx-auto px-6 lg:px-12">
+        <div className="mx-auto w-full max-w-[1600px] px-4 md:px-8 lg:px-10">
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -66,15 +60,15 @@ const GalleryPage = () => {
           </motion.div>
 
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 auto-rows-[280px]">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className="h-full rounded-lg" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[6px] md:gap-2">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <Skeleton key={i} className="aspect-[3/4] w-full rounded-none" />
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 auto-rows-[280px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[6px] md:gap-2">
               {images.map((img, i) => (
-                <motion.div
+                <motion.figure
                   key={`${img.alt_text}-${i}`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -83,15 +77,15 @@ const GalleryPage = () => {
                     delay: 0.15 + i * 0.08,
                     ease: [0.3, 0, 0.2, 1],
                   }}
-                  className={`overflow-hidden ${sizeClasses[img.size] || ""}`}
+                  className="group relative overflow-hidden bg-muted"
                 >
                   <img
                     src={img.image_url}
                     alt={img.alt_text}
-                    className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.3,0,0.2,1)] hover:scale-105 cursor-pointer"
+                    className="aspect-[3/4] w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.3,0,0.2,1)] group-hover:scale-[1.025]"
                     loading="lazy"
                   />
-                </motion.div>
+                </motion.figure>
               ))}
             </div>
           )}
