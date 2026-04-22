@@ -44,6 +44,11 @@ const sizeToSpan: Record<string, string> = {
   tall: "md:col-span-2",
 };
 
+const portraitSizeLabels = new Set(["portrait", "vertical", "9:16", "tall"]);
+
+const isPortraitGalleryImage = (img: { size?: string | null }) =>
+  portraitSizeLabels.has((img.size || "").toLowerCase());
+
 const Gallery = () => {
   const { data: dbImages } = useQuery({
     queryKey: ["public-gallery-preview"],
@@ -179,12 +184,15 @@ const SplitGalleryImage = ({
     },
   });
 
-  const fallbackPool = [primaryImg, portraitImg]
+  const fallbackPool = [primaryImg]
     .filter((img) => img.image_url && !excludeUrls.includes(img.image_url))
     .map((img) => ({ url: img.image_url, alt: img.alt_text || "Gallery image" }));
   const pool = ((allDbImages && allDbImages.length > 0 ? allDbImages : [])
     .filter((img) => img.image_url && !excludeUrls.includes(img.image_url))
     .map((img) => ({ url: img.image_url, alt: img.alt_text || "Gallery image" })));
+  const portraitPool = ((allDbImages && allDbImages.length > 0 ? allDbImages : [])
+    .filter((img) => img.image_url && !excludeUrls.includes(img.image_url) && isPortraitGalleryImage(img))
+    .map((img) => ({ url: img.image_url, alt: img.alt_text || "Portrait gallery image" })));
   const displayPool = pool.length > 0 ? pool : fallbackPool;
 
   const seenRef = useRef<Set<string>>(new Set());
@@ -194,34 +202,31 @@ const SplitGalleryImage = ({
   ]);
 
   useEffect(() => {
-    const initialPair = displayPool.slice(0, 2);
-    if (initialPair.length === 2) {
-      setSplitImages(initialPair);
-    } else if (initialPair.length === 1) {
-      setSplitImages([initialPair[0], initialPair[0]]);
+    const primary = displayPool[0];
+    const portrait = portraitPool.find((img) => img.url !== primary?.url);
+    if (primary && portrait) {
+      setSplitImages([primary, portrait]);
+    } else if (primary) {
+      setSplitImages([primary, { url: "", alt: "Portrait gallery image placeholder" }]);
     }
-  }, [displayPool.length]);
+  }, [displayPool.length, portraitPool.length]);
 
   const pickPair = useCallback(() => {
     if (displayPool.length === 0) return;
 
     let available = displayPool.filter((img) => !seenRef.current.has(img.url));
-    if (available.length < Math.min(2, displayPool.length)) {
+    if (available.length === 0) {
       seenRef.current = new Set();
       available = displayPool;
     }
 
-    const shuffled = [...available].sort(() => Math.random() - 0.5);
-    const pair = shuffled.slice(0, Math.min(2, shuffled.length));
-    pair.forEach((img) => seenRef.current.add(img.url));
+    const primary = available[Math.floor(Math.random() * available.length)];
+    const portraitOptions = portraitPool.filter((img) => img.url !== primary.url);
+    const portrait = portraitOptions[Math.floor(Math.random() * portraitOptions.length)];
+    seenRef.current.add(primary.url);
 
-    if (pair.length === 1) {
-      setSplitImages([pair[0], { url: portraitImg.image_url, alt: portraitImg.alt_text }]);
-      return;
-    }
-
-    setSplitImages(pair);
-  }, [displayPool, portraitImg.alt_text, portraitImg.image_url]);
+    setSplitImages([primary, portrait || { url: "", alt: "Portrait gallery image placeholder" }]);
+  }, [displayPool, portraitPool]);
 
   useEffect(() => {
     if (displayPool.length === 0) return;
