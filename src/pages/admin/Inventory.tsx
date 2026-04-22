@@ -340,16 +340,16 @@ export default function Inventory() {
         <Card className="min-w-0">
           <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <table className="text-sm font-sans border-collapse">
+            <table className="w-full table-fixed text-sm font-sans border-collapse">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider sticky left-0 bg-card z-10 min-w-[140px]">
+                  <th className="text-left px-2 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider sticky left-0 bg-card z-10 w-[116px]">
                     Room
                   </th>
                   {days.map((d) => (
                     <th
                       key={d.toISOString()}
-                      className={`text-center px-2 py-3 text-xs font-medium uppercase tracking-wider w-[100px] ${
+                      className={`text-center px-1 py-2 text-xs font-medium uppercase tracking-wider ${
                         isSameDay(d, new Date()) ? "text-accent bg-accent/5" : "text-muted-foreground"
                       }`}
                     >
@@ -363,19 +363,19 @@ export default function Inventory() {
                 {loading
                   ? Array.from({ length: 3 }).map((_, i) => (
                       <tr key={i} className="border-b border-border/50">
-                        <td className="px-4 py-4 sticky left-0 bg-card">
+                        <td className="px-2 py-2 sticky left-0 bg-card">
                           <div className="h-4 bg-muted rounded animate-pulse w-24" />
                         </td>
                         {days.map((d) => (
-                          <td key={d.toISOString()} className="px-2 py-4">
-                            <div className="h-12 bg-muted rounded animate-pulse" />
+                          <td key={d.toISOString()} className="px-0.5 py-1">
+                            <div className="h-[76px] bg-muted rounded animate-pulse" />
                           </td>
                         ))}
                       </tr>
                     ))
                   : rooms.map((room) => (
                       <tr key={room.id} className="border-b border-border/50">
-                        <td className="px-4 py-3 sticky left-0 bg-card z-10">
+                        <td className="px-2 py-2 sticky left-0 bg-card z-10">
                           <p className="font-medium text-foreground">{room.name}</p>
                           <p className="text-xs text-muted-foreground">
                             Base: {fc(Number(room.base_price_ghs))}
@@ -387,13 +387,13 @@ export default function Inventory() {
                           const pct = cell.total_count > 0 ? Math.round((cell.booked_count / cell.total_count) * 100) : 0;
                           const rate = cell.rate_override ?? Number(room.base_price_ghs);
                           return (
-                            <td key={d.toISOString()} className="px-1 py-1">
+                             <td key={d.toISOString()} className="px-0.5 py-0.5">
                               <TooltipProvider delayDuration={200}>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <button
                                       onClick={() => openEdit(room, d)}
-                                      className={`w-[100px] h-[100px] rounded-md p-2 text-xs transition-colors hover:ring-2 hover:ring-ring/50 cursor-pointer flex flex-col items-center justify-center ${occupancyColor(
+                                      className={`h-[76px] w-full rounded-md p-1 text-xs transition-colors hover:ring-2 hover:ring-ring/50 cursor-pointer flex flex-col items-center justify-center ${occupancyColor(
                                         cell.booked_count,
                                         cell.total_count,
                                         cell.is_closed
