@@ -31,6 +31,16 @@ const pixiesetGridPattern = [
   "sm:row-span-1 lg:row-span-1",
 ];
 
+const galleryFrameClasses: Record<string, string> = {
+  normal: "sm:row-span-2 lg:row-span-2",
+  wide: "sm:row-span-2 lg:col-span-2 lg:row-span-2",
+  tall: "sm:row-span-3 lg:row-span-3",
+};
+
+const getGalleryFrameClass = (size: string | null | undefined, index: number) => {
+  return size && galleryFrameClasses[size] ? galleryFrameClasses[size] : pixiesetGridPattern[index % pixiesetGridPattern.length];
+};
+
 const GalleryPage = () => {
   const { data: dbImages, isLoading } = useQuery({
     queryKey: ["public-gallery"],
@@ -90,7 +100,7 @@ const GalleryPage = () => {
                     delay: 0.15 + i * 0.08,
                     ease: [0.3, 0, 0.2, 1],
                   }}
-                  className={`group relative overflow-hidden bg-muted ${pixiesetGridPattern[i % pixiesetGridPattern.length]}`}
+                  className={`group relative overflow-hidden bg-muted ${getGalleryFrameClass(img.size, i)}`}
                 >
                   <img
                     src={img.image_url}
