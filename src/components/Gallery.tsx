@@ -68,8 +68,8 @@ const Gallery = () => {
 
   const images = [...fallbackImages, ...dbMapped].slice(0, 4);
 
-  // Collect the image URLs used in the other 3 static cards (indices 0, 1, 3)
-  const staticUrls = [images[0]?.image_url, images[1]?.image_url, images[3]?.image_url].filter(Boolean);
+  // Keep rotating gallery images from repeating the first two fixed homepage images.
+  const excludedHomeUrls = [images[0]?.image_url, images[1]?.image_url].filter(Boolean);
 
   return (
     <section id="gallery" className="py-24 md:py-32 bg-background">
@@ -107,7 +107,7 @@ const Gallery = () => {
               <SlideshowCard
                 key="slideshow"
                 fallbackImg={img}
-                excludeUrls={staticUrls}
+                excludeUrls={excludedHomeUrls}
                 index={i}
               />
             ) : i === 3 ? (
@@ -115,6 +115,7 @@ const Gallery = () => {
                 key={`${img.alt_text}-${i}`}
                 primaryImg={img}
                 portraitImg={images[2] || img}
+                excludeUrls={excludedHomeUrls}
               />
             ) : (
               <GalleryImage key={`${img.alt_text}-${i}`} img={img} index={i} />
@@ -160,32 +161,101 @@ const GalleryImage = ({ img, index }: { img: { image_url: string; alt_text: stri
 const SplitGalleryImage = ({
   primaryImg,
   portraitImg,
+  excludeUrls,
 }: {
   primaryImg: { image_url: string; alt_text: string; span: string };
   portraitImg: { image_url: string; alt_text: string; span: string };
-}) => (
-  <motion.div
-    variants={fadeUp}
-    className={`grid grid-cols-[minmax(0,1fr)_minmax(108px,144px)] md:grid-cols-[minmax(0,1fr)_180px] gap-3 overflow-hidden ${primaryImg.span}`}
-  >
-    <div className="h-64 md:h-80 w-full overflow-hidden bg-muted">
-      <img
-        src={primaryImg.image_url}
-        alt={primaryImg.alt_text}
-        className="h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.3,0,0.2,1)] hover:scale-105 cursor-pointer"
-        loading="lazy"
-      />
-    </div>
-    <div className="aspect-[9/16] h-64 md:h-80 w-full max-w-full overflow-hidden justify-self-end bg-muted">
-      <img
-        src={portraitImg.image_url}
-        alt={portraitImg.alt_text}
-        className="h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.3,0,0.2,1)] hover:scale-105 cursor-pointer"
-        loading="lazy"
-      />
-    </div>
-  </motion.div>
-);
+  excludeUrls: string[];
+}) => {
+  const { data: allDbImages } = useQuery({
+    queryKey: ["public-gallery"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("gallery_images")
+        .select("*")
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const pool = (allDbImages || [])
+    .filter((img) => !excludeUrls.includes(img.image_url))
+    .map((img) => ({ url: img.image_url, alt: img.alt_text }));
+
+  const seenRef = useRef<Set<string>>(new Set());
+  const [splitImages, setSplitImages] = useState([
+    { url: primaryImg.image_url, alt: primaryImg.alt_text },
+    { url: portraitImg.image_url, alt: portraitImg.alt_text },
+  ]);
+
+  const pickPair = useCallback(() => {
+    if (pool.length === 0) return;
+
+    let available = pool.filter((img) => !seenRef.current.has(img.url));
+    if (available.length < Math.min(2, pool.length)) {
+      seenRef.current = new Set();
+      available = pool;
+    }
+
+    const shuffled = [...available].sort(() => Math.random() - 0.5);
+    const pair = shuffled.slice(0, Math.min(2, shuffled.length));
+    pair.forEach((img) => seenRef.current.add(img.url));
+
+    if (pair.length === 1) {
+      setSplitImages([pair[0], { url: portraitImg.image_url, alt: portraitImg.alt_text }]);
+      return;
+    }
+
+    setSplitImages(pair);
+  }, [pool, portraitImg.alt_text, portraitImg.image_url]);
+
+  useEffect(() => {
+    if (pool.length === 0) return;
+    pickPair();
+    const id = setInterval(pickPair, 6000);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pool.length]);
+
+  return (
+    <motion.div
+      variants={fadeUp}
+      className={`grid grid-cols-[minmax(0,1fr)_minmax(108px,144px)] md:grid-cols-[minmax(0,1fr)_180px] gap-3 overflow-hidden ${primaryImg.span}`}
+    >
+      <div className="relative h-64 md:h-80 w-full overflow-hidden bg-muted">
+        <AnimatePresence mode="popLayout">
+          <motion.img
+            key={splitImages[0].url}
+            src={splitImages[0].url}
+            alt={splitImages[0].alt}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 3, ease: [0.3, 0, 0.2, 1] }}
+            className="absolute inset-0 h-full w-full object-cover cursor-pointer"
+            loading="lazy"
+          />
+        </AnimatePresence>
+      </div>
+      <div className="relative aspect-[9/16] h-64 md:h-80 w-full max-w-full overflow-hidden justify-self-end bg-muted">
+        <AnimatePresence mode="popLayout">
+          <motion.img
+            key={splitImages[1].url}
+            src={splitImages[1].url}
+            alt={splitImages[1].alt}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 3, ease: [0.3, 0, 0.2, 1] }}
+            className="absolute inset-0 h-full w-full object-cover cursor-pointer"
+            loading="lazy"
+          />
+        </AnimatePresence>
+      </div>
+    </motion.div>
+  );
+};
 
 /* ── Slideshow card (3rd position) ── */
 const SlideshowCard = ({
