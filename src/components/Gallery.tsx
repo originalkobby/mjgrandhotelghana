@@ -179,9 +179,13 @@ const SplitGalleryImage = ({
     },
   });
 
-  const pool = (allDbImages || [])
-    .filter((img) => !excludeUrls.includes(img.image_url))
-    .map((img) => ({ url: img.image_url, alt: img.alt_text }));
+  const fallbackPool = [primaryImg, portraitImg]
+    .filter((img) => img.image_url && !excludeUrls.includes(img.image_url))
+    .map((img) => ({ url: img.image_url, alt: img.alt_text || "Gallery image" }));
+  const pool = ((allDbImages && allDbImages.length > 0 ? allDbImages : [])
+    .filter((img) => img.image_url && !excludeUrls.includes(img.image_url))
+    .map((img) => ({ url: img.image_url, alt: img.alt_text || "Gallery image" })));
+  const displayPool = pool.length > 0 ? pool : fallbackPool;
 
   const seenRef = useRef<Set<string>>(new Set());
   const [splitImages, setSplitImages] = useState([
@@ -190,12 +194,12 @@ const SplitGalleryImage = ({
   ]);
 
   const pickPair = useCallback(() => {
-    if (pool.length === 0) return;
+    if (displayPool.length === 0) return;
 
-    let available = pool.filter((img) => !seenRef.current.has(img.url));
-    if (available.length < Math.min(2, pool.length)) {
+    let available = displayPool.filter((img) => !seenRef.current.has(img.url));
+    if (available.length < Math.min(2, displayPool.length)) {
       seenRef.current = new Set();
-      available = pool;
+      available = displayPool;
     }
 
     const shuffled = [...available].sort(() => Math.random() - 0.5);
@@ -208,15 +212,15 @@ const SplitGalleryImage = ({
     }
 
     setSplitImages(pair);
-  }, [pool, portraitImg.alt_text, portraitImg.image_url]);
+  }, [displayPool, portraitImg.alt_text, portraitImg.image_url]);
 
   useEffect(() => {
-    if (pool.length === 0) return;
+    if (displayPool.length === 0) return;
     pickPair();
     const id = setInterval(pickPair, 6000);
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pool.length]);
+  }, [displayPool.length]);
 
   return (
     <motion.div
