@@ -6,6 +6,9 @@ import {
   Lock,
   ChevronLeft,
   ChevronRight,
+  CalendarDays,
+  LogIn,
+  LogOut,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -56,11 +59,18 @@ interface InvCell {
   closure_reason: string | null;
 }
 
+interface DailyOperations {
+  date: string;
+  bookedRooms: number;
+  expectedCheckIns: number;
+  expectedCheckOuts: number;
+}
+
 async function fetchInventoryData(weekStart: Date, weekEnd: Date) {
   const startStr = format(weekStart, "yyyy-MM-dd");
   const endStr = format(weekEnd, "yyyy-MM-dd");
 
-  const [{ data: roomsData }, { data: invData }] = await Promise.all([
+  const [{ data: roomsData }, { data: invData }, { data: checkInsData }, { data: checkOutsData }] = await Promise.all([
     supabase
       .from("rooms")
       .select("id, name, base_price_ghs")
@@ -71,15 +81,48 @@ async function fetchInventoryData(weekStart: Date, weekEnd: Date) {
       .select("id, room_id, date, total_count, booked_count, is_closed, rate_override, closure_reason")
       .gte("date", startStr)
       .lte("date", endStr),
+    supabase
+      .from("bookings")
+      .select("id, check_in, status")
+      .gte("check_in", startStr)
+      .lte("check_in", endStr)
+      .in("status", ["pending", "confirmed"]),
+    supabase
+      .from("bookings")
+      .select("id, check_out, status")
+      .gte("check_out", startStr)
+      .lte("check_out", endStr)
+      .in("status", ["pending", "confirmed"]),
   ]);
 
   const rooms = roomsData ?? [];
   const map = new Map<string, InvCell>();
-  for (const row of invData ?? []) {
-    map.set(`${row.room_id}|${row.date}`, row as InvCell);
+  const dailyStats = new Map<string, DailyOperations>();
+  for (const day of eachDayOfInterval({ start: weekStart, end: weekEnd })) {
+    const date = format(day, "yyyy-MM-dd");
+    dailyStats.set(date, {
+      date,
+      bookedRooms: 0,
+      expectedCheckIns: 0,
+      expectedCheckOuts: 0,
+    });
   }
 
-  return { rooms, inventory: map };
+  for (const row of invData ?? []) {
+    map.set(`${row.room_id}|${row.date}`, row as InvCell);
+    const dayStats = dailyStats.get(row.date);
+    if (dayStats) dayStats.bookedRooms += Number(row.booked_count ?? 0);
+  }
+  for (const booking of checkInsData ?? []) {
+    const dayStats = dailyStats.get(booking.check_in);
+    if (dayStats) dayStats.expectedCheckIns += 1;
+  }
+  for (const booking of checkOutsData ?? []) {
+    const dayStats = dailyStats.get(booking.check_out);
+    if (dayStats) dayStats.expectedCheckOuts += 1;
+  }
+
+  return { rooms, inventory: map, dailyStats };
 }
 
 export default function Inventory() {
