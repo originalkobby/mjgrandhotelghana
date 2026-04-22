@@ -68,8 +68,8 @@ const Gallery = () => {
 
   const images = [...fallbackImages, ...dbMapped].slice(0, 4);
 
-  // Collect the image URLs used in the other 3 static cards (indices 0, 1, 3)
-  const staticUrls = [images[0]?.image_url, images[1]?.image_url, images[3]?.image_url].filter(Boolean);
+  // Keep rotating gallery images from repeating the first two fixed homepage images.
+  const excludedHomeUrls = [images[0]?.image_url, images[1]?.image_url].filter(Boolean);
 
   return (
     <section id="gallery" className="py-24 md:py-32 bg-background">
@@ -107,7 +107,7 @@ const Gallery = () => {
               <SlideshowCard
                 key="slideshow"
                 fallbackImg={img}
-                excludeUrls={staticUrls}
+                excludeUrls={excludedHomeUrls}
                 index={i}
               />
             ) : i === 3 ? (
@@ -115,6 +115,7 @@ const Gallery = () => {
                 key={`${img.alt_text}-${i}`}
                 primaryImg={img}
                 portraitImg={images[2] || img}
+                excludeUrls={excludedHomeUrls}
               />
             ) : (
               <GalleryImage key={`${img.alt_text}-${i}`} img={img} index={i} />
