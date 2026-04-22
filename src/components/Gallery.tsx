@@ -166,7 +166,7 @@ const SplitGalleryImage = ({
 }) => (
   <motion.div
     variants={fadeUp}
-    className={`grid grid-cols-[minmax(0,1fr)_auto] gap-3 overflow-hidden ${primaryImg.span}`}
+    className={`grid grid-cols-[minmax(0,1fr)_minmax(108px,144px)] md:grid-cols-[minmax(0,1fr)_180px] gap-3 overflow-hidden ${primaryImg.span}`}
   >
     <img
       src={primaryImg.image_url}
@@ -174,12 +174,14 @@ const SplitGalleryImage = ({
       className="h-64 md:h-80 w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.3,0,0.2,1)] hover:scale-105 cursor-pointer"
       loading="lazy"
     />
-    <img
-      src={portraitImg.image_url}
-      alt={portraitImg.alt_text}
-      className="aspect-[9/16] h-64 md:h-80 w-auto max-w-[42vw] object-cover transition-transform duration-700 ease-[cubic-bezier(0.3,0,0.2,1)] hover:scale-105 cursor-pointer"
-      loading="lazy"
-    />
+    <div className="aspect-[9/16] h-64 md:h-80 w-full max-w-full overflow-hidden justify-self-end">
+      <img
+        src={portraitImg.image_url}
+        alt={portraitImg.alt_text}
+        className="h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.3,0,0.2,1)] hover:scale-105 cursor-pointer"
+        loading="lazy"
+      />
+    </div>
   </motion.div>
 );
 
