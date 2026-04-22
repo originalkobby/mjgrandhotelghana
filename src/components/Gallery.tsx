@@ -49,6 +49,11 @@ const portraitSizeLabels = new Set(["portrait", "vertical", "9:16", "tall"]);
 const isPortraitGalleryImage = (img: { size?: string | null }) =>
   portraitSizeLabels.has((img.size || "").toLowerCase());
 
+const isPortraitAspectRatio = (img: HTMLImageElement) => {
+  if (!img.naturalWidth || !img.naturalHeight) return false;
+  return img.naturalHeight / img.naturalWidth >= 1.45;
+};
+
 const Gallery = () => {
   const { data: dbImages } = useQuery({
     queryKey: ["public-gallery-preview"],
@@ -196,14 +201,15 @@ const SplitGalleryImage = ({
   const displayPool = pool.length > 0 ? pool : fallbackPool;
 
   const seenRef = useRef<Set<string>>(new Set());
+  const rejectedPortraitUrlsRef = useRef<Set<string>>(new Set());
   const [splitImages, setSplitImages] = useState([
     { url: primaryImg.image_url, alt: primaryImg.alt_text },
-    { url: portraitImg.image_url, alt: portraitImg.alt_text },
+    { url: "", alt: portraitImg.alt_text },
   ]);
 
   useEffect(() => {
     const primary = displayPool[0];
-    const portrait = portraitPool.find((img) => img.url !== primary?.url);
+    const portrait = portraitPool.find((img) => img.url !== primary?.url && !rejectedPortraitUrlsRef.current.has(img.url));
     if (primary && portrait) {
       setSplitImages([primary, portrait]);
     } else if (primary) {
@@ -221,12 +227,20 @@ const SplitGalleryImage = ({
     }
 
     const primary = available[Math.floor(Math.random() * available.length)];
-    const portraitOptions = portraitPool.filter((img) => img.url !== primary.url);
+    const portraitOptions = portraitPool.filter(
+      (img) => img.url !== primary.url && !rejectedPortraitUrlsRef.current.has(img.url)
+    );
     const portrait = portraitOptions[Math.floor(Math.random() * portraitOptions.length)];
     seenRef.current.add(primary.url);
 
     setSplitImages([primary, portrait || { url: "", alt: "Portrait gallery image placeholder" }]);
   }, [displayPool, portraitPool]);
+
+  const rejectPortraitImage = useCallback((url: string) => {
+    if (!url) return;
+    rejectedPortraitUrlsRef.current.add(url);
+    pickPair();
+  }, [pickPair]);
 
   useEffect(() => {
     if (displayPool.length === 0) return;
@@ -258,17 +272,25 @@ const SplitGalleryImage = ({
       </div>
       <div className="relative aspect-[9/16] h-64 md:h-80 w-full max-w-full overflow-hidden justify-self-end bg-muted">
         <AnimatePresence mode="popLayout">
-          <motion.img
-            key={splitImages[1].url}
-            src={splitImages[1].url}
-            alt={splitImages[1].alt}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 3, ease: [0.3, 0, 0.2, 1] }}
-            className="absolute inset-0 h-full w-full object-cover cursor-pointer"
-            loading="lazy"
-          />
+          {splitImages[1].url && (
+            <motion.img
+              key={splitImages[1].url}
+              src={splitImages[1].url}
+              alt={splitImages[1].alt}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 3, ease: [0.3, 0, 0.2, 1] }}
+              className="absolute inset-0 h-full w-full object-cover cursor-pointer"
+              loading="lazy"
+              onLoad={(event) => {
+                if (!isPortraitAspectRatio(event.currentTarget)) {
+                  rejectPortraitImage(splitImages[1].url);
+                }
+              }}
+              onError={() => rejectPortraitImage(splitImages[1].url)}
+            />
+          )}
         </AnimatePresence>
       </div>
     </motion.div>
