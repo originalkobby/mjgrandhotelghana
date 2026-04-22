@@ -193,6 +193,15 @@ const SplitGalleryImage = ({
     { url: portraitImg.image_url, alt: portraitImg.alt_text },
   ]);
 
+  useEffect(() => {
+    const initialPair = displayPool.slice(0, 2);
+    if (initialPair.length === 2) {
+      setSplitImages(initialPair);
+    } else if (initialPair.length === 1) {
+      setSplitImages([initialPair[0], initialPair[0]]);
+    }
+  }, [displayPool.length]);
+
   const pickPair = useCallback(() => {
     if (displayPool.length === 0) return;
 
