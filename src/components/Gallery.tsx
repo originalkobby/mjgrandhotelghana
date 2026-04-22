@@ -110,6 +110,12 @@ const Gallery = () => {
                 excludeUrls={staticUrls}
                 index={i}
               />
+            ) : i === 3 ? (
+              <SplitGalleryImage
+                key={`${img.alt_text}-${i}`}
+                primaryImg={img}
+                portraitImg={images[2] || img}
+              />
             ) : (
               <GalleryImage key={`${img.alt_text}-${i}`} img={img} index={i} />
             )
@@ -146,6 +152,32 @@ const GalleryImage = ({ img, index }: { img: { image_url: string; alt_text: stri
       src={img.image_url}
       alt={img.alt_text}
       className="w-full h-64 md:h-80 object-cover transition-transform duration-700 ease-[cubic-bezier(0.3,0,0.2,1)] hover:scale-105 cursor-pointer"
+      loading="lazy"
+    />
+  </motion.div>
+);
+
+const SplitGalleryImage = ({
+  primaryImg,
+  portraitImg,
+}: {
+  primaryImg: { image_url: string; alt_text: string; span: string };
+  portraitImg: { image_url: string; alt_text: string; span: string };
+}) => (
+  <motion.div
+    variants={fadeUp}
+    className={`grid grid-cols-[minmax(0,1fr)_auto] gap-3 overflow-hidden ${primaryImg.span}`}
+  >
+    <img
+      src={primaryImg.image_url}
+      alt={primaryImg.alt_text}
+      className="h-64 md:h-80 w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.3,0,0.2,1)] hover:scale-105 cursor-pointer"
+      loading="lazy"
+    />
+    <img
+      src={portraitImg.image_url}
+      alt={portraitImg.alt_text}
+      className="aspect-[9/16] h-64 md:h-80 w-auto max-w-[42vw] object-cover transition-transform duration-700 ease-[cubic-bezier(0.3,0,0.2,1)] hover:scale-105 cursor-pointer"
       loading="lazy"
     />
   </motion.div>
