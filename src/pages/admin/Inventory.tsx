@@ -13,6 +13,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Dialog,
   DialogContent,
@@ -476,73 +477,75 @@ export default function Inventory() {
                 Booked rooms, arrivals, and departures by day
               </p>
             </div>
-            <div className="space-y-3">
-              {days.map((day) => {
-                const date = format(day, "yyyy-MM-dd");
-                const stats = dailyStats.get(date) ?? {
-                  date,
-                  bookedRooms: 0,
-                  expectedCheckIns: 0,
-                  expectedCheckOuts: 0,
-                };
-                const maxValue = Math.max(
-                  1,
-                  stats.bookedRooms,
-                  stats.expectedCheckIns,
-                  stats.expectedCheckOuts
-                );
+            <ScrollArea className="h-[min(58vh,32rem)] pr-3">
+              <div className="space-y-3">
+                {days.map((day) => {
+                  const date = format(day, "yyyy-MM-dd");
+                  const stats = dailyStats.get(date) ?? {
+                    date,
+                    bookedRooms: 0,
+                    expectedCheckIns: 0,
+                    expectedCheckOuts: 0,
+                  };
+                  const maxValue = Math.max(
+                    1,
+                    stats.bookedRooms,
+                    stats.expectedCheckIns,
+                    stats.expectedCheckOuts
+                  );
 
-                return (
-                  <div key={date} className="rounded-md border border-border bg-card p-3 font-sans">
-                    <div className="mb-3 flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                          {format(day, "EEE")}
-                        </p>
-                        <p className="text-sm font-medium text-foreground">{format(day, "MMM d")}</p>
+                  return (
+                    <div key={date} className="rounded-md border border-border bg-card p-3 font-sans">
+                      <div className="mb-3 flex items-center justify-between">
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                            {format(day, "EEE")}
+                          </p>
+                          <p className="text-sm font-medium text-foreground">{format(day, "MMM d")}</p>
+                        </div>
+                        <CalendarDays className="h-4 w-4 text-accent" />
                       </div>
-                      <CalendarDays className="h-4 w-4 text-accent" />
+                      <div className="space-y-2">
+                        <div className="grid grid-cols-[88px_1fr_24px] items-center gap-2 text-xs">
+                          <span className="text-muted-foreground">Booked</span>
+                          <div className="h-2 overflow-hidden rounded-full bg-muted">
+                            <div
+                              className="h-full rounded-full bg-accent"
+                              style={{ width: `${(stats.bookedRooms / maxValue) * 100}%` }}
+                            />
+                          </div>
+                          <span className="text-right font-semibold text-foreground">{stats.bookedRooms}</span>
+                        </div>
+                        <div className="grid grid-cols-[88px_1fr_24px] items-center gap-2 text-xs">
+                          <span className="flex items-center gap-1 text-muted-foreground">
+                            <LogIn className="h-3 w-3" /> In
+                          </span>
+                          <div className="h-2 overflow-hidden rounded-full bg-muted">
+                            <div
+                              className="h-full rounded-full bg-primary"
+                              style={{ width: `${(stats.expectedCheckIns / maxValue) * 100}%` }}
+                            />
+                          </div>
+                          <span className="text-right font-semibold text-foreground">{stats.expectedCheckIns}</span>
+                        </div>
+                        <div className="grid grid-cols-[88px_1fr_24px] items-center gap-2 text-xs">
+                          <span className="flex items-center gap-1 text-muted-foreground">
+                            <LogOut className="h-3 w-3" /> Out
+                          </span>
+                          <div className="h-2 overflow-hidden rounded-full bg-muted">
+                            <div
+                              className="h-full rounded-full bg-secondary-foreground"
+                              style={{ width: `${(stats.expectedCheckOuts / maxValue) * 100}%` }}
+                            />
+                          </div>
+                          <span className="text-right font-semibold text-foreground">{stats.expectedCheckOuts}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <div className="grid grid-cols-[88px_1fr_24px] items-center gap-2 text-xs">
-                        <span className="text-muted-foreground">Booked</span>
-                        <div className="h-2 overflow-hidden rounded-full bg-muted">
-                          <div
-                            className="h-full rounded-full bg-accent"
-                            style={{ width: `${(stats.bookedRooms / maxValue) * 100}%` }}
-                          />
-                        </div>
-                        <span className="text-right font-semibold text-foreground">{stats.bookedRooms}</span>
-                      </div>
-                      <div className="grid grid-cols-[88px_1fr_24px] items-center gap-2 text-xs">
-                        <span className="flex items-center gap-1 text-muted-foreground">
-                          <LogIn className="h-3 w-3" /> In
-                        </span>
-                        <div className="h-2 overflow-hidden rounded-full bg-muted">
-                          <div
-                            className="h-full rounded-full bg-primary"
-                            style={{ width: `${(stats.expectedCheckIns / maxValue) * 100}%` }}
-                          />
-                        </div>
-                        <span className="text-right font-semibold text-foreground">{stats.expectedCheckIns}</span>
-                      </div>
-                      <div className="grid grid-cols-[88px_1fr_24px] items-center gap-2 text-xs">
-                        <span className="flex items-center gap-1 text-muted-foreground">
-                          <LogOut className="h-3 w-3" /> Out
-                        </span>
-                        <div className="h-2 overflow-hidden rounded-full bg-muted">
-                          <div
-                            className="h-full rounded-full bg-secondary-foreground"
-                            style={{ width: `${(stats.expectedCheckOuts / maxValue) * 100}%` }}
-                          />
-                        </div>
-                        <span className="text-right font-semibold text-foreground">{stats.expectedCheckOuts}</span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            </ScrollArea>
           </CardContent>
         </Card>
       </div>
