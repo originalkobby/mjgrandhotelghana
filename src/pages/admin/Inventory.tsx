@@ -106,7 +106,7 @@ async function fetchInventoryData(weekStart: Date, weekEnd: Date) {
   const [{ data: roomsData }, { data: invData }, { data: checkInsData }, { data: checkOutsData }] = await Promise.all([
     supabase
       .from("rooms")
-      .select("id, name, base_price_ghs")
+      .select("id, name, base_price_ghs, total_units")
       .eq("is_active", true)
       .order("sort_order"),
     supabase
@@ -116,19 +116,19 @@ async function fetchInventoryData(weekStart: Date, weekEnd: Date) {
       .lte("date", endStr),
     supabase
       .from("bookings")
-      .select("id, check_in, status")
+      .select("id, reference_code, check_in, check_out, room_number, status, rooms(name), guests(full_name, email, phone)")
       .gte("check_in", startStr)
       .lte("check_in", endStr)
       .in("status", ["pending", "confirmed"]),
     supabase
       .from("bookings")
-      .select("id, check_out, status")
+      .select("id, reference_code, check_in, check_out, room_number, status, rooms(name), guests(full_name, email, phone)")
       .gte("check_out", startStr)
       .lte("check_out", endStr)
       .in("status", ["pending", "confirmed"]),
   ]);
 
-  const rooms = roomsData ?? [];
+  const rooms = (roomsData ?? []) as Room[];
   const map = new Map<string, InvCell>();
   const dailyStats = new Map<string, DailyOperations>();
   for (const day of eachDayOfInterval({ start: weekStart, end: weekEnd })) {
@@ -136,23 +136,69 @@ async function fetchInventoryData(weekStart: Date, weekEnd: Date) {
     dailyStats.set(date, {
       date,
       bookedRooms: 0,
+      totalRooms: 0,
+      availableRooms: 0,
       expectedCheckIns: 0,
       expectedCheckOuts: 0,
+      roomBreakdown: [],
+      closedRooms: [],
+      arrivals: [],
+      departures: [],
     });
   }
 
   for (const row of invData ?? []) {
     map.set(`${row.room_id}|${row.date}`, row as InvCell);
-    const dayStats = dailyStats.get(row.date);
-    if (dayStats) dayStats.bookedRooms += Number(row.booked_count ?? 0);
+  }
+  for (const day of eachDayOfInterval({ start: weekStart, end: weekEnd })) {
+    const date = format(day, "yyyy-MM-dd");
+    const dayStats = dailyStats.get(date);
+    if (!dayStats) continue;
+
+    for (const room of rooms) {
+      const cell = map.get(`${room.id}|${date}`) ?? {
+        room_id: room.id,
+        date,
+        total_count: Number(room.total_units ?? 1),
+        booked_count: 0,
+        is_closed: false,
+        rate_override: null,
+        closure_reason: null,
+      };
+      const total = Number(cell.total_count ?? room.total_units ?? 1);
+      const booked = Number(cell.booked_count ?? 0);
+      const available = cell.is_closed ? 0 : Math.max(total - booked, 0);
+
+      dayStats.totalRooms += cell.is_closed ? 0 : total;
+      dayStats.bookedRooms += booked;
+      dayStats.availableRooms += available;
+      dayStats.roomBreakdown.push({
+        roomId: room.id,
+        roomName: room.name,
+        booked,
+        total,
+        available,
+        isClosed: cell.is_closed,
+        closureReason: cell.closure_reason,
+      });
+      if (cell.is_closed) {
+        dayStats.closedRooms.push({ roomName: room.name, reason: cell.closure_reason });
+      }
+    }
   }
   for (const booking of checkInsData ?? []) {
     const dayStats = dailyStats.get(booking.check_in);
-    if (dayStats) dayStats.expectedCheckIns += 1;
+    if (dayStats) {
+      dayStats.expectedCheckIns += 1;
+      dayStats.arrivals.push(booking as unknown as BookingDetail);
+    }
   }
   for (const booking of checkOutsData ?? []) {
     const dayStats = dailyStats.get(booking.check_out);
-    if (dayStats) dayStats.expectedCheckOuts += 1;
+    if (dayStats) {
+      dayStats.expectedCheckOuts += 1;
+      dayStats.departures.push(booking as unknown as BookingDetail);
+    }
   }
 
   return { rooms, inventory: map, dailyStats };
