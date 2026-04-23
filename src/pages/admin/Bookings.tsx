@@ -562,8 +562,9 @@ export default function Bookings() {
               <thead>
                 <tr className="border-b border-border">
                   {isAdmin && (
-                    <th className="w-10 px-4 py-3">
+                    <th className="w-8 px-3 py-3">
                       <Checkbox
+                        className="h-3 w-3 [&_svg]:h-3 [&_svg]:w-3"
                         checked={allVisibleSelected ? true : someVisibleSelected ? "indeterminate" : false}
                         onCheckedChange={toggleAll}
                         aria-label="Select all bookings"
@@ -606,8 +607,9 @@ export default function Bookings() {
                         className="border-b border-border/50 hover:bg-muted/30 transition-colors"
                       >
                         {isAdmin && (
-                          <td className="px-4 py-3">
+                          <td className="px-3 py-3">
                             <Checkbox
+                              className="h-3 w-3 [&_svg]:h-3 [&_svg]:w-3"
                               checked={selectedIds.has(b.id)}
                               onCheckedChange={() => toggleRow(b.id)}
                               aria-label={`Select ${b.reference_code}`}
