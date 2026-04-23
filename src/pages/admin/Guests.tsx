@@ -1,12 +1,23 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import FlagIcon, { getIsoFromPhone } from "@/components/FlagIcon";
-import { Search, RefreshCw, Star, Crown, Clock, LogIn, LogOut, DoorOpen, CalendarPlus, Plane } from "lucide-react";
+import { Search, RefreshCw, Star, Crown, Clock, LogIn, LogOut, DoorOpen, CalendarPlus, Plane, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Dialog,
   DialogContent,
@@ -80,6 +91,9 @@ export default function Guests() {
   const [checkOutTime, setCheckOutTime] = useState("");
   const [recordingBookingId, setRecordingBookingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [selectedGuestIds, setSelectedGuestIds] = useState<string[]>([]);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deletingGuests, setDeletingGuests] = useState(false);
   // Extend checkout
   const [showExtendDialog, setShowExtendDialog] = useState(false);
   const [extendBookingId, setExtendBookingId] = useState<string | null>(null);
@@ -112,6 +126,52 @@ export default function Guests() {
         );
       })
     : allGuests;
+
+  const allVisibleSelected = guests.length > 0 && guests.every((g) => selectedGuestIds.includes(g.id));
+  const selectedGuestCount = selectedGuestIds.length;
+
+  const toggleGuestSelection = (guestId: string, checked: boolean) => {
+    setSelectedGuestIds((current) =>
+      checked ? Array.from(new Set([...current, guestId])) : current.filter((id) => id !== guestId),
+    );
+  };
+
+  const toggleAllVisibleGuests = (checked: boolean) => {
+    const visibleIds = guests.map((g) => g.id);
+    setSelectedGuestIds((current) =>
+      checked ? Array.from(new Set([...current, ...visibleIds])) : current.filter((id) => !visibleIds.includes(id)),
+    );
+  };
+
+  const handleDeleteGuests = async () => {
+    if (selectedGuestIds.length === 0) return;
+    setDeletingGuests(true);
+    try {
+      const ids = selectedGuestIds;
+      const clearGuestLinks = ["bookings", "support_tickets", "conversations"].map((table) =>
+        supabase.from(table as any).update({ guest_id: null }).in("guest_id", ids),
+      );
+      const linkResults = await Promise.all(clearGuestLinks);
+      const linkError = linkResults.find((result) => result.error)?.error;
+      if (linkError) throw linkError;
+
+      const { error } = await supabase.from("guests").delete().in("id", ids);
+      if (error) throw error;
+
+      toast({
+        title: selectedGuestCount === 1 ? "Guest deleted" : "Guests deleted",
+        description: `${selectedGuestCount} record${selectedGuestCount === 1 ? "" : "s"} removed.`,
+      });
+      setSelectedGuestIds([]);
+      setSelectedGuest((current) => (current && ids.includes(current.id) ? null : current));
+      queryClient.invalidateQueries({ queryKey: ["admin-guests"] });
+    } catch (err: any) {
+      toast({ title: "Delete failed", description: err.message, variant: "destructive" });
+    } finally {
+      setDeletingGuests(false);
+      setShowDeleteDialog(false);
+    }
+  };
 
   const toggleVIP = async (guest: Guest) => {
     const { error } = await supabase
@@ -231,6 +291,17 @@ export default function Guests() {
         >
           <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
         </Button>
+        {selectedGuestCount > 0 && (
+          <Button
+            variant="destructive"
+            className="gap-2"
+            onClick={() => setShowDeleteDialog(true)}
+            disabled={deletingGuests}
+          >
+            <Trash2 className="w-4 h-4" />
+            Delete {selectedGuestCount} record{selectedGuestCount === 1 ? "" : "s"}
+          </Button>
+        )}
       </div>
 
       {/* Table */}
@@ -240,6 +311,13 @@ export default function Guests() {
             <table className="w-full text-sm font-sans">
               <thead>
                 <tr className="border-b border-border">
+                  <th className="w-12 px-4 py-3">
+                    <Checkbox
+                      checked={allVisibleSelected}
+                      onCheckedChange={(checked) => toggleAllVisibleGuests(checked === true)}
+                      aria-label="Select all visible guests"
+                    />
+                  </th>
                   {["Name", "Email", "Phone", "VIP", "Date", "Actions"].map((h) => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       {h}
@@ -251,7 +329,7 @@ export default function Guests() {
                 {isLoading ? (
                   Array.from({ length: 5 }).map((_, i) => (
                     <tr key={i} className="border-b border-border/50">
-                      {Array.from({ length: 6 }).map((_, j) => (
+                      {Array.from({ length: 7 }).map((_, j) => (
                         <td key={j} className="px-4 py-3">
                           <div className="h-4 bg-muted rounded animate-pulse" />
                         </td>
@@ -260,7 +338,7 @@ export default function Guests() {
                   ))
                 ) : guests.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="text-center py-12 text-muted-foreground">No guests found</td>
+                    <td colSpan={7} className="text-center py-12 text-muted-foreground">No guests found</td>
                   </tr>
                 ) : (
                   guests.map((g, i) => {
@@ -273,6 +351,13 @@ export default function Guests() {
                         transition={{ delay: i * 0.02 }}
                         className="border-b border-border/50 hover:bg-muted/30 transition-colors"
                       >
+                        <td className="px-4 py-3">
+                          <Checkbox
+                            checked={selectedGuestIds.includes(g.id)}
+                            onCheckedChange={(checked) => toggleGuestSelection(g.id, checked === true)}
+                            aria-label={`Select ${g.full_name ?? "guest"}`}
+                          />
+                        </td>
                         <td className="px-4 py-3 font-medium text-foreground">
                           <div className="flex items-center gap-2">
                             {g.full_name ?? "—"}
