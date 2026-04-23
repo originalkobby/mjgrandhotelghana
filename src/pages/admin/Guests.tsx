@@ -623,6 +623,23 @@ export default function Guests() {
         </DialogContent>
       </Dialog>
 
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-serif">Delete selected guest records?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete {selectedGuestCount} guest record{selectedGuestCount === 1 ? "" : "s"}. Existing bookings, support tickets, and conversations will remain, but will no longer be linked to these guests.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deletingGuests}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteGuests} disabled={deletingGuests} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {deletingGuests ? "Deleting…" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Extend Checkout Dialog */}
       <Dialog open={showExtendDialog} onOpenChange={(o) => { if (!o) { setShowExtendDialog(false); setExtendBookingId(null); } }}>
         <DialogContent>
