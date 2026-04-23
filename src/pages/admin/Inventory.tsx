@@ -15,6 +15,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -47,6 +53,7 @@ interface Room {
   id: string;
   name: string;
   base_price_ghs: number;
+  total_units: number;
 }
 
 interface InvCell {
@@ -63,8 +70,33 @@ interface InvCell {
 interface DailyOperations {
   date: string;
   bookedRooms: number;
+  totalRooms: number;
+  availableRooms: number;
   expectedCheckIns: number;
   expectedCheckOuts: number;
+  roomBreakdown: Array<{
+    roomId: string;
+    roomName: string;
+    booked: number;
+    total: number;
+    available: number;
+    isClosed: boolean;
+    closureReason: string | null;
+  }>;
+  closedRooms: Array<{ roomName: string; reason: string | null }>;
+  arrivals: BookingDetail[];
+  departures: BookingDetail[];
+}
+
+interface BookingDetail {
+  id: string;
+  reference_code: string;
+  check_in: string;
+  check_out: string;
+  room_number: string | null;
+  status: string;
+  rooms: { name: string } | null;
+  guests: { full_name: string | null; email: string | null; phone: string | null } | null;
 }
 
 async function fetchInventoryData(weekStart: Date, weekEnd: Date) {
