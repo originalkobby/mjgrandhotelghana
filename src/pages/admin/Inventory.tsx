@@ -469,15 +469,15 @@ export default function Inventory() {
           </CardContent>
         </Card>
 
-        <Card className="h-full xl:sticky xl:top-24">
-          <CardContent className="flex h-full min-h-0 flex-col p-4">
+        <Card className="xl:sticky xl:top-24 xl:self-start">
+          <CardContent className="p-4 space-y-4">
             <div>
               <h2 className="font-serif text-lg text-foreground">Weekly Operations</h2>
               <p className="font-sans text-xs text-muted-foreground">
                 Booked rooms, arrivals, and departures by day
               </p>
             </div>
-            <ScrollArea className="mt-4 min-h-0 flex-1 pr-3">
+            <ScrollArea className="h-[min(58vh,32rem)] pr-3">
               <div className="space-y-3">
                 {days.map((day) => {
                   const date = format(day, "yyyy-MM-dd");
