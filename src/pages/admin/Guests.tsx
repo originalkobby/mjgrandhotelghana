@@ -311,8 +311,9 @@ export default function Guests() {
             <table className="w-full text-sm font-sans">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="w-12 px-4 py-3">
+                  <th className="w-9 px-3 py-3">
                     <Checkbox
+                      className="h-3 w-3 [&_svg]:h-3 [&_svg]:w-3"
                       checked={allVisibleSelected}
                       onCheckedChange={(checked) => toggleAllVisibleGuests(checked === true)}
                       aria-label="Select all visible guests"
@@ -351,8 +352,9 @@ export default function Guests() {
                         transition={{ delay: i * 0.02 }}
                         className="border-b border-border/50 hover:bg-muted/30 transition-colors"
                       >
-                        <td className="px-4 py-3">
+                        <td className="px-3 py-3">
                           <Checkbox
+                            className="h-3 w-3 [&_svg]:h-3 [&_svg]:w-3"
                             checked={selectedGuestIds.includes(g.id)}
                             onCheckedChange={(checked) => toggleGuestSelection(g.id, checked === true)}
                             aria-label={`Select ${g.full_name ?? "guest"}`}
