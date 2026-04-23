@@ -477,7 +477,7 @@ export default function Inventory() {
                 Booked rooms, arrivals, and departures by day
               </p>
             </div>
-            <ScrollArea className="h-[min(58vh,32rem)] pr-3">
+            <ScrollArea className="h-[min(calc(58vh+35mm),calc(32rem+35mm))] pr-3">
               <div className="space-y-3">
                 {days.map((day) => {
                   const date = format(day, "yyyy-MM-dd");
