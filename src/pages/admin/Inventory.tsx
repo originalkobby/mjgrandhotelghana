@@ -15,12 +15,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -53,7 +47,6 @@ interface Room {
   id: string;
   name: string;
   base_price_ghs: number;
-  total_units: number;
 }
 
 interface InvCell {
@@ -70,33 +63,8 @@ interface InvCell {
 interface DailyOperations {
   date: string;
   bookedRooms: number;
-  totalRooms: number;
-  availableRooms: number;
   expectedCheckIns: number;
   expectedCheckOuts: number;
-  roomBreakdown: Array<{
-    roomId: string;
-    roomName: string;
-    booked: number;
-    total: number;
-    available: number;
-    isClosed: boolean;
-    closureReason: string | null;
-  }>;
-  closedRooms: Array<{ roomName: string; reason: string | null }>;
-  arrivals: BookingDetail[];
-  departures: BookingDetail[];
-}
-
-interface BookingDetail {
-  id: string;
-  reference_code: string;
-  check_in: string;
-  check_out: string;
-  room_number: string | null;
-  status: string;
-  rooms: { name: string } | null;
-  guests: { full_name: string | null; email: string | null; phone: string | null } | null;
 }
 
 async function fetchInventoryData(weekStart: Date, weekEnd: Date) {
@@ -106,7 +74,7 @@ async function fetchInventoryData(weekStart: Date, weekEnd: Date) {
   const [{ data: roomsData }, { data: invData }, { data: checkInsData }, { data: checkOutsData }] = await Promise.all([
     supabase
       .from("rooms")
-      .select("id, name, base_price_ghs, total_units")
+      .select("id, name, base_price_ghs")
       .eq("is_active", true)
       .order("sort_order"),
     supabase
@@ -116,19 +84,19 @@ async function fetchInventoryData(weekStart: Date, weekEnd: Date) {
       .lte("date", endStr),
     supabase
       .from("bookings")
-      .select("id, reference_code, check_in, check_out, room_number, status, rooms(name), guests(full_name, email, phone)")
+      .select("id, check_in, status")
       .gte("check_in", startStr)
       .lte("check_in", endStr)
       .in("status", ["pending", "confirmed"]),
     supabase
       .from("bookings")
-      .select("id, reference_code, check_in, check_out, room_number, status, rooms(name), guests(full_name, email, phone)")
+      .select("id, check_out, status")
       .gte("check_out", startStr)
       .lte("check_out", endStr)
       .in("status", ["pending", "confirmed"]),
   ]);
 
-  const rooms = (roomsData ?? []) as Room[];
+  const rooms = roomsData ?? [];
   const map = new Map<string, InvCell>();
   const dailyStats = new Map<string, DailyOperations>();
   for (const day of eachDayOfInterval({ start: weekStart, end: weekEnd })) {
@@ -136,69 +104,23 @@ async function fetchInventoryData(weekStart: Date, weekEnd: Date) {
     dailyStats.set(date, {
       date,
       bookedRooms: 0,
-      totalRooms: 0,
-      availableRooms: 0,
       expectedCheckIns: 0,
       expectedCheckOuts: 0,
-      roomBreakdown: [],
-      closedRooms: [],
-      arrivals: [],
-      departures: [],
     });
   }
 
   for (const row of invData ?? []) {
     map.set(`${row.room_id}|${row.date}`, row as InvCell);
-  }
-  for (const day of eachDayOfInterval({ start: weekStart, end: weekEnd })) {
-    const date = format(day, "yyyy-MM-dd");
-    const dayStats = dailyStats.get(date);
-    if (!dayStats) continue;
-
-    for (const room of rooms) {
-      const cell = map.get(`${room.id}|${date}`) ?? {
-        room_id: room.id,
-        date,
-        total_count: Number(room.total_units ?? 1),
-        booked_count: 0,
-        is_closed: false,
-        rate_override: null,
-        closure_reason: null,
-      };
-      const total = Number(cell.total_count ?? room.total_units ?? 1);
-      const booked = Number(cell.booked_count ?? 0);
-      const available = cell.is_closed ? 0 : Math.max(total - booked, 0);
-
-      dayStats.totalRooms += cell.is_closed ? 0 : total;
-      dayStats.bookedRooms += booked;
-      dayStats.availableRooms += available;
-      dayStats.roomBreakdown.push({
-        roomId: room.id,
-        roomName: room.name,
-        booked,
-        total,
-        available,
-        isClosed: cell.is_closed,
-        closureReason: cell.closure_reason,
-      });
-      if (cell.is_closed) {
-        dayStats.closedRooms.push({ roomName: room.name, reason: cell.closure_reason });
-      }
-    }
+    const dayStats = dailyStats.get(row.date);
+    if (dayStats) dayStats.bookedRooms += Number(row.booked_count ?? 0);
   }
   for (const booking of checkInsData ?? []) {
     const dayStats = dailyStats.get(booking.check_in);
-    if (dayStats) {
-      dayStats.expectedCheckIns += 1;
-      dayStats.arrivals.push(booking as unknown as BookingDetail);
-    }
+    if (dayStats) dayStats.expectedCheckIns += 1;
   }
   for (const booking of checkOutsData ?? []) {
     const dayStats = dailyStats.get(booking.check_out);
-    if (dayStats) {
-      dayStats.expectedCheckOuts += 1;
-      dayStats.departures.push(booking as unknown as BookingDetail);
-    }
+    if (dayStats) dayStats.expectedCheckOuts += 1;
   }
 
   return { rooms, inventory: map, dailyStats };
@@ -556,110 +478,73 @@ export default function Inventory() {
               </p>
             </div>
             <ScrollArea className="h-[min(calc(58vh+30mm),calc(32rem+30mm))] pr-3">
-              <Accordion
-                type="single"
-                collapsible
-                defaultValue={days.some((day) => isSameDay(day, new Date())) ? format(new Date(), "yyyy-MM-dd") : undefined}
-                className="space-y-2 font-sans"
-              >
+              <div className="space-y-3">
                 {days.map((day) => {
                   const date = format(day, "yyyy-MM-dd");
                   const stats = dailyStats.get(date) ?? {
                     date,
                     bookedRooms: 0,
-                    totalRooms: 0,
-                    availableRooms: 0,
                     expectedCheckIns: 0,
                     expectedCheckOuts: 0,
-                    roomBreakdown: [],
-                    closedRooms: [],
-                    arrivals: [],
-                    departures: [],
                   };
-                  const hasDetails = stats.arrivals.length > 0 || stats.departures.length > 0 || stats.closedRooms.length > 0 || stats.bookedRooms > 0;
+                  const maxValue = Math.max(
+                    1,
+                    stats.bookedRooms,
+                    stats.expectedCheckIns,
+                    stats.expectedCheckOuts
+                  );
 
                   return (
-                    <AccordionItem key={date} value={date} className="rounded-md border border-border bg-card px-3">
-                      <AccordionTrigger className="py-3 text-left hover:no-underline">
-                        <div className="grid w-full grid-cols-[1fr_auto] items-center gap-3 pr-3">
-                          <div className="min-w-0">
-                            <p className="text-xs font-semibold uppercase text-muted-foreground">
-                              {format(day, "EEE dd/MM/yyyy")}
-                            </p>
-                            <p className="text-sm font-medium text-foreground">
-                              {stats.bookedRooms}/{stats.totalRooms} booked · {stats.availableRooms} available
-                            </p>
-                          </div>
-                          <div className="grid grid-cols-3 gap-1 text-center text-[10px]">
-                            <span className="rounded bg-accent/10 px-2 py-1 text-accent">{stats.bookedRooms} booked</span>
-                            <span className="rounded bg-primary/10 px-2 py-1 text-primary">{stats.expectedCheckIns} in</span>
-                            <span className="rounded bg-secondary px-2 py-1 text-secondary-foreground">{stats.expectedCheckOuts} out</span>
-                          </div>
+                    <div key={date} className="rounded-md border border-border bg-card p-3 font-sans">
+                      <div className="mb-3 flex items-center justify-between">
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                            {format(day, "EEE")}
+                          </p>
+                          <p className="text-sm font-medium text-foreground">{format(day, "MMM d")}</p>
                         </div>
-                      </AccordionTrigger>
-                      <AccordionContent className="pb-3">
-                        <div className="space-y-4 border-t border-border pt-3 text-xs">
-                          <div className="grid grid-cols-3 gap-2">
-                            <div className="rounded bg-muted/50 p-2">
-                              <p className="text-muted-foreground">Booked</p>
-                              <p className="text-sm font-semibold text-foreground">{stats.bookedRooms}</p>
-                            </div>
-                            <div className="rounded bg-muted/50 p-2">
-                              <p className="text-muted-foreground">Available</p>
-                              <p className="text-sm font-semibold text-foreground">{stats.availableRooms}</p>
-                            </div>
-                            <div className="rounded bg-muted/50 p-2">
-                              <p className="text-muted-foreground">Closed</p>
-                              <p className="text-sm font-semibold text-foreground">{stats.closedRooms.length}</p>
-                            </div>
+                        <CalendarDays className="h-4 w-4 text-accent" />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="grid grid-cols-[88px_1fr_24px] items-center gap-2 text-xs">
+                          <span className="text-muted-foreground">Booked</span>
+                          <div className="h-2 overflow-hidden rounded-full bg-muted">
+                            <div
+                              className="h-full rounded-full bg-accent"
+                              style={{ width: `${(stats.bookedRooms / maxValue) * 100}%` }}
+                            />
                           </div>
-
-                          {!hasDetails && (
-                            <div className="rounded border border-dashed border-border p-3 text-center text-muted-foreground">
-                              No arrivals, departures, closures, or bookings for this date.
-                            </div>
-                          )}
-
-                          <div className="space-y-2">
-                            <p className="font-medium text-foreground">Room occupancy</p>
-                            {stats.roomBreakdown.map((room) => (
-                              <div key={room.roomId} className="grid grid-cols-[1fr_auto] gap-2 rounded bg-muted/40 p-2">
-                                <span className="truncate text-muted-foreground">{room.roomName}</span>
-                                <span className="font-medium text-foreground">
-                                  {room.isClosed ? `Closed${room.closureReason ? ` · ${room.closureReason}` : ""}` : `${room.booked}/${room.total} booked · ${room.available} left`}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-
-                          {(stats.arrivals.length > 0 || stats.departures.length > 0) && (
-                            <div className="grid gap-3 sm:grid-cols-2">
-                              <div className="space-y-2">
-                                <p className="flex items-center gap-1 font-medium text-foreground"><LogIn className="h-3 w-3" /> Arrivals</p>
-                                {stats.arrivals.length === 0 ? <p className="text-muted-foreground">No arrivals</p> : stats.arrivals.map((booking) => (
-                                  <div key={booking.id} className="rounded border border-border p-2">
-                                    <p className="font-medium text-foreground">{booking.guests?.full_name ?? "Guest pending"}</p>
-                                    <p className="text-muted-foreground">{booking.rooms?.name ?? "Room"}{booking.room_number ? ` · ${booking.room_number}` : ""} · {booking.reference_code}</p>
-                                  </div>
-                                ))}
-                              </div>
-                              <div className="space-y-2">
-                                <p className="flex items-center gap-1 font-medium text-foreground"><LogOut className="h-3 w-3" /> Departures</p>
-                                {stats.departures.length === 0 ? <p className="text-muted-foreground">No departures</p> : stats.departures.map((booking) => (
-                                  <div key={booking.id} className="rounded border border-border p-2">
-                                    <p className="font-medium text-foreground">{booking.guests?.full_name ?? "Guest pending"}</p>
-                                    <p className="text-muted-foreground">{booking.rooms?.name ?? "Room"}{booking.room_number ? ` · ${booking.room_number}` : ""} · {booking.reference_code}</p>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
+                          <span className="text-right font-semibold text-foreground">{stats.bookedRooms}</span>
                         </div>
-                      </AccordionContent>
-                    </AccordionItem>
+                        <div className="grid grid-cols-[88px_1fr_24px] items-center gap-2 text-xs">
+                          <span className="flex items-center gap-1 text-muted-foreground">
+                            <LogIn className="h-3 w-3" /> In
+                          </span>
+                          <div className="h-2 overflow-hidden rounded-full bg-muted">
+                            <div
+                              className="h-full rounded-full bg-primary"
+                              style={{ width: `${(stats.expectedCheckIns / maxValue) * 100}%` }}
+                            />
+                          </div>
+                          <span className="text-right font-semibold text-foreground">{stats.expectedCheckIns}</span>
+                        </div>
+                        <div className="grid grid-cols-[88px_1fr_24px] items-center gap-2 text-xs">
+                          <span className="flex items-center gap-1 text-muted-foreground">
+                            <LogOut className="h-3 w-3" /> Out
+                          </span>
+                          <div className="h-2 overflow-hidden rounded-full bg-muted">
+                            <div
+                              className="h-full rounded-full bg-secondary-foreground"
+                              style={{ width: `${(stats.expectedCheckOuts / maxValue) * 100}%` }}
+                            />
+                          </div>
+                          <span className="text-right font-semibold text-foreground">{stats.expectedCheckOuts}</span>
+                        </div>
+                      </div>
+                    </div>
                   );
                 })}
-              </Accordion>
+              </div>
             </ScrollArea>
           </CardContent>
         </Card>
