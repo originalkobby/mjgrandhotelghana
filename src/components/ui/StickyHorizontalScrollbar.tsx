@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { CaretLeft, CaretRight } from "lucide-react";
 
 interface StickyHorizontalScrollbarProps {
   targetRef: RefObject<HTMLElement>;
@@ -166,7 +166,7 @@ export function StickyHorizontalScrollbar({ targetRef }: StickyHorizontalScrollb
         onPointerCancel={stopHold}
         className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
       >
-        <ChevronLeft className="h-4 w-4" />
+        <CaretLeft className="h-4 w-4" />
       </button>
       <div
         ref={trackRef}
@@ -193,7 +193,7 @@ export function StickyHorizontalScrollbar({ targetRef }: StickyHorizontalScrollb
         onPointerCancel={stopHold}
         className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
       >
-        <ChevronRight className="h-4 w-4" />
+        <CaretRight className="h-4 w-4" />
       </button>
     </div>,
     document.body,
