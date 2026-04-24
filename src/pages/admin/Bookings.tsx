@@ -860,7 +860,7 @@ export default function Bookings() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="font-serif flex items-center gap-2">
-              <Banknote className="w-5 h-5 text-accent" />
+              <CreditCard className="w-5 h-5 text-accent" />
               Record Payment
             </DialogTitle>
             <DialogDescription className="font-sans">
