@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef } from "react";
 import { StickyHorizontalScrollbar } from "@/components/ui/StickyHorizontalScrollbar";
 import { motion } from "framer-motion";
-import { Search, Filter, RefreshCw, Download, Banknote, Trash2, X } from "lucide-react";
+import { Search, Filter, RefreshCw, Download, CreditCard, Trash2, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   AlertDialog,
@@ -686,7 +686,7 @@ export default function Bookings() {
                                   setShowPaymentDialog(true);
                                 }}
                               >
-                                <Banknote className="w-3.5 h-3.5" />
+                                <CreditCard className="w-3.5 h-3.5" />
                               </Button>
                             )}
 
