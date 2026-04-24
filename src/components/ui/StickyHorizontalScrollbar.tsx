@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
-import { CaretLeft, CaretRight } from "lucide-react";
+import { Triangle } from "lucide-react";
 
 interface StickyHorizontalScrollbarProps {
   targetRef: RefObject<HTMLElement>;
@@ -166,7 +166,7 @@ export function StickyHorizontalScrollbar({ targetRef }: StickyHorizontalScrollb
         onPointerCancel={stopHold}
         className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
       >
-        <CaretLeft className="h-4 w-4" />
+        <Triangle className="h-2.5 w-2.5 -rotate-90 fill-current" />
       </button>
       <div
         ref={trackRef}
@@ -193,7 +193,7 @@ export function StickyHorizontalScrollbar({ targetRef }: StickyHorizontalScrollb
         onPointerCancel={stopHold}
         className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
       >
-        <CaretRight className="h-4 w-4" />
+        <Triangle className="h-2.5 w-2.5 rotate-90 fill-current" />
       </button>
     </div>,
     document.body,
