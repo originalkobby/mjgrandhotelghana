@@ -534,7 +534,7 @@ export default function Inventory() {
                           </span>
                           <div className="h-2 overflow-hidden rounded-full bg-muted">
                             <div
-                              className="h-full rounded-full bg-secondary-foreground"
+                              className="h-full rounded-full bg-orange-500"
                               style={{ width: `${(stats.expectedCheckOuts / maxValue) * 100}%` }}
                             />
                           </div>
