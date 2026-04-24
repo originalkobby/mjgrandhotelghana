@@ -171,12 +171,12 @@ export function StickyHorizontalScrollbar({ targetRef }: StickyHorizontalScrollb
       <div
         ref={trackRef}
         onPointerDown={onTrackDown}
-        className="relative h-2.5 flex-1 rounded-full bg-muted cursor-pointer"
+        className="relative h-2.5 flex-1 rounded-full bg-muted"
       >
         <div
           ref={thumbRef}
           onPointerDown={onThumbDown}
-          className="absolute top-0 h-full rounded-full bg-muted-foreground/40 hover:bg-muted-foreground/60 transition-colors cursor-grab active:cursor-grabbing"
+          className="absolute top-0 h-full rounded-full bg-muted-foreground/40 hover:bg-muted-foreground/60 transition-colors"
           style={{
             width: `${metrics.thumbWidthPct}%`,
             left: `${metrics.thumbLeftPct}%`,
