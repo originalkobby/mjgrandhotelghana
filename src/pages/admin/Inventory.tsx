@@ -510,7 +510,7 @@ export default function Inventory() {
                           <span className="text-muted-foreground">Booked</span>
                           <div className="h-2 overflow-hidden rounded-full bg-muted">
                             <div
-                              className="h-full rounded-full bg-accent"
+                              className="h-full rounded-full bg-green-600"
                               style={{ width: `${(stats.bookedRooms / maxValue) * 100}%` }}
                             />
                           </div>
