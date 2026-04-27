@@ -425,7 +425,7 @@ export default function Inventory() {
                                       )}
                                     </button>
                                   </TooltipTrigger>
-                                  <TooltipContent side="top" className="font-sans text-xs">
+                                  <TooltipContent side="top" className="font-sans text-[10px] p-2">
                                     <div className="space-y-1">
                                       <p className="font-semibold">
                                         {room.name} · {format(d, "EEE, MMM d")}
