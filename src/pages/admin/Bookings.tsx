@@ -161,6 +161,8 @@ export default function Bookings() {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [newStatus, setNewStatus] = useState<BookingStatus | "">("");
   const [roomNumber, setRoomNumber] = useState("");
+  const [editCheckIn, setEditCheckIn] = useState("");
+  const [editCheckOut, setEditCheckOut] = useState("");
   const [updating, setUpdating] = useState(false);
   
   // Record payment
