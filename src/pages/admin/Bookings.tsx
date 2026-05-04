@@ -909,12 +909,18 @@ export default function Bookings() {
           )}
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setSelectedBooking(null); setRoomNumber(""); }}>
+            <Button variant="outline" onClick={() => { setSelectedBooking(null); setRoomNumber(""); setEditCheckIn(""); setEditCheckOut(""); }}>
               Cancel
             </Button>
             <Button
               onClick={handleStatusUpdate}
-              disabled={updating || (newStatus === selectedBooking?.status && roomNumber === (selectedBooking?.room_number ?? ""))}
+              disabled={
+                updating ||
+                (newStatus === selectedBooking?.status &&
+                  roomNumber === (selectedBooking?.room_number ?? "") &&
+                  editCheckIn === (selectedBooking?.check_in ?? "") &&
+                  editCheckOut === (selectedBooking?.check_out ?? ""))
+              }
               className="bg-accent text-accent-foreground hover:bg-accent/90"
             >
               {updating ? "Updating…" : "Save Changes"}
