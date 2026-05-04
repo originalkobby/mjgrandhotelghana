@@ -241,14 +241,42 @@ export default function Bookings() {
     setUpdating(true);
 
     const oldStatus = selectedBooking.status;
+    const oldCheckIn = selectedBooking.check_in;
+    const oldCheckOut = selectedBooking.check_out;
+    const datesChanged = editCheckIn !== oldCheckIn || editCheckOut !== oldCheckOut;
+
+    // Validate dates
+    if (datesChanged) {
+      if (!editCheckIn || !editCheckOut) {
+        toast({ title: "Invalid dates", description: "Both check-in and check-out are required.", variant: "destructive" });
+        setUpdating(false);
+        return;
+      }
+      if (editCheckOut <= editCheckIn) {
+        toast({ title: "Invalid dates", description: "Check-out must be after check-in.", variant: "destructive" });
+        setUpdating(false);
+        return;
+      }
+    }
+
+    const wasActive = oldStatus === "pending" || oldStatus === "confirmed";
+
+    // If dates changed AND booking blocks inventory, release the OLD nights first
+    // so the inventory check / re-reserve uses a clean slate.
+    if (datesChanged && wasActive) {
+      try { await releaseInventory(selectedBooking.id); } catch (e) { console.error("release before date edit failed", e); }
+    }
 
     const updatePayload: any = { status: newStatus as BookingStatus };
     if (newStatus === "completed") {
       updatePayload.payment_status = "paid";
     }
-    // Save room number if changed
     if (roomNumber !== (selectedBooking.room_number ?? "")) {
       updatePayload.room_number = roomNumber || null;
+    }
+    if (datesChanged) {
+      updatePayload.check_in = editCheckIn;
+      updatePayload.check_out = editCheckOut;
     }
 
     const { error } = await supabase
@@ -257,20 +285,37 @@ export default function Bookings() {
       .eq("id", selectedBooking.id);
 
     if (!error) {
-      // Sync inventory based on status transition
-      const action = getInventoryAction(oldStatus, newStatus);
+      const willBeActive = newStatus === "pending" || newStatus === "confirmed";
+
       let inventoryNote: string | null = null;
-      if (action === "release") {
-        const nights = await releaseInventory(selectedBooking.id);
-        inventoryNote = `Released ${nights} night${nights === 1 ? "" : "s"} of inventory`;
-      } else if (action === "reserve") {
+
+      if (datesChanged && wasActive && willBeActive) {
+        // Re-reserve at the new dates
         const nights = await reserveInventory(selectedBooking.id);
-        inventoryNote = `Re-booked ${nights} night${nights === 1 ? "" : "s"} of inventory`;
+        inventoryNote = `Dates changed → re-reserved ${nights} night${nights === 1 ? "" : "s"} (${oldCheckIn}→${oldCheckOut} ⇒ ${editCheckIn}→${editCheckOut})`;
+      } else if (datesChanged && wasActive && !willBeActive) {
+        inventoryNote = `Dates changed and status released inventory (${oldCheckIn}→${oldCheckOut} ⇒ ${editCheckIn}→${editCheckOut})`;
+      } else if (datesChanged && !wasActive && willBeActive) {
+        const nights = await reserveInventory(selectedBooking.id);
+        inventoryNote = `Dates changed → reserved ${nights} night${nights === 1 ? "" : "s"} at new dates`;
+      } else {
+        // No date change — handle pure status transition
+        const action = getInventoryAction(oldStatus, newStatus);
+        if (action === "release") {
+          const nights = await releaseInventory(selectedBooking.id);
+          inventoryNote = `Released ${nights} night${nights === 1 ? "" : "s"} of inventory`;
+        } else if (action === "reserve") {
+          const nights = await reserveInventory(selectedBooking.id);
+          inventoryNote = `Re-booked ${nights} night${nights === 1 ? "" : "s"} of inventory`;
+        }
       }
 
       const noteParts: string[] = [];
       if (roomNumber && roomNumber !== (selectedBooking.room_number ?? "")) {
         noteParts.push(`Room number assigned: ${roomNumber}`);
+      }
+      if (datesChanged) {
+        noteParts.push(`Stay updated: ${oldCheckIn} → ${oldCheckOut} ⇒ ${editCheckIn} → ${editCheckOut}`);
       }
       if (inventoryNote) noteParts.push(inventoryNote);
 
@@ -281,12 +326,17 @@ export default function Bookings() {
         changed_by: user?.id || null,
         note: noteParts.length > 0 ? noteParts.join(" · ") : null,
       });
+    } else if (datesChanged && wasActive) {
+      // Update failed — try to restore the old reservation
+      try { await reserveInventory(selectedBooking.id); } catch (e) { console.error("rollback reserve failed", e); }
     }
 
     setUpdating(false);
     setSelectedBooking(null);
     setNewStatus("");
     setRoomNumber("");
+    setEditCheckIn("");
+    setEditCheckOut("");
 
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
