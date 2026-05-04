@@ -350,19 +350,21 @@ export default function Bookings() {
     let success = 0;
     let failed = 0;
 
+    let lastError: string | null = null;
     for (const id of ids) {
       const b = idToBooking.get(id);
       try {
         if (b && (b.status === "pending" || b.status === "confirmed")) {
           try { await releaseInventory(id); } catch { /* non-fatal */ }
         }
-        await supabase.from("booking_add_ons").delete().eq("booking_id", id);
-        await supabase.from("payment_logs").delete().eq("booking_id", id);
-        await supabase.from("booking_audit_log" as any).delete().eq("booking_id", id);
+        // Related rows (booking_add_ons, payment_logs, booking_audit_log, webhook_logs)
+        // are removed/nulled automatically via ON DELETE CASCADE / SET NULL.
         const { error } = await supabase.from("bookings").delete().eq("id", id);
         if (error) throw error;
         success++;
-      } catch {
+      } catch (err: any) {
+        console.error("Delete booking failed:", id, err);
+        lastError = err?.message ?? String(err);
         failed++;
       }
     }
@@ -375,8 +377,10 @@ export default function Bookings() {
       toast({ title: "Bookings deleted", description: `${success} booking${success === 1 ? "" : "s"} permanently removed.` });
     } else {
       toast({
-        title: "Partial delete",
-        description: `${success} deleted, ${failed} failed.`,
+        title: failed === ids.length ? "Delete failed" : "Partial delete",
+        description: failed === ids.length
+          ? (lastError ?? "Could not delete bookings.")
+          : `${success} deleted, ${failed} failed${lastError ? `: ${lastError}` : ""}.`,
         variant: failed === ids.length ? "destructive" : "default",
       });
     }
