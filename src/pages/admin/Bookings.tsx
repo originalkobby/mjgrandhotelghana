@@ -762,7 +762,7 @@ export default function Bookings() {
       </Card>
 
       {/* Status Update / Room Assignment Dialog */}
-      <Dialog open={!!selectedBooking} onOpenChange={(o) => { if (!o) { setSelectedBooking(null); setRoomNumber(""); } }}>
+      <Dialog open={!!selectedBooking} onOpenChange={(o) => { if (!o) { setSelectedBooking(null); setRoomNumber(""); setEditCheckIn(""); setEditCheckOut(""); } }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="font-serif">
