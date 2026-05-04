@@ -377,8 +377,10 @@ export default function Bookings() {
       toast({ title: "Bookings deleted", description: `${success} booking${success === 1 ? "" : "s"} permanently removed.` });
     } else {
       toast({
-        title: "Partial delete",
-        description: `${success} deleted, ${failed} failed.`,
+        title: failed === ids.length ? "Delete failed" : "Partial delete",
+        description: failed === ids.length
+          ? (lastError ?? "Could not delete bookings.")
+          : `${success} deleted, ${failed} failed${lastError ? `: ${lastError}` : ""}.`,
         variant: failed === ids.length ? "destructive" : "default",
       });
     }
