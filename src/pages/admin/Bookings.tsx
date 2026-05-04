@@ -777,12 +777,25 @@ export default function Bookings() {
             <div className="space-y-4 font-sans text-sm">
               <div className="grid grid-cols-2 gap-3 text-muted-foreground">
                 <div>
-                  <p className="text-xs uppercase tracking-wider mb-1">Check-in</p>
-                  <p className="text-foreground">{formatDateGB(selectedBooking.check_in)}</p>
+                  <Label htmlFor="edit-check-in" className="text-xs uppercase tracking-wider mb-1 block">Check-in</Label>
+                  <Input
+                    id="edit-check-in"
+                    type="date"
+                    value={editCheckIn}
+                    onChange={(e) => setEditCheckIn(e.target.value)}
+                    className="h-9 text-sm"
+                  />
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-wider mb-1">Check-out</p>
-                  <p className="text-foreground">{formatDateGB(selectedBooking.check_out)}</p>
+                  <Label htmlFor="edit-check-out" className="text-xs uppercase tracking-wider mb-1 block">Check-out</Label>
+                  <Input
+                    id="edit-check-out"
+                    type="date"
+                    value={editCheckOut}
+                    min={editCheckIn || undefined}
+                    onChange={(e) => setEditCheckOut(e.target.value)}
+                    className="h-9 text-sm"
+                  />
                 </div>
                 <div>
                   <p className="text-xs uppercase tracking-wider mb-1">Total</p>
