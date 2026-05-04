@@ -724,6 +724,8 @@ export default function Bookings() {
                                 setSelectedBooking(b);
                                 setNewStatus(b.status);
                                 setRoomNumber(b.room_number ?? "");
+                                setEditCheckIn(b.check_in);
+                                setEditCheckOut(b.check_out);
                               }}
                             >
                               Manage
