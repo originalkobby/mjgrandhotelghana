@@ -1129,6 +1129,7 @@ async function createBooking(
     .eq("id", args.room_id)
     .single();
 
+  const fxRate = await getUsdToGhsRate();
   return {
     success: true,
     reference_code: refCode,
@@ -1139,11 +1140,16 @@ async function createBooking(
     adults: args.adults,
     children: args.children || 0,
     base_total_ghs: baseTotalGhs,
+    base_total_usd: ghsToUsd(baseTotalGhs, fxRate),
     add_ons_total_ghs: addOnsTotal,
+    add_ons_total_usd: ghsToUsd(addOnsTotal, fxRate),
     final_total_ghs: finalTotal,
+    final_total_usd: ghsToUsd(finalTotal, fxRate),
+    final_total_display: fmtPrice(finalTotal, fxRate),
+    fx_rate_usd_to_ghs: fxRate,
     add_ons: addOnRecords.map((a: any) => a.name),
     payment_status: "pending",
-    message: `Booking confirmed! Reference: ${refCode}. Total: GHS ${finalTotal}. Payment can be made at the hotel or online.`,
+    message: `Booking confirmed! Reference: ${refCode}. Total: ${fmtPrice(finalTotal, fxRate)}. Payment can be made at the hotel or online.`,
   };
 }
 
