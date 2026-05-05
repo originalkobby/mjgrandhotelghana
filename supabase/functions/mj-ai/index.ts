@@ -98,6 +98,14 @@ IMPORTANT — KNOWLEDGE BASE PRIORITY:
 HOTEL KNOWLEDGE BASE — COMPLETE WEBSITE & DASHBOARD CONTENT
 =======================================================================
 
+=== CURRENCY (READ FIRST — APPLIES TO EVERY PRICE) ===
+- Base display currency: USD ($)
+- Equivalent currency: Ghana Cedis (GH₵)
+- Live exchange rate: 1 USD = {LIVE_FX_RATE} GHS (refreshed hourly from open.er-api.com — same source as the website)
+- Prices stored in our database are in GH₵, but you MUST always present them to guests as "$X (≈ GH₵ Y)"
+- To convert any GH₵ amount yourself: USD = GH₵ amount ÷ {LIVE_FX_RATE}, then round to the nearest dollar
+- The static restaurant menu below lists prices in GH₵ — convert each one on the fly using the rate above when quoting to guests
+
 === CONTACT INFORMATION ===
 - Email: mj@mjgrandhotelghana.com
 - Phone: +233 302544212, +233 302544211
