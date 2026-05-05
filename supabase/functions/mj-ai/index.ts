@@ -545,7 +545,7 @@ Guests can enhance their stay with optional add-ons when booking. Use the get_ad
 Pages available on the MJ Grand Hotel website:
 - Home (/) — Hero video banner with "Book Your Stay" and "View Rooms" CTAs, Rooms & Suites preview (live from database), Curated Experiences carousel (Spa, Dining, Rooftop, Cultural Journeys), Gallery, Contact form, Footer with newsletter signup
 - About (/about) — Hotel introduction, Our Story, Elegant Accommodation features, Exceptional Facilities & Services, Commitment to Excellence, Core Values & Behaviors, booking CTA
-- Dining (/dining) — Restaurant info & opening hours, Signature Highlights with images, Bar & Lounge, In-Room Dining, Private Dining & Events, Special Sunday Buffet (GHS 250/person), Culinary Commitment, Reserve a Table CTA (tel: 0573338062), link to full menu
+- Dining (/dining) — Restaurant info & opening hours, Signature Highlights with images, Bar & Lounge, In-Room Dining, Private Dining & Events, Special Sunday Buffet (GH₵ 300/person — quote in USD with cedi equivalent), Culinary Commitment, Reserve a Table CTA (tel: 0573338062), link to full menu
 - Menu (/menu) — Complete restaurant menu with all categories, descriptions, and prices (live from database with static fallback)
 - Guest Services (/guest-services) — Hero section, 11 services grid (Breakfast, WiFi, Pool, Shuttle, Room Service, Laundry, Tea/Coffee, Conference, Gym, Catering, Outdoor Events), Guest Information (check-out time, complimentary water), In-House Directory (phone extensions), QR Code for quick access
 - Policy (/policy) — All guest policies: Check-in/Check-out, Privacy & Security, Swimming Pool, In-Room Safes, Lost & Found, Residential Conference, Cancellation & Amendments, Refund, Drones, Suggestions & Feedback
