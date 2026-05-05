@@ -862,6 +862,7 @@ async function searchAvailableRooms(
   adults: number = 1,
   children: number = 0
 ) {
+  const fxRate = await getUsdToGhsRate();
   // Fetch active rooms that fit guest count
   const { data: rooms, error: roomsError } = await supabase
     .from("rooms")
