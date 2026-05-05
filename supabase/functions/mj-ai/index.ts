@@ -1369,12 +1369,12 @@ async function buildDynamicContext(supabase: any, rate: number): Promise<string>
         const itemLines = items.map((i: any) => {
           let line = `- ${i.name}`;
           if (i.description) line += ` (${i.description})`;
-          if (i.price) line += ` — ${i.price}`;
+          if (i.price) line += ` — ${convertGhsTokensToDual(String(i.price), rate)}`;
           return line;
         }).join("\n");
         return `${cat.toUpperCase()}:\n${itemLines}`;
       }).join("\n\n");
-      prompt = prompt.replace("{DYNAMIC_MENU}", "All prices in GH₵ (live from database):\n\n" + menuText);
+      prompt = prompt.replace("{DYNAMIC_MENU}", `Prices shown as "$X (≈ GH₵ Y)" using live FX rate 1 USD = ${rate.toFixed(2)} GHS:\n\n` + menuText);
     } else {
       prompt = prompt.replace("{DYNAMIC_MENU}", "Menu is currently being updated. Tell guests to contact the restaurant directly.");
     }
