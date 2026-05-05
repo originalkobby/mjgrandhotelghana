@@ -554,7 +554,7 @@ const Dining = () => {
                 </p>
 
                 <p className="font-serif text-3xl sm:text-4xl font-bold text-gold mb-3">
-                  GHS 250 <span className="text-base font-normal text-cream/40">per person</span>
+                  GHS 300 <span className="text-base font-normal text-cream/40">per person</span>
                 </p>
 
                 <p className="font-sans text-cream/40 text-sm leading-relaxed max-w-lg mx-auto mb-10">
