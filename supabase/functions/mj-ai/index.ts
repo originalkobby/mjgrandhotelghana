@@ -1466,7 +1466,8 @@ serve(async (req) => {
       ? `\n\nCurrent date and time: ${now.toISOString().slice(0, 10)} (GMT hour: ${gmt_hour}). Use the GMT hour to determine the correct time-bound greeting. Use the date for any date-related questions.`
       : `\n\nCurrent date: ${now.toISOString().slice(0, 10)}.`;
     // Build dynamic system prompt with live DB data
-    const dynamicPrompt = await buildDynamicContext(supabase);
+    const fxRate = await getUsdToGhsRate();
+    const dynamicPrompt = await buildDynamicContext(supabase, fxRate);
     const systemPrompt = dynamicPrompt + memoryContext +
       (guest_name ? `\n\nThe guest's name is ${guest_name}.` : "") + timeContext;
 
