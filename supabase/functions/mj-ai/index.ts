@@ -1230,9 +1230,48 @@ async function cancelBooking(supabase: any, referenceCode: string) {
   return { success: true, reference_code: ref, message: `Booking ${ref} has been cancelled successfully.` };
 }
 
+// --- Currency helpers (USD primary, GH₵ equivalent) ---
+let cachedRate: { rate: number; fetchedAt: number } | null = null;
+const RATE_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+async function getUsdToGhsRate(): Promise<number> {
+  if (cachedRate && Date.now() - cachedRate.fetchedAt < RATE_TTL_MS) {
+    return cachedRate.rate;
+  }
+  try {
+    const res = await fetch("https://open.er-api.com/v6/latest/USD");
+    const data = await res.json();
+    if (data?.rates?.GHS) {
+      cachedRate = { rate: data.rates.GHS, fetchedAt: Date.now() };
+      return cachedRate.rate;
+    }
+  } catch (e) {
+    console.error("FX fetch failed:", e);
+  }
+  return cachedRate?.rate ?? 16;
+}
+
+function ghsToUsd(ghs: number, rate: number): number {
+  return Math.max(1, Math.round(ghs / rate));
+}
+
+function fmtPrice(ghs: number, rate: number): string {
+  return `$${ghsToUsd(ghs, rate).toLocaleString()} (≈ GH₵ ${Math.round(ghs).toLocaleString()})`;
+}
+
+/** Rewrite "GH₵ 150" / "GHS 150" / "GH? 150" tokens in free-text to "$X (≈ GH₵ 150)". */
+function convertGhsTokensToDual(text: string, rate: number): string {
+  return text.replace(/GH[₵CcSs]?\s?(\d{1,3}(?:,\d{3})*|\d+)/g, (_m, num) => {
+    const ghs = parseInt(String(num).replace(/,/g, ""), 10);
+    if (Number.isNaN(ghs)) return _m;
+    return fmtPrice(ghs, rate);
+  });
+}
+
 // --- Dynamic Knowledge Base Builder ---
-async function buildDynamicContext(supabase: any): Promise<string> {
-  let prompt = SYSTEM_PROMPT;
+async function buildDynamicContext(supabase: any, rate: number): Promise<string> {
+  let prompt = SYSTEM_PROMPT.replaceAll("{LIVE_FX_RATE}", rate.toFixed(2));
+
 
   // Fetch active rooms
   try {
