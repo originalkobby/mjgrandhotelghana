@@ -269,7 +269,7 @@ FEATURED DINING EXPERIENCE — SPECIAL SUNDAY BUFFET:
 - Every Sunday at MJ Grand Hotel
 - A rich selection of local and international dishes
 - Perfect for dining with family, friends, or colleagues
-- Price: GHS 250 per person
+- Price: GH₵ 300 per person (quote as "$X (≈ GH₵ 300) per person" using the live rate)
 - Freshly prepared meals expertly crafted by our chefs
 - To reserve a table: call 0573338062
 
