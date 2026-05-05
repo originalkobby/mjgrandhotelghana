@@ -64,8 +64,8 @@ You can help guests book rooms directly in this conversation. When a guest wants
 BOOKING RESPONSE FORMATTING:
 - When presenting rooms from search_available_rooms, format them as a clear numbered list with name, nightly rate, total, and bed type
 - When presenting add-ons, list them briefly with prices
-- CRITICAL: After a booking is successfully created via create_booking, you MUST ALWAYS share the booking reference code (e.g., MJ-XXXXXXXX) and the total amount prominently with the guest. This is their confirmation — never skip it. Example: "Your booking is confirmed! Reference code: **MJ-A1B2C3D4**. Total: **GH₵ 1,200**. You can use this code to check your booking status anytime."
-- All prices are in Ghana Cedis — display as "GH₵ X"
+- CRITICAL: After a booking is successfully created via create_booking, you MUST ALWAYS share the booking reference code (e.g., MJ-XXXXXXXX) and the total amount prominently with the guest. This is their confirmation — never skip it. Example: "Your booking is confirmed! Reference code: **MJ-A1B2C3D4**. Total: **$80 (≈ GH₵ 1,200)**. You can use this code to check your booking status anytime."
+- CURRENCY DISPLAY (CRITICAL): The website shows USD as the primary currency with GH₵ as the equivalent. ALWAYS quote prices in this exact format: "$X (≈ GH₵ Y)". Never quote GH₵ alone unless the guest explicitly asks for cedis only. Use the live exchange rate provided in the CURRENCY section of the knowledge base for any conversion you must compute yourself.
 
 DATE HANDLING:
 - When guests say "tomorrow", "next week", "this Friday", etc., calculate the actual date based on the current date provided in your context
@@ -97,6 +97,14 @@ IMPORTANT — KNOWLEDGE BASE PRIORITY:
 =======================================================================
 HOTEL KNOWLEDGE BASE — COMPLETE WEBSITE & DASHBOARD CONTENT
 =======================================================================
+
+=== CURRENCY (READ FIRST — APPLIES TO EVERY PRICE) ===
+- Base display currency: USD ($)
+- Equivalent currency: Ghana Cedis (GH₵)
+- Live exchange rate: 1 USD = {LIVE_FX_RATE} GHS (refreshed hourly from open.er-api.com — same source as the website)
+- Prices stored in our database are in GH₵, but you MUST always present them to guests as "$X (≈ GH₵ Y)"
+- To convert any GH₵ amount yourself: USD = GH₵ amount ÷ {LIVE_FX_RATE}, then round to the nearest dollar
+- The static restaurant menu below lists prices in GH₵ — convert each one on the fly using the rate above when quoting to guests
 
 === CONTACT INFORMATION ===
 - Email: mj@mjgrandhotelghana.com
@@ -261,7 +269,7 @@ FEATURED DINING EXPERIENCE — SPECIAL SUNDAY BUFFET:
 - Every Sunday at MJ Grand Hotel
 - A rich selection of local and international dishes
 - Perfect for dining with family, friends, or colleagues
-- Price: GHS 250 per person
+- Price: GH₵ 300 per person (quote as "$X (≈ GH₵ 300) per person" using the live rate)
 - Freshly prepared meals expertly crafted by our chefs
 - To reserve a table: call 0573338062
 
@@ -537,7 +545,7 @@ Guests can enhance their stay with optional add-ons when booking. Use the get_ad
 Pages available on the MJ Grand Hotel website:
 - Home (/) — Hero video banner with "Book Your Stay" and "View Rooms" CTAs, Rooms & Suites preview (live from database), Curated Experiences carousel (Spa, Dining, Rooftop, Cultural Journeys), Gallery, Contact form, Footer with newsletter signup
 - About (/about) — Hotel introduction, Our Story, Elegant Accommodation features, Exceptional Facilities & Services, Commitment to Excellence, Core Values & Behaviors, booking CTA
-- Dining (/dining) — Restaurant info & opening hours, Signature Highlights with images, Bar & Lounge, In-Room Dining, Private Dining & Events, Special Sunday Buffet (GHS 250/person), Culinary Commitment, Reserve a Table CTA (tel: 0573338062), link to full menu
+- Dining (/dining) — Restaurant info & opening hours, Signature Highlights with images, Bar & Lounge, In-Room Dining, Private Dining & Events, Special Sunday Buffet (GH₵ 300/person — quote in USD with cedi equivalent), Culinary Commitment, Reserve a Table CTA (tel: 0573338062), link to full menu
 - Menu (/menu) — Complete restaurant menu with all categories, descriptions, and prices (live from database with static fallback)
 - Guest Services (/guest-services) — Hero section, 11 services grid (Breakfast, WiFi, Pool, Shuttle, Room Service, Laundry, Tea/Coffee, Conference, Gym, Catering, Outdoor Events), Guest Information (check-out time, complimentary water), In-House Directory (phone extensions), QR Code for quick access
 - Policy (/policy) — All guest policies: Check-in/Check-out, Privacy & Security, Swimming Pool, In-Room Safes, Lost & Found, Residential Conference, Cancellation & Amendments, Refund, Drones, Suggestions & Feedback
@@ -854,6 +862,7 @@ async function searchAvailableRooms(
   adults: number = 1,
   children: number = 0
 ) {
+  const fxRate = await getUsdToGhsRate();
   // Fetch active rooms that fit guest count
   const { data: rooms, error: roomsError } = await supabase
     .from("rooms")
@@ -939,7 +948,11 @@ async function searchAvailableRooms(
       size_sqm: room.size_sqm,
       amenities: room.amenities,
       nightly_rate_ghs: avgNightlyRate,
+      nightly_rate_usd: ghsToUsd(avgNightlyRate, fxRate),
+      nightly_rate_display: fmtPrice(avgNightlyRate, fxRate),
       total_price_ghs: Math.round(totalPrice),
+      total_price_usd: ghsToUsd(Math.round(totalPrice), fxRate),
+      total_price_display: fmtPrice(Math.round(totalPrice), fxRate),
       nights,
       rooms_left: minAvailable === Infinity ? "plenty" : minAvailable,
     };
@@ -952,6 +965,8 @@ async function searchAvailableRooms(
     nights,
     adults,
     children,
+    fx_rate_usd_to_ghs: fxRate,
+    currency_note: "Quote prices to the guest as 'nightly_rate_display' / 'total_price_display' — USD primary with GH₵ equivalent.",
     rooms: availableRooms,
   };
 }
@@ -968,7 +983,19 @@ async function getAddOns(supabase: any) {
     return { success: false, error: "Unable to fetch add-ons" };
   }
 
-  return { success: true, add_ons: data || [] };
+  const fxRate = await getUsdToGhsRate();
+  const addOns = (data || []).map((a: any) => ({
+    ...a,
+    price_usd: ghsToUsd(Number(a.price_ghs), fxRate),
+    price_display: fmtPrice(Number(a.price_ghs), fxRate),
+  }));
+
+  return {
+    success: true,
+    fx_rate_usd_to_ghs: fxRate,
+    currency_note: "Quote add-on prices to the guest as 'price_display' — USD primary with GH₵ equivalent.",
+    add_ons: addOns,
+  };
 }
 
 async function createBooking(
@@ -1102,6 +1129,7 @@ async function createBooking(
     .eq("id", args.room_id)
     .single();
 
+  const fxRate = await getUsdToGhsRate();
   return {
     success: true,
     reference_code: refCode,
@@ -1112,11 +1140,16 @@ async function createBooking(
     adults: args.adults,
     children: args.children || 0,
     base_total_ghs: baseTotalGhs,
+    base_total_usd: ghsToUsd(baseTotalGhs, fxRate),
     add_ons_total_ghs: addOnsTotal,
+    add_ons_total_usd: ghsToUsd(addOnsTotal, fxRate),
     final_total_ghs: finalTotal,
+    final_total_usd: ghsToUsd(finalTotal, fxRate),
+    final_total_display: fmtPrice(finalTotal, fxRate),
+    fx_rate_usd_to_ghs: fxRate,
     add_ons: addOnRecords.map((a: any) => a.name),
     payment_status: "pending",
-    message: `Booking confirmed! Reference: ${refCode}. Total: GHS ${finalTotal}. Payment can be made at the hotel or online.`,
+    message: `Booking confirmed! Reference: ${refCode}. Total: ${fmtPrice(finalTotal, fxRate)}. Payment can be made at the hotel or online.`,
   };
 }
 
@@ -1222,9 +1255,48 @@ async function cancelBooking(supabase: any, referenceCode: string) {
   return { success: true, reference_code: ref, message: `Booking ${ref} has been cancelled successfully.` };
 }
 
+// --- Currency helpers (USD primary, GH₵ equivalent) ---
+let cachedRate: { rate: number; fetchedAt: number } | null = null;
+const RATE_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+async function getUsdToGhsRate(): Promise<number> {
+  if (cachedRate && Date.now() - cachedRate.fetchedAt < RATE_TTL_MS) {
+    return cachedRate.rate;
+  }
+  try {
+    const res = await fetch("https://open.er-api.com/v6/latest/USD");
+    const data = await res.json();
+    if (data?.rates?.GHS) {
+      cachedRate = { rate: data.rates.GHS, fetchedAt: Date.now() };
+      return cachedRate.rate;
+    }
+  } catch (e) {
+    console.error("FX fetch failed:", e);
+  }
+  return cachedRate?.rate ?? 16;
+}
+
+function ghsToUsd(ghs: number, rate: number): number {
+  return Math.max(1, Math.round(ghs / rate));
+}
+
+function fmtPrice(ghs: number, rate: number): string {
+  return `$${ghsToUsd(ghs, rate).toLocaleString()} (≈ GH₵ ${Math.round(ghs).toLocaleString()})`;
+}
+
+/** Rewrite "GH₵ 150" / "GHS 150" / "GH? 150" tokens in free-text to "$X (≈ GH₵ 150)". */
+function convertGhsTokensToDual(text: string, rate: number): string {
+  return text.replace(/GH[₵CcSs]?\s?(\d{1,3}(?:,\d{3})*|\d+)/g, (_m, num) => {
+    const ghs = parseInt(String(num).replace(/,/g, ""), 10);
+    if (Number.isNaN(ghs)) return _m;
+    return fmtPrice(ghs, rate);
+  });
+}
+
 // --- Dynamic Knowledge Base Builder ---
-async function buildDynamicContext(supabase: any): Promise<string> {
-  let prompt = SYSTEM_PROMPT;
+async function buildDynamicContext(supabase: any, rate: number): Promise<string> {
+  let prompt = SYSTEM_PROMPT.replaceAll("{LIVE_FX_RATE}", rate.toFixed(2));
+
 
   // Fetch active rooms
   try {
@@ -1236,7 +1308,7 @@ async function buildDynamicContext(supabase: any): Promise<string> {
 
     if (rooms && rooms.length > 0) {
       const roomsText = "ROOM TYPES (live from database):\n" + rooms.map((r: any, i: number) => {
-        let line = `${i + 1}. ${r.name} — From GH₵ ${r.base_price_ghs.toLocaleString()}/night`;
+        let line = `${i + 1}. ${r.name} — From ${fmtPrice(Number(r.base_price_ghs), rate)}/night`;
         if (r.description) line += `: ${r.description}`;
         if (r.bed_type) line += ` | Bed: ${r.bed_type}`;
         if (r.size_sqm) line += ` | ${r.size_sqm} sqm`;
@@ -1264,7 +1336,7 @@ async function buildDynamicContext(supabase: any): Promise<string> {
       const activePromos = promos.filter((p: any) => !p.end_date || p.end_date >= now);
       if (activePromos.length > 0) {
         const promosText = activePromos.map((p: any) => {
-          const discount = p.discount_type === "percentage" ? `${p.discount_value}% off` : `GH₵ ${p.discount_value} off`;
+          const discount = p.discount_type === "percentage" ? `${p.discount_value}% off` : `${fmtPrice(Number(p.discount_value), rate)} off`;
           let line = `- Code: ${p.code} — ${discount}`;
           if (p.description) line += ` (${p.description})`;
           if (p.end_date) line += ` | Valid until ${p.end_date}`;
@@ -1322,12 +1394,12 @@ async function buildDynamicContext(supabase: any): Promise<string> {
         const itemLines = items.map((i: any) => {
           let line = `- ${i.name}`;
           if (i.description) line += ` (${i.description})`;
-          if (i.price) line += ` — ${i.price}`;
+          if (i.price) line += ` — ${convertGhsTokensToDual(String(i.price), rate)}`;
           return line;
         }).join("\n");
         return `${cat.toUpperCase()}:\n${itemLines}`;
       }).join("\n\n");
-      prompt = prompt.replace("{DYNAMIC_MENU}", "All prices in GH₵ (live from database):\n\n" + menuText);
+      prompt = prompt.replace("{DYNAMIC_MENU}", `Prices shown as "$X (≈ GH₵ Y)" using live FX rate 1 USD = ${rate.toFixed(2)} GHS:\n\n` + menuText);
     } else {
       prompt = prompt.replace("{DYNAMIC_MENU}", "Menu is currently being updated. Tell guests to contact the restaurant directly.");
     }
@@ -1419,7 +1491,8 @@ serve(async (req) => {
       ? `\n\nCurrent date and time: ${now.toISOString().slice(0, 10)} (GMT hour: ${gmt_hour}). Use the GMT hour to determine the correct time-bound greeting. Use the date for any date-related questions.`
       : `\n\nCurrent date: ${now.toISOString().slice(0, 10)}.`;
     // Build dynamic system prompt with live DB data
-    const dynamicPrompt = await buildDynamicContext(supabase);
+    const fxRate = await getUsdToGhsRate();
+    const dynamicPrompt = await buildDynamicContext(supabase, fxRate);
     const systemPrompt = dynamicPrompt + memoryContext +
       (guest_name ? `\n\nThe guest's name is ${guest_name}.` : "") + timeContext;
 
