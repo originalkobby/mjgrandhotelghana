@@ -947,7 +947,11 @@ async function searchAvailableRooms(
       size_sqm: room.size_sqm,
       amenities: room.amenities,
       nightly_rate_ghs: avgNightlyRate,
+      nightly_rate_usd: ghsToUsd(avgNightlyRate, fxRate),
+      nightly_rate_display: fmtPrice(avgNightlyRate, fxRate),
       total_price_ghs: Math.round(totalPrice),
+      total_price_usd: ghsToUsd(Math.round(totalPrice), fxRate),
+      total_price_display: fmtPrice(Math.round(totalPrice), fxRate),
       nights,
       rooms_left: minAvailable === Infinity ? "plenty" : minAvailable,
     };
@@ -960,6 +964,8 @@ async function searchAvailableRooms(
     nights,
     adults,
     children,
+    fx_rate_usd_to_ghs: fxRate,
+    currency_note: "Quote prices to the guest as 'nightly_rate_display' / 'total_price_display' — USD primary with GH₵ equivalent.",
     rooms: availableRooms,
   };
 }
