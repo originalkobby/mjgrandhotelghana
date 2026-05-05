@@ -983,7 +983,19 @@ async function getAddOns(supabase: any) {
     return { success: false, error: "Unable to fetch add-ons" };
   }
 
-  return { success: true, add_ons: data || [] };
+  const fxRate = await getUsdToGhsRate();
+  const addOns = (data || []).map((a: any) => ({
+    ...a,
+    price_usd: ghsToUsd(Number(a.price_ghs), fxRate),
+    price_display: fmtPrice(Number(a.price_ghs), fxRate),
+  }));
+
+  return {
+    success: true,
+    fx_rate_usd_to_ghs: fxRate,
+    currency_note: "Quote add-on prices to the guest as 'price_display' — USD primary with GH₵ equivalent.",
+    add_ons: addOns,
+  };
 }
 
 async function createBooking(
