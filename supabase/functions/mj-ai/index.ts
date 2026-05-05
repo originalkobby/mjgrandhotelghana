@@ -1311,7 +1311,7 @@ async function buildDynamicContext(supabase: any, rate: number): Promise<string>
       const activePromos = promos.filter((p: any) => !p.end_date || p.end_date >= now);
       if (activePromos.length > 0) {
         const promosText = activePromos.map((p: any) => {
-          const discount = p.discount_type === "percentage" ? `${p.discount_value}% off` : `GH₵ ${p.discount_value} off`;
+          const discount = p.discount_type === "percentage" ? `${p.discount_value}% off` : `${fmtPrice(Number(p.discount_value), rate)} off`;
           let line = `- Code: ${p.code} — ${discount}`;
           if (p.description) line += ` (${p.description})`;
           if (p.end_date) line += ` | Valid until ${p.end_date}`;
