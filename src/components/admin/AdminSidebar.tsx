@@ -37,7 +37,7 @@ const NAV_ITEMS = [
   { title: "Bookings", url: "/admin/bookings", icon: CalendarCheck, end: false, roles: null },
   { title: "Guests", url: "/admin/guests", icon: Users, end: false, roles: ["admin", "front_desk"] },
   { title: "Rooms", url: "/admin/rooms", icon: BedDouble, end: false, roles: ["admin"] },
-  { title: "Inventory", url: "/admin/inventory", icon: CalendarRange, end: false, roles: ["admin", "revenue_manager"] },
+  { title: "Inventory", url: "/admin/inventory", icon: CalendarRange, end: false, roles: ["admin", "revenue_manager", "front_desk"] },
   { title: "Promotions", url: "/admin/promotions", icon: Tag, end: false, roles: ["admin"] },
   { title: "Menu", url: "/admin/menu", icon: UtensilsCrossed, end: false, roles: ["admin"] },
   { title: "Gallery", url: "/admin/gallery", icon: ImageIcon, end: false, roles: ["admin"] },
