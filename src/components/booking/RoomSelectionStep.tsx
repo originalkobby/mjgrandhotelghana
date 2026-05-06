@@ -96,7 +96,6 @@ export default function RoomSelectionStep({ search, onSelect, onBack }: Props) {
 
       let available = true;
       let minAvailable = room.total_units;
-      const rates: number[] = [];
 
       // Evaluate every night — missing inventory rows fall back to rooms.total_units
       // with booked_count = 0, so availability still respects the configured cap.
@@ -112,12 +111,10 @@ export default function RoomSelectionStep({ search, onSelect, onBack }: Props) {
         }
         const avail = totalForDate - bookedForDate;
         if (avail < minAvailable) minAvailable = avail;
-        rates.push(inv?.rate_override ?? room.base_price_ghs);
       }
 
-      const avgRate = rates.length > 0
-        ? rates.reduce((a, b) => a + b, 0) / rates.length
-        : room.base_price_ghs;
+      // Pricing matches the homepage: always use the room's base price.
+      const avgRate = room.base_price_ghs;
 
       roomResults.push({
         id: room.id,
