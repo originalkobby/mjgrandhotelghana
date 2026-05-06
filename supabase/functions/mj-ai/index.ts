@@ -917,7 +917,7 @@ async function searchAvailableRooms(
   const availableRooms = rooms.map((room: any) => {
     let available = true;
     let minAvailable = Infinity;
-    let totalRate = 0;
+    let totalRateUsd = 0;
 
     for (const date of dates) {
       const inv = invMap.get(`${room.id}_${date}`);
@@ -927,17 +927,19 @@ async function searchAvailableRooms(
           break;
         }
         minAvailable = Math.min(minAvailable, inv.total_count - inv.booked_count);
-        totalRate += inv.rate_override ?? room.base_price_ghs;
+        // base_price_ghs and rate_override are stored as USD (matches website display).
+        totalRateUsd += Number(inv.rate_override ?? room.base_price_ghs);
       } else {
-        // No inventory record = use base price, assume available
-        totalRate += room.base_price_ghs;
+        totalRateUsd += Number(room.base_price_ghs);
       }
     }
 
     if (!available) return null;
 
-    const avgNightlyRate = Math.round(totalRate / nights);
-    const totalPrice = totalRate;
+    const avgNightlyUsd = Math.round(totalRateUsd / nights);
+    const totalUsd = Math.round(totalRateUsd);
+    const avgNightlyGhs = Math.round(avgNightlyUsd * fxRate);
+    const totalGhs = Math.round(totalUsd * fxRate);
 
     return {
       room_id: room.id,
@@ -947,12 +949,12 @@ async function searchAvailableRooms(
       bed_type: room.bed_type,
       size_sqm: room.size_sqm,
       amenities: room.amenities,
-      nightly_rate_ghs: avgNightlyRate,
-      nightly_rate_usd: ghsToUsd(avgNightlyRate, fxRate),
-      nightly_rate_display: fmtPrice(avgNightlyRate, fxRate),
-      total_price_ghs: Math.round(totalPrice),
-      total_price_usd: ghsToUsd(Math.round(totalPrice), fxRate),
-      total_price_display: fmtPrice(Math.round(totalPrice), fxRate),
+      nightly_rate_ghs: avgNightlyGhs,
+      nightly_rate_usd: avgNightlyUsd,
+      nightly_rate_display: fmtPriceFromUsd(avgNightlyUsd, fxRate),
+      total_price_ghs: totalGhs,
+      total_price_usd: totalUsd,
+      total_price_display: fmtPriceFromUsd(totalUsd, fxRate),
       nights,
       rooms_left: minAvailable === Infinity ? "plenty" : minAvailable,
     };
