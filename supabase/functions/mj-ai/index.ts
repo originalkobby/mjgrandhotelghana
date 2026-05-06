@@ -102,9 +102,18 @@ HOTEL KNOWLEDGE BASE — COMPLETE WEBSITE & DASHBOARD CONTENT
 - Base display currency: USD ($)
 - Equivalent currency: Ghana Cedis (GH₵)
 - Live exchange rate: 1 USD = {LIVE_FX_RATE} GHS (refreshed hourly from open.er-api.com — same source as the website)
-- Prices stored in our database are in GH₵, but you MUST always present them to guests as "$X (≈ GH₵ Y)"
-- To convert any GH₵ amount yourself: USD = GH₵ amount ÷ {LIVE_FX_RATE}, then round to the nearest dollar
-- The static restaurant menu below lists prices in GH₵ — convert each one on the fly using the rate above when quoting to guests
+- ROOM RATES are stored and quoted in USD on the website. Always present room rates as "$X (≈ GH₵ Y)" where Y = X × {LIVE_FX_RATE}.
+- The static restaurant menu below lists prices in GH₵ — convert each one on the fly to "$X (≈ GH₵ Y)" using the rate above (USD = GH₵ ÷ {LIVE_FX_RATE}, rounded).
+- Never quote a price in GH₵ alone unless the guest explicitly asks for cedis only.
+
+=== CURRENT ROOM RATES (live from website, USD per night) ===
+- Single — $70/night
+- Standard — $90/night
+- Deluxe — $110/night
+- Twin Bed — $120/night
+- Junior Suite — $140/night
+- Executive — $190/night
+(Always verify with the dynamic ROOMS section below or the search_available_rooms tool — those are the live source of truth.)
 
 === CONTACT INFORMATION ===
 - Email: mj@mjgrandhotelghana.com
@@ -693,7 +702,7 @@ const TOOLS = [
           },
           nightly_rate: {
             type: "number",
-            description: "The nightly rate that was quoted to the guest",
+            description: "The nightly rate in USD that was quoted to the guest (use nightly_rate_usd from search_available_rooms).",
           },
         },
         required: [
@@ -917,7 +926,7 @@ async function searchAvailableRooms(
   const availableRooms = rooms.map((room: any) => {
     let available = true;
     let minAvailable = Infinity;
-    let totalRate = 0;
+    let totalRateUsd = 0;
 
     for (const date of dates) {
       const inv = invMap.get(`${room.id}_${date}`);
@@ -927,17 +936,19 @@ async function searchAvailableRooms(
           break;
         }
         minAvailable = Math.min(minAvailable, inv.total_count - inv.booked_count);
-        totalRate += inv.rate_override ?? room.base_price_ghs;
+        // base_price_ghs and rate_override are stored as USD (matches website display).
+        totalRateUsd += Number(inv.rate_override ?? room.base_price_ghs);
       } else {
-        // No inventory record = use base price, assume available
-        totalRate += room.base_price_ghs;
+        totalRateUsd += Number(room.base_price_ghs);
       }
     }
 
     if (!available) return null;
 
-    const avgNightlyRate = Math.round(totalRate / nights);
-    const totalPrice = totalRate;
+    const avgNightlyUsd = Math.round(totalRateUsd / nights);
+    const totalUsd = Math.round(totalRateUsd);
+    const avgNightlyGhs = Math.round(avgNightlyUsd * fxRate);
+    const totalGhs = Math.round(totalUsd * fxRate);
 
     return {
       room_id: room.id,
@@ -947,12 +958,12 @@ async function searchAvailableRooms(
       bed_type: room.bed_type,
       size_sqm: room.size_sqm,
       amenities: room.amenities,
-      nightly_rate_ghs: avgNightlyRate,
-      nightly_rate_usd: ghsToUsd(avgNightlyRate, fxRate),
-      nightly_rate_display: fmtPrice(avgNightlyRate, fxRate),
-      total_price_ghs: Math.round(totalPrice),
-      total_price_usd: ghsToUsd(Math.round(totalPrice), fxRate),
-      total_price_display: fmtPrice(Math.round(totalPrice), fxRate),
+      nightly_rate_ghs: avgNightlyGhs,
+      nightly_rate_usd: avgNightlyUsd,
+      nightly_rate_display: fmtPriceFromUsd(avgNightlyUsd, fxRate),
+      total_price_ghs: totalGhs,
+      total_price_usd: totalUsd,
+      total_price_display: fmtPriceFromUsd(totalUsd, fxRate),
       nights,
       rooms_left: minAvailable === Infinity ? "plenty" : minAvailable,
     };
@@ -1038,9 +1049,11 @@ async function createBooking(
     return { success: false, error: "Unable to create guest record" };
   }
 
-  const baseTotalGhs = args.nightly_rate * nights;
+  // nightly_rate is quoted in USD; DB monetary columns hold USD values
+  // (the website's "GHS" suffix is legacy — UI converts via fxRate for display).
+  const baseTotalUsd = args.nightly_rate * nights;
 
-  // Fetch add-ons if any
+  // Fetch add-ons if any (price_ghs column also holds USD)
   let addOnsTotal = 0;
   let addOnRecords: any[] = [];
   if (args.add_on_ids && args.add_on_ids.length > 0) {
@@ -1051,11 +1064,11 @@ async function createBooking(
 
     if (addOns) {
       addOnRecords = addOns;
-      addOnsTotal = addOns.reduce((sum: number, a: any) => sum + a.price_ghs, 0);
+      addOnsTotal = addOns.reduce((sum: number, a: any) => sum + Number(a.price_ghs), 0);
     }
   }
 
-  const finalTotal = baseTotalGhs + addOnsTotal;
+  const finalTotal = baseTotalUsd + addOnsTotal;
   const refCode = "MJ-" + Math.random().toString(36).substring(2, 10).toUpperCase();
 
   // Create booking
@@ -1069,7 +1082,7 @@ async function createBooking(
       check_out: args.check_out,
       adults: args.adults,
       children: args.children || 0,
-      base_total_ghs: baseTotalGhs,
+      base_total_ghs: baseTotalUsd,
       add_ons_total_ghs: addOnsTotal,
       discount_ghs: 0,
       final_total_ghs: finalTotal,
@@ -1139,17 +1152,17 @@ async function createBooking(
     nights,
     adults: args.adults,
     children: args.children || 0,
-    base_total_ghs: baseTotalGhs,
-    base_total_usd: ghsToUsd(baseTotalGhs, fxRate),
-    add_ons_total_ghs: addOnsTotal,
-    add_ons_total_usd: ghsToUsd(addOnsTotal, fxRate),
-    final_total_ghs: finalTotal,
-    final_total_usd: ghsToUsd(finalTotal, fxRate),
-    final_total_display: fmtPrice(finalTotal, fxRate),
+    base_total_usd: baseTotalUsd,
+    base_total_ghs: Math.round(baseTotalUsd * fxRate),
+    add_ons_total_usd: addOnsTotal,
+    add_ons_total_ghs: Math.round(addOnsTotal * fxRate),
+    final_total_usd: finalTotal,
+    final_total_ghs: Math.round(finalTotal * fxRate),
+    final_total_display: fmtPriceFromUsd(finalTotal, fxRate),
     fx_rate_usd_to_ghs: fxRate,
     add_ons: addOnRecords.map((a: any) => a.name),
     payment_status: "pending",
-    message: `Booking confirmed! Reference: ${refCode}. Total: ${fmtPrice(finalTotal, fxRate)}. Payment can be made at the hotel or online.`,
+    message: `Booking confirmed! Reference: ${refCode}. Total: ${fmtPriceFromUsd(finalTotal, fxRate)}. Payment can be made at the hotel or online.`,
   };
 }
 
@@ -1284,6 +1297,14 @@ function fmtPrice(ghs: number, rate: number): string {
   return `$${ghsToUsd(ghs, rate).toLocaleString()} (≈ GH₵ ${Math.round(ghs).toLocaleString()})`;
 }
 
+/** Room prices in the DB column `base_price_ghs` are actually stored as USD
+ *  (the website displays them via formatUsd). Use this when formatting room rates. */
+function fmtPriceFromUsd(usd: number, rate: number): string {
+  const usdRounded = Math.round(usd);
+  const ghs = Math.round(usd * rate);
+  return `$${usdRounded.toLocaleString()} (≈ GH₵ ${ghs.toLocaleString()})`;
+}
+
 /** Rewrite "GH₵ 150" / "GHS 150" / "GH? 150" tokens in free-text to "$X (≈ GH₵ 150)". */
 function convertGhsTokensToDual(text: string, rate: number): string {
   return text.replace(/GH[₵CcSs]?\s?(\d{1,3}(?:,\d{3})*|\d+)/g, (_m, num) => {
@@ -1308,7 +1329,7 @@ async function buildDynamicContext(supabase: any, rate: number): Promise<string>
 
     if (rooms && rooms.length > 0) {
       const roomsText = "ROOM TYPES (live from database):\n" + rooms.map((r: any, i: number) => {
-        let line = `${i + 1}. ${r.name} — From ${fmtPrice(Number(r.base_price_ghs), rate)}/night`;
+        let line = `${i + 1}. ${r.name} — From ${fmtPriceFromUsd(Number(r.base_price_ghs), rate)}/night`;
         if (r.description) line += `: ${r.description}`;
         if (r.bed_type) line += ` | Bed: ${r.bed_type}`;
         if (r.size_sqm) line += ` | ${r.size_sqm} sqm`;
