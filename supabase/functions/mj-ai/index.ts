@@ -693,7 +693,7 @@ const TOOLS = [
           },
           nightly_rate: {
             type: "number",
-            description: "The nightly rate that was quoted to the guest",
+            description: "The nightly rate in USD that was quoted to the guest (use nightly_rate_usd from search_available_rooms).",
           },
         },
         required: [
