@@ -1316,7 +1316,7 @@ async function buildDynamicContext(supabase: any, rate: number): Promise<string>
 
     if (rooms && rooms.length > 0) {
       const roomsText = "ROOM TYPES (live from database):\n" + rooms.map((r: any, i: number) => {
-        let line = `${i + 1}. ${r.name} — From ${fmtPrice(Number(r.base_price_ghs), rate)}/night`;
+        let line = `${i + 1}. ${r.name} — From ${fmtPriceFromUsd(Number(r.base_price_ghs), rate)}/night`;
         if (r.description) line += `: ${r.description}`;
         if (r.bed_type) line += ` | Bed: ${r.bed_type}`;
         if (r.size_sqm) line += ` | ${r.size_sqm} sqm`;
