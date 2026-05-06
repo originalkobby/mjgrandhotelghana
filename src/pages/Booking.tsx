@@ -80,18 +80,7 @@ const Booking = () => {
     if (nights <= 0) return;
 
     (async () => {
-      const { data: inventory } = await supabase
-        .from("room_inventory")
-        .select("rate_override")
-        .eq("room_id", roomId)
-        .gte("date", checkIn)
-        .lt("date", checkOut);
-
-      let avgRate = state.selectedRoom!.base_price_ghs;
-      if (inventory && inventory.length > 0) {
-        const rates = inventory.map((inv) => inv.rate_override ?? state.selectedRoom!.base_price_ghs);
-        avgRate = rates.reduce((a, b) => a + b, 0) / rates.length;
-      }
+      const avgRate = state.selectedRoom!.base_price_ghs;
 
       setSelectedRoom({
         ...state.selectedRoom!,
