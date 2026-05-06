@@ -30,6 +30,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDateGB, formatDateTimeGB } from "@/lib/dateUtils";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 interface Guest {
   id: string;
@@ -85,6 +86,8 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function Guests() {
   const { format: formatCurrency } = useCurrency();
+  const { role } = useAdminAuth();
+  const isAdmin = role === "admin";
   const [search, setSearch] = useState("");
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
   const [checkInTime, setCheckInTime] = useState("");
@@ -291,7 +294,7 @@ export default function Guests() {
         >
           <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
         </Button>
-        {selectedGuestCount > 0 && (
+        {isAdmin && selectedGuestCount > 0 && (
           <Button
             variant="destructive"
             className="gap-2"
