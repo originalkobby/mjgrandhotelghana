@@ -274,9 +274,35 @@ export default function Bookings() {
     if (roomNumber !== (selectedBooking.room_number ?? "")) {
       updatePayload.room_number = roomNumber || null;
     }
+
+    let recalcNote: string | null = null;
     if (datesChanged) {
       updatePayload.check_in = editCheckIn;
       updatePayload.check_out = editCheckOut;
+
+      // Recalculate totals using the existing per-night rate
+      const oldNights = Math.max(
+        1,
+        Math.round(
+          (new Date(oldCheckOut).getTime() - new Date(oldCheckIn).getTime()) / 86400000
+        )
+      );
+      const newNights = Math.max(
+        1,
+        Math.round(
+          (new Date(editCheckOut).getTime() - new Date(editCheckIn).getTime()) / 86400000
+        )
+      );
+      const perNight = (selectedBooking.base_total_ghs ?? 0) / oldNights;
+      const newBase = +(perNight * newNights).toFixed(2);
+      const newFinal = +(
+        newBase +
+        (selectedBooking.add_ons_total_ghs ?? 0) -
+        (selectedBooking.discount_ghs ?? 0)
+      ).toFixed(2);
+      updatePayload.base_total_ghs = newBase;
+      updatePayload.final_total_ghs = newFinal;
+      recalcNote = `Total recalculated: ${oldNights}→${newNights} night(s), new total ${formatCurrency(newFinal)}`;
     }
 
     const { error } = await supabase
