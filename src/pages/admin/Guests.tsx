@@ -30,6 +30,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDateGB, formatDateTimeGB } from "@/lib/dateUtils";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 interface Guest {
   id: string;
@@ -85,6 +86,8 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function Guests() {
   const { format: formatCurrency } = useCurrency();
+  const { role } = useAdminAuth();
+  const isAdmin = role === "admin";
   const [search, setSearch] = useState("");
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
   const [checkInTime, setCheckInTime] = useState("");
@@ -291,7 +294,7 @@ export default function Guests() {
         >
           <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
         </Button>
-        {selectedGuestCount > 0 && (
+        {isAdmin && selectedGuestCount > 0 && (
           <Button
             variant="destructive"
             className="gap-2"
@@ -311,14 +314,16 @@ export default function Guests() {
             <table className="w-full text-sm font-sans">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="w-9 px-3 py-3">
-                    <Checkbox
-                      className="h-3 w-3 [&_svg]:h-3 [&_svg]:w-3"
-                      checked={allVisibleSelected}
-                      onCheckedChange={(checked) => toggleAllVisibleGuests(checked === true)}
-                      aria-label="Select all visible guests"
-                    />
-                  </th>
+                  {isAdmin && (
+                    <th className="w-9 px-3 py-3">
+                      <Checkbox
+                        className="h-3 w-3 [&_svg]:h-3 [&_svg]:w-3"
+                        checked={allVisibleSelected}
+                        onCheckedChange={(checked) => toggleAllVisibleGuests(checked === true)}
+                        aria-label="Select all visible guests"
+                      />
+                    </th>
+                  )}
                   {["Name", "Email", "Phone", "VIP", "Date", "Actions"].map((h) => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       {h}
@@ -352,14 +357,16 @@ export default function Guests() {
                         transition={{ delay: i * 0.02 }}
                         className="border-b border-border/50 hover:bg-muted/30 transition-colors"
                       >
-                        <td className="px-3 py-3">
-                          <Checkbox
-                            className="h-3 w-3 [&_svg]:h-3 [&_svg]:w-3"
-                            checked={selectedGuestIds.includes(g.id)}
-                            onCheckedChange={(checked) => toggleGuestSelection(g.id, checked === true)}
-                            aria-label={`Select ${g.full_name ?? "guest"}`}
-                          />
-                        </td>
+                        {isAdmin && (
+                          <td className="px-3 py-3">
+                            <Checkbox
+                              className="h-3 w-3 [&_svg]:h-3 [&_svg]:w-3"
+                              checked={selectedGuestIds.includes(g.id)}
+                              onCheckedChange={(checked) => toggleGuestSelection(g.id, checked === true)}
+                              aria-label={`Select ${g.full_name ?? "guest"}`}
+                            />
+                          </td>
+                        )}
                         <td className="px-4 py-3 font-medium text-foreground">
                           <div className="flex items-center gap-2">
                             {g.full_name ?? "—"}
