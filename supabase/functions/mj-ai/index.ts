@@ -1040,9 +1040,11 @@ async function createBooking(
     return { success: false, error: "Unable to create guest record" };
   }
 
-  const baseTotalGhs = args.nightly_rate * nights;
+  // nightly_rate is quoted in USD; DB monetary columns hold USD values
+  // (the website's "GHS" suffix is legacy — UI converts via fxRate for display).
+  const baseTotalUsd = args.nightly_rate * nights;
 
-  // Fetch add-ons if any
+  // Fetch add-ons if any (price_ghs column also holds USD)
   let addOnsTotal = 0;
   let addOnRecords: any[] = [];
   if (args.add_on_ids && args.add_on_ids.length > 0) {
@@ -1053,11 +1055,11 @@ async function createBooking(
 
     if (addOns) {
       addOnRecords = addOns;
-      addOnsTotal = addOns.reduce((sum: number, a: any) => sum + a.price_ghs, 0);
+      addOnsTotal = addOns.reduce((sum: number, a: any) => sum + Number(a.price_ghs), 0);
     }
   }
 
-  const finalTotal = baseTotalGhs + addOnsTotal;
+  const finalTotal = baseTotalUsd + addOnsTotal;
   const refCode = "MJ-" + Math.random().toString(36).substring(2, 10).toUpperCase();
 
   // Create booking
