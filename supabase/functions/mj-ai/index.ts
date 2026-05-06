@@ -102,9 +102,18 @@ HOTEL KNOWLEDGE BASE — COMPLETE WEBSITE & DASHBOARD CONTENT
 - Base display currency: USD ($)
 - Equivalent currency: Ghana Cedis (GH₵)
 - Live exchange rate: 1 USD = {LIVE_FX_RATE} GHS (refreshed hourly from open.er-api.com — same source as the website)
-- Prices stored in our database are in GH₵, but you MUST always present them to guests as "$X (≈ GH₵ Y)"
-- To convert any GH₵ amount yourself: USD = GH₵ amount ÷ {LIVE_FX_RATE}, then round to the nearest dollar
-- The static restaurant menu below lists prices in GH₵ — convert each one on the fly using the rate above when quoting to guests
+- ROOM RATES are stored and quoted in USD on the website. Always present room rates as "$X (≈ GH₵ Y)" where Y = X × {LIVE_FX_RATE}.
+- The static restaurant menu below lists prices in GH₵ — convert each one on the fly to "$X (≈ GH₵ Y)" using the rate above (USD = GH₵ ÷ {LIVE_FX_RATE}, rounded).
+- Never quote a price in GH₵ alone unless the guest explicitly asks for cedis only.
+
+=== CURRENT ROOM RATES (live from website, USD per night) ===
+- Single — $70/night
+- Standard — $90/night
+- Deluxe — $110/night
+- Twin Bed — $120/night
+- Junior Suite — $140/night
+- Executive — $190/night
+(Always verify with the dynamic ROOMS section below or the search_available_rooms tool — those are the live source of truth.)
 
 === CONTACT INFORMATION ===
 - Email: mj@mjgrandhotelghana.com
