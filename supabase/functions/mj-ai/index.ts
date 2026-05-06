@@ -1284,6 +1284,14 @@ function fmtPrice(ghs: number, rate: number): string {
   return `$${ghsToUsd(ghs, rate).toLocaleString()} (≈ GH₵ ${Math.round(ghs).toLocaleString()})`;
 }
 
+/** Room prices in the DB column `base_price_ghs` are actually stored as USD
+ *  (the website displays them via formatUsd). Use this when formatting room rates. */
+function fmtPriceFromUsd(usd: number, rate: number): string {
+  const usdRounded = Math.round(usd);
+  const ghs = Math.round(usd * rate);
+  return `$${usdRounded.toLocaleString()} (≈ GH₵ ${ghs.toLocaleString()})`;
+}
+
 /** Rewrite "GH₵ 150" / "GHS 150" / "GH? 150" tokens in free-text to "$X (≈ GH₵ 150)". */
 function convertGhsTokensToDual(text: string, rate: number): string {
   return text.replace(/GH[₵CcSs]?\s?(\d{1,3}(?:,\d{3})*|\d+)/g, (_m, num) => {
