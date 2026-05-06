@@ -343,6 +343,7 @@ export default function Bookings() {
       if (datesChanged) {
         noteParts.push(`Stay updated: ${oldCheckIn} → ${oldCheckOut} ⇒ ${editCheckIn} → ${editCheckOut}`);
       }
+      if (recalcNote) noteParts.push(recalcNote);
       if (inventoryNote) noteParts.push(inventoryNote);
 
       await supabase.from("booking_audit_log" as any).insert({
