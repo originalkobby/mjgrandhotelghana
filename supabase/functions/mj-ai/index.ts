@@ -1073,7 +1073,7 @@ async function createBooking(
       check_out: args.check_out,
       adults: args.adults,
       children: args.children || 0,
-      base_total_ghs: baseTotalGhs,
+      base_total_ghs: baseTotalUsd,
       add_ons_total_ghs: addOnsTotal,
       discount_ghs: 0,
       final_total_ghs: finalTotal,
