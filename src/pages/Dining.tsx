@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import SEO from "@/components/SEO";
 import { Link } from "react-router-dom";
 import diningBg from "@/assets/dining-bg.jpg";
 import {
@@ -82,6 +83,7 @@ const openingHours = [
 const Dining = () => {
   return (
     <div className="min-h-screen bg-charcoal">
+      <SEO title="Dining at MJ Grand Hotel — Restaurant & Sunday Buffet" description="Fine dining in East Legon, Accra. Enjoy our restaurant, bar, rooftop lounge, and the celebrated GH₵ 300 Sunday Buffet." path="/dining" />
       <Navbar />
 
       {/* Hero */}

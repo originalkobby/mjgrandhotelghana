@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import SEO from "@/components/SEO";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -63,6 +64,7 @@ const GalleryPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Photo Gallery — MJ Grand Hotel Ghana" description="Browse photos of our rooms, restaurant, pool, and grounds at MJ Grand Hotel in East Legon, Accra." path="/gallery" />
       <Navbar />
 
       <section className="pt-32 pb-24 md:pt-40 md:pb-32">

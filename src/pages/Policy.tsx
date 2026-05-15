@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import SEO from "@/components/SEO";
 import { Link } from "react-router-dom";
 import { Shield, Clock, UtensilsCrossed, Key, Car, Waves, CircleX, Ban, MessageSquare, Lock, Search, Users, Banknote, Dumbbell } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -93,6 +94,7 @@ const sections = [
 const Policy = () => {
   return (
     <div className="min-h-screen bg-secondary">
+      <SEO title="Guest Policies — MJ Grand Hotel Ghana" description="Check-in and check-out times, cancellation policy, security, and house rules for guests at MJ Grand Hotel, Accra." path="/policy" />
       <Navbar />
 
       <div className="container mx-auto px-6 lg:px-12 py-16 max-w-4xl">
