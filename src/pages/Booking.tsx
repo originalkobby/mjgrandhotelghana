@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import SEO from "@/components/SEO";
 import { AnimatePresence } from "framer-motion";
 import { useSearchParams } from "react-router-dom";
 import { differenceInDays } from "date-fns";
@@ -195,6 +196,7 @@ const Booking = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Book a Room — MJ Grand Hotel Ghana" description="Reserve your stay at MJ Grand Hotel, Accra. Single, Double, Deluxe, and Executive rooms with secure online booking and instant confirmation." path="/booking" />
       <Navbar />
       <main className="pt-24 pb-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-12">

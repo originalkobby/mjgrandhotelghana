@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import SEO from "@/components/SEO";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
@@ -109,6 +110,7 @@ const Menu = () => {
 
   return (
     <div className="min-h-screen bg-charcoal">
+      <SEO title="Restaurant Menu — MJ Grand Hotel Ghana" description="Explore our full menu: Ghanaian and continental cuisine, fine wines, cocktails, and seasonal specials at MJ Grand Hotel, Accra." path="/menu" jsonLd={{ "@context": "https://schema.org", "@type": "Menu", name: "MJ Grand Hotel Restaurant Menu", url: "https://mjgrandhotelghana.com/menu", inLanguage: "en" }} />
       <Navbar />
 
       {/* Hero */}

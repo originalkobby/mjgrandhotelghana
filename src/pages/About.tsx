@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import SEO from "@/components/SEO";
 import { Link } from "react-router-dom";
 import { Bed, Wifi, Wind, Tv, Bath, Clock, UtensilsCrossed, Wine, Building2, Waves, Dumbbell, Shield, Plane, Heart, Scale, Users, Lightbulb, Lock, MessageCircle, Award } from "lucide-react";
 import aboutHeroBg from "@/assets/about-hero-new.jpg";
@@ -64,6 +65,7 @@ const coreValues = [
 const About = () => {
   return (
     <div className="min-h-screen bg-charcoal">
+      <SEO title="About MJ Grand Hotel — Our Story & Values" description="Discover MJ Grand Hotel, a luxury sanctuary in East Legon, Accra. Learn about our story, hospitality philosophy, and dedicated team." path="/about" />
       <Navbar />
 
       {/* Hero */}

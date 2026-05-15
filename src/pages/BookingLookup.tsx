@@ -1,4 +1,5 @@
 import { useState } from "react";
+import SEO from "@/components/SEO";
 import { motion } from "framer-motion";
 import { Search, Calendar, Users, CreditCard, Clock, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
@@ -136,6 +137,7 @@ const BookingLookup = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Find My Booking — MJ Grand Hotel Ghana" description="Look up an existing reservation at MJ Grand Hotel using your booking reference or email." path="/booking/lookup" />
       <Navbar />
       <main className="pt-28 pb-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-12 max-w-2xl">

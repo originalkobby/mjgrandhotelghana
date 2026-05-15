@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import SEO from "@/components/SEO";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
@@ -126,6 +127,7 @@ export default function GuestServices() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Guest Services & Directory — MJ Grand Hotel Ghana" description="In-house guest directory: housekeeping, room service, spa, concierge, and dial-in extensions at MJ Grand Hotel." path="/guest-services" />
       <Navbar />
 
       {/* HERO */}
