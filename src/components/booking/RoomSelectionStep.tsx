@@ -147,26 +147,8 @@ export default function RoomSelectionStep({ search, onSelect, onBack }: Props) {
     fetchRooms();
   }, [fetchRooms]);
 
-  // Real-time availability: refetch when inventory or bookings change so the
-  // grid reflects fresh check-ins (blocked) and check-outs/cancellations (released).
-  useEffect(() => {
-    const channel = supabase
-      .channel("public-availability")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "room_inventory" },
-        () => fetchRooms()
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "bookings" },
-        () => fetchRooms()
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [fetchRooms]);
+  // Note: realtime subscriptions are restricted to staff. Public booking page
+  // refetches availability when the user changes dates or returns to this step.
 
   const handleSelect = (room: RoomData) => {
     onSelect({
