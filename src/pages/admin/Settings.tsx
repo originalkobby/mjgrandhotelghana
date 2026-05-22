@@ -39,9 +39,11 @@ const emptyPolicy = {
 
 export default function AdminSettings() {
   const qc = useQueryClient();
+  const { user: currentUser } = useAdminAuth();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyPolicy);
+  const [deleteTarget, setDeleteTarget] = useState<{ user_id: string; name: string } | null>(null);
 
   // Cancellation Policies
   const { data: policies, isLoading: loadingPolicies } = useQuery({
