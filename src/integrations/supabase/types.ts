@@ -934,6 +934,7 @@ export type Database = {
     }
     Functions: {
       generate_booking_ref: { Args: never; Returns: string }
+      get_my_admin_role: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
