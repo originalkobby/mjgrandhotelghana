@@ -60,7 +60,7 @@ const Hero = () => {
           playsInline
           disablePictureInPicture
           controlsList="nodownload noplaybackrate nofullscreen noremoteplayback"
-          preload="auto"
+          preload="metadata"
           className="h-full w-full object-cover"
           poster="/videos/hero-poster.jpg"
           aria-hidden="true"
