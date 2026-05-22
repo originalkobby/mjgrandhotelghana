@@ -21,12 +21,19 @@ export function useAdminAuth(): AdminAuth {
   const initialSessionHandled = useRef(false);
 
   const fetchRole = useCallback(async (userId: string) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", userId)
+      .order("role")
       .limit(1)
-      .single();
+      .maybeSingle();
+    if (error) {
+      console.error("[useAdminAuth] fetchRole error:", error);
+    }
+    if (!data) {
+      console.warn("[useAdminAuth] No role row found for user", userId);
+    }
     return (data?.role as AdminRole) ?? null;
   }, []);
 
