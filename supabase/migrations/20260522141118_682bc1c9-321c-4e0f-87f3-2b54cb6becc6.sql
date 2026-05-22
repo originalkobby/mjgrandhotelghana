@@ -1,0 +1,2 @@
+REVOKE ALL ON public.rooms FROM anon;
+GRANT SELECT (id, name, slug, description, total_units, is_active, sort_order, images, amenities, base_price_ghs, max_children, max_adults, bed_type, size_sqm, created_at) ON public.rooms TO anon;
