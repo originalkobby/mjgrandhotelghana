@@ -85,11 +85,11 @@ export default function RoomSelectionStep({ search, onSelect, onBack }: Props) {
     const roomResults: RoomData[] = [];
     for (const room of roomsData) {
       const { data: inventory } = await supabase
-        .from("room_inventory")
-        .select("date, total_count, booked_count, is_closed, rate_override")
+        .from("room_availability" as never)
+        .select("date, total_count, booked_count, is_closed")
         .eq("room_id", room.id)
         .gte("date", checkInStr)
-        .lt("date", checkOutStr);
+        .lt("date", checkOutStr) as { data: Array<{ date: string; total_count: number; booked_count: number; is_closed: boolean }> | null };
 
       const invByDate = new Map<string, typeof inventory[number]>();
       (inventory ?? []).forEach((row) => invByDate.set(row.date, row));
