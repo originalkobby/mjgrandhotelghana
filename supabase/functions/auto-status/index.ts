@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-cron-secret",
 };
 
 async function releaseInventoryForBooking(
@@ -44,15 +44,49 @@ serve(async (req) => {
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-  const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  const supabase = createClient(supabaseUrl, supabaseKey);
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+
+  // --- Authorization: allow either a cron secret OR an authenticated admin/front_desk user ---
+  const cronSecret = Deno.env.get("CRON_SECRET");
+  const providedCron = req.headers.get("x-cron-secret");
+  let authorized = false;
+
+  if (cronSecret && providedCron && providedCron === cronSecret) {
+    authorized = true;
+  } else {
+    const authHeader = req.headers.get("Authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.replace("Bearer ", "");
+      const authClient = createClient(supabaseUrl, anonKey);
+      const { data: claimsData } = await authClient.auth.getClaims(token);
+      const userId = claimsData?.claims?.sub;
+      if (userId) {
+        const admin = createClient(supabaseUrl, serviceKey);
+        const { data: roles } = await admin
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", userId)
+          .in("role", ["admin", "front_desk"]);
+        if (roles && roles.length > 0) authorized = true;
+      }
+    }
+  }
+
+  if (!authorized) {
+    return new Response(
+      JSON.stringify({ error: "Unauthorized" }),
+      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
+  const supabase = createClient(supabaseUrl, serviceKey);
 
   const now = new Date();
   const todayStr = now.toISOString().split("T")[0];
   const results = { completed: 0, noShow: 0, inventoryReleased: 0 };
 
   try {
-    // 1. Find all confirmed/pending bookings whose check_out <= today
     const { data: expiredBookings, error: fetchErr } = await supabase
       .from("bookings")
       .select("id, room_id, check_in, check_out, status, payment_status")
@@ -66,24 +100,20 @@ serve(async (req) => {
       let shouldReleaseInventory = false;
 
       if (booking.payment_status === "paid") {
-        // Paid → Completed (release nights back to availability)
         newStatus = "completed";
         results.completed++;
         shouldReleaseInventory = true;
       } else {
-        // Not paid → No Show (release the nights back to availability)
         newStatus = "no_show";
         results.noShow++;
         shouldReleaseInventory = true;
       }
 
-      // Update booking status
       await supabase
         .from("bookings")
         .update({ status: newStatus })
         .eq("id", booking.id);
 
-      // Insert audit log
       await supabase.from("booking_audit_log").insert({
         booking_id: booking.id,
         old_status: booking.status,
