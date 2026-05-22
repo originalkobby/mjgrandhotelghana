@@ -96,6 +96,22 @@ export default function AdminSettings() {
     onError: (e) => toast.error(e.message),
   });
 
+  const deleteUserMutation = useMutation({
+    mutationFn: async (user_id: string) => {
+      const { data, error } = await supabase.functions.invoke("delete-user", {
+        body: { user_id },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-user-roles"] });
+      toast.success("User deleted");
+      setDeleteTarget(null);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const resetForm = () => {
     setForm(emptyPolicy);
     setEditId(null);
