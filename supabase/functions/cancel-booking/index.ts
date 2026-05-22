@@ -16,7 +16,7 @@ serve(async (req) => {
   const supabase = createClient(supabaseUrl, supabaseKey);
 
   try {
-    const { referenceCode } = await req.json();
+    const { referenceCode, email } = await req.json();
 
     if (!referenceCode || typeof referenceCode !== "string") {
       return new Response(JSON.stringify({ error: "referenceCode is required" }), {
@@ -25,16 +25,34 @@ serve(async (req) => {
       });
     }
 
-    // Fetch booking
+    if (!email || typeof email !== "string") {
+      return new Response(JSON.stringify({ error: "Email confirmation is required to cancel a booking" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Fetch booking with guest email for verification
     const { data: booking, error: fetchErr } = await supabase
       .from("bookings")
-      .select("id, status, check_in, check_out, room_id, guest_id")
+      .select("id, status, check_in, check_out, room_id, guest_id, guests ( email )")
       .eq("reference_code", referenceCode.toUpperCase().trim())
       .single();
 
     if (fetchErr || !booking) {
       return new Response(JSON.stringify({ error: "Booking not found" }), {
         status: 404,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Identity verification: submitted email must match booking guest email
+    const guestEmail = (booking as any).guests?.email?.toLowerCase().trim();
+    const submittedEmail = email.toLowerCase().trim();
+    if (!guestEmail || guestEmail !== submittedEmail) {
+      console.warn(`Cancel attempt with mismatched email for ${referenceCode}`);
+      return new Response(JSON.stringify({ error: "Email does not match the booking record" }), {
+        status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -46,7 +64,6 @@ serve(async (req) => {
       });
     }
 
-    // Server-side 48-hour cancellation window check
     const checkInDate = new Date(booking.check_in + "T14:00:00");
     const now = new Date();
     const hoursUntilCheckIn = (checkInDate.getTime() - now.getTime()) / (1000 * 60 * 60);
@@ -58,7 +75,6 @@ serve(async (req) => {
       );
     }
 
-    // Update booking status
     const { error: updateErr } = await supabase
       .from("bookings")
       .update({ status: "cancelled" })
@@ -93,18 +109,17 @@ serve(async (req) => {
       d.setDate(d.getDate() + 1);
     }
 
-    // Audit log
     await supabase.from("booking_audit_log").insert({
       booking_id: booking.id,
       old_status: booking.status,
       new_status: "cancelled",
-      note: "Cancelled by guest via booking lookup",
+      note: "Cancelled by guest via booking lookup (email-verified)",
     });
 
-    // Send cancellation email
     try {
       await supabase.functions.invoke("send-cancellation-email", {
         body: { bookingId: booking.id },
+        headers: { Authorization: `Bearer ${supabaseKey}` },
       });
     } catch (e) {
       console.error("Failed to send cancellation email:", e);
