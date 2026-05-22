@@ -17,6 +17,9 @@ import { useBooking } from "@/hooks/useBooking";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+const PUBLIC_ROOM_COLUMNS =
+  "id, name, slug, description, size_sqm, bed_type, max_adults, max_children, base_price_ghs, amenities, images, sort_order, is_active, total_units";
+
 const Booking = () => {
   const {
     state,
@@ -43,7 +46,7 @@ const Booking = () => {
       (async () => {
         const { data: room } = await supabase
           .from("rooms")
-          .select("*")
+          .select(PUBLIC_ROOM_COLUMNS)
           .eq("id", roomId)
           .eq("is_active", true)
           .maybeSingle();
