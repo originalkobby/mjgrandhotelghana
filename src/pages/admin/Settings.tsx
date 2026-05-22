@@ -9,11 +9,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useState } from "react";
-import { Settings2, ShieldCheck, Plus, Pencil } from "lucide-react";
+import { Settings2, ShieldCheck, Plus, Pencil, Trash2 } from "lucide-react";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 import type { Tables } from "@/integrations/supabase/types";
 
 type CancelPolicy = Tables<"cancellation_policies">;
