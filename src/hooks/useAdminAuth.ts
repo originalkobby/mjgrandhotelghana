@@ -20,14 +20,14 @@ export function useAdminAuth(): AdminAuth {
   const navigate = useNavigate();
   const initialSessionHandled = useRef(false);
 
-  const fetchRole = useCallback(async (_userId: string) => {
-    // Use SECURITY DEFINER RPC to bypass any RLS/JWT timing issues
-    const { data, error } = await supabase.rpc("get_my_admin_role");
-    if (error) {
-      console.error("[useAdminAuth] get_my_admin_role error:", error);
-      return null;
-    }
-    return (data as AdminRole | null) ?? null;
+  const fetchRole = useCallback(async (userId: string) => {
+    const { data } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .limit(1)
+      .single();
+    return (data?.role as AdminRole) ?? null;
   }, []);
 
   useEffect(() => {

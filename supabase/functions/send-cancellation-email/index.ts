@@ -17,16 +17,6 @@ Deno.serve(async (req) => {
       throw new Error("RESEND_API_KEY is not configured");
     }
 
-    // Restrict to service-role callers only (i.e. other trusted edge functions).
-    const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const authHeader = req.headers.get("Authorization") ?? "";
-    if (authHeader !== `Bearer ${SERVICE_ROLE_KEY}`) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     const { bookingId } = await req.json();
     if (!bookingId) {
       return new Response(
@@ -34,7 +24,6 @@ Deno.serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,

@@ -9,22 +9,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useState } from "react";
-import { Settings2, ShieldCheck, Plus, Pencil, Trash2 } from "lucide-react";
-import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { Settings2, ShieldCheck, Plus, Pencil } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 type CancelPolicy = Tables<"cancellation_policies">;
@@ -39,11 +28,9 @@ const emptyPolicy = {
 
 export default function AdminSettings() {
   const qc = useQueryClient();
-  const { user: currentUser } = useAdminAuth();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyPolicy);
-  const [deleteTarget, setDeleteTarget] = useState<{ user_id: string; name: string } | null>(null);
 
   // Cancellation Policies
   const { data: policies, isLoading: loadingPolicies } = useQuery({
@@ -94,22 +81,6 @@ export default function AdminSettings() {
       resetForm();
     },
     onError: (e) => toast.error(e.message),
-  });
-
-  const deleteUserMutation = useMutation({
-    mutationFn: async (user_id: string) => {
-      const { data, error } = await supabase.functions.invoke("delete-user", {
-        body: { user_id },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-user-roles"] });
-      toast.success("User deleted");
-      setDeleteTarget(null);
-    },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   const resetForm = () => {
@@ -245,7 +216,7 @@ export default function AdminSettings() {
               <CardTitle className="text-base flex items-center gap-2">
                 <ShieldCheck className="h-4 w-4" /> Staff Roles
               </CardTitle>
-              <CardDescription>Roles are managed via the database. Admins can permanently delete users.</CardDescription>
+              <CardDescription>Roles are managed via the database. This is a read-only view.</CardDescription>
             </CardHeader>
             <CardContent className="p-0">
               <Table>
@@ -253,36 +224,20 @@ export default function AdminSettings() {
                   <TableRow>
                     <TableHead>User</TableHead>
                     <TableHead>Role</TableHead>
-                    <TableHead className="w-12" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {roles?.map((r) => {
-                    const name = (r.profiles as any)?.full_name || r.user_id;
-                    const isSelf = currentUser?.id === r.user_id;
-                    return (
-                      <TableRow key={r.id}>
-                        <TableCell className="text-foreground">{name}</TableCell>
-                        <TableCell>
-                          <Badge variant="secondary" className="capitalize">{r.role.replace("_", " ")}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            disabled={isSelf}
-                            title={isSelf ? "You cannot delete your own account" : "Delete user"}
-                            onClick={() => setDeleteTarget({ user_id: r.user_id, name })}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
+                  {roles?.map((r) => (
+                    <TableRow key={r.id}>
+                      <TableCell className="text-foreground">{(r.profiles as any)?.full_name || r.user_id}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="capitalize">{r.role.replace("_", " ")}</Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                   {roles?.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">No roles assigned</TableCell>
+                      <TableCell colSpan={2} className="text-center py-8 text-muted-foreground">No roles assigned</TableCell>
                     </TableRow>
                   )}
                 </TableBody>
@@ -291,27 +246,6 @@ export default function AdminSettings() {
           </Card>
         </TabsContent>
       </Tabs>
-
-      <AlertDialog open={!!deleteTarget} onOpenChange={(v) => !v && setDeleteTarget(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete user?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete <strong>{deleteTarget?.name}</strong>, their profile, and all assigned roles. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => deleteTarget && deleteUserMutation.mutate(deleteTarget.user_id)}
-              disabled={deleteUserMutation.isPending}
-            >
-              {deleteUserMutation.isPending ? "Deleting…" : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

@@ -37,28 +37,16 @@ serve(async (req) => {
         });
       }
 
-      // Look up the booking from DB to get the authoritative amount and verify guest email
+      // Look up the booking from DB to get the authoritative amount
       const { data: booking, error: bookingErr } = await supabase
         .from("bookings")
-        .select("final_total_ghs, status, payment_status, guests ( email )")
+        .select("final_total_ghs, status, payment_status")
         .eq("reference_code", booking_reference)
         .single();
 
       if (bookingErr || !booking) {
-        // Generic message — do not reveal whether the reference exists
-        return new Response(JSON.stringify({ error: "Unable to initialize payment for this booking" }), {
+        return new Response(JSON.stringify({ error: "Booking not found" }), {
           status: 404,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      // Identity check: submitted email must match booking guest email
-      const onFile = (booking as any).guests?.email?.toLowerCase().trim();
-      const submitted = String(email).toLowerCase().trim();
-      if (!onFile || onFile !== submitted) {
-        console.warn(`Paystack init: email mismatch for ${booking_reference}`);
-        return new Response(JSON.stringify({ error: "Unable to initialize payment for this booking" }), {
-          status: 403,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
