@@ -85,11 +85,11 @@ export default function RoomSelectionStep({ search, onSelect, onBack }: Props) {
     const roomResults: RoomData[] = [];
     for (const room of roomsData) {
       const { data: inventory } = await supabase
-        .from("room_inventory")
-        .select("date, total_count, booked_count, is_closed, rate_override")
+        .from("room_availability" as never)
+        .select("date, total_count, booked_count, is_closed")
         .eq("room_id", room.id)
         .gte("date", checkInStr)
-        .lt("date", checkOutStr);
+        .lt("date", checkOutStr) as { data: Array<{ date: string; total_count: number; booked_count: number; is_closed: boolean }> | null };
 
       const invByDate = new Map<string, typeof inventory[number]>();
       (inventory ?? []).forEach((row) => invByDate.set(row.date, row));
@@ -147,26 +147,8 @@ export default function RoomSelectionStep({ search, onSelect, onBack }: Props) {
     fetchRooms();
   }, [fetchRooms]);
 
-  // Real-time availability: refetch when inventory or bookings change so the
-  // grid reflects fresh check-ins (blocked) and check-outs/cancellations (released).
-  useEffect(() => {
-    const channel = supabase
-      .channel("public-availability")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "room_inventory" },
-        () => fetchRooms()
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "bookings" },
-        () => fetchRooms()
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [fetchRooms]);
+  // Note: realtime subscriptions are restricted to staff. Public booking page
+  // refetches availability when the user changes dates or returns to this step.
 
   const handleSelect = (room: RoomData) => {
     onSelect({
