@@ -743,7 +743,7 @@ const TOOLS = [
     function: {
       name: "cancel_booking",
       description:
-        "Cancel a confirmed booking by its reference code. Only works if the booking is confirmed/pending and at least 48 hours before check-in.",
+        "Cancel a confirmed booking. REQUIRES both the reference code AND the email address used on the booking for identity verification. Always ask the guest for their email before calling this tool. Only works if the booking is confirmed/pending and at least 48 hours before check-in.",
       parameters: {
         type: "object",
         properties: {
@@ -751,8 +751,12 @@ const TOOLS = [
             type: "string",
             description: "The booking reference code (e.g. MJ-A1B2C3D4)",
           },
+          guest_email: {
+            type: "string",
+            description: "The email address on the booking — required for identity verification.",
+          },
         },
-        required: ["reference_code"],
+        required: ["reference_code", "guest_email"],
         additionalProperties: false,
       },
     },
@@ -1211,20 +1215,30 @@ async function lookupBooking(supabase: any, referenceCode: string) {
   };
 }
 
-async function cancelBooking(supabase: any, referenceCode: string) {
-  const ref = referenceCode.trim().toUpperCase();
+async function cancelBooking(supabase: any, referenceCode: string, guestEmail: string) {
+  const ref = (referenceCode || "").trim().toUpperCase();
   if (!ref || !ref.startsWith("MJ-")) {
     return { success: false, error: "Invalid reference code format." };
+  }
+  if (!guestEmail || typeof guestEmail !== "string" || !guestEmail.includes("@")) {
+    return { success: false, error: "Email address is required for identity verification before cancelling a booking." };
   }
 
   const { data: booking, error } = await supabase
     .from("bookings")
-    .select("id, status, check_in, room_id")
+    .select("id, status, check_in, room_id, guests ( email )")
     .eq("reference_code", ref)
     .maybeSingle();
 
   if (error || !booking) {
     return { success: false, error: `No booking found with reference ${ref}` };
+  }
+
+  const onFile = (booking as any).guests?.email?.toLowerCase().trim();
+  const submitted = guestEmail.toLowerCase().trim();
+  if (!onFile || onFile !== submitted) {
+    console.warn(`mj-ai cancel attempt with mismatched email for ${ref}`);
+    return { success: false, error: "The email you provided does not match the booking record. Cancellation denied." };
   }
 
   if (booking.status !== "confirmed" && booking.status !== "pending") {
@@ -1624,7 +1638,7 @@ serve(async (req) => {
         } else if (tc.function.name === "lookup_booking") {
           result = await lookupBooking(supabase, args.reference_code);
         } else if (tc.function.name === "cancel_booking") {
-          result = await cancelBooking(supabase, args.reference_code);
+          result = await cancelBooking(supabase, args.reference_code, args.guest_email);
         } else {
           result = { error: "Unknown tool" };
         }
