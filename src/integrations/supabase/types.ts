@@ -896,7 +896,41 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      room_availability: {
+        Row: {
+          booked_count: number | null
+          date: string | null
+          is_closed: boolean | null
+          min_stay: number | null
+          room_id: string | null
+          total_count: number | null
+        }
+        Insert: {
+          booked_count?: number | null
+          date?: string | null
+          is_closed?: boolean | null
+          min_stay?: number | null
+          room_id?: string | null
+          total_count?: number | null
+        }
+        Update: {
+          booked_count?: number | null
+          date?: string | null
+          is_closed?: boolean | null
+          min_stay?: number | null
+          room_id?: string | null
+          total_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_inventory_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       generate_booking_ref: { Args: never; Returns: string }
