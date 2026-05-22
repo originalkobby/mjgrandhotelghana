@@ -23,16 +23,25 @@ export function useBookingLifecycleSync({
       running = true;
 
       try {
+        // auto-status requires admin/front_desk auth — for non-staff sessions this
+        // is expected to 401 and we silently skip it. The refresh callback still
+        // runs so the UI re-reads the latest persisted state from the DB.
         await supabase.functions.invoke("auto-status");
+      } catch (error) {
+        // swallow — unauthorized callers (guests) won't trigger lifecycle changes
+      }
+
+      try {
         if (!cancelled) {
           await onSynced?.();
         }
       } catch (error) {
-        console.error("Booking lifecycle sync failed:", error);
+        console.error("Booking lifecycle refresh failed:", error);
       } finally {
         running = false;
       }
     };
+
 
     void run();
     const intervalId = window.setInterval(() => {

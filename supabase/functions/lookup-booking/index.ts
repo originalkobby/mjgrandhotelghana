@@ -37,6 +37,32 @@ serve(async (req) => {
       guests ( full_name, email, phone )
     `;
 
+    // Mask email and phone so PII is not exposed to anyone with a reference code.
+    const maskEmail = (e?: string | null) => {
+      if (!e) return e;
+      const [local, domain] = e.split("@");
+      if (!domain) return "***";
+      const visible = local.slice(0, 2);
+      return `${visible}${"*".repeat(Math.max(1, local.length - 2))}@${domain}`;
+    };
+    const maskPhone = (p?: string | null) => {
+      if (!p) return p;
+      const digits = p.replace(/\D/g, "");
+      if (digits.length < 4) return "***";
+      return `***${digits.slice(-3)}`;
+    };
+    const sanitize = (booking: any) => {
+      if (!booking?.guests) return booking;
+      return {
+        ...booking,
+        guests: {
+          full_name: booking.guests.full_name,
+          email: maskEmail(booking.guests.email),
+          phone: maskPhone(booking.guests.phone),
+        },
+      };
+    };
+
     // Try internal reference first
     const { data: internalBooking, error: intErr } = await supabase
       .from("bookings")
@@ -46,7 +72,7 @@ serve(async (req) => {
 
     if (intErr) throw intErr;
     if (internalBooking) {
-      return new Response(JSON.stringify({ booking: internalBooking }), {
+      return new Response(JSON.stringify({ booking: sanitize(internalBooking) }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -61,11 +87,12 @@ serve(async (req) => {
 
       if (otaErr) throw otaErr;
       if (otaBooking) {
-        return new Response(JSON.stringify({ booking: otaBooking }), {
+        return new Response(JSON.stringify({ booking: sanitize(otaBooking) }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
     }
+
 
     return new Response(JSON.stringify({ booking: null }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

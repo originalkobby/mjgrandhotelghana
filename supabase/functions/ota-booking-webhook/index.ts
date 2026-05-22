@@ -147,14 +147,16 @@ serve(async (req) => {
 
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
-  // --- Layer 1: Static shared-secret validation ---
+  // --- Layer 1: Static shared-secret validation (fail closed) ---
   const webhookSecret = Deno.env.get("OTA_WEBHOOK_SECRET");
-  if (webhookSecret) {
-    const providedSecret = req.headers.get("x-webhook-secret") || new URL(req.url).searchParams.get("secret");
-    if (providedSecret !== webhookSecret) {
-      return json({ error: "Unauthorized" }, 401);
-    }
+  if (!webhookSecret) {
+    return json({ error: "Webhook secret not configured" }, 500);
   }
+  const providedSecret = req.headers.get("x-webhook-secret") || new URL(req.url).searchParams.get("secret");
+  if (providedSecret !== webhookSecret) {
+    return json({ error: "Unauthorized" }, 401);
+  }
+
 
   // --- Layer 2: Replay attack protection (timestamp validation) ---
   const timestamp = req.headers.get("x-webhook-timestamp");

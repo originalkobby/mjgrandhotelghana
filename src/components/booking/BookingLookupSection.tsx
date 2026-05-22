@@ -64,7 +64,9 @@ export default function BookingLookupSection() {
   const [loading, setLoading] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [cancelEmail, setCancelEmail] = useState("");
   const { toast } = useToast();
+
   const { toUsd, toGhs } = useCurrency();
 
   useBookingLifecycleSync({
@@ -101,10 +103,14 @@ export default function BookingLookupSection() {
 
   const handleCancel = async () => {
     if (!result) return;
+    if (!cancelEmail.trim()) {
+      toast({ title: "Email required", description: "Enter the email used at booking.", variant: "destructive" });
+      return;
+    }
     setCancelling(true);
     try {
       const { data, error: fnError } = await supabase.functions.invoke("cancel-booking", {
-        body: { referenceCode: result.reference_code },
+        body: { referenceCode: result.reference_code, email: cancelEmail.trim() },
       });
 
       if (fnError) throw new Error(fnError.message);
@@ -112,6 +118,7 @@ export default function BookingLookupSection() {
 
       setResult({ ...result, status: "cancelled" });
       setShowCancelDialog(false);
+      setCancelEmail("");
       toast({ title: "Booking Cancelled", description: `Booking ${result.reference_code} has been cancelled.` });
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -119,6 +126,7 @@ export default function BookingLookupSection() {
       setCancelling(false);
     }
   };
+
 
   const paymentDisplay = result ? getPaymentDisplay(result) : null;
   const displayStatus = paymentDisplay?.effectiveStatus ?? result?.status ?? "pending";
@@ -309,23 +317,33 @@ export default function BookingLookupSection() {
         )}
       </div>
 
-      <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+      <Dialog open={showCancelDialog} onOpenChange={(o) => { setShowCancelDialog(o); if (!o) setCancelEmail(""); }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="font-serif">Cancel Booking?</DialogTitle>
             <DialogDescription className="font-sans">
-              Are you sure you want to cancel booking <strong>{result?.reference_code}</strong>?
+              For your security, confirm the email used to book <strong>{result?.reference_code}</strong>.
               This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
+          <div className="py-2">
+            <Input
+              type="email"
+              value={cancelEmail}
+              onChange={(e) => setCancelEmail(e.target.value)}
+              placeholder="email@example.com"
+              autoComplete="email"
+            />
+          </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCancelDialog(false)}>Keep Booking</Button>
-            <Button variant="destructive" onClick={handleCancel} disabled={cancelling}>
+            <Button variant="destructive" onClick={handleCancel} disabled={cancelling || !cancelEmail.trim()}>
               {cancelling ? "Cancelling…" : "Yes, Cancel Booking"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
     </section>
   );
 }
