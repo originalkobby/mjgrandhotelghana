@@ -25,6 +25,9 @@ const AMENITY_ICONS: Record<string, React.ElementType> = {
   "Flat Screen TV": Tv,
 };
 
+const PUBLIC_ROOM_COLUMNS =
+  "id, name, slug, description, size_sqm, bed_type, max_adults, max_children, base_price_ghs, amenities, images, sort_order, is_active, total_units";
+
 interface RoomData {
   id: string;
   name: string;
@@ -64,7 +67,7 @@ export default function RoomSelectionStep({ search, onSelect, onBack }: Props) {
 
     const { data: roomsData } = await supabase
       .from("rooms")
-      .select("*")
+      .select(PUBLIC_ROOM_COLUMNS)
       .eq("is_active", true)
       .order("sort_order");
 
