@@ -22,8 +22,8 @@ export default function RateRefreshIndicator() {
   const remainingSeconds = Math.min(ttlSeconds, Math.ceil(remainingMs / 1000));
   const progress = Math.min(1, remainingMs / ttlMs);
 
-  const size = 28;
-  const stroke = 2.5;
+  const size = 20;
+  const stroke = 2;
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
   const dashOffset = circumference * (1 - progress);
@@ -69,7 +69,7 @@ export default function RateRefreshIndicator() {
             className="transition-all duration-500"
           />
         </svg>
-        <span className="absolute inset-0 flex items-center justify-center text-[9px] font-medium text-foreground tabular-nums">
+        <span className="absolute inset-0 flex items-center justify-center text-[7px] font-medium text-foreground tabular-nums">
           {remainingSeconds}
         </span>
       </div>
