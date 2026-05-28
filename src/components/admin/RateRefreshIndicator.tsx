@@ -45,6 +45,10 @@ export default function RateRefreshIndicator() {
       className="flex items-center gap-2 text-[11px] text-muted-foreground font-sans"
       title={`Currency conversion updates every ${ttlSeconds} seconds`}
     >
+      <span className="hidden md:inline tabular-nums">
+        {dateLabel} {timeLabel}
+      </span>
+      <span className="md:hidden tabular-nums">{timeLabel}</span>
       <div className="relative shrink-0" style={{ width: size, height: size }}>
         <svg width={size} height={size} className="-rotate-90">
           <circle
@@ -72,10 +76,7 @@ export default function RateRefreshIndicator() {
           {remainingSeconds}
         </span>
       </div>
-      <span className="hidden md:inline tabular-nums">
-        {dateLabel} {timeLabel}
-      </span>
-      <span className="md:hidden tabular-nums">{timeLabel}</span>
+
     </div>
   );
 }
