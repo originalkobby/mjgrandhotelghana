@@ -590,15 +590,6 @@ export default function Bookings() {
         </Select>
         <Button
           variant="outline"
-          size="icon"
-          onClick={() => queryClient.invalidateQueries({ queryKey: ["admin-bookings"] })}
-          disabled={refreshing}
-          title="Refresh bookings"
-        >
-          <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-        </Button>
-        <Button
-          variant="outline"
           size="sm"
           onClick={exportCSV}
           disabled={bookings.length === 0}

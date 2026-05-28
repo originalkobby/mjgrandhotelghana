@@ -1,9 +1,10 @@
-## Remove the refresh button
+## Remove refresh button on Bookings page
 
-Delete the outlined refresh icon button next to the date range on the admin Dashboard header.
+**File:** `src/pages/admin/Bookings.tsx`
 
-### Changes
-- **`src/pages/admin/Overview.tsx`** — Remove the `<Button>` (lines 202-210) that triggers `queryClient.invalidateQueries`. Remove the now-unused `RefreshCw` import and the `refreshing` variable if no other references remain.
+- Delete the `<Button>` (lines 591–599) that triggers `queryClient.invalidateQueries` with the `RefreshCw` icon.
+- Remove `RefreshCw` from the `lucide-react` import if no other usages remain.
+- Remove the `refreshing` variable and `isFetching` from the `useQuery` destructuring if they're no longer referenced.
+- Remove the `queryClient` / `useQueryClient` import if it becomes unused.
 
-### Notes
-Data will still refresh on the existing React Query intervals/refetch triggers; only the manual refresh control is removed.
+Data will continue to refresh via existing React Query polling/refetch triggers.
