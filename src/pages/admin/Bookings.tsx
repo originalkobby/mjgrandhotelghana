@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef } from "react";
 import { StickyHorizontalScrollbar } from "@/components/ui/StickyHorizontalScrollbar";
 import { motion } from "framer-motion";
-import { Search, Filter, RefreshCw, Download, CreditCard, Trash2, X } from "lucide-react";
+import { Search, Filter, Download, CreditCard, Trash2, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   AlertDialog,
@@ -183,7 +183,7 @@ export default function Bookings() {
   const isAdmin = role === "admin";
   const tableScrollRef = useRef<HTMLDivElement>(null);
 
-  const { data: allBookings = [], isLoading: loading, isFetching } = useQuery({
+  const { data: allBookings = [], isLoading: loading } = useQuery({
     queryKey: ["admin-bookings", statusFilter, sourceFilter],
     queryFn: () => fetchBookings(statusFilter, sourceFilter),
     staleTime: 30_000,
@@ -539,7 +539,7 @@ export default function Bookings() {
     URL.revokeObjectURL(url);
   };
 
-  const refreshing = loading || isFetching;
+  
 
   return (
     <div className="space-y-6">
@@ -588,15 +588,6 @@ export default function Bookings() {
             ))}
           </SelectContent>
         </Select>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => queryClient.invalidateQueries({ queryKey: ["admin-bookings"] })}
-          disabled={refreshing}
-          title="Refresh bookings"
-        >
-          <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-        </Button>
         <Button
           variant="outline"
           size="sm"
