@@ -1,5 +1,5 @@
 const RATE_CACHE_KEY = "mj_usd_ghs_rate";
-export const RATE_CACHE_TTL = 3600_000; // 1 hour
+export const RATE_CACHE_TTL = 60_000; // 60 seconds
 
 interface CachedRate {
   rate: number;

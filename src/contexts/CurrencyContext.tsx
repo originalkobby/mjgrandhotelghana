@@ -31,12 +31,16 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
-    fetchUsdToGhsRate()
-      .then((r) => {
-        setRate(r.rate);
-        setFetchedAt(r.fetchedAt);
-      })
-      .finally(() => setLoading(false));
+    const load = () =>
+      fetchUsdToGhsRate()
+        .then((r) => {
+          setRate(r.rate);
+          setFetchedAt(r.fetchedAt);
+        })
+        .finally(() => setLoading(false));
+    load();
+    const id = setInterval(load, RATE_CACHE_TTL);
+    return () => clearInterval(id);
   }, []);
 
   const handleSetAdminMode = (mode: "usd" | "ghs") => {
