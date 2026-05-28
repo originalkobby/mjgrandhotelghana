@@ -9,7 +9,7 @@ interface UseBookingLifecycleSyncOptions {
 
 export function useBookingLifecycleSync({
   enabled = true,
-  intervalMs = 30_000,
+  intervalMs = 60_000,
   onSynced,
 }: UseBookingLifecycleSyncOptions = {}) {
   useEffect(() => {
