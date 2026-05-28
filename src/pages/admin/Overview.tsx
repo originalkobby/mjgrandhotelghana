@@ -7,11 +7,11 @@ import {
   CalendarCheck,
   ArrowUpRight,
   ArrowDownRight,
-  RefreshCw,
+  
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { format, subDays, startOfMonth, endOfMonth } from "date-fns";
@@ -142,7 +142,7 @@ export default function Overview() {
   const [dateFrom, setDateFrom] = useState(format(startOfMonth(now), "yyyy-MM-dd"));
   const [dateTo, setDateTo] = useState(format(endOfMonth(now), "yyyy-MM-dd"));
 
-  const { data, isLoading, isFetching } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["admin-overview", dateFrom, dateTo],
     queryFn: () => fetchOverviewData(dateFrom, dateTo),
     staleTime: 60_000,
@@ -154,7 +154,7 @@ export default function Overview() {
 
   const chartData = data?.chartData ?? [];
   const recentBookings = data?.recentBookings ?? [];
-  const refreshing = isLoading || isFetching;
+  
 
   const kpis: KPI[] = data ? [
     { label: "Total Revenue", value: fc(data.totalRevenue), change: data.pctChange(data.totalRevenue, data.prevRevenue), icon: DollarSign },
@@ -199,15 +199,6 @@ export default function Overview() {
             onChange={(e) => setDateTo(e.target.value)}
             className="w-36 text-xs"
           />
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => queryClient.invalidateQueries({ queryKey: ["admin-overview"] })}
-            disabled={refreshing}
-            title="Refresh dashboard"
-          >
-            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-          </Button>
         </div>
       </div>
 
