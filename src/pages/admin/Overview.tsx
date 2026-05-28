@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { format, subDays, startOfMonth, endOfMonth } from "date-fns";
@@ -142,7 +142,7 @@ export default function Overview() {
   const [dateFrom, setDateFrom] = useState(format(startOfMonth(now), "yyyy-MM-dd"));
   const [dateTo, setDateTo] = useState(format(endOfMonth(now), "yyyy-MM-dd"));
 
-  const { data, isLoading, isFetching } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["admin-overview", dateFrom, dateTo],
     queryFn: () => fetchOverviewData(dateFrom, dateTo),
     staleTime: 60_000,
