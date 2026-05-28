@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { Button } from "@/components/ui/button";
 import { DollarSign } from "lucide-react";
+import RateRefreshIndicator from "@/components/admin/RateRefreshIndicator";
 
 export default function AdminLayout() {
   const { user, role, loading } = useAdminAuth();
