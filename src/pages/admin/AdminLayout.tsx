@@ -67,7 +67,9 @@ export default function AdminLayout() {
                 </span>
                 <NotificationBell />
               </div>
-              <RateRefreshIndicator />
+              <div className="pr-[10px]">
+                <RateRefreshIndicator />
+              </div>
             </div>
           </header>
           <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
