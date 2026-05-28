@@ -65,11 +65,10 @@ export default function AdminLayout() {
                 <span className="text-[10px] text-muted-foreground font-sans hidden sm:inline">
                   1 USD = {rate.toFixed(2)} GHS
                 </span>
+                <NotificationBell />
               </div>
               <RateRefreshIndicator />
             </div>
-
-            <NotificationBell />
           </header>
           <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
             <Outlet />
