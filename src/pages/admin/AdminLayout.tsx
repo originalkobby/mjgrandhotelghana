@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { Button } from "@/components/ui/button";
 import { DollarSign } from "lucide-react";
+import RateRefreshIndicator from "@/components/admin/RateRefreshIndicator";
 
 export default function AdminLayout() {
   const { user, role, loading } = useAdminAuth();
@@ -40,28 +41,33 @@ export default function AdminLayout() {
             <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
             <span className="font-serif text-lg text-foreground flex-1">Booking Command Center</span>
 
-            {/* Currency Toggle */}
-            <div className="flex items-center gap-1 bg-secondary rounded-lg p-0.5">
-              <Button
-                variant={adminMode === "usd" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setAdminMode("usd")}
-                className="h-7 px-2.5 text-xs font-sans gap-1"
-              >
-                <DollarSign className="w-3 h-3" /> USD
-              </Button>
-              <Button
-                variant={adminMode === "ghs" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setAdminMode("ghs")}
-                className="h-7 px-2.5 text-xs font-sans"
-              >
-                GH₵
-              </Button>
+            {/* Currency Toggle + Refresh Indicator */}
+            <div className="flex flex-col items-end gap-1">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 bg-secondary rounded-lg p-0.5">
+                  <Button
+                    variant={adminMode === "usd" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setAdminMode("usd")}
+                    className="h-7 px-2.5 text-xs font-sans gap-1"
+                  >
+                    <DollarSign className="w-3 h-3" /> USD
+                  </Button>
+                  <Button
+                    variant={adminMode === "ghs" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setAdminMode("ghs")}
+                    className="h-7 px-2.5 text-xs font-sans"
+                  >
+                    GH₵
+                  </Button>
+                </div>
+                <span className="text-[10px] text-muted-foreground font-sans hidden sm:inline">
+                  1 USD = {rate.toFixed(2)} GHS
+                </span>
+              </div>
+              <RateRefreshIndicator />
             </div>
-            <span className="text-[10px] text-muted-foreground font-sans hidden sm:inline">
-              1 USD = {rate.toFixed(2)} GHS
-            </span>
 
             <NotificationBell />
           </header>

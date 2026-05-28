@@ -1,20 +1,25 @@
 const RATE_CACHE_KEY = "mj_usd_ghs_rate";
-const RATE_CACHE_TTL = 3600_000; // 1 hour
+export const RATE_CACHE_TTL = 3600_000; // 1 hour
 
 interface CachedRate {
   rate: number;
   fetchedAt: number;
 }
 
+export interface RateResult {
+  rate: number;
+  fetchedAt: number;
+}
+
 /** Fetch live USD → GHS rate with localStorage caching */
-export async function fetchUsdToGhsRate(): Promise<number> {
+export async function fetchUsdToGhsRate(): Promise<RateResult> {
   // Check cache first
   try {
     const cached = localStorage.getItem(RATE_CACHE_KEY);
     if (cached) {
       const parsed: CachedRate = JSON.parse(cached);
       if (Date.now() - parsed.fetchedAt < RATE_CACHE_TTL) {
-        return parsed.rate;
+        return { rate: parsed.rate, fetchedAt: parsed.fetchedAt };
       }
     }
   } catch {}
@@ -24,18 +29,19 @@ export async function fetchUsdToGhsRate(): Promise<number> {
     const data = await res.json();
     if (data?.rates?.GHS) {
       const rate = data.rates.GHS;
+      const fetchedAt = Date.now();
       localStorage.setItem(
         RATE_CACHE_KEY,
-        JSON.stringify({ rate, fetchedAt: Date.now() })
+        JSON.stringify({ rate, fetchedAt })
       );
-      return rate;
+      return { rate, fetchedAt };
     }
   } catch (err) {
     console.error("Failed to fetch exchange rate:", err);
   }
 
   // Fallback rate
-  return 16;
+  return { rate: 16, fetchedAt: Date.now() };
 }
 
 /** Convert USD to GHS */

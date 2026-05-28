@@ -1,29 +1,26 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
-import { fetchUsdToGhsRate, formatUsd, formatGhs, formatCurrency as formatCurrencyUtil, usdToGhs } from "@/lib/currency";
+import { fetchUsdToGhsRate, formatUsd, formatGhs, formatCurrency as formatCurrencyUtil, RATE_CACHE_TTL } from "@/lib/currency";
 
 interface CurrencyContextValue {
-  /** Live USD → GHS exchange rate */
   rate: number;
-  /** Whether rate is still loading */
   loading: boolean;
-  /** Admin dashboard display mode */
+  /** Timestamp (ms) when current rate was fetched */
+  fetchedAt: number | null;
+  /** TTL in ms before rate refreshes */
+  ttlMs: number;
   adminMode: "usd" | "ghs";
-  /** Toggle admin dashboard currency */
   setAdminMode: (mode: "usd" | "ghs") => void;
-  /** Format GHS amount as USD */
   toUsd: (ghsAmount: number) => string;
-  /** Format GHS amount as GH₵ */
   toGhs: (ghsAmount: number) => string;
-  /** Format based on admin mode setting */
   format: (ghsAmount: number) => string;
-  /** Get raw USD number from GHS */
   convertToUsd: (ghsAmount: number) => number;
 }
 
 const CurrencyContext = createContext<CurrencyContextValue | null>(null);
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
-  const [rate, setRate] = useState(16); // fallback
+  const [rate, setRate] = useState(16);
+  const [fetchedAt, setFetchedAt] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [adminMode, setAdminMode] = useState<"usd" | "ghs">(() => {
     try {
@@ -35,7 +32,10 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     fetchUsdToGhsRate()
-      .then(setRate)
+      .then((r) => {
+        setRate(r.rate);
+        setFetchedAt(r.fetchedAt);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -49,12 +49,14 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   const value: CurrencyContextValue = {
     rate,
     loading,
+    fetchedAt,
+    ttlMs: RATE_CACHE_TTL,
     adminMode,
     setAdminMode: handleSetAdminMode,
     toUsd: (amount: number) => formatUsd(amount),
     toGhs: (amount: number) => formatGhs(amount, rate),
     format: (amount: number) => formatCurrencyUtil(amount, rate, adminMode),
-    convertToUsd: (amount: number) => amount, // already USD
+    convertToUsd: (amount: number) => amount,
   };
 
   return (
