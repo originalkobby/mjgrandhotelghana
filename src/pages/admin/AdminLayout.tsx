@@ -42,33 +42,32 @@ export default function AdminLayout() {
             <span className="font-serif text-lg text-foreground flex-1">Booking Command Center</span>
 
             {/* Currency Toggle + Refresh Indicator */}
-            <div className="flex flex-col items-end gap-1">
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1 bg-secondary rounded-lg p-0.5">
-                  <Button
-                    variant={adminMode === "usd" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setAdminMode("usd")}
-                    className="h-7 px-2.5 text-xs font-sans gap-1"
-                  >
-                    <DollarSign className="w-3 h-3" /> USD
-                  </Button>
-                  <Button
-                    variant={adminMode === "ghs" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setAdminMode("ghs")}
-                    className="h-7 px-2.5 text-xs font-sans"
-                  >
-                    GH₵
-                  </Button>
-                </div>
-                <span className="text-[10px] text-muted-foreground font-sans hidden sm:inline">
-                  1 USD = {rate.toFixed(2)} GHS
-                </span>
-                <NotificationBell />
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 bg-secondary rounded-lg p-0.5">
+                <Button
+                  variant={adminMode === "usd" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setAdminMode("usd")}
+                  className="h-7 px-2.5 text-xs font-sans gap-1"
+                >
+                  <DollarSign className="w-3 h-3" /> USD
+                </Button>
+                <Button
+                  variant={adminMode === "ghs" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setAdminMode("ghs")}
+                  className="h-7 px-2.5 text-xs font-sans"
+                >
+                  GH₵
+                </Button>
               </div>
+              <span className="text-[10px] text-muted-foreground font-sans hidden sm:inline">
+                1 USD = {rate.toFixed(2)} GHS
+              </span>
               <RateRefreshIndicator />
+              <NotificationBell />
             </div>
+
           </header>
           <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
             <Outlet />
