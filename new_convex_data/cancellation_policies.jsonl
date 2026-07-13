@@ -1,0 +1,2 @@
+{"id": "afc16e54-b47a-4339-b954-bfc544268e73", "name": "Flexible", "description": "Free cancellation up to 48 hours before check-in. Full refund.", "refund_percentage": 100, "deadline_hours": 48, "is_default": true, "supabase_id": "afc16e54-b47a-4339-b954-bfc544268e73"}
+{"id": "e99a6089-9c0a-49e3-85ab-7ee6e9044665", "name": "Non-Refundable", "description": "No refund upon cancellation. Best rate guaranteed.", "refund_percentage": 0, "deadline_hours": 0, "is_default": false, "supabase_id": "e99a6089-9c0a-49e3-85ab-7ee6e9044665"}
