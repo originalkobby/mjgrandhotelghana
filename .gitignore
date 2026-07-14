@@ -1,1 +1,10 @@
-node_modules/ 
+node_modules
+.env
+.env.*
+dist
+.DS_Store
+.agents
+.claude
+.lovable
+# Ensure HTML files are NOT ignored
+!index.html
