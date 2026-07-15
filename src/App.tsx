@@ -1,30 +1,30 @@
 import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { CurrencyProvider } from "./contexts/CurrencyContext.tsx";
-import { ConvexClientProvider } from "./components/ConvexClientProvider.tsx";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { CurrencyProvider } from "@/contexts/CurrencyContext.tsx";
+import { ConvexClientProvider } from "@/components/ConvexClientProvider.tsx";
 import { ClerkProvider } from "@clerk/clerk-react";
 
-import Index from "./pages/Index.tsx";
-import { ScrollToTop } from "./components/ScrollToTop.tsx";
+import Index from "@/pages/Index.tsx";
+import { ScrollToTop } from "@/components/ScrollToTop.tsx";
 
 // Public pages
-const Menu = lazy(() => import("./pages/Menu.tsx"));
-const Dining = lazy(() => import("./pages/Dining.tsx"));
-const Policy = lazy(() => import("./pages/Policy.tsx"));
-const About = lazy(() => import("./pages/About.tsx"));
-const Booking = lazy(() => import("./pages/Booking.tsx"));
-const NotFound = lazy(() => import("./pages/NotFound.tsx"));
-const GuestServices = lazy(() => import("./pages/GuestServices.tsx"));
-const GalleryPage = lazy(() => import("./pages/GalleryPage.tsx"));
+const Menu = lazy(() => import("@/pages/Menu.tsx"));
+const Dining = lazy(() => import("@/pages/Dining.tsx"));
+const Policy = lazy(() => import("@/pages/Policy.tsx"));
+const About = lazy(() => import("@/pages/About.tsx"));
+const Booking = lazy(() => import("@/pages/Booking.tsx"));
+const NotFound = lazy(() => import("@/pages/NotFound.tsx"));
+const GuestServices = lazy(() => import("@/pages/GuestServices.tsx"));
+const GalleryPage = lazy(() => import("@/pages/GalleryPage.tsx"));
 
 // Admin
-const AdminLogin = lazy(() => import("./pages/admin/Login.tsx"));
-const AdminLayout = lazy(() => import("./pages/admin/AdminLayout.tsx"));
-const Overview = lazy(() => import("./pages/admin/Overview.tsx"));
+const AdminLogin = lazy(() => import("@/pages/admin/Login.tsx"));
+const AdminLayout = lazy(() => import("@/pages/admin/AdminLayout.tsx"));
+const Overview = lazy(() => import("@/pages/admin/Overview.tsx"));
 
 // Components
-const MJChat = lazy(() => import("./components/MJChat.tsx"));
+const MJChat = lazy(() => import("@/components/MJChat.tsx"));
 
 const queryClient = new QueryClient();
 const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
