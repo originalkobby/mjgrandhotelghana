@@ -8,18 +8,18 @@ import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import { ClerkProvider } from "@clerk/clerk-react";
 
-import Index from "./pages/Index";
+import Index from "./pages/Index.tsx";
 import { ScrollToTop } from "./components/ScrollToTop";
 
 // Public pages — lazy-loaded so the homepage ships a smaller initial bundle.
-const Menu = lazy(() => import("./pages/Menu"));
-const Dining = lazy(() => import("./pages/Dining"));
-const Policy = lazy(() => import("./pages/Policy"));
-const About = lazy(() => import("./pages/About"));
-const Booking = lazy(() => import("./pages/Booking"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-const GuestServices = lazy(() => import("./pages/GuestServices"));
-const GalleryPage = lazy(() => import("./pages/GalleryPage"));
+const Menu = lazy(() => import("./pages/Menu.tsx"));
+const Dining = lazy(() => import("./pages/Dining.tsx"));
+const Policy = lazy(() => import("./pages/Policy.tsx"));
+const About = lazy(() => import("./pages/About.tsx"));
+const Booking = lazy(() => import("./pages/Booking.tsx"));
+const NotFound = lazy(() => import("./pages/NotFound.tsx"));
+const GuestServices = lazy(() => import("./pages/GuestServices.tsx"));
+const GalleryPage = lazy(() => import("./pages/GalleryPage.tsx"));
 
 // Admin (always lazy — never needed for public visitors).
 const AdminLogin = lazy(() => import("./pages/admin/Login"));
