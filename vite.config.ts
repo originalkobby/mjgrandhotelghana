@@ -2,30 +2,15 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 
-export default defineConfig(({ mode }) => ({
-  root: "./",
-  server: {
-    host: "::",
-    port: 8080,
-  },
-  plugins: [
-    react(),
-  ],
-  optimizeDeps: {
-    exclude: ["convex/server"],
-  },
+export default defineConfig({
+  plugins: [react()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "convex/server": path.resolve(__dirname, "./src/convex-stub.js"),
     },
   },
   build: {
     outDir: "dist",
-    emptyOutDir: true,
-    rollupOptions: {
-      input: {
-        main: path.resolve(__dirname, "./index.html"),
-      },
-    },
   },
-}));
+});
