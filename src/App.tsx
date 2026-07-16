@@ -36,7 +36,7 @@ const App = () => (
         <CurrencyProvider>
           <BrowserRouter>
             <ScrollToTop />
-            <Suspense fallback={<div>Loading...</div>}>
+            <Suspense fallback={<div className="min-h-screen bg-background" />}>
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/menu" element={<Menu />} />
