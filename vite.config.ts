@@ -7,7 +7,6 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      "convex/server": path.resolve(__dirname, "./src/convex-stub.js"),
     },
   },
   build: {

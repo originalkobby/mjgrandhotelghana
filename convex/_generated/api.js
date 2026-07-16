@@ -1,4 +1,15 @@
 /* eslint-disable */
-import { anyApi } from "convex/server";
-export const api = anyApi;
-export const internal = anyApi;
+/**
+ * Generated `api` utility.
+ */
+const makeAnyApi = () => {
+  return new Proxy({}, {
+    get(target, prop) {
+      if (prop === 'components') return () => makeAnyApi();
+      return makeAnyApi();
+    }
+  });
+};
+
+export const api = makeAnyApi();
+export const internal = makeAnyApi();
