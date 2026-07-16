@@ -11,6 +11,9 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
   ],
+  optimizeDeps: {
+    exclude: ["convex/server"],
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
