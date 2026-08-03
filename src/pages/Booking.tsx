@@ -31,7 +31,6 @@ const Booking = () => {
     goNext,
     goBack,
     currentStepIndex,
-    steps,
   } = useBooking();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
