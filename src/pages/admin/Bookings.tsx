@@ -919,7 +919,7 @@ export default function Bookings() {
 
               <div>
                 <p className="text-xs uppercase tracking-wider mb-2 text-muted-foreground">Update Status</p>
-                <Select value={newStatus} onValueChange={(v) => setNewStatus(v as BookingStatus)}>
+                <Select value={newStatus} onValueChange={(v: string) => setNewStatus(v as BookingStatus)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -960,7 +960,7 @@ export default function Bookings() {
 
 
       {/* Record Payment Dialog */}
-      <Dialog open={showPaymentDialog} onOpenChange={(o) => { if (!o) { setShowPaymentDialog(false); setPaymentBooking(null); } }}>
+      <Dialog open={showPaymentDialog} onOpenChange={(o: boolean) => { if (!o) { setShowPaymentDialog(false); setPaymentBooking(null); } }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="font-serif flex items-center gap-2">
@@ -985,7 +985,7 @@ export default function Bookings() {
                 step="0.01"
                 min="0"
                 value={paymentAmount}
-                onChange={(e) => setPaymentAmount(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPaymentAmount(e.target.value)}
                 placeholder="e.g. 500"
                 className="mt-1"
               />
@@ -1011,7 +1011,7 @@ export default function Bookings() {
       </Dialog>
 
       {/* Bulk Delete Confirmation Dialog (admin only) */}
-      <AlertDialog open={bulkDeleteOpen} onOpenChange={(o) => { if (!o && !deleting) setBulkDeleteOpen(false); }}>
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={(o: boolean) => { if (!o && !deleting) setBulkDeleteOpen(false); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="font-serif">
@@ -1030,7 +1030,7 @@ export default function Bookings() {
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={(e) => { e.preventDefault(); handleBulkDelete(); }}
+              onClick={(e: React.MouseEvent) => { e.preventDefault(); handleBulkDelete(); }}
               disabled={deleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
