@@ -16,3 +16,12 @@ export const listActiveRooms = query({
       .collect();
   },
 });
+
+export const listActiveAddOns = query({
+  handler: async (ctx) => {
+    return await ctx.db
+      .query("add_ons")
+      .filter((q) => q.eq(q.field("is_active"), true))
+      .collect();
+  },
+});
