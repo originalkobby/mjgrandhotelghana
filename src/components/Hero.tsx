@@ -1,8 +1,6 @@
 import { motion } from "framer-motion";
 
 import { useRef, useEffect } from "react";
-import fathersDayFlyer from "@/assets/fathers-day-banquet.jpg.asset.json";
-
 
 const Hero = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
