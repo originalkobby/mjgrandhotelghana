@@ -1,103 +1,207 @@
-import { useEffect, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
-import { Menu, X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Menu, X, ArrowLeft } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import logo from "@/assets/logo.png";
 
-const links = [
-  { to: "/", label: "Home" },
-  { to: "/about", label: "About" },
-  { to: "/dining", label: "Dining" },
-  { to: "/menu", label: "Menu" },
-  { to: "/gallery", label: "Gallery" },
-  { to: "/guest-services", label: "Guest Services" },
+const allNavItems = [
+  { label: "About", href: "/about", isHash: false, homeOnly: false },
+  { label: "Rooms & Suites", href: "#rooms", isHash: true, homeOnly: true },
+  { label: "Dining", href: "/dining", isHash: false, homeOnly: false },
+  { label: "Menu", href: "/menu", isHash: false, homeOnly: false, diningOnly: true },
+  { label: "Guest Services", href: "/guest-services", isHash: false, homeOnly: false },
 ];
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
-  const [open, setOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const location = useLocation();
+  const isHome = location.pathname === "/";
+
+  const navItems = isHome
+    ? allNavItems.filter((item) => !item.diningOnly)
+    : [
+        { label: "Back to Home", href: "/", isHash: false, homeOnly: false },
+        ...allNavItems.filter((item) => {
+          if (item.homeOnly) return false;
+          if (item.href === location.pathname) return false;
+          if (item.label === "Menu" && location.pathname !== "/dining") return false;
+          return true;
+        }),
+      ];
+
+  // Pages with dark hero backgrounds where cream text works
+  const isDarkHeroPage = location.pathname === "/" || location.pathname === "/dining" || location.pathname === "/about" || location.pathname === "/guest-services" || location.pathname === "/menu" || location.pathname === "/policy";
+  // Use light text only when not scrolled AND not on dark hero page (glass-nav is always dark, so needs light text when scrolled)
+  const useLight = !scrolled && !isDarkHeroPage;
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
+    const onScroll = () => setScrolled(window.scrollY > 60);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   return (
-    <header
-      className={cn(
-        "fixed top-0 inset-x-0 z-50 transition-all duration-500",
-        scrolled
-          ? "bg-background/90 backdrop-blur-md border-b border-border py-3"
-          : "bg-gradient-to-b from-black/50 to-transparent py-5"
-      )}
-    >
-      <div className="container flex items-center justify-between">
-        <Link
-          to="/"
-          className={cn(
-            "font-serif text-xl md:text-2xl tracking-wide transition-colors",
-            scrolled ? "text-foreground" : "text-white"
-          )}
-        >
-          MJ <span className="text-accent">Grand</span> Hotel
-        </Link>
-
-        <nav className="hidden lg:flex items-center gap-8">
-          {links.map((l) => (
-            <NavLink
-              key={l.to}
-              to={l.to}
-              className={({ isActive }) =>
-                cn(
-                  "text-sm tracking-wide transition-colors hover:text-accent",
-                  scrolled ? "text-muted-foreground" : "text-white/85",
-                  isActive && "text-accent"
-                )
-              }
-            >
-              {l.label}
-            </NavLink>
-          ))}
-          <Link
-            to="/booking"
-            className="rounded-full bg-accent px-6 py-2.5 text-sm font-medium text-accent-foreground transition-transform hover:scale-[1.03]"
-          >
-            Book Now
-          </Link>
-        </nav>
-
-        <button
-          aria-label="Toggle menu"
-          onClick={() => setOpen((v) => !v)}
-          className={cn("lg:hidden", scrolled ? "text-foreground" : "text-white")}
-        >
-          {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
-      </div>
-
-      {open && (
-        <nav className="lg:hidden mt-3 border-t border-border bg-background px-6 py-4 space-y-3">
-          {links.map((l) => (
-            <Link
-              key={l.to}
-              to={l.to}
-              onClick={() => setOpen(false)}
-              className="block text-sm text-muted-foreground hover:text-accent"
-            >
-              {l.label}
+    <>
+      <motion.nav
+        initial={{ y: -80 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+          scrolled ? "glass-nav py-3 shadow-lg" : "bg-transparent py-5"
+        }`}
+      >
+        <div className="container mx-auto flex items-center justify-between px-2 lg:px-4">
+          <div className="flex items-center gap-6">
+            <Link to="/" className="flex items-center">
+              <img src={logo} alt="MJ Grand Hotel" className="h-7 w-auto" />
             </Link>
-          ))}
-          <Link
-            to="/booking"
-            onClick={() => setOpen(false)}
-            className="block rounded-full bg-accent px-6 py-2.5 text-center text-sm font-medium text-accent-foreground"
+            {!isHome && (
+              <Link
+                to="/"
+                className={`hidden lg:flex items-center gap-1.5 text-sm font-sans font-medium tracking-wide transition-colors duration-300 ${
+                  useLight ? "text-foreground/80 hover:text-foreground" : "text-cream/80 hover:text-cream"
+                }`}
+              >
+                <ArrowLeft size={16} />
+                BACK TO HOME
+              </Link>
+            )}
+          </div>
+
+          {/* Desktop nav */}
+          <div className="hidden lg:flex items-center gap-12">
+            {navItems.filter(item => item.label !== "Back to Home").map((item) =>
+              item.isHash ? (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  className={`group relative text-xs font-sans font-semibold uppercase tracking-[0.2em] transition-colors duration-300 ${
+                    useLight ? "text-foreground/80 hover:text-foreground" : "text-cream/80 hover:text-cream"
+                  }`}
+                >
+                  {item.label}
+                  <span className="absolute -bottom-1 left-0 h-[1.5px] w-0 bg-gold transition-all duration-300 ease-[cubic-bezier(0.3,0,0.2,1)] group-hover:w-full" />
+                </a>
+              ) : (
+                <Link
+                  key={item.label}
+                  to={item.href}
+                  className={`group relative text-xs font-sans font-semibold uppercase tracking-[0.2em] transition-colors duration-300 ${
+                    useLight ? "text-foreground/80 hover:text-foreground" : "text-cream/80 hover:text-cream"
+                  }`}
+                >
+                  {item.label}
+                  <span className="absolute -bottom-1 left-0 h-[1.5px] w-0 bg-gold transition-all duration-300 ease-[cubic-bezier(0.3,0,0.2,1)] group-hover:w-full" />
+                </Link>
+              )
+            )}
+            <Link
+              to="/booking"
+              className={`ml-4 border border-gold/60 px-6 py-2 text-xs font-sans font-semibold uppercase tracking-[0.2em] transition-all duration-300 ${
+                useLight ? "text-foreground hover:bg-gold hover:text-charcoal" : "text-cream hover:bg-gold hover:text-charcoal"
+              }`}
+            >
+              Book Now
+            </Link>
+          </div>
+
+          {/* Mobile toggle */}
+          <button
+            onClick={() => setMobileOpen(true)}
+            className={`lg:hidden ${useLight ? "text-foreground" : "text-cream"}`}
+            aria-label="Open menu"
           >
-            Book Now
-          </Link>
-        </nav>
-      )}
-    </header>
+            <Menu size={24} />
+          </button>
+        </div>
+      </motion.nav>
+
+      {/* Mobile menu */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[60] bg-overlay-heavy"
+              onClick={() => setMobileOpen(false)}
+            />
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ duration: 0.4, ease: [0.3, 0, 0.2, 1] }}
+              className="fixed top-0 right-0 bottom-0 z-[70] w-80 bg-charcoal flex flex-col p-8"
+            >
+              <button
+                onClick={() => setMobileOpen(false)}
+                className="self-end text-cream mb-12"
+                aria-label="Close menu"
+              >
+                <X size={24} />
+              </button>
+              <div className="flex flex-col gap-6">
+                {!isHome && (
+                  <Link
+                    to="/"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-1.5 font-serif text-2xl text-cream/80 hover:text-gold transition-colors duration-300"
+                  >
+                    <ArrowLeft size={20} />
+                    Back to home
+                  </Link>
+                )}
+                {navItems.filter(item => item.label !== "Back to Home").map((item, i) =>
+                  item.isHash ? (
+                    <motion.a
+                      key={item.label}
+                      href={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      initial={{ opacity: 0, x: 30 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 + i * 0.06 }}
+                      className="font-serif text-2xl text-cream/80 hover:text-gold transition-colors duration-300"
+                    >
+                      {item.label}
+                    </motion.a>
+                  ) : (
+                    <motion.div
+                      key={item.label}
+                      initial={{ opacity: 0, x: 30 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 + i * 0.06 }}
+                    >
+                      <Link
+                        to={item.href}
+                        onClick={() => setMobileOpen(false)}
+                        className="font-serif text-2xl text-cream/80 hover:text-gold transition-colors duration-300 block"
+                      >
+                        {item.label}
+                      </Link>
+                    </motion.div>
+                  )
+                )}
+                <motion.div
+                  initial={{ opacity: 0, x: 30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  <Link
+                    to="/booking"
+                    onClick={() => setMobileOpen(false)}
+                    className="mt-4 border border-gold/60 px-5 py-3 text-center font-sans font-medium tracking-wide text-cream hover:bg-gold hover:text-charcoal transition-all duration-300 block"
+                  >
+                    Book Now
+                  </Link>
+                </motion.div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 

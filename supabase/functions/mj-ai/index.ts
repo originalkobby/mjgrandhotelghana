@@ -4,8 +4,32 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.98.0";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+    "authorization, x-client-info, apikey, content-type, x-shared-secret, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+// --- In-memory rate limiting (per instance) ---
+// Prevents AI credit abuse, spam bookings, and enumeration via the anonymous chat endpoint.
+const RL_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const RL_MAX_REQUESTS = 20; // per IP per hour
+const rlMap = new Map<string, { count: number; resetAt: number }>();
+
+function getClientIp(req: Request): string {
+  const fwd = req.headers.get("x-forwarded-for");
+  if (fwd) return fwd.split(",")[0].trim();
+  return req.headers.get("cf-connecting-ip") || req.headers.get("x-real-ip") || "unknown";
+}
+
+function checkChatRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const entry = rlMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    rlMap.set(ip, { count: 1, resetAt: now + RL_WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= RL_MAX_REQUESTS) return false;
+  entry.count++;
+  return true;
+}
 
 const SYSTEM_PROMPT = `You are MJ, the AI Guest Experience Concierge for MJ Grand Hotel.
 
@@ -101,7 +125,7 @@ HOTEL KNOWLEDGE BASE — COMPLETE WEBSITE & DASHBOARD CONTENT
 === CURRENCY (READ FIRST — APPLIES TO EVERY PRICE) ===
 - Base display currency: USD ($)
 - Equivalent currency: Ghana Cedis (GH₵)
-- Live exchange rate: 1 USD = {LIVE_FX_RATE} GHS (refreshed hourly from open.er-api.com — same source as the website)
+- Fixed exchange rate: 1 USD = {LIVE_FX_RATE} GHS (fixed rate used across the entire system).
 - ROOM RATES are stored and quoted in USD on the website. Always present room rates as "$X (≈ GH₵ Y)" where Y = X × {LIVE_FX_RATE}.
 - The static restaurant menu below lists prices in GH₵ — convert each one on the fly to "$X (≈ GH₵ Y)" using the rate above (USD = GH₵ ÷ {LIVE_FX_RATE}, rounded).
 - Never quote a price in GH₵ alone unless the guest explicitly asks for cedis only.
@@ -547,8 +571,13 @@ BOOKING STATUSES:
 - Completed: Guest has checked out
 - No-show: Guest did not arrive
 
-=== ADD-ONS (available during booking) ===
-Guests can enhance their stay with optional add-ons when booking. Use the get_add_ons tool to show current options with prices. Common add-ons include airport pickup, spa treatments, and special arrangements.
+=== ADD-ONS (available during booking — LIVE from database) ===
+{DYNAMIC_ADDONS}
+
+Notes:
+- Early Check-in and Late Checkout are dynamically priced at 50% of the selected room's nightly rate (so the price depends on which room the guest books).
+- The Spa Package shown on the website is a starting point — at checkout guests can pick from 17 treatments (45/60/90 min) plus a Sauna option; quote the starting price and offer to detail the full menu.
+- Always quote add-on prices in the dual "$X (≈ GH₵ Y)" format using the live FX rate. Use the get_add_ons tool if you need the most current list mid-conversation.
 
 === WEBSITE NAVIGATION ===
 Pages available on the MJ Grand Hotel website:
@@ -776,7 +805,7 @@ function validateRequest(body: any): { valid: true; data: any } | { valid: false
     if (!msg.role || !["user", "assistant"].includes(msg.role)) {
       return { valid: false, error: "Invalid message role" };
     }
-    if (!msg.content || typeof msg.content !== "string") {
+    if (typeof msg.content !== "string") {
       return { valid: false, error: "Invalid message content" };
     }
     if (msg.content.length > 5000) {
@@ -995,19 +1024,29 @@ async function getAddOns(supabase: any) {
   }
 
   const fxRate = await getUsdToGhsRate();
-  const addOns = (data || []).map((a: any) => ({
-    ...a,
-    price_usd: ghsToUsd(Number(a.price_ghs), fxRate),
-    price_display: fmtPrice(Number(a.price_ghs), fxRate),
-  }));
+  const DYNAMIC_PRICED = new Set(["Early Check-in", "Late Checkout"]);
+  const addOns = (data || []).map((a: any) => {
+    // price_ghs column actually stores USD (matches the website's display convention)
+    const usd = Number(a.price_ghs);
+    const isDynamic = DYNAMIC_PRICED.has(a.name);
+    return {
+      ...a,
+      price_usd: usd,
+      price_display: isDynamic
+        ? "50% of the selected room's nightly rate"
+        : fmtPriceFromUsd(usd, fxRate) + (a.name === "Spa Package" ? " (starting price)" : ""),
+      dynamic_pricing: isDynamic,
+    };
+  });
 
   return {
     success: true,
     fx_rate_usd_to_ghs: fxRate,
-    currency_note: "Quote add-on prices to the guest as 'price_display' — USD primary with GH₵ equivalent.",
+    currency_note: "Quote add-on prices to the guest as 'price_display' — USD primary with GH₵ equivalent. Items with dynamic_pricing=true are priced at 50% of the selected room's nightly rate.",
     add_ons: addOns,
   };
 }
+
 
 async function createBooking(
   supabase: any,
@@ -1034,6 +1073,45 @@ async function createBooking(
     return { success: false, error: "Invalid dates" };
   }
 
+  // SECURITY: Re-fetch the authoritative nightly rate from the DB. The
+  // AI-supplied `args.nightly_rate` is IGNORED to prevent prompt-injection
+  // price manipulation. Rates come from room_inventory.rate_override or
+  // rooms.base_price_ghs — identical to the create-booking edge function.
+  const { data: room, error: roomErr } = await supabase
+    .from("rooms")
+    .select("id, base_price_ghs, is_active")
+    .eq("id", args.room_id)
+    .single();
+
+  if (roomErr || !room || !room.is_active) {
+    return { success: false, error: "Room not found or inactive" };
+  }
+
+  const dates: string[] = [];
+  const cursor = new Date(checkInDate);
+  while (cursor < checkOutDate) {
+    dates.push(cursor.toISOString().split("T")[0]);
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  const { data: inventory } = await supabase
+    .from("room_inventory")
+    .select("date, rate_override, booked_count, total_count, is_closed")
+    .eq("room_id", args.room_id)
+    .in("date", dates);
+
+  const invMap = new Map((inventory || []).map((i: any) => [i.date, i]));
+
+  let baseTotalUsd = 0;
+  for (const date of dates) {
+    const inv: any = invMap.get(date);
+    if (inv?.is_closed) return { success: false, error: `Room is closed on ${date}` };
+    if (inv && inv.booked_count >= inv.total_count) {
+      return { success: false, error: `Room not available on ${date}` };
+    }
+    baseTotalUsd += Number(inv?.rate_override ?? room.base_price_ghs);
+  }
+
   // Upsert guest
   const { data: guestData, error: guestError } = await supabase
     .from("guests")
@@ -1048,10 +1126,6 @@ async function createBooking(
     console.error("Guest upsert error:", guestError);
     return { success: false, error: "Unable to create guest record" };
   }
-
-  // nightly_rate is quoted in USD; DB monetary columns hold USD values
-  // (the website's "GHS" suffix is legacy — UI converts via fxRate for display).
-  const baseTotalUsd = args.nightly_rate * nights;
 
   // Fetch add-ons if any (price_ghs column also holds USD)
   let addOnsTotal = 0;
@@ -1099,13 +1173,8 @@ async function createBooking(
     return { success: false, error: "Unable to create booking" };
   }
 
-  // Increment room_inventory.booked_count for each night
-  const dates: string[] = [];
-  const d = new Date(args.check_in);
-  while (d < checkOutDate) {
-    dates.push(d.toISOString().split("T")[0]);
-    d.setDate(d.getDate() + 1);
-  }
+  // Increment room_inventory.booked_count for each night (dates array computed above)
+
 
   for (const date of dates) {
     const { data: inv } = await supabase
@@ -1269,25 +1338,13 @@ async function cancelBooking(supabase: any, referenceCode: string) {
 }
 
 // --- Currency helpers (USD primary, GH₵ equivalent) ---
-let cachedRate: { rate: number; fetchedAt: number } | null = null;
-const RATE_TTL_MS = 60 * 60 * 1000; // 1 hour
+// Fixed rate: 1 USD = 12.5 GHS
+const FIXED_USD_TO_GHS_RATE = 12.5;
 
 async function getUsdToGhsRate(): Promise<number> {
-  if (cachedRate && Date.now() - cachedRate.fetchedAt < RATE_TTL_MS) {
-    return cachedRate.rate;
-  }
-  try {
-    const res = await fetch("https://open.er-api.com/v6/latest/USD");
-    const data = await res.json();
-    if (data?.rates?.GHS) {
-      cachedRate = { rate: data.rates.GHS, fetchedAt: Date.now() };
-      return cachedRate.rate;
-    }
-  } catch (e) {
-    console.error("FX fetch failed:", e);
-  }
-  return cachedRate?.rate ?? 16;
+  return FIXED_USD_TO_GHS_RATE;
 }
+
 
 function ghsToUsd(ghs: number, rate: number): number {
   return Math.max(1, Math.round(ghs / rate));
@@ -1344,6 +1401,34 @@ async function buildDynamicContext(supabase: any, rate: number): Promise<string>
   } catch {
     prompt = prompt.replace("{DYNAMIC_ROOMS}", "Room information temporarily unavailable.");
   }
+
+  // Fetch active add-ons (price_ghs is stored as USD, matching website)
+  try {
+    const { data: addOns } = await supabase
+      .from("add_ons")
+      .select("name, description, price_ghs, category")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true });
+
+    const DYNAMIC_PRICED = new Set(["Early Check-in", "Late Checkout"]);
+
+    if (addOns && addOns.length > 0) {
+      const addOnsText = addOns.map((a: any, i: number) => {
+        const priceLabel = DYNAMIC_PRICED.has(a.name)
+          ? "50% of the selected room's nightly rate"
+          : `${fmtPriceFromUsd(Number(a.price_ghs), rate)}${a.name === "Spa Package" ? " (starting price — see notes)" : ""}`;
+        let line = `${i + 1}. ${a.name} — ${priceLabel}`;
+        if (a.description) line += `: ${a.description}`;
+        return line;
+      }).join("\n");
+      prompt = prompt.replace("{DYNAMIC_ADDONS}", addOnsText);
+    } else {
+      prompt = prompt.replace("{DYNAMIC_ADDONS}", "Add-on information is currently being updated. Use the get_add_ons tool for the latest list.");
+    }
+  } catch {
+    prompt = prompt.replace("{DYNAMIC_ADDONS}", "Add-on information temporarily unavailable. Use the get_add_ons tool.");
+  }
+
 
   // Fetch active promotions
   try {
@@ -1436,6 +1521,29 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Server-to-server callers (e.g. Convex) must present the shared secret.
+  // Browser callers from our own app skip this header and rely on the anon JWT.
+  const presentedSecret = req.headers.get("x-shared-secret");
+  const isTrustedServerCaller = presentedSecret !== null;
+  if (isTrustedServerCaller) {
+    const expectedSecret = Deno.env.get("MJ_AI_SHARED_SECRET");
+    if (!expectedSecret || presentedSecret !== expectedSecret) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+  } else {
+    // Anonymous/browser callers: enforce per-IP rate limit to prevent abuse.
+    const ip = getClientIp(req);
+    if (!checkChatRateLimit(ip)) {
+      return new Response(
+        JSON.stringify({ error: "Too many requests. Please try again later." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+  }
+
   try {
     const rawBody = await req.json();
 
@@ -1475,9 +1583,112 @@ serve(async (req) => {
       );
     }
 
+    // --- Canned quick-action / booking-intent responses (bypass AI for booking CTAs) ---
+    const BOOKING_CTA_URL = "https://mjgrandhotelghana.com/booking";
+    const lastMsg = messages.length > 0 ? messages[messages.length - 1] : null;
+    if (lastMsg && lastMsg.role === "user") {
+      const quickAction = lastMsg.content.trim();
+      const lower = quickAction.toLowerCase();
+
+      // Intent detection for free-text booking / availability / reservation messages
+      const notBookingContext = /\b(cancel|modify|change|update|refund|reschedule)\b/.test(lower);
+      const bookingIntent =
+        !notBookingContext &&
+        /\b(book a room|book a stay|make a booking|make a reservation|reserve a room|i want to book|i'd like to book|i would like to book|how (do|can) i book|book my stay|booking)\b/.test(lower);
+      const availabilityIntent =
+        /\b(availability|available rooms?|any rooms? available|room available|check (rooms?|availability)|vacancy|vacancies|rooms? free)\b/.test(lower);
+      const viewReservationIntent =
+        /\b(view|see|check|find|look ?up|manage)\b[^.?!]*\b(my )?(reservation|booking)\b/.test(lower);
+
+      let ctaResponse = "";
+      if (quickAction === "Book a Room" || bookingIntent) {
+        ctaResponse = `You can book your stay directly on our website. Please click the link below to begin your reservation:\n\n👉 [**Book your stay here**](${BOOKING_CTA_URL})`;
+      } else if (quickAction === "Check Room Availability" || availabilityIntent) {
+        ctaResponse = `You can check live room availability and rates on our booking page. Please click the link below to view available rooms:\n\n👉 [**Check room availability**](${BOOKING_CTA_URL})`;
+      } else if (quickAction === "View My Reservation" || viewReservationIntent) {
+        ctaResponse = `You can view or manage your reservation on our booking page. Please click the link below to continue:\n\n👉 [**View my reservation**](${BOOKING_CTA_URL})`;
+      }
+
+      if (ctaResponse) {
+        // Log both sides of the conversation
+        if (guest_id) {
+          await supabase.from("conversations").insert([
+            { guest_id, role: "user", message: quickAction },
+            { guest_id, role: "assistant", message: ctaResponse },
+          ]);
+        }
+        const encoder = new TextEncoder();
+        const stream = new ReadableStream({
+          start(controller) {
+            const sseData = JSON.stringify({
+              choices: [{ delta: { content: ctaResponse }, finish_reason: "stop" }],
+            });
+            controller.enqueue(encoder.encode(`data: ${sseData}\n\n`));
+            controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+            controller.close();
+          },
+        });
+        return new Response(stream, {
+          headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+        });
+      }
+    }
+
     // --- Resolve guest server-side ---
     if (!guest_id && guest_name) {
       guest_id = await resolveGuest(supabase, guest_name);
+    }
+
+    // --- Extract guest name from conversation if not yet known ---
+    // Looks for the user's reply right after MJ asked for their name, or common
+    // self-introductions like "my name is X", "I'm X", "this is X", "call me X".
+    function extractNameFromConversation(msgs: Array<{ role: string; content: string }>): string | null {
+      const cleanName = (raw: string): string | null => {
+        const trimmed = raw.trim().replace(/^[\s"'`.,!?-]+|[\s"'`.,!?-]+$/g, "");
+        if (!trimmed) return null;
+        // Take up to first 3 words, letters/hyphens/apostrophes only
+        const parts = trimmed.split(/\s+/).slice(0, 3).filter(p => /^[A-Za-z][A-Za-z'’\-]{0,30}$/.test(p));
+        if (parts.length === 0) return null;
+        const name = parts.map(p => p[0].toUpperCase() + p.slice(1).toLowerCase()).join(" ");
+        // Reject obvious non-names
+        const lower = name.toLowerCase();
+        const blacklist = ["i", "me", "you", "yes", "no", "ok", "okay", "sure", "thanks", "thank", "hello", "hi", "hey", "good", "fine", "yeah", "yep", "nope", "nah", "guest", "anonymous"];
+        if (blacklist.includes(lower)) return null;
+        if (name.length < 2 || name.length > 60) return null;
+        return name;
+      };
+
+      // 1) Self-introduction patterns anywhere in user messages
+      const introRe = /\b(?:my name is|i am|i'?m|this is|it'?s|call me|name'?s)\s+([A-Za-z][A-Za-z'’\-]{1,30}(?:\s+[A-Za-z][A-Za-z'’\-]{1,30}){0,2})\b/i;
+      for (const m of msgs) {
+        if (m.role !== "user") continue;
+        const match = m.content.match(introRe);
+        if (match) {
+          const n = cleanName(match[1]);
+          if (n) return n;
+        }
+      }
+
+      // 2) User reply directly after MJ asks for the name
+      const askRe = /\b(your name|may i (?:have|know|ask)|what(?:'s| is) your name|whom am i (?:speaking|chatting) with)\b/i;
+      for (let i = 0; i < msgs.length - 1; i++) {
+        if (msgs[i].role === "assistant" && askRe.test(msgs[i].content)) {
+          const next = msgs[i + 1];
+          if (next?.role === "user") {
+            const n = cleanName(next.content);
+            if (n) return n;
+          }
+        }
+      }
+      return null;
+    }
+
+    let resolvedName: string | null = guest_name || null;
+    if (!resolvedName) {
+      resolvedName = extractNameFromConversation(messages);
+      if (resolvedName && !guest_id) {
+        try { guest_id = await resolveGuest(supabase, resolvedName); } catch { /* non-fatal */ }
+      }
     }
 
     // Fetch recent conversation history for context
@@ -1503,6 +1714,7 @@ serve(async (req) => {
         .single();
 
       if (guest) {
+        if (!resolvedName && guest.full_name) resolvedName = guest.full_name;
         memoryContext += `\n\nGUEST PROFILE:\n- Name: ${guest.full_name || "Unknown"}\n- VIP: ${guest.vip}\n- Preferences: ${JSON.stringify(guest.preferences || {})}`;
       }
     }
@@ -1514,8 +1726,11 @@ serve(async (req) => {
     // Build dynamic system prompt with live DB data
     const fxRate = await getUsdToGhsRate();
     const dynamicPrompt = await buildDynamicContext(supabase, fxRate);
-    const systemPrompt = dynamicPrompt + memoryContext +
-      (guest_name ? `\n\nThe guest's name is ${guest_name}.` : "") + timeContext;
+    const personalization = resolvedName
+      ? `\n\nThe guest's name is ${resolvedName}. PERSONALIZE every subsequent response: address them by their first name naturally (e.g., "Certainly, ${resolvedName.split(" ")[0]}." or "${resolvedName.split(" ")[0]}, here's what I can do…"). Do NOT ask for their name again. Use the name warmly but not in every single sentence — sprinkle it in openings, confirmations, and farewells to keep responses personal.`
+      : "";
+    const systemPrompt = dynamicPrompt + memoryContext + personalization + timeContext;
+
 
     // Call Lovable AI Gateway
     const aiResponse = await fetch(

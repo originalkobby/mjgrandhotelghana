@@ -1,46 +1,102 @@
-import { useUser, useClerk } from "@clerk/clerk-react";
-import { useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
 type AdminRole = "admin" | "revenue_manager" | "front_desk" | "finance";
 
 interface AdminAuth {
-  user: any; // Using Clerk's user object
+  user: User | null;
   role: AdminRole | null;
   loading: boolean;
-  signIn: () => void; // Redirects to Clerk Login
+  signIn: (email: string, password: string) => Promise<string | null>;
   signOut: () => Promise<void>;
 }
 
-/**
- * Refactored Admin Authentication Hook
- * Now uses Clerk for Identity and Convex for Roles.
- */
 export function useAdminAuth(): AdminAuth {
-  const { user, isLoaded } = useUser();
-  const { signOut: clerkSignOut, openSignIn } = useClerk();
+  const [user, setUser] = useState<User | null>(null);
+  const [role, setRole] = useState<AdminRole | null>(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  
-  // Fetch the role from Convex using the native user_roles table
-  const role = useQuery(api.users.getMyRole) as AdminRole | null;
+  const initialSessionHandled = useRef(false);
 
-  const signIn = () => {
-    openSignIn({
-      afterSignInUrl: "/admin",
+  const fetchRole = useCallback(async (userId: string) => {
+    const { data } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .limit(1)
+      .single();
+    return (data?.role as AdminRole) ?? null;
+  }, []);
+
+  useEffect(() => {
+    // 1. Restore session from storage FIRST
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        setUser(session.user);
+        const r = await fetchRole(session.user.id);
+        setRole(r);
+      }
+      initialSessionHandled.current = true;
+      setLoading(false);
     });
-  };
 
-  const signOut = async () => {
-    await clerkSignOut();
-    navigate("/admin/login");
-  };
+    // 2. Listen for SUBSEQUENT auth changes (sign-in, sign-out, token refresh)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        // Skip the INITIAL_SESSION event — we handle it via getSession above
+        if (event === "INITIAL_SESSION") return;
 
-  return { 
-    user, 
-    role, 
-    loading: !isLoaded, 
-    signIn, 
-    signOut 
-  };
+        if (session?.user) {
+          setUser(session.user);
+          // Don't await inside onAuthStateChange to avoid deadlocks;
+          // use setTimeout to defer the async role fetch
+          setTimeout(async () => {
+            const r = await fetchRole(session.user.id);
+            setRole(r);
+          }, 0);
+        } else {
+          setUser(null);
+          setRole(null);
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [fetchRole]);
+
+  const signIn = useCallback(async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return error.message;
+    if (!data.user) return "Login failed";
+
+    const r = await fetchRole(data.user.id);
+    if (!r) {
+      await supabase.auth.signOut();
+      return "Access denied. No admin role assigned to this account.";
+    }
+    sessionStorage.removeItem("admin_session_started_at");
+    setUser(data.user);
+    setRole(r);
+    return null;
+  }, [fetchRole]);
+
+  const signOut = useCallback(async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Sign out error:", error.message);
+      }
+    } catch (err) {
+      console.error("Unexpected sign out error:", err);
+    } finally {
+      sessionStorage.removeItem("admin_session_started_at");
+      setUser(null);
+      setRole(null);
+      navigate("/admin/login");
+    }
+  }, [navigate]);
+
+  return { user, role, loading, signIn, signOut };
 }

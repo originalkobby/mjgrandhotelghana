@@ -14,9 +14,11 @@ import PaymentStep from "@/components/booking/PaymentStep";
 import ConfirmationStep from "@/components/booking/ConfirmationStep";
 import BookingLookupSection from "@/components/booking/BookingLookupSection";
 import { useBooking } from "@/hooks/useBooking";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation, useAction, useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
+
+const PUBLIC_ROOM_COLUMNS =
+  "id, name, slug, description, size_sqm, bed_type, max_adults, max_children, base_price_ghs, amenities, images, sort_order, is_active, total_units";
 
 const Booking = () => {
   const {
@@ -28,66 +30,101 @@ const Booking = () => {
     toggleAddOn,
     setGuestInfo,
     setBookingReference,
+    setAppliedPromo,
     goNext,
     goBack,
     currentStepIndex,
+    steps,
   } = useBooking();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
 
-  const createBooking = useMutation(api.bookings.createBooking);
-  const verifyPayment = useAction(api.paystack.verify);
-
   // Pre-select room from query param
-  const roomId = searchParams.get("room");
-  const roomData = useQuery(api.rooms.getRoomById, roomId ? { id: roomId } : "skip");
-
   useEffect(() => {
-    if (roomData && !state.selectedRoom) {
-      setRoomPreselected(true);
-      setSelectedRoom({
-        id: roomData._id,
-        name: roomData.name,
-        slug: roomData.slug,
-        description: roomData.description ?? "",
-        size_sqm: roomData.size_sqm ?? 0,
-        bed_type: roomData.bed_type ?? "",
-        base_price_ghs: roomData.base_price_ghs,
-        amenities: roomData.amenities ?? [],
-        images: roomData.images ?? [],
-        nightlyRate: roomData.base_price_ghs,
-        totalNights: 0,
-        totalPrice: 0,
-      });
+    const roomId = searchParams.get("room");
+    if (roomId && !state.selectedRoom) {
+      (async () => {
+        const { data: room } = await supabase
+          .from("rooms")
+          .select(PUBLIC_ROOM_COLUMNS)
+          .eq("id", roomId)
+          .eq("is_active", true)
+          .maybeSingle();
+
+        if (room) {
+          setRoomPreselected(true);
+          // Store basic room info; totalPrice will be computed after dates are chosen
+          setSelectedRoom({
+            id: room.id,
+            name: room.name,
+            slug: room.slug,
+            description: room.description ?? "",
+            size_sqm: room.size_sqm ?? 0,
+            bed_type: room.bed_type ?? "",
+            base_price_ghs: room.base_price_ghs,
+            amenities: (room.amenities as string[]) ?? [],
+            images: (room.images as string[]) ?? [],
+            nightlyRate: room.base_price_ghs,
+            totalNights: 0,
+            totalPrice: 0,
+          });
+        }
+      })();
     }
-  }, [roomData]);
+  }, [searchParams]);
 
   // Recompute room pricing when dates change (for pre-selected rooms)
   useEffect(() => {
     if (!state.roomPreselected || !state.selectedRoom || !state.search.checkIn || !state.search.checkOut) return;
 
+    const roomId = state.selectedRoom.id;
+    const checkIn = state.search.checkIn.toISOString().split("T")[0];
+    const checkOut = state.search.checkOut.toISOString().split("T")[0];
     const nights = differenceInDays(state.search.checkOut, state.search.checkIn);
     if (nights <= 0) return;
 
-    const avgRate = state.selectedRoom.base_price_ghs;
-    setSelectedRoom({
-      ...state.selectedRoom,
-      nightlyRate: avgRate,
-      totalNights: nights,
-      totalPrice: avgRate * nights,
-    });
+    (async () => {
+      const avgRate = state.selectedRoom!.base_price_ghs;
+
+      setSelectedRoom({
+        ...state.selectedRoom!,
+        nightlyRate: avgRate,
+        totalNights: nights,
+        totalPrice: avgRate * nights,
+      });
+    })();
   }, [state.roomPreselected, state.search.checkIn, state.search.checkOut]);
 
-  // Handle Paystack callback verification
+  // Handle Paystack callback verification — restore booking state from DB
   useEffect(() => {
     const verifyRef = searchParams.get("verify");
+    const verifyEmail = searchParams.get("e") || undefined;
     if (verifyRef && state.step !== "confirmation") {
       (async () => {
         try {
-          const result = await verifyPayment({ reference: verifyRef });
-          if (result.verified) {
+          const { data } = await supabase.functions.invoke("paystack", {
+            body: { action: "verify", reference: verifyRef, email: verifyEmail },
+          });
+
+          if (data?.verified) {
+            const { data: booking } = await supabase
+              .from("bookings")
+              .select("reference_code, check_in, check_out, adults, children, final_total_ghs, rooms(name), guests(full_name, email)")
+              .eq("reference_code", verifyRef)
+              .maybeSingle();
+
             setBookingReference(verifyRef);
+
+            if (booking) {
+              setSearch({
+                checkIn: new Date(booking.check_in),
+                checkOut: new Date(booking.check_out),
+                adults: booking.adults,
+                children: booking.children,
+              });
+            }
+
             setStep("confirmation");
             toast({ title: "Payment Successful!", description: `Reference: ${verifyRef}` });
           }
@@ -98,41 +135,109 @@ const Booking = () => {
     }
   }, [searchParams]);
 
+  // Validate promo code when entering details/payment steps or when inputs change
+  useEffect(() => {
+    const code = state.search.promoCode?.trim().toUpperCase();
+    const room = state.selectedRoom;
+    const baseTotal = room?.totalPrice ?? 0;
+    const shouldValidate = (state.step === "details" || state.step === "payment") && code && room && baseTotal > 0;
+
+    if (!code) {
+      if (state.appliedPromo || state.promoError) setAppliedPromo(null, null);
+      return;
+    }
+    if (!shouldValidate) return;
+    // Always re-validate on payment step (catches admin toggling promo off mid-flow)
+    if (state.step !== "payment" && state.appliedPromo?.code === code) return;
+
+    let cancelled = false;
+    const validationTimer = window.setTimeout(async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("validate-promo", {
+          body: { code, roomId: room!.id, baseTotalGhs: baseTotal },
+        });
+        if (cancelled) return;
+        if (error) {
+          setAppliedPromo(null, "Could not validate promo code");
+          return;
+        }
+        if (data?.valid) {
+          setAppliedPromo({
+            code: data.code,
+            discountType: data.discountType,
+            discountValue: data.discountValue,
+            discountGhs: data.discountGhs,
+            description: data.description,
+          }, null);
+        } else {
+          const reasonMap: Record<string, string> = {
+            not_found: "Promo code not found",
+            inactive: "This promo code is no longer active",
+            expired: "Promo code has expired",
+            not_started: "Promo code not yet active",
+            usage_limit: "Promo code usage limit reached",
+            room_not_allowed: "Promo not valid for this room",
+          };
+          setAppliedPromo(null, reasonMap[data?.reason] ?? "Promo code not valid");
+        }
+      } catch (err) {
+        if (!cancelled) setAppliedPromo(null, "Could not validate promo code");
+      }
+    }, 600);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(validationTimer);
+    };
+  }, [state.step, state.search.promoCode, state.selectedRoom?.id, state.selectedRoom?.totalPrice]);
+
   const handleSubmitBooking = useCallback(async () => {
     if (!state.selectedRoom || !state.search.checkIn || !state.search.checkOut) return;
 
     setIsSubmitting(true);
     try {
-      const result = await createBooking({
-        guest: {
-          fullName: state.guestInfo.fullName,
-          email: state.guestInfo.email,
-          phone: state.guestInfo.phone,
+      const addOnsTotal = state.selectedAddOns.reduce((s, a) => s + a.price_ghs * a.quantity, 0);
+      const discountGhs = state.appliedPromo?.discountGhs ?? 0;
+      const finalTotal = Math.max(0, state.selectedRoom.totalPrice + addOnsTotal - discountGhs);
+
+      const { data, error: fnError } = await supabase.functions.invoke("create-booking", {
+        body: {
+          guest: {
+            fullName: state.guestInfo.fullName,
+            email: state.guestInfo.email,
+            phone: state.guestInfo.phone,
+          },
+          booking: {
+            roomId: state.selectedRoom.id,
+            checkIn: state.search.checkIn.toISOString().split("T")[0],
+            checkOut: state.search.checkOut.toISOString().split("T")[0],
+            adults: state.search.adults,
+            children: state.search.children,
+            baseTotalGhs: state.selectedRoom.totalPrice,
+            addOnsTotalGhs: addOnsTotal,
+            finalTotalGhs: finalTotal,
+            promoCode: state.search.promoCode || null,
+            specialRequests: state.guestInfo.specialRequests || null,
+            arrivalTime: state.guestInfo.arrivalTime || null,
+            nationality: state.guestInfo.nationality || null,
+            flightItinerary: state.guestInfo.flightItinerary || null,
+          },
+          addOns: state.selectedAddOns.map((a) => ({
+            id: a.id,
+            quantity: a.quantity,
+            priceGhs: a.price_ghs,
+          })),
         },
-        booking: {
-          roomId: state.selectedRoom.id,
-          checkIn: state.search.checkIn.toISOString().split("T")[0],
-          checkOut: state.search.checkOut.toISOString().split("T")[0],
-          adults: state.search.adults,
-          children: state.search.children,
-          promoCode: state.search.promoCode || undefined,
-          specialRequests: state.guestInfo.specialRequests || undefined,
-          arrivalTime: state.guestInfo.arrivalTime || undefined,
-          nationality: state.guestInfo.nationality || undefined,
-          flightItinerary: state.guestInfo.flightItinerary || undefined,
-        },
-        addOns: state.selectedAddOns.map((a) => ({
-          id: a.id,
-          quantity: a.quantity,
-        })),
       });
 
-      setBookingReference(result.reference);
+      if (fnError) throw new Error(fnError.message);
+      if (data?.error) throw new Error(data.error);
+
+      setBookingReference(data.reference);
       goNext();
 
       toast({
         title: "Booking Created!",
-        description: `Reference: ${result.reference}. Proceed to payment.`,
+        description: `Reference: ${data.reference}. Proceed to payment.`,
       });
     } catch (err: any) {
       console.error("Booking error:", err);
@@ -144,7 +249,7 @@ const Booking = () => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [state, createBooking, setBookingReference, goNext, toast]);
+  }, [state, setBookingReference, goNext, toast]);
 
   const handlePaymentComplete = useCallback(() => {
     setStep("confirmation");
@@ -193,6 +298,8 @@ const Booking = () => {
                 selectedRoom={state.selectedRoom}
                 selectedAddOns={state.selectedAddOns}
                 totalAmount={state.totalAmount}
+                appliedPromo={state.appliedPromo}
+                promoError={state.promoError}
                 onUpdate={setGuestInfo}
                 onSubmit={handleSubmitBooking}
                 onBack={goBack}
@@ -206,6 +313,8 @@ const Booking = () => {
                 selectedAddOns={state.selectedAddOns}
                 guestInfo={state.guestInfo}
                 totalAmount={state.totalAmount}
+                appliedPromo={state.appliedPromo}
+                promoError={state.promoError}
                 bookingReference={state.bookingReference}
                 onPaymentComplete={handlePaymentComplete}
                 onBack={goBack}

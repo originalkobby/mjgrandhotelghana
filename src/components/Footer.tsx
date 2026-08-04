@@ -1,55 +1,108 @@
-import { Link } from "react-router-dom";
-import { MapPin, Phone, Mail, Instagram, Facebook } from "lucide-react";
+import { motion } from "framer-motion";
+import { Mail, Phone, MapPin } from "lucide-react";
 
-const Footer = () => (
-  <footer className="bg-primary text-primary-foreground">
-    <div className="container grid gap-10 py-16 md:grid-cols-4">
-      <div className="md:col-span-2">
-        <p className="font-serif text-2xl">
-          MJ <span className="text-accent">Grand</span> Hotel
-        </p>
-        <p className="mt-4 max-w-sm text-sm leading-relaxed text-primary-foreground/70">
-          A refined address in East Legon, Accra — where quiet luxury, warm Ghanaian
-          hospitality and considered detail meet.
-        </p>
-        <div className="mt-6 flex gap-4">
-          <a href="https://instagram.com" aria-label="Instagram" className="text-primary-foreground/70 hover:text-accent">
-            <Instagram className="h-5 w-5" />
-          </a>
-          <a href="https://facebook.com" aria-label="Facebook" className="text-primary-foreground/70 hover:text-accent">
-            <Facebook className="h-5 w-5" />
-          </a>
+const Footer = () => {
+  return (
+    <footer id="contact" className="bg-charcoal py-20">
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.7, ease: [0.3, 0, 0.2, 1] }}
+        className="container mx-auto px-6 lg:px-12"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
+          {/* Brand + contact */}
+          <div>
+            <h4 className="font-serif text-lg text-cream mb-4">MJ Grand Hotel</h4>
+            <div className="space-y-3 text-sm font-sans text-cream/60">
+              <p className="flex items-center gap-2">
+                <MapPin size={14} className="text-gold" />
+                No. 460 Abotsi Street, East Legon, Accra - Ghana
+              </p>
+              <p className="flex items-center gap-2">
+                <Phone size={14} className="text-gold" />
+                +233 302544212
+              </p>
+              <p className="flex items-center gap-2">
+                <Mail size={14} className="text-gold" />
+                mj@mjgrandhotelghana.com
+              </p>
+            </div>
+          </div>
+
+          {/* Quick links */}
+          <div>
+            <h4 className="font-sans text-sm font-semibold uppercase tracking-wider text-cream/40 mb-6">
+              Quick Links
+            </h4>
+            <div className="space-y-3 font-sans text-sm">
+            {[
+              { label: "Rooms & Suites", href: "#rooms" },
+              { label: "Dining", href: "/dining" },
+              { label: "Policy", href: "/policy" },
+              { label: "About", href: "/about" },
+            ].map((link) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  className="block text-cream/60 hover:text-gold transition-colors duration-300"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Newsletter */}
+          <div>
+            <h4 className="font-sans text-sm font-semibold uppercase tracking-wider text-cream/40 mb-6">
+              Stay Connected
+            </h4>
+            <p className="font-sans text-sm text-cream/60 mb-4">
+              Receive exclusive offers and updates from MJ Grand.
+            </p>
+            <div className="flex">
+              <input
+                type="email"
+                placeholder="Your email"
+                className="flex-1 bg-cream/5 border border-cream/10 px-4 py-2.5 text-sm text-cream placeholder:text-cream/30 focus:outline-none focus:border-gold/50 transition-colors"
+                aria-label="Email for newsletter"
+              />
+              <button className="bg-gold px-5 py-2.5 text-sm font-sans font-semibold text-charcoal hover:bg-gold-light transition-colors duration-300">
+                Join
+              </button>
+            </div>
+            {/* Social */}
+            <div className="flex gap-4 mt-6">
+              {[
+                { label: "Instagram", href: "https://instagram.com/mjgrand_hotel" },
+                { label: "Facebook", href: "https://facebook.com/MJGrand" },
+                { label: "Twitter", href: "https://twitter.com/MJGRANDHOTEL001" },
+                { label: "TikTok", href: "https://tiktok.com/@mj.grand.hotel" },
+              ].map((s) => (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-sans text-cream/40 hover:text-gold hover:scale-110 transition-all duration-300"
+                >
+                  {s.label}
+                </a>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div>
-        <h2 className="text-sm uppercase tracking-[0.22em] text-accent">Explore</h2>
-        <ul className="mt-5 space-y-3 text-sm text-primary-foreground/70">
-          <li><Link to="/booking" className="hover:text-accent">Reservations</Link></li>
-          <li><Link to="/dining" className="hover:text-accent">Dining</Link></li>
-          <li><Link to="/gallery" className="hover:text-accent">Gallery</Link></li>
-          <li><Link to="/guest-services" className="hover:text-accent">Guest Services</Link></li>
-          <li><Link to="/policy" className="hover:text-accent">Policies</Link></li>
-        </ul>
-      </div>
-
-      <div>
-        <h2 className="text-sm uppercase tracking-[0.22em] text-accent">Contact</h2>
-        <ul className="mt-5 space-y-3 text-sm text-primary-foreground/70">
-          <li className="flex gap-3"><MapPin className="h-4 w-4 shrink-0 text-accent" />East Legon, Accra, Ghana</li>
-          <li className="flex gap-3"><Phone className="h-4 w-4 shrink-0 text-accent" />+233 30 000 0000</li>
-          <li className="flex gap-3"><Mail className="h-4 w-4 shrink-0 text-accent" />info@mjgrandhotelghana.com</li>
-        </ul>
-      </div>
-    </div>
-
-    <div className="border-t border-primary-foreground/10">
-      <div className="container flex flex-col gap-2 py-6 text-xs text-primary-foreground/50 md:flex-row md:justify-between">
-        <p>&copy; {new Date().getFullYear()} MJ Grand Hotel Ghana. All rights reserved.</p>
-        <Link to="/admin" className="hover:text-accent">Staff Portal</Link>
-      </div>
-    </div>
-  </footer>
-);
+        <div className="mt-16 pt-8 border-t border-cream/10 text-center">
+          <p className="font-sans text-xs text-cream/30">
+            © 2026 MJ Grand Hotel. All rights reserved.
+          </p>
+        </div>
+      </motion.div>
+    </footer>
+  );
+};
 
 export default Footer;

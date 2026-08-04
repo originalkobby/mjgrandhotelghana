@@ -1,0 +1,1 @@
+ALTER TABLE public.room_inventory ADD CONSTRAINT room_inventory_room_id_date_unique UNIQUE (room_id, date);

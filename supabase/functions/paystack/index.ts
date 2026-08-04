@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { syncToConvex } from "../_shared/convexSync.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -92,7 +93,54 @@ serve(async (req) => {
 
     // ── Verify transaction ──
     if (action === "verify") {
-      const { reference } = payload;
+      const { reference, email } = payload;
+
+      if (!reference || typeof reference !== "string") {
+        return new Response(JSON.stringify({ error: "reference is required" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // SECURITY: authorise the caller before exposing payment status or hitting
+      // the Paystack API. Look up the booking + guest email, then require either
+      //  (a) the booking is already marked paid — return cached status, no external call
+      //  (b) the caller supplied the matching guest email (proves booking ownership)
+      const { data: bookingRow } = await supabase
+        .from("bookings")
+        .select("id, payment_status, final_total_ghs, guests(email)")
+        .eq("reference_code", reference)
+        .maybeSingle();
+
+      if (!bookingRow) {
+        // Do not reveal whether the reference exists at Paystack either.
+        return new Response(JSON.stringify({ error: "Not authorised" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Short-circuit: already paid — return cached status without calling Paystack.
+      if (bookingRow.payment_status === "paid") {
+        return new Response(
+          JSON.stringify({
+            verified: true,
+            status: "success",
+            amount: Number(bookingRow.final_total_ghs),
+            cached: true,
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const bookingEmail = ((bookingRow as any).guests?.email || "").toLowerCase();
+      const providedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
+      if (!providedEmail || providedEmail !== bookingEmail) {
+        return new Response(JSON.stringify({ error: "Not authorised" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
       const res = await fetch(`https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`, {
         headers: { Authorization: `Bearer ${PAYSTACK_SECRET}` },
@@ -126,6 +174,18 @@ serve(async (req) => {
           .from("bookings")
           .update({ payment_status: "paid" })
           .eq("reference_code", reference);
+
+        // Fire-and-forget dual-write to Convex
+        syncToConvex({
+          event: "booking.payment_updated",
+          referenceCode: reference,
+          data: {
+            paymentStatus: "paid",
+            provider: "paystack",
+            providerReference: txn.reference,
+            amountGhs: txn.amount / 100,
+          },
+        });
       }
 
       return new Response(
@@ -133,6 +193,7 @@ serve(async (req) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
 
     return new Response(JSON.stringify({ error: "Unknown action" }), {
       status: 400,

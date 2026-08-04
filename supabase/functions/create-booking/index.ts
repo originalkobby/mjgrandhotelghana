@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { syncToConvex } from "../_shared/convexSync.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -312,6 +313,27 @@ serve(async (req) => {
         }))
       );
     }
+
+    // Fire-and-forget dual-write to Convex
+    syncToConvex({
+      event: "booking.created",
+      bookingId: bookingData.id,
+      referenceCode: refCode,
+      data: {
+        guestId,
+        roomId: booking.roomId,
+        checkIn: booking.checkIn,
+        checkOut: booking.checkOut,
+        adults: booking.adults,
+        children: booking.children,
+        baseTotalGhs,
+        addOnsTotalGhs,
+        discountGhs,
+        finalTotalGhs: finalTotal,
+        status: "confirmed",
+        paymentStatus: "pending",
+      },
+    });
 
     return new Response(
       JSON.stringify({

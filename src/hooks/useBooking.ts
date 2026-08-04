@@ -43,6 +43,14 @@ export interface GuestInfo {
   flightItinerary: string;
 }
 
+export interface AppliedPromo {
+  code: string;
+  discountType: string;
+  discountValue: number;
+  discountGhs: number;
+  description?: string | null;
+}
+
 export interface BookingState {
   step: BookingStep;
   search: BookingSearch;
@@ -52,6 +60,8 @@ export interface BookingState {
   bookingReference: string | null;
   totalAmount: number;
   roomPreselected: boolean;
+  appliedPromo: AppliedPromo | null;
+  promoError: string | null;
 }
 
 const STEPS: BookingStep[] = ["search", "rooms", "addons", "details", "payment", "confirmation"];
@@ -80,6 +90,8 @@ export function useBooking() {
     bookingReference: null,
     totalAmount: 0,
     roomPreselected: false,
+    appliedPromo: null,
+    promoError: null,
   });
 
   const setStep = useCallback((step: BookingStep) => {
@@ -116,6 +128,11 @@ export function useBooking() {
     setState((prev) => ({ ...prev, bookingReference: ref }));
   }, []);
 
+  const setAppliedPromo = useCallback((promo: AppliedPromo | null, error: string | null = null) => {
+    setState((prev) => ({ ...prev, appliedPromo: promo, promoError: error }));
+  }, []);
+
+
   const currentStepIndex = STEPS.indexOf(state.step);
 
   const goNext = useCallback(() => {
@@ -147,7 +164,9 @@ export function useBooking() {
   }, [state.step, state.roomPreselected]);
 
   const addOnsTotal = state.selectedAddOns.reduce((sum, a) => sum + a.price_ghs * a.quantity, 0);
-  const totalAmount = (state.selectedRoom?.totalPrice ?? 0) + addOnsTotal;
+  const preDiscountTotal = (state.selectedRoom?.totalPrice ?? 0) + addOnsTotal;
+  const discountGhs = state.appliedPromo?.discountGhs ?? 0;
+  const totalAmount = Math.max(0, preDiscountTotal - discountGhs);
 
   return {
     state: { ...state, totalAmount },
@@ -158,6 +177,7 @@ export function useBooking() {
     toggleAddOn,
     setGuestInfo,
     setBookingReference,
+    setAppliedPromo,
     goNext,
     goBack,
     currentStepIndex,

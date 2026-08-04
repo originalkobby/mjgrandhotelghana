@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef } from "react";
 import { StickyHorizontalScrollbar } from "@/components/ui/StickyHorizontalScrollbar";
 import { motion } from "framer-motion";
-import { Search, Filter, RefreshCw, Download, CreditCard, Trash2, X } from "lucide-react";
+import { Search, Filter, Download, CreditCard, Trash2, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   AlertDialog,
@@ -40,7 +40,7 @@ import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { formatDateGB } from "@/lib/dateUtils";
 import type { Database } from "@/integrations/supabase/types";
 import { formatBookingLabel, getPaymentDisplay } from "@/lib/bookingLifecycle";
-import { useBookingLifecycleSync } from "@/hooks/useBookingLifecycleSync";
+import { useSessionTimeout } from "@/hooks/useSessionTimeout";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { releaseInventory, reserveInventory, getInventoryAction } from "@/lib/inventorySync";
 
@@ -87,9 +87,10 @@ const STATUS_LABELS: Record<string, string> = {
   pending: "pending",
   confirmed: "confirmed",
   cancelled: "cancelled",
-  completed: "released",
+  completed: "checked-out",
   no_show: "no show",
 };
+
 
 const STATUS_COLORS: Record<string, string> = {
   confirmed: "bg-green-600 text-white border-green-700",
@@ -178,23 +179,29 @@ export default function Bookings() {
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { user, role } = useAdminAuth();
+  const { user, role, signOut } = useAdminAuth();
+
+  // 4-hour hard session cap for staff/admins on the Bookings page
+  useSessionTimeout({
+    maxDurationMs: 4 * 60 * 60 * 1000,
+    enabled: !!user,
+    onTimeout: () => {
+      toast({
+        title: "Session expired",
+        description: "You've been signed out after 4 hours. Please sign in again.",
+        variant: "destructive",
+      });
+      signOut();
+    },
+  });
   const { format: formatCurrency } = useCurrency();
   const isAdmin = role === "admin";
   const tableScrollRef = useRef<HTMLDivElement>(null);
 
-  const { data: allBookings = [], isLoading: loading, isFetching } = useQuery({
+  const { data: allBookings = [], isLoading: loading } = useQuery({
     queryKey: ["admin-bookings", statusFilter, sourceFilter],
     queryFn: () => fetchBookings(statusFilter, sourceFilter),
     staleTime: 30_000,
-  });
-
-  useBookingLifecycleSync({
-    onSynced: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
-      queryClient.invalidateQueries({ queryKey: ["admin-inventory"] });
-      queryClient.invalidateQueries({ queryKey: ["admin-overview"] });
-    },
   });
 
   // Try to parse the search as a date (DD/MM/YYYY, D/M/YYYY, or YYYY-MM-DD)
@@ -398,10 +405,15 @@ export default function Bookings() {
       // Determine payment status
       const newPaymentStatus = amount >= paymentBooking.final_total_ghs ? "paid" : "partial";
 
-      // Update booking payment status
+      // Payment recording no longer auto-changes booking status.
+      // Status stays "Confirmed" until staff manually checks the guest in.
+      const updatePayload: any = { payment_status: newPaymentStatus };
+
+
+      // Update booking
       await supabase
         .from("bookings")
-        .update({ payment_status: newPaymentStatus } as any)
+        .update(updatePayload)
         .eq("id", paymentBooking.id);
 
       toast({
@@ -539,7 +551,7 @@ export default function Bookings() {
     URL.revokeObjectURL(url);
   };
 
-  const refreshing = loading || isFetching;
+  
 
   return (
     <div className="space-y-6">
@@ -588,15 +600,6 @@ export default function Bookings() {
             ))}
           </SelectContent>
         </Select>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => queryClient.invalidateQueries({ queryKey: ["admin-bookings"] })}
-          disabled={refreshing}
-          title="Refresh bookings"
-        >
-          <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-        </Button>
         <Button
           variant="outline"
           size="sm"
@@ -716,7 +719,7 @@ export default function Bookings() {
                         <td className="px-4 py-3 text-muted-foreground">
                           {b.adults}A{b.children > 0 ? ` ${b.children}C` : ""}
                         </td>
-                        <td className="px-4 py-3 font-medium text-foreground">
+                        <td className="px-4 py-3 font-medium text-foreground whitespace-nowrap">
                           {formatCurrency(b.final_total_ghs)}
                         </td>
                         <td className="px-4 py-3">
@@ -918,8 +921,25 @@ export default function Bookings() {
 
 
               <div>
+                <Label htmlFor="edit-room-number" className="text-xs uppercase tracking-wider mb-2 block text-muted-foreground">
+                  Assigned Room Number
+                </Label>
+                <Input
+                  id="edit-room-number"
+                  type="text"
+                  value={roomNumber}
+                  onChange={(e) => setRoomNumber(e.target.value)}
+                  placeholder="e.g. 204"
+                  className="h-9 text-sm"
+                />
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  Assign a physical room number to this guest. Saved to the booking and shown in the Guests section.
+                </p>
+              </div>
+
+              <div>
                 <p className="text-xs uppercase tracking-wider mb-2 text-muted-foreground">Update Status</p>
-                <Select value={newStatus} onValueChange={(v: string) => setNewStatus(v as BookingStatus)}>
+                <Select value={newStatus} onValueChange={(v) => setNewStatus(v as BookingStatus)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -960,7 +980,7 @@ export default function Bookings() {
 
 
       {/* Record Payment Dialog */}
-      <Dialog open={showPaymentDialog} onOpenChange={(o: boolean) => { if (!o) { setShowPaymentDialog(false); setPaymentBooking(null); } }}>
+      <Dialog open={showPaymentDialog} onOpenChange={(o) => { if (!o) { setShowPaymentDialog(false); setPaymentBooking(null); } }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="font-serif flex items-center gap-2">
@@ -985,7 +1005,7 @@ export default function Bookings() {
                 step="0.01"
                 min="0"
                 value={paymentAmount}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPaymentAmount(e.target.value)}
+                onChange={(e) => setPaymentAmount(e.target.value)}
                 placeholder="e.g. 500"
                 className="mt-1"
               />
@@ -1011,7 +1031,7 @@ export default function Bookings() {
       </Dialog>
 
       {/* Bulk Delete Confirmation Dialog (admin only) */}
-      <AlertDialog open={bulkDeleteOpen} onOpenChange={(o: boolean) => { if (!o && !deleting) setBulkDeleteOpen(false); }}>
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={(o) => { if (!o && !deleting) setBulkDeleteOpen(false); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="font-serif">
@@ -1030,7 +1050,7 @@ export default function Bookings() {
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={(e: React.MouseEvent) => { e.preventDefault(); handleBulkDelete(); }}
+              onClick={(e) => { e.preventDefault(); handleBulkDelete(); }}
               disabled={deleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >

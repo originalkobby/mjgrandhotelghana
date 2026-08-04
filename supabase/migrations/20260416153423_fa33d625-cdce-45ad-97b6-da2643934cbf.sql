@@ -1,0 +1,1 @@
+UPDATE public.add_ons SET price_ghs = 90 WHERE id = '39aa6455-2af0-4d23-a5c7-17f2dd5d8ce0';

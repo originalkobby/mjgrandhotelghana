@@ -1,56 +1,201 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
+import { createPortal } from "react-dom";
+import { Triangle } from "lucide-react";
 
-interface Props {
+interface StickyHorizontalScrollbarProps {
   targetRef: RefObject<HTMLElement>;
 }
 
+function getScrollParent(element: HTMLElement | null): HTMLElement | Window {
+  let current = element?.parentElement ?? null;
+
+  while (current) {
+    const { overflowY } = window.getComputedStyle(current);
+    if ((overflowY === "auto" || overflowY === "scroll" || overflowY === "overlay") && current.scrollHeight > current.clientHeight) {
+      return current;
+    }
+    current = current.parentElement;
+  }
+
+  return window;
+}
+
 /**
- * A sticky proxy scrollbar that mirrors horizontal scrolling of a wide table
- * so staff can scroll without reaching the bottom of the container.
+ * A sticky proxy horizontal scrollbar that mirrors the scrollLeft of `targetRef`.
+ * Stays visible at the bottom of the surrounding scrollable region (via position: sticky)
+ * so it behaves like the browser's native vertical scrollbar at the right edge of the viewport.
  */
-export const StickyHorizontalScrollbar = ({ targetRef }: Props) => {
-  const barRef = useRef<HTMLDivElement>(null);
-  const [width, setWidth] = useState(0);
-  const syncing = useRef(false);
+export function StickyHorizontalScrollbar({ targetRef }: StickyHorizontalScrollbarProps) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const thumbRef = useRef<HTMLDivElement>(null);
+  const [metrics, setMetrics] = useState({
+    visible: false,
+    left: 0,
+    width: 0,
+    thumbWidthPct: 0,
+    thumbLeftPct: 0,
+  });
+  const draggingRef = useRef<{ startX: number; startScrollLeft: number } | null>(null);
 
   useEffect(() => {
     const target = targetRef.current;
-    const bar = barRef.current;
-    if (!target || !bar) return;
+    if (!target) return;
+    const scrollParent = getScrollParent(target);
 
-    const measure = () => setWidth(target.scrollWidth);
-    measure();
+    const sync = () => {
+      const { scrollLeft, scrollWidth, clientWidth } = target;
+      const canScroll = scrollWidth > clientWidth;
+      const rawThumbWidthPct = canScroll ? (clientWidth / scrollWidth) * 100 : 0;
+      const thumbWidthPct = Math.min(Math.max(rawThumbWidthPct, 0), 100);
+      const maxScrollLeft = Math.max(scrollWidth - clientWidth, 0);
+      const thumbLeftPct = maxScrollLeft === 0 ? 0 : (scrollLeft / maxScrollLeft) * (100 - thumbWidthPct);
 
-    const onTarget = () => {
-      if (syncing.current) return (syncing.current = false);
-      syncing.current = true;
-      bar.scrollLeft = target.scrollLeft;
+      const rect = target.getBoundingClientRect();
+      const left = Math.max(rect.left, 0);
+      const right = Math.min(rect.right, window.innerWidth);
+      const width = Math.max(right - left, 0);
+      const inViewport = rect.bottom > 0 && rect.top < window.innerHeight;
+
+      setMetrics({
+        visible: canScroll && inViewport && width > 0,
+        left,
+        width,
+        thumbWidthPct,
+        thumbLeftPct,
+      });
     };
-    const onBar = () => {
-      if (syncing.current) return (syncing.current = false);
-      syncing.current = true;
-      target.scrollLeft = bar.scrollLeft;
-    };
 
-    target.addEventListener("scroll", onTarget);
-    bar.addEventListener("scroll", onBar);
-    const ro = new ResizeObserver(measure);
+    sync();
+    target.addEventListener("scroll", sync, { passive: true });
+    const ro = new ResizeObserver(sync);
     ro.observe(target);
+    if (target.firstElementChild) ro.observe(target.firstElementChild);
+    window.addEventListener("resize", sync);
+    window.addEventListener("scroll", sync, { passive: true });
+    scrollParent.addEventListener("scroll", sync, { passive: true });
 
     return () => {
-      target.removeEventListener("scroll", onTarget);
-      bar.removeEventListener("scroll", onBar);
+      target.removeEventListener("scroll", sync);
       ro.disconnect();
+      window.removeEventListener("resize", sync);
+      window.removeEventListener("scroll", sync);
+      scrollParent.removeEventListener("scroll", sync);
     };
   }, [targetRef]);
 
-  if (!width) return null;
+  useEffect(() => {
+    const onMove = (e: PointerEvent) => {
+      const target = targetRef.current;
+      const track = trackRef.current;
+      const drag = draggingRef.current;
+      if (!target || !track || !drag) return;
+      const trackWidth = track.clientWidth;
+      const dx = e.clientX - drag.startX;
+      const ratio = target.scrollWidth / trackWidth;
+      target.scrollLeft = drag.startScrollLeft + dx * ratio;
+    };
+    const onUp = () => {
+      draggingRef.current = null;
+      document.body.style.userSelect = "";
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+  }, [targetRef]);
 
-  return (
-    <div ref={barRef} className="sticky bottom-0 z-10 overflow-x-auto bg-background/80 backdrop-blur-sm">
-      <div style={{ width, height: 1 }} />
-    </div>
+  const onThumbDown = (e: React.PointerEvent) => {
+    const target = targetRef.current;
+    if (!target) return;
+    e.preventDefault();
+    draggingRef.current = { startX: e.clientX, startScrollLeft: target.scrollLeft };
+    document.body.style.userSelect = "none";
+  };
+
+  const onTrackDown = (e: React.PointerEvent) => {
+    const target = targetRef.current;
+    const track = trackRef.current;
+    const thumb = thumbRef.current;
+    if (!target || !track || !thumb) return;
+    if (e.target === thumb) return;
+    const rect = track.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const ratio = target.scrollWidth / track.clientWidth;
+    const newScroll = clickX * ratio - target.clientWidth / 2;
+    target.scrollLeft = Math.max(0, newScroll);
+  };
+
+  const scrollByStep = (direction: -1 | 1) => {
+    const target = targetRef.current;
+    if (!target) return;
+    const step = Math.max(target.clientWidth * 0.5, 120);
+    target.scrollBy({ left: direction * step, behavior: "smooth" });
+  };
+
+  const holdTimerRef = useRef<number | null>(null);
+  const startHold = (direction: -1 | 1) => {
+    scrollByStep(direction);
+    holdTimerRef.current = window.setInterval(() => scrollByStep(direction), 200);
+  };
+  const stopHold = () => {
+    if (holdTimerRef.current !== null) {
+      window.clearInterval(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+  };
+
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
+    <div
+      className="fixed bottom-0 z-40 flex items-center gap-1 px-1.5 py-1.5 bg-background/80 backdrop-blur-sm border-t border-border"
+      style={{
+        display: metrics.visible ? "flex" : "none",
+        left: `${metrics.left}px`,
+        width: `${metrics.width}px`,
+      }}
+    >
+      <button
+        type="button"
+        aria-label="Scroll left"
+        onPointerDown={() => startHold(-1)}
+        onPointerUp={stopHold}
+        onPointerLeave={stopHold}
+        onPointerCancel={stopHold}
+        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+      >
+        <Triangle className="h-2.5 w-2.5 -rotate-90 fill-current" />
+      </button>
+      <div
+        ref={trackRef}
+        onPointerDown={onTrackDown}
+        className="relative h-2.5 flex-1 rounded-full bg-muted"
+      >
+        <div
+          ref={thumbRef}
+          onPointerDown={onThumbDown}
+          className="absolute top-0 h-full rounded-full bg-muted-foreground/40 hover:bg-muted-foreground/60 transition-colors"
+          style={{
+            width: `${metrics.thumbWidthPct}%`,
+            left: `${metrics.thumbLeftPct}%`,
+            minWidth: "24px",
+          }}
+        />
+      </div>
+      <button
+        type="button"
+        aria-label="Scroll right"
+        onPointerDown={() => startHold(1)}
+        onPointerUp={stopHold}
+        onPointerLeave={stopHold}
+        onPointerCancel={stopHold}
+        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+      >
+        <Triangle className="h-2.5 w-2.5 rotate-90 fill-current" />
+      </button>
+    </div>,
+    document.body,
   );
-};
-
-export default StickyHorizontalScrollbar;
+}

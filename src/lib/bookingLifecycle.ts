@@ -1,45 +1,41 @@
-/** Shared booking lifecycle helpers used by the admin dashboard. */
-
-export type LifecycleBooking = {
+export interface BookingLifecycleSnapshot {
+  check_out: string;
+  payment_status: string;
   status: string;
-  payment_status?: string | null;
-  payment_method?: string | null;
-  check_in?: string | null;
-  check_out?: string | null;
-};
-
-/** Human-friendly label for a raw status/enum value. */
-export function formatBookingLabel(value: string | null | undefined): string {
-  if (!value) return "--";
-  return value
-    .split("_")
-    .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
-    .join(" ");
 }
 
-export interface PaymentDisplay {
-  /** Whether the payment cell should render as a dash. */
-  isDash: boolean;
-  /** Payment label, e.g. "paid", "pending", "refunded". */
-  label: string;
-  /** The status shown in the status column after lifecycle rules are applied. */
-  effectiveStatus: string;
+const ACTIVE_STATUSES = new Set(["pending", "confirmed"]);
+
+function toDateOnly(value: string) {
+  return value.split("T")[0] ?? value;
 }
 
-/**
- * Derives the payment label and effective booking status.
- * A paid booking that is still "pending" is displayed as "confirmed".
- */
-export function getPaymentDisplay(b: LifecycleBooking): PaymentDisplay {
-  const payment = (b.payment_status ?? "").toLowerCase();
-  const status = (b.status ?? "").toLowerCase();
+export function hasCheckoutDatePassed(checkOut: string, now = new Date()) {
+  return toDateOnly(checkOut) <= now.toISOString().split("T")[0];
+}
 
-  const isDash = !payment || payment === "unpaid" || status === "cancelled";
-
-  let effectiveStatus = status;
-  if (payment === "paid" && (status === "pending" || status === "")) {
-    effectiveStatus = "confirmed";
+export function getEffectiveBookingStatus<T extends BookingLifecycleSnapshot>(booking: T, now = new Date()) {
+  if (!ACTIVE_STATUSES.has(booking.status) || !hasCheckoutDatePassed(booking.check_out, now)) {
+    return booking.status;
   }
 
-  return { isDash, label: payment || "unpaid", effectiveStatus };
+  return booking.payment_status === "paid" ? "completed" : "no_show";
+}
+
+export function getPaymentDisplay<T extends BookingLifecycleSnapshot>(booking: T, now = new Date()) {
+  const effectiveStatus = getEffectiveBookingStatus(booking, now);
+
+  if (effectiveStatus === "cancelled" || effectiveStatus === "no_show") {
+    return { effectiveStatus, isDash: true, label: "--" };
+  }
+
+  if (effectiveStatus === "completed") {
+    return { effectiveStatus, isDash: false, label: "paid" };
+  }
+
+  return { effectiveStatus, isDash: false, label: booking.payment_status };
+}
+
+export function formatBookingLabel(value: string) {
+  return value === "--" ? value : value.replace(/_/g, " ");
 }

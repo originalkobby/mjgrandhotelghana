@@ -1,26 +1,27 @@
-/** British date formatting (DD/MM/YYYY) used across the app. */
-export function formatDateGB(value: string | Date | null | undefined): string {
-  if (!value) return "--";
-  const d = typeof value === "string" ? new Date(value) : value;
-  if (Number.isNaN(d.getTime())) return "--";
-  const dd = String(d.getDate()).padStart(2, "0");
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  return `${dd}/${mm}/${d.getFullYear()}`;
+import { format, parseISO } from "date-fns";
+
+/**
+ * Format a date string or Date to British format DD/MM/YYYY
+ */
+export function formatDateGB(dateStr: string | Date | null | undefined): string {
+  if (!dateStr) return "—";
+  try {
+    const d = typeof dateStr === "string" ? parseISO(dateStr) : dateStr;
+    return format(d, "dd/MM/yyyy");
+  } catch {
+    return String(dateStr);
+  }
 }
 
-export function formatDateTimeGB(value: string | Date | null | undefined): string {
-  if (!value) return "--";
-  const d = typeof value === "string" ? new Date(value) : value;
-  if (Number.isNaN(d.getTime())) return "--";
-  const hh = String(d.getHours()).padStart(2, "0");
-  const mi = String(d.getMinutes()).padStart(2, "0");
-  return `${formatDateGB(d)} ${hh}:${mi}`;
-}
-
-/** ISO (yyyy-mm-dd) helper for date inputs and DB writes. */
-export function toISODate(value: string | Date | null | undefined): string {
-  if (!value) return "";
-  const d = typeof value === "string" ? new Date(value) : value;
-  if (Number.isNaN(d.getTime())) return "";
-  return d.toISOString().split("T")[0];
+/**
+ * Format a date string to DD/MM/YYYY HH:mm:ss
+ */
+export function formatDateTimeGB(dateStr: string | Date | null | undefined): string {
+  if (!dateStr) return "—";
+  try {
+    const d = typeof dateStr === "string" ? parseISO(dateStr) : dateStr;
+    return format(d, "dd/MM/yyyy HH:mm:ss");
+  } catch {
+    return String(dateStr);
+  }
 }

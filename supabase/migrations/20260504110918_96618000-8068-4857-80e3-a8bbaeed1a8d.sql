@@ -1,0 +1,2 @@
+ALTER TABLE public.webhook_logs DROP CONSTRAINT IF EXISTS webhook_logs_booking_id_fkey;
+ALTER TABLE public.webhook_logs ADD CONSTRAINT webhook_logs_booking_id_fkey FOREIGN KEY (booking_id) REFERENCES public.bookings(id) ON DELETE SET NULL;

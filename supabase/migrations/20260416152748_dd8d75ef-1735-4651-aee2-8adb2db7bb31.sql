@@ -1,0 +1,1 @@
+UPDATE public.add_ons SET is_active = false WHERE id = 'b1b2563a-3f78-4f8a-93fb-86efb3c2a045';

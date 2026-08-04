@@ -1,0 +1,1 @@
+ALTER VIEW public.room_availability SET (security_invoker = true);

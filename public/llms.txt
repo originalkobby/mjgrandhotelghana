@@ -1,0 +1,23 @@
+# MJ Grand Hotel Ghana
+
+> Five-star luxury hotel in East Legon, Accra, Ghana — exquisite rooms, fine dining, spa, and curated cultural experiences.
+
+MJ Grand Hotel offers premium accommodation, an on-site restaurant and bar, conference facilities, a swimming pool, and 24/7 concierge service (the MJ AI assistant). Pricing is quoted in USD with Ghana Cedi (GH₵) equivalents.
+
+## Pages
+
+- [Home](/): Overview of the hotel, rooms, experiences, and contact.
+- [Rooms & Booking](/booking): Reserve a room — Single, Double, Deluxe, or Executive.
+- [Booking Lookup](/booking/lookup): Find an existing reservation by reference.
+- [Dining](/dining): Restaurant overview, hours, and Sunday Buffet.
+- [Menu](/menu): Full food and drink menu.
+- [Gallery](/gallery): Photo gallery of rooms, dining, and grounds.
+- [Guest Services](/guest-services): In-house guest directory and extensions.
+- [About](/about): Hotel story and team.
+- [Policy](/policy): Check-in/out, cancellation, and house rules.
+
+## Contact
+
+- Address: No. 460 Abotsi Street, East Legon, Accra, Ghana
+- Phone: +233 302544212
+- Email: mj@mjgrandhotelghana.com

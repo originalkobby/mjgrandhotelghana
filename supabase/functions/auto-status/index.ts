@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { syncToConvex } from "../_shared/convexSync.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -89,6 +90,13 @@ serve(async (req) => {
         old_status: booking.status,
         new_status: newStatus,
         note: `Auto-status: check-out date ${booking.check_out} reached. Payment: ${booking.payment_status}`,
+      });
+
+      // Fire-and-forget dual-write to Convex
+      syncToConvex({
+        event: "booking.status_changed",
+        bookingId: booking.id,
+        data: { previousStatus: booking.status, status: newStatus, reason: "auto-status" },
       });
 
       if (shouldReleaseInventory) {

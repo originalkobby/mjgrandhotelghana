@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.enforce_rooms_room_numbers_private() FROM PUBLIC, anon, authenticated;
