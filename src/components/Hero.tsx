@@ -126,22 +126,6 @@ const Hero = () => {
           </motion.div>
         </div>
 
-        {/* Father's Day promo flyer */}
-        <motion.a
-          href="/booking"
-          initial={{ opacity: 0, x: 40 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.9, ease: [0.3, 0, 0.2, 1] }}
-          className="group block w-full max-w-xs sm:max-w-sm lg:max-w-md xl:max-w-lg flex-shrink-0"
-          aria-label="Daddy's Banquet — Father's Day at MJ Grand Hotel, 21st June 2026"
-        >
-          <img
-            src={fathersDayFlyer.url}
-            alt="Daddy's Banquet — Father's Day at MJ Grand Hotel, 21st June 2026"
-            loading="lazy"
-            className="w-full h-auto rounded-xl border border-gold/20 shadow-2xl shadow-gold/20 transition-transform duration-500 group-hover:scale-[1.02]"
-          />
-        </motion.a>
       </div>
 
 
