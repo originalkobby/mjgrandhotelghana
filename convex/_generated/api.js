@@ -1,15 +1,12 @@
 /* eslint-disable */
 /**
  * Generated `api` utility.
+ *
+ * Uses Convex's `anyApi`, which produces real function references
+ * (e.g. "rooms:listActiveRooms") resolved at runtime by the backend.
  */
-const makeAnyApi = () => {
-  return new Proxy({}, {
-    get(target, prop) {
-      if (prop === 'components') return () => makeAnyApi();
-      return makeAnyApi();
-    }
-  });
-};
+import { anyApi } from "convex/server";
 
-export const api = makeAnyApi();
-export const internal = makeAnyApi();
+export const api = anyApi;
+export const internal = anyApi;
+export const components = anyApi;
