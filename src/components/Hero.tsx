@@ -72,7 +72,7 @@ const Hero = () => {
 
       {/* Content */}
       <div className="relative z-10 flex h-full flex-col items-center justify-center gap-10 px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-12 lg:px-16 xl:px-24">
-        <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
+        <div className="flex flex-col items-center text-center">
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
