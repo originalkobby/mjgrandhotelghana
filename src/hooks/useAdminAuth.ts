@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
-type AdminRole = "admin" | "revenue_manager" | "front_desk" | "finance";
+type AdminRole = "admin" | "operations_manager" | "revenue_manager" | "front_desk" | "finance";
 
 interface AdminAuth {
   user: User | null;
