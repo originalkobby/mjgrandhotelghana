@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
   try {
     const { code, roomId, baseTotalGhs, nights, checkIn, checkOut }: Body = await req.json();
     if (!code || typeof code !== "string" || !roomId || typeof baseTotalGhs !== "number" || baseTotalGhs <= 0) {
-      return json({ valid: false, reason: "invalid_input" }, 400);
+      return json({ valid: false, reason: "invalid_input" });
     }
 
 
