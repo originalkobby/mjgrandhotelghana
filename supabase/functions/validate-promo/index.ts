@@ -49,7 +49,13 @@ Deno.serve(async (req) => {
       discountGhs = Math.round((baseTotalGhs * promo.discount_value) / 100);
     } else if (promo.discount_type === "fixed") {
       discountGhs = Math.min(promo.discount_value, baseTotalGhs);
+    } else if (promo.discount_type === "flat_rate") {
+      const n = typeof nights === "number" && nights > 0 ? Math.round(nights) : 1;
+      const flatTotal = promo.discount_value * n;
+      // Never increase the price: only discount when the flat rate is cheaper.
+      discountGhs = Math.max(0, Math.round(baseTotalGhs - flatTotal));
     }
+
 
     return json({
       valid: true,
