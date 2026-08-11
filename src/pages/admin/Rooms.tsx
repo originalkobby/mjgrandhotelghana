@@ -38,6 +38,7 @@ const emptyForm = {
 
 export default function AdminRooms() {
   const qc = useQueryClient();
+  const { role, loading: roleLoading } = useAdminAuth();
   const { format: fc } = useCurrency();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
