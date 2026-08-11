@@ -164,12 +164,25 @@ export function useBooking() {
   }, [state.step, state.roomPreselected]);
 
   const addOnsTotal = state.selectedAddOns.reduce((sum, a) => sum + a.price_ghs * a.quantity, 0);
-  const preDiscountTotal = (state.selectedRoom?.totalPrice ?? 0) + addOnsTotal;
-  const discountGhs = state.appliedPromo?.discountGhs ?? 0;
+  const roomTotal = state.selectedRoom?.totalPrice ?? 0;
+  const preDiscountTotal = roomTotal + addOnsTotal;
+  // For flat-rate group promos the room charge is always rate x nights, so derive the
+  // adjustment from the currently selected room instead of a possibly stale server value.
+  const nights = state.selectedRoom?.totalNights ?? 0;
+  const discountGhs =
+    state.appliedPromo?.discountType === "flat_rate" && nights > 0
+      ? roomTotal - state.appliedPromo.discountValue * nights
+      : state.appliedPromo?.discountGhs ?? 0;
   const totalAmount = Math.max(0, preDiscountTotal - discountGhs);
 
+
   return {
-    state: { ...state, totalAmount },
+    state: {
+      ...state,
+      totalAmount,
+      appliedPromo: state.appliedPromo ? { ...state.appliedPromo, discountGhs } : null,
+    },
+
     setStep,
     setSearch,
     setSelectedRoom,

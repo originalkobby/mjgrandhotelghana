@@ -203,7 +203,11 @@ serve(async (req) => {
             discountGhs = Math.round((baseTotalGhs * promo.discount_value) / 100);
           } else if (promo.discount_type === "fixed") {
             discountGhs = Math.min(promo.discount_value, baseTotalGhs);
+          } else if (promo.discount_type === "flat_rate") {
+            // Group flat nightly rate: room charge = rate x nights for every room type
+            discountGhs = baseTotalGhs - promo.discount_value * dates.length;
           }
+
 
           await supabase
             .from("promotions")
@@ -214,7 +218,7 @@ serve(async (req) => {
     }
 
     // Server-computed final total
-    const finalTotal = baseTotalGhs + addOnsTotalGhs - discountGhs;
+    const finalTotal = Math.max(0, baseTotalGhs + addOnsTotalGhs - discountGhs);
 
     // --- Upsert guest ---
     let guestId: string | null = null;
