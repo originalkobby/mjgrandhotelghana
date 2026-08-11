@@ -154,8 +154,16 @@ const Booking = () => {
     const validationTimer = window.setTimeout(async () => {
       try {
         const { data, error } = await supabase.functions.invoke("validate-promo", {
-          body: { code, roomId: room!.id, baseTotalGhs: baseTotal, nights: room!.totalNights },
+          body: {
+            code,
+            roomId: room!.id,
+            baseTotalGhs: baseTotal,
+            nights: room!.totalNights,
+            checkIn: state.search.checkIn?.toISOString().split("T")[0],
+            checkOut: state.search.checkOut?.toISOString().split("T")[0],
+          },
         });
+
         if (cancelled) return;
         if (error) {
           setAppliedPromo(null, "Could not validate promo code");
@@ -188,7 +196,7 @@ const Booking = () => {
       cancelled = true;
       window.clearTimeout(validationTimer);
     };
-  }, [state.step, state.search.promoCode, state.selectedRoom?.id, state.selectedRoom?.totalPrice]);
+  }, [state.step, state.search.promoCode, state.selectedRoom?.id, state.selectedRoom?.totalPrice, state.selectedRoom?.totalNights, state.search.checkIn, state.search.checkOut]);
 
   const handleSubmitBooking = useCallback(async () => {
     if (!state.selectedRoom || !state.search.checkIn || !state.search.checkOut) return;

@@ -121,9 +121,10 @@ export default function PaymentStep({
                     {appliedPromo.discountType === "percentage"
                       ? `${appliedPromo.discountValue}% off`
                       : appliedPromo.discountType === "flat_rate"
-                      ? `Group flat rate — ${toUsd(appliedPromo.discountValue)} / night (${toGhs(appliedPromo.discountValue)})`
+                      ? `Group flat rate — ${toUsd(appliedPromo.discountValue)} × ${selectedRoom.totalNights} night${selectedRoom.totalNights === 1 ? "" : "s"} = ${toUsd(appliedPromo.discountValue * selectedRoom.totalNights)} (${toGhs(appliedPromo.discountValue * selectedRoom.totalNights)})`
                       : "Flat discount"}
                   </p>
+
                   {appliedPromo.description && (
                     <p className="text-xs text-muted-foreground mt-0.5">{appliedPromo.description}</p>
                   )}
