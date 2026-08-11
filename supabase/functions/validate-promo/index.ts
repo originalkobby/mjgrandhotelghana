@@ -10,13 +10,14 @@ interface Body {
   code?: string;
   roomId?: string;
   baseTotalGhs?: number;
+  nights?: number;
 }
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const { code, roomId, baseTotalGhs }: Body = await req.json();
+    const { code, roomId, baseTotalGhs, nights }: Body = await req.json();
     if (!code || typeof code !== "string" || !roomId || typeof baseTotalGhs !== "number" || baseTotalGhs <= 0) {
       return json({ valid: false, reason: "invalid_input" }, 400);
     }
