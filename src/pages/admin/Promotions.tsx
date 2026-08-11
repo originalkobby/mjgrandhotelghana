@@ -318,7 +318,11 @@ export default function Promotions() {
                             : formatCurrency(p.discount_value)}
                         </span>
                         <span className="text-xs text-muted-foreground ml-1">
-                          {p.discount_type === "percentage" ? "off" : "flat"}
+                          {p.discount_type === "percentage"
+                            ? "off"
+                            : p.discount_type === "flat_rate"
+                            ? "/ night (group flat)"
+                            : "flat"}
                         </span>
                       </TableCell>
                       <TableCell className="font-sans text-sm hidden md:table-cell">
