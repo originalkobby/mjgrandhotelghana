@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.get_my_admin_role() TO authenticated;
