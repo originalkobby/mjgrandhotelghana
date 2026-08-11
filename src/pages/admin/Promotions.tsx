@@ -441,7 +441,7 @@ export default function Promotions() {
               <div className="space-y-2">
                 <Label className="text-xs">
                   {form.discount_type === "flat_rate"
-                    ? "Nightly Rate (GH₵)"
+                    ? "Flat Nightly Rate (USD)"
                     : `Discount Value ${form.discount_type === "percentage" ? "(%)" : "(GH₵)"}`}
                 </Label>
                 <Input
@@ -452,16 +452,17 @@ export default function Promotions() {
                     form.discount_type === "percentage"
                       ? "e.g. 15"
                       : form.discount_type === "flat_rate"
-                      ? "e.g. 1250"
+                      ? "e.g. 90"
                       : "e.g. 50"
                   }
                   min={0}
                 />
                 {form.discount_type === "flat_rate" && (
                   <p className="text-[11px] text-muted-foreground">
-                    Every guest using this code pays this rate per night, whatever the room type. Set the usage limit to the number of rooms in the group.
+                    Enter the rate in USD, same unit as room rates (e.g. 90). Every guest using this code pays exactly this rate per night for any room type — total = rate × nights. Set the usage limit to the number of rooms in the group.
                   </p>
                 )}
+
               </div>
               <div className="space-y-2">
                 <Label className="text-xs">Usage Limit</Label>
