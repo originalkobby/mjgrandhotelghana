@@ -460,10 +460,15 @@ export default function GuestDetailsStep({
                     </div>
                     <div className="text-right shrink-0">
                       <div className="font-semibold text-emerald-700 dark:text-emerald-300">
-                        − {toUsd(appliedPromo.discountGhs)}
+                        {appliedPromo.discountGhs < 0 ? "+ " : "− "}
+                        {toUsd(Math.abs(appliedPromo.discountGhs))}
                       </div>
-                      <div className="text-[11px] text-muted-foreground">{toGhs(appliedPromo.discountGhs)}</div>
+                      <div className="text-[11px] text-muted-foreground">
+                        {appliedPromo.discountGhs < 0 ? "Adjustment · " : ""}
+                        {toGhs(Math.abs(appliedPromo.discountGhs))}
+                      </div>
                     </div>
+
                   </div>
                 </div>
               </div>

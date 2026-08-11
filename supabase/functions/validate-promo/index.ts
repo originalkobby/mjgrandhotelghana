@@ -62,6 +62,7 @@ Deno.serve(async (req) => {
 
     let discountGhs = 0;
     let resolvedNights: number | null = null;
+    let flatTotalGhs: number | null = null;
     if (promo.discount_type === "percentage") {
       discountGhs = Math.round((baseTotalGhs * promo.discount_value) / 100);
     } else if (promo.discount_type === "fixed") {
@@ -70,8 +71,9 @@ Deno.serve(async (req) => {
       resolvedNights = resolveNights(checkIn, checkOut, nights);
       if (!resolvedNights) return json({ valid: false, reason: "invalid_dates" });
       // Flat nightly rate applies to every room type: total = rate x nights.
-      const flatTotal = promo.discount_value * resolvedNights;
-      discountGhs = Math.round(baseTotalGhs - flatTotal);
+      // May be negative (an uplift) when the room's normal rate is lower.
+      flatTotalGhs = promo.discount_value * resolvedNights;
+      discountGhs = Math.round(baseTotalGhs - flatTotalGhs);
     }
 
     return json({
@@ -81,9 +83,11 @@ Deno.serve(async (req) => {
       discountValue: promo.discount_value,
       discountGhs,
       nights: resolvedNights,
+      flatTotalGhs,
       description: promo.description ?? null,
 
     });
+
   } catch (err) {
     console.error("validate-promo error", err);
     return json({ valid: false, reason: "error" }, 500);

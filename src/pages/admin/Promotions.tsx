@@ -315,6 +315,8 @@ export default function Promotions() {
                         <span className="font-medium text-foreground">
                           {p.discount_type === "percentage"
                             ? `${p.discount_value}%`
+                            : p.discount_type === "flat_rate"
+                            ? `Flat $${p.discount_value}`
                             : formatCurrency(p.discount_value)}
                         </span>
                         <span className="text-xs text-muted-foreground ml-1">
@@ -325,6 +327,7 @@ export default function Promotions() {
                             : "flat"}
                         </span>
                       </TableCell>
+
                       <TableCell className="font-sans text-sm hidden md:table-cell">
                         {p.room_restrictions && p.room_restrictions.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
@@ -428,7 +431,7 @@ export default function Promotions() {
                   <SelectContent>
                     <SelectItem value="percentage">Percentage (%)</SelectItem>
                     <SelectItem value="fixed">Fixed Amount (GH₵)</SelectItem>
-                    <SelectItem value="flat_rate">Flat Nightly Rate (GH₵)</SelectItem>
+                    <SelectItem value="flat_rate">Flat Nightly Rate (USD)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -438,7 +441,7 @@ export default function Promotions() {
               <div className="space-y-2">
                 <Label className="text-xs">
                   {form.discount_type === "flat_rate"
-                    ? "Nightly Rate (GH₵)"
+                    ? "Flat Nightly Rate (USD)"
                     : `Discount Value ${form.discount_type === "percentage" ? "(%)" : "(GH₵)"}`}
                 </Label>
                 <Input
@@ -449,16 +452,17 @@ export default function Promotions() {
                     form.discount_type === "percentage"
                       ? "e.g. 15"
                       : form.discount_type === "flat_rate"
-                      ? "e.g. 1250"
+                      ? "e.g. 90"
                       : "e.g. 50"
                   }
                   min={0}
                 />
                 {form.discount_type === "flat_rate" && (
                   <p className="text-[11px] text-muted-foreground">
-                    Every guest using this code pays this rate per night, whatever the room type. Set the usage limit to the number of rooms in the group.
+                    Enter the rate in USD, same unit as room rates (e.g. 90). Every guest using this code pays exactly this rate per night for any room type — total = rate × nights. Set the usage limit to the number of rooms in the group.
                   </p>
                 )}
+
               </div>
               <div className="space-y-2">
                 <Label className="text-xs">Usage Limit</Label>
