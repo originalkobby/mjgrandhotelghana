@@ -505,14 +505,14 @@ export default function Promotions() {
             </div>
 
             {/* Room Restrictions */}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label className="text-xs">Room Restrictions (optional)</Label>
-              <p className="text-xs text-muted-foreground">Leave empty to apply to all rooms</p>
-              <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto rounded-md border border-border p-3">
+              <p className="text-[11px] text-muted-foreground">Leave empty to apply to all rooms</p>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 max-h-24 overflow-y-auto rounded-md border border-border p-2">
                 {rooms.map((room) => {
                   const isSelected = form.room_restrictions.includes(room.id);
                   return (
-                    <label key={room.id} className="flex items-center gap-2 cursor-pointer text-sm">
+                    <label key={room.id} className="flex items-center gap-1.5 cursor-pointer text-xs">
                       <input
                         type="checkbox"
                         checked={isSelected}
@@ -524,22 +524,22 @@ export default function Promotions() {
                               : [...form.room_restrictions, room.id],
                           });
                         }}
-                        className="rounded border-border"
+                        className="rounded border-border h-3.5 w-3.5"
                       />
-                      <span className="text-foreground">{room.name}</span>
+                      <span className="text-foreground truncate">{room.name}</span>
                     </label>
                   );
                 })}
                 {rooms.length === 0 && (
-                  <p className="text-xs text-muted-foreground">No rooms available</p>
+                  <p className="text-xs text-muted-foreground col-span-2">No rooms available</p>
                 )}
               </div>
             </div>
 
-            <div className="flex items-center justify-between rounded-md border border-border p-3">
+            <div className="flex items-center justify-between rounded-md border border-border p-2.5">
               <div>
                 <p className="text-sm font-medium text-foreground">Active</p>
-                <p className="text-xs text-muted-foreground">Guests can use this code at checkout</p>
+                <p className="text-[11px] text-muted-foreground">Guests can use this code at checkout</p>
               </div>
               <Switch
                 checked={form.is_active}
