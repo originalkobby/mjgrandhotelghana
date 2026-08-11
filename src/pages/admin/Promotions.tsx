@@ -315,6 +315,8 @@ export default function Promotions() {
                         <span className="font-medium text-foreground">
                           {p.discount_type === "percentage"
                             ? `${p.discount_value}%`
+                            : p.discount_type === "flat_rate"
+                            ? `Flat $${p.discount_value}`
                             : formatCurrency(p.discount_value)}
                         </span>
                         <span className="text-xs text-muted-foreground ml-1">
@@ -325,6 +327,7 @@ export default function Promotions() {
                             : "flat"}
                         </span>
                       </TableCell>
+
                       <TableCell className="font-sans text-sm hidden md:table-cell">
                         {p.room_restrictions && p.room_restrictions.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
