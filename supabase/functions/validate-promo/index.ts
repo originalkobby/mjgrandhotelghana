@@ -69,9 +69,9 @@ Deno.serve(async (req) => {
     } else if (promo.discount_type === "flat_rate") {
       resolvedNights = resolveNights(checkIn, checkOut, nights);
       if (!resolvedNights) return json({ valid: false, reason: "invalid_dates" });
+      // Flat nightly rate applies to every room type: total = rate x nights.
       const flatTotal = promo.discount_value * resolvedNights;
-      // Never increase the price: only discount when the flat rate is cheaper.
-      discountGhs = Math.max(0, Math.round(baseTotalGhs - flatTotal));
+      discountGhs = Math.round(baseTotalGhs - flatTotal);
     }
 
     return json({
