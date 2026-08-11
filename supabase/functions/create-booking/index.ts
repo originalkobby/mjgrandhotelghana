@@ -218,7 +218,7 @@ serve(async (req) => {
     }
 
     // Server-computed final total
-    const finalTotal = baseTotalGhs + addOnsTotalGhs - discountGhs;
+    const finalTotal = Math.max(0, baseTotalGhs + addOnsTotalGhs - discountGhs);
 
     // --- Upsert guest ---
     let guestId: string | null = null;
