@@ -196,7 +196,7 @@ const Booking = () => {
       cancelled = true;
       window.clearTimeout(validationTimer);
     };
-  }, [state.step, state.search.promoCode, state.selectedRoom?.id, state.selectedRoom?.totalPrice]);
+  }, [state.step, state.search.promoCode, state.selectedRoom?.id, state.selectedRoom?.totalPrice, state.selectedRoom?.totalNights, state.search.checkIn, state.search.checkOut]);
 
   const handleSubmitBooking = useCallback(async () => {
     if (!state.selectedRoom || !state.search.checkIn || !state.search.checkOut) return;
