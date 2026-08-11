@@ -401,17 +401,17 @@ export default function Promotions() {
 
       {/* Create / Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="font-serif">
+        <DialogContent className="sm:max-w-lg p-4 sm:p-5 max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="space-y-1">
+            <DialogTitle className="font-serif text-base">
               {editingId ? "Edit Promotion" : "Create Promotion"}
             </DialogTitle>
-            <DialogDescription className="font-sans">
+            <DialogDescription className="font-sans text-xs">
               {editingId ? "Update the promo code details below." : "Set up a new promotional discount."}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 font-sans">
+          <div className="space-y-3 font-sans">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-xs">Promo Code</Label>
