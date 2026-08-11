@@ -458,8 +458,8 @@ export default function Promotions() {
                   min={0}
                 />
                 {form.discount_type === "flat_rate" && (
-                  <p className="text-[11px] text-muted-foreground">
-                    Enter the rate in USD, same unit as room rates (e.g. 90). Every guest using this code pays exactly this rate per night for any room type — total = rate × nights. Set the usage limit to the number of rooms in the group.
+                  <p className="text-[10px] leading-tight text-muted-foreground">
+                    USD rate per night for any room type. Total = rate × nights.
                   </p>
                 )}
 
