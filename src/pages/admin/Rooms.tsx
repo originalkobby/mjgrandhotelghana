@@ -16,6 +16,8 @@ import { Plus, Pencil, BedDouble, RefreshCw } from "lucide-react";
 import ImageUpload from "@/components/admin/ImageUpload";
 import type { Tables } from "@/integrations/supabase/types";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { Navigate } from "react-router-dom";
 
 type Room = Tables<"rooms">;
 
