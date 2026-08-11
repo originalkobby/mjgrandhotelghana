@@ -165,7 +165,8 @@ const Booking = () => {
         });
 
         if (cancelled) return;
-        if (error) {
+        if (error && !data) {
+          console.error("validate-promo error:", error);
           setAppliedPromo(null, "Could not validate promo code");
           return;
         }
@@ -185,6 +186,8 @@ const Booking = () => {
             not_started: "Promo code not yet active",
             usage_limit: "Promo code usage limit reached",
             room_not_allowed: "Promo not valid for this room",
+            invalid_dates: "Select your stay dates to apply this promo",
+            invalid_input: "Promo code could not be applied to this stay",
           };
           setAppliedPromo(null, reasonMap[data?.reason] ?? "Promo code not valid");
         }
