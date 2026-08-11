@@ -141,6 +141,10 @@ export default function AdminRooms() {
 
   const refreshing = isLoading || isFetching;
 
+  if (!roleLoading && role && role !== "admin") {
+    return <Navigate to="/admin/bookings" replace />;
+  }
+
   if (isLoading) {
     return (
       <div className="space-y-4">
