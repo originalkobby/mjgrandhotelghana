@@ -658,7 +658,7 @@ export default function Bookings() {
                     </th>
                   )}
                   {["Ref", "Guest", "Room", "Check-in", "Check-out", "Guests", "Total", "Status", "Source", "Payment", "Method", "Actions"].map((h) => (
-                    <th key={h} className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <th key={h} className={`px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider ${h === "Status" ? "text-center" : "text-left"}`}>
                       {h}
                     </th>
                   ))}
@@ -722,7 +722,7 @@ export default function Bookings() {
                         <td className="px-4 py-3 font-medium text-foreground whitespace-nowrap">
                           {formatCurrency(b.final_total_ghs)}
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-3 text-center">
                           <Badge variant="outline" className={`text-xs capitalize ${STATUS_COLORS[pd.effectiveStatus] ?? STATUS_COLORS[b.status] ?? ""}`}>
                             {STATUS_LABELS[pd.effectiveStatus] ?? formatBookingLabel(pd.effectiveStatus)}
                           </Badge>
