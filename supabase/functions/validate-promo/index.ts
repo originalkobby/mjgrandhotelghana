@@ -10,13 +10,14 @@ interface Body {
   code?: string;
   roomId?: string;
   baseTotalGhs?: number;
+  nights?: number;
 }
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const { code, roomId, baseTotalGhs }: Body = await req.json();
+    const { code, roomId, baseTotalGhs, nights }: Body = await req.json();
     if (!code || typeof code !== "string" || !roomId || typeof baseTotalGhs !== "number" || baseTotalGhs <= 0) {
       return json({ valid: false, reason: "invalid_input" }, 400);
     }
@@ -48,7 +49,13 @@ Deno.serve(async (req) => {
       discountGhs = Math.round((baseTotalGhs * promo.discount_value) / 100);
     } else if (promo.discount_type === "fixed") {
       discountGhs = Math.min(promo.discount_value, baseTotalGhs);
+    } else if (promo.discount_type === "flat_rate") {
+      const n = typeof nights === "number" && nights > 0 ? Math.round(nights) : 1;
+      const flatTotal = promo.discount_value * n;
+      // Never increase the price: only discount when the flat rate is cheaper.
+      discountGhs = Math.max(0, Math.round(baseTotalGhs - flatTotal));
     }
+
 
     return json({
       valid: true,

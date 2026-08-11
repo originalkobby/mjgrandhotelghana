@@ -154,7 +154,7 @@ const Booking = () => {
     const validationTimer = window.setTimeout(async () => {
       try {
         const { data, error } = await supabase.functions.invoke("validate-promo", {
-          body: { code, roomId: room!.id, baseTotalGhs: baseTotal },
+          body: { code, roomId: room!.id, baseTotalGhs: baseTotal, nights: room!.totalNights },
         });
         if (cancelled) return;
         if (error) {

@@ -318,7 +318,11 @@ export default function Promotions() {
                             : formatCurrency(p.discount_value)}
                         </span>
                         <span className="text-xs text-muted-foreground ml-1">
-                          {p.discount_type === "percentage" ? "off" : "flat"}
+                          {p.discount_type === "percentage"
+                            ? "off"
+                            : p.discount_type === "flat_rate"
+                            ? "/ night (group flat)"
+                            : "flat"}
                         </span>
                       </TableCell>
                       <TableCell className="font-sans text-sm hidden md:table-cell">
@@ -424,6 +428,7 @@ export default function Promotions() {
                   <SelectContent>
                     <SelectItem value="percentage">Percentage (%)</SelectItem>
                     <SelectItem value="fixed">Fixed Amount (GH₵)</SelectItem>
+                    <SelectItem value="flat_rate">Flat Nightly Rate (GH₵)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -432,15 +437,28 @@ export default function Promotions() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-xs">
-                  Discount Value {form.discount_type === "percentage" ? "(%)" : "(GH₵)"}
+                  {form.discount_type === "flat_rate"
+                    ? "Nightly Rate (GH₵)"
+                    : `Discount Value ${form.discount_type === "percentage" ? "(%)" : "(GH₵)"}`}
                 </Label>
                 <Input
                   type="number"
                   value={form.discount_value}
                   onChange={(e) => setForm({ ...form, discount_value: e.target.value })}
-                  placeholder={form.discount_type === "percentage" ? "e.g. 15" : "e.g. 50"}
+                  placeholder={
+                    form.discount_type === "percentage"
+                      ? "e.g. 15"
+                      : form.discount_type === "flat_rate"
+                      ? "e.g. 1250"
+                      : "e.g. 50"
+                  }
                   min={0}
                 />
+                {form.discount_type === "flat_rate" && (
+                  <p className="text-[11px] text-muted-foreground">
+                    Every guest using this code pays this rate per night, whatever the room type. Set the usage limit to the number of rooms in the group.
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label className="text-xs">Usage Limit</Label>

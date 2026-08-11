@@ -449,6 +449,8 @@ export default function GuestDetailsStep({
                       <p className="text-xs text-muted-foreground mt-1">
                         {appliedPromo.discountType === "percentage"
                           ? `${appliedPromo.discountValue}% off`
+                          : appliedPromo.discountType === "flat_rate"
+                          ? `Group flat rate — ${toUsd(appliedPromo.discountValue)} / night (${toGhs(appliedPromo.discountValue)})`
                           : "Flat discount"}
                       </p>
                       {appliedPromo.description && (
