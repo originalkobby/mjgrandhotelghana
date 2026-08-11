@@ -11,16 +11,32 @@ interface Body {
   roomId?: string;
   baseTotalGhs?: number;
   nights?: number;
+  checkIn?: string;
+  checkOut?: string;
+}
+
+function resolveNights(checkIn?: string, checkOut?: string, nights?: number): number | null {
+  if (checkIn && checkOut) {
+    const inMs = Date.parse(checkIn);
+    const outMs = Date.parse(checkOut);
+    if (!Number.isNaN(inMs) && !Number.isNaN(outMs)) {
+      const n = Math.round((outMs - inMs) / 86400000);
+      if (n > 0) return n;
+    }
+  }
+  if (typeof nights === "number" && nights > 0) return Math.round(nights);
+  return null;
 }
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const { code, roomId, baseTotalGhs, nights }: Body = await req.json();
+    const { code, roomId, baseTotalGhs, nights, checkIn, checkOut }: Body = await req.json();
     if (!code || typeof code !== "string" || !roomId || typeof baseTotalGhs !== "number" || baseTotalGhs <= 0) {
       return json({ valid: false, reason: "invalid_input" }, 400);
     }
+
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
