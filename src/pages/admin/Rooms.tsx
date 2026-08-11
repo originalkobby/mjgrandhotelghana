@@ -16,6 +16,8 @@ import { Plus, Pencil, BedDouble, RefreshCw } from "lucide-react";
 import ImageUpload from "@/components/admin/ImageUpload";
 import type { Tables } from "@/integrations/supabase/types";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { Navigate } from "react-router-dom";
 
 type Room = Tables<"rooms">;
 
@@ -36,6 +38,7 @@ const emptyForm = {
 
 export default function AdminRooms() {
   const qc = useQueryClient();
+  const { role, loading: roleLoading } = useAdminAuth();
   const { format: fc } = useCurrency();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -138,6 +141,10 @@ export default function AdminRooms() {
   const set = (key: string, val: any) => setForm((p) => ({ ...p, [key]: val }));
 
   const refreshing = isLoading || isFetching;
+
+  if (!roleLoading && role && role !== "admin") {
+    return <Navigate to="/admin/bookings" replace />;
+  }
 
   if (isLoading) {
     return (
