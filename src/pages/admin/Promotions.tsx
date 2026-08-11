@@ -431,7 +431,7 @@ export default function Promotions() {
                   <SelectContent>
                     <SelectItem value="percentage">Percentage (%)</SelectItem>
                     <SelectItem value="fixed">Fixed Amount (GH₵)</SelectItem>
-                    <SelectItem value="flat_rate">Flat Nightly Rate (GH₵)</SelectItem>
+                    <SelectItem value="flat_rate">Flat Nightly Rate (USD)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
