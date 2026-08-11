@@ -26,8 +26,12 @@ export function useAdminAuth(): AdminAuth {
       .select("role")
       .eq("user_id", userId)
       .limit(1)
-      .single();
-    return (data?.role as AdminRole) ?? null;
+      .maybeSingle();
+    if (data?.role) return data.role as AdminRole;
+
+    // Fallback: security-definer RPC (works even if direct table read is blocked)
+    const { data: rpcRole } = await supabase.rpc("get_my_admin_role");
+    return (rpcRole as AdminRole) ?? null;
   }, []);
 
   useEffect(() => {
