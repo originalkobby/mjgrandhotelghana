@@ -177,7 +177,12 @@ export function useBooking() {
 
 
   return {
-    state: { ...state, totalAmount },
+    state: {
+      ...state,
+      totalAmount,
+      appliedPromo: state.appliedPromo ? { ...state.appliedPromo, discountGhs } : null,
+    },
+
     setStep,
     setSearch,
     setSelectedRoom,
