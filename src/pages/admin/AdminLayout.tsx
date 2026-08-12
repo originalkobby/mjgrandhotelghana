@@ -70,8 +70,6 @@ export default function AdminLayout() {
                 </Button>
               </div>
 
-              <span className="admin-rail-divider hidden md:block" />
-
               <div className="hidden md:flex flex-col justify-center px-3 leading-none">
                 <span className="text-[8px] uppercase tracking-[0.24em] text-admin-bar-foreground/55 font-sans">
                   Exchange Rate

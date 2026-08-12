@@ -125,7 +125,7 @@ export function AdminSidebar({ role }: Props) {
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={signOut}
-              className="text-destructive/90 hover:bg-destructive/10 hover:text-destructive rounded-sm"
+              className="text-white hover:bg-sidebar-foreground/10 hover:text-white rounded-sm"
             >
               <LogOut className="mr-2 h-4 w-4" />
               {!collapsed && <span>Sign Out</span>}
