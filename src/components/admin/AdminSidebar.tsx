@@ -58,14 +58,16 @@ export function AdminSidebar({ role }: Props) {
   const collapsed = state === "collapsed";
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader className="p-4">
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+      <SidebarHeader className="p-4 border-b border-sidebar-border/60">
         <div className="flex items-center gap-3">
           <img src={logo} alt="MJ" className="h-8 w-8 object-contain shrink-0" />
           {!collapsed && (
             <div className="min-w-0">
               <p className="font-serif text-sm text-sidebar-foreground truncate">MJ Grand Hotel</p>
-              <p className="font-sans text-xs text-muted-foreground capitalize">{role.replace("_", " ")}</p>
+              <p className="font-sans text-[10px] uppercase tracking-[0.16em] text-sidebar-foreground/55">
+                {role.replace("_", " ")}
+              </p>
             </div>
           )}
         </div>
@@ -73,7 +75,9 @@ export function AdminSidebar({ role }: Props) {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.2em] text-sidebar-foreground/45">
+            Navigation
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {NAV_ITEMS
@@ -84,8 +88,8 @@ export function AdminSidebar({ role }: Props) {
                     <NavLink
                       to={item.url}
                       end={item.end}
-                      className="hover:bg-sidebar-accent/50"
-                      activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                      className="text-sidebar-foreground/75 hover:bg-sidebar-foreground/5 hover:text-sidebar-foreground rounded-sm"
+                      activeClassName="bg-sidebar-foreground/10 text-sidebar-primary font-medium border-l-2 border-sidebar-primary rounded-none"
                     >
                       {item.customIcon ? (
                         <img src={item.customIcon} alt="" className="mr-2 h-5 w-5 object-contain" />
@@ -101,6 +105,7 @@ export function AdminSidebar({ role }: Props) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
 
       <SidebarFooter className="p-3">
         <SidebarMenu>
