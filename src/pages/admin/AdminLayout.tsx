@@ -9,7 +9,6 @@ import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { Button } from "@/components/ui/button";
-import { DollarSign } from "lucide-react";
 
 
 export default function AdminLayout() {
@@ -49,13 +48,13 @@ export default function AdminLayout() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setAdminMode("usd")}
-                  className={`h-8 px-3 text-[11px] font-sans gap-1 uppercase tracking-[0.16em] rounded-none transition-colors duration-200 ${
+                  className={`h-8 px-3 text-[11px] font-sans uppercase tracking-[0.16em] rounded-none transition-colors duration-200 ${
                     adminMode === "usd"
                       ? "bg-accent text-accent-foreground hover:bg-accent"
                       : "text-admin-bar-foreground/70 hover:bg-transparent hover:text-admin-bar-foreground"
                   }`}
                 >
-                  <DollarSign className="w-2.5 h-2.5" /> USD
+                  $ USD
                 </Button>
                 <Button
                   variant="ghost"
