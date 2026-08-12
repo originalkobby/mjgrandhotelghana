@@ -163,7 +163,38 @@
     height: 0;
     display: none;
   }
+
+  /* ── Admin dashboard (warm editorial luxury) ── */
+  .bg-admin-bar {
+    background-color: hsl(var(--admin-bar));
+  }
+  .text-admin-bar-foreground {
+    color: hsl(var(--admin-bar-foreground));
+  }
+  .admin-shell {
+    background-color: hsl(var(--background));
+  }
+  .admin-label {
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.68rem;
+    color: hsl(var(--muted-foreground));
+  }
 }
+
+/* Warm surfaces + editorial labels inside the dashboard */
+.admin-shell .rounded-lg[class*="bg-card"],
+.admin-shell [data-admin-surface] {
+  background-color: hsl(var(--admin-surface));
+}
+
+.admin-shell table thead th {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.68rem;
+  color: hsl(var(--muted-foreground));
+}
+
 
 /* Smooth scroll */
 html {
