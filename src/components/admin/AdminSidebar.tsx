@@ -33,7 +33,7 @@ import logo from "@/assets/logo.png";
 import revenueIntelIcon from "@/assets/revenue-intel-icon.jpeg";
 
 const NAV_ITEMS = [
-  { title: "Overview", url: "/admin", icon: LayoutDashboard, end: true, roles: ["admin", "revenue_manager", "finance"] },
+  { title: "Overview", url: "/admin", icon: LayoutDashboard, end: true, roles: ["admin", "revenue_manager", "finance", "front_desk", "operations_manager"] },
   { title: "Bookings", url: "/admin/bookings", icon: CalendarCheck, end: false, roles: null },
   { title: "Guests", url: "/admin/guests", icon: Users, end: false, roles: ["admin", "front_desk", "operations_manager"] },
   { title: "Rooms", url: "/admin/rooms", icon: BedDouble, end: false, roles: ["admin"] },
