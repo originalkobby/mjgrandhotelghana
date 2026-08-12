@@ -62,8 +62,8 @@ export default function AdminLayout() {
                   onClick={() => setAdminMode("ghs")}
                   className={`h-8 px-3 text-[11px] font-sans uppercase tracking-[0.16em] rounded-none transition-colors duration-200 ${
                     adminMode === "ghs"
-                      ? "bg-accent text-accent-foreground hover:bg-accent"
-                      : "text-admin-bar-foreground/70 hover:bg-transparent hover:text-admin-bar-foreground"
+                      ? "bg-accent text-accent-foreground hover:bg-accent border border-accent"
+                      : "text-admin-bar-foreground/70 hover:bg-transparent hover:text-admin-bar-foreground border border-accent"
                   }`}
                 >
                   GH₵
