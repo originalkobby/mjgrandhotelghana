@@ -107,25 +107,33 @@ export function AdminSidebar({ role }: Props) {
       </SidebarContent>
 
 
-      <SidebarFooter className="p-3">
+      <SidebarFooter className="p-3 border-t border-sidebar-border/60">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <a href="/" target="_blank" rel="noopener noreferrer" className="hover:bg-sidebar-accent/50">
+              <a
+                href="/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sidebar-foreground/75 hover:bg-sidebar-foreground/5 hover:text-sidebar-foreground rounded-sm"
+              >
                 <Globe className="mr-2 h-4 w-4" />
                 {!collapsed && <span>View Website</span>}
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={signOut} className="hover:bg-destructive/10 text-destructive">
+            <SidebarMenuButton
+              onClick={signOut}
+              className="text-destructive/90 hover:bg-destructive/10 hover:text-destructive rounded-sm"
+            >
               <LogOut className="mr-2 h-4 w-4" />
               {!collapsed && <span>Sign Out</span>}
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
         {!collapsed && user && (
-          <p className="font-sans text-xs text-muted-foreground px-2 mt-2 truncate">
+          <p className="font-sans text-[10px] tracking-wide text-sidebar-foreground/50 px-2 mt-2 truncate">
             {user.email}
           </p>
         )}
@@ -133,3 +141,4 @@ export function AdminSidebar({ role }: Props) {
     </Sidebar>
   );
 }
+
