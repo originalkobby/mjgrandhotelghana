@@ -1,36 +1,36 @@
-# Room Price / Rate Editing on Dashboard
+# Dashboard Restyle — Warm Editorial Luxury
 
-## Goal
-Allow hotel staff to edit room prices and rates directly from the admin dashboard in a fast, role-gated way.
+Bring the admin dashboard's look in line with the public site shown in the reference: warm beige/cream background, muted taupe surfaces, soft gold accents, Playfair Display headings, and generous letter-spaced uppercase labels.
 
-## Background
-- **Room base prices** are currently managed only on the Admin → Rooms page (admin-only). The page edits `rooms.base_price_ghs`.
-- **Per-date rate overrides** are currently managed on the Admin → Inventory page by clicking a cell, which edits `room_inventory.rate_override`.
-- Recent requests also added an `operations_manager` role that should not see Rooms, but may need to adjust pricing.
+## What changes
 
-## What we will build
+### 1. Dashboard colour surfaces
+- Admin background becomes the warm sand tone from the reference (the site's existing beige `--background`) instead of the default grey-white.
+- Cards, tables, and panels sit on a slightly lighter cream surface with soft warm borders — no cool greys anywhere in the dashboard.
+- Sidebar switches from the current neutral grey theme to a warm taupe/charcoal panel with cream text and gold active states, echoing the reference navbar.
 
-### 1. Inline price editing on the Rooms table
-- Add a small, in-place input for `base_price_ghs` directly on each row in `src/pages/admin/Rooms.tsx`.
-- Save on blur or Enter key. Show a loading/confirm state and a toast.
-- Validate that the price is a positive number.
+### 2. Header
+- Keep the current height and controls, but restyle the top bar as a warm taupe band with cream text, matching the reference site's navbar.
+- "Booking Command Center" title in Playfair Display; currency toggle restyled with the gold accent for the active option.
 
-### 2. Role-based access
-- Keep the existing page-level guard: only `admin` and `revenue_manager` can access `/admin/rooms`.
-- `operations_manager` and `front_desk` will continue to be redirected to `/admin/bookings`.
-- Adjust the sidebar so the Rooms nav item is visible only to those same roles.
+### 3. Typography and labels
+- Section headings and page titles in Playfair Display.
+- Table column headers and small labels in uppercase with wide letter spacing and muted warm-grey colour, like "CONTACT" / "YOUR NAME" in the reference.
+- Body text stays DM Sans.
 
-### 3. Propagate changes automatically
-- Updating `base_price_ghs` already triggers a DB trigger that clears stale `rate_override` values.
-- After a successful inline save, we will re-run the dynamic pricing engine (as the existing full edit dialog already does) so the new base price is reflected across the inventory grid and the public booking page.
-- Invalidate the `admin-rooms` and `admin-inventory` query caches so the dashboard and inventory update immediately.
+### 4. Buttons and inputs
+- Primary/outline buttons adopt the reference's thin gold-bordered, transparent style with gold uppercase letter-spaced text (as in "SEND INQUIRY" and "BOOK NOW").
+- Inputs in dialogs adopt a lighter, warm-bordered treatment; the underline style from the reference is used only for the simplest single-line fields, boxed inputs stay boxed for data-heavy admin forms.
 
-## Technical details
-- File: `src/pages/admin/Rooms.tsx`
-- Add an `InlinePriceEdit` sub-component per row.
-- Re-use the existing `saveMutation` pattern or a small dedicated `useMutation` for row-level updates.
-- Keep the existing full edit dialog for all other room fields.
+### 5. Consistency
+- Status badges, charts, and accents recoloured to the warm palette (gold, sage/olive, terracotta, muted charcoal) instead of the current saturated blues/greens where they clash.
+- Dark mode keeps working; the warm tokens have dark equivalents.
+
+## Technical notes
+- All colour work goes through the sidebar and admin tokens in `src/index.css` (the `--sidebar-*` variables are currently cool grey and get warm values). No hardcoded colour classes in components.
+- Touch points: `src/index.css`, `src/pages/admin/AdminLayout.tsx`, `src/components/admin/AdminSidebar.tsx`, plus light class-level passes on the admin pages for heading/label styling.
+- Purely presentational — no changes to data fetching, roles, or business logic.
 
 ## Out of scope
-- No new database tables or migrations (uses existing `rooms` and `room_inventory`).
-- No changes to the public booking flow or pricing calculation logic.
+- The public-facing pages already use this palette and stay untouched.
+- No layout restructuring of dashboard modules.
