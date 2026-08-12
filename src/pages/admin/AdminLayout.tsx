@@ -55,7 +55,7 @@ export default function AdminLayout() {
                       : "text-admin-bar-foreground/70 hover:bg-transparent hover:text-admin-bar-foreground"
                   }`}
                 >
-                  <DollarSign className="w-3 h-3" /> USD
+                  <DollarSign className="w-2.5 h-2.5" /> USD
                 </Button>
                 <Button
                   variant="ghost"
