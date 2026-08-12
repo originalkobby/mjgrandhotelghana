@@ -43,16 +43,16 @@ export default function AdminLayout() {
               Booking Command Center
             </span>
 
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1 rounded-md border border-accent/50 p-0.5">
+            <div className="admin-rail flex items-center h-11 rounded-full pl-1 pr-1">
+              <div className="flex items-center gap-0.5 px-1">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setAdminMode("usd")}
-                  className={`h-7 px-2.5 text-[11px] font-sans gap-1 uppercase tracking-[0.14em] rounded-sm ${
+                  className={`h-8 px-3 text-[11px] font-sans gap-1 uppercase tracking-[0.16em] rounded-full transition-colors duration-200 ${
                     adminMode === "usd"
                       ? "bg-accent text-accent-foreground hover:bg-accent"
-                      : "text-admin-bar-foreground/80 hover:bg-transparent hover:text-admin-bar-foreground"
+                      : "text-admin-bar-foreground/70 hover:bg-transparent hover:text-admin-bar-foreground"
                   }`}
                 >
                   <DollarSign className="w-3 h-3" /> USD
@@ -61,20 +61,34 @@ export default function AdminLayout() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setAdminMode("ghs")}
-                  className={`h-7 px-2.5 text-[11px] font-sans uppercase tracking-[0.14em] rounded-sm ${
+                  className={`h-8 px-3 text-[11px] font-sans uppercase tracking-[0.16em] rounded-full transition-colors duration-200 ${
                     adminMode === "ghs"
                       ? "bg-accent text-accent-foreground hover:bg-accent"
-                      : "text-admin-bar-foreground/80 hover:bg-transparent hover:text-admin-bar-foreground"
+                      : "text-admin-bar-foreground/70 hover:bg-transparent hover:text-admin-bar-foreground"
                   }`}
                 >
                   GH₵
                 </Button>
               </div>
-              <span className="text-[10px] tracking-[0.14em] uppercase text-admin-bar-foreground/70 font-sans hidden sm:inline">
-                1 USD = {rate.toFixed(2)} GHS
-              </span>
-              <NotificationBell />
+
+              <span className="admin-rail-divider hidden md:block" />
+
+              <div className="hidden md:flex flex-col justify-center px-3 leading-none">
+                <span className="text-[8px] uppercase tracking-[0.24em] text-admin-bar-foreground/55 font-sans">
+                  Exchange Rate
+                </span>
+                <span className="text-[11px] tracking-[0.08em] text-admin-bar-foreground font-sans tabular-nums mt-0.5">
+                  1 USD = {rate.toFixed(2)} GHS
+                </span>
+              </div>
+
+              <span className="admin-rail-divider" />
+
+              <div className="px-1">
+                <NotificationBell />
+              </div>
             </div>
+
           </header>
           <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
             <Outlet />
