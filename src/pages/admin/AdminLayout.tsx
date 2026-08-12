@@ -43,13 +43,13 @@ export default function AdminLayout() {
               Booking Command Center
             </span>
 
-            <div className="admin-rail flex items-center h-11 rounded-full pl-1 pr-1">
+            <div className="admin-rail flex items-center h-11 pl-1 pr-1">
               <div className="flex items-center gap-0.5 px-1">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setAdminMode("usd")}
-                  className={`h-8 px-3 text-[11px] font-sans gap-1 uppercase tracking-[0.16em] rounded-full transition-colors duration-200 ${
+                  className={`h-8 px-3 text-[11px] font-sans gap-1 uppercase tracking-[0.16em] rounded-none transition-colors duration-200 ${
                     adminMode === "usd"
                       ? "bg-accent text-accent-foreground hover:bg-accent"
                       : "text-admin-bar-foreground/70 hover:bg-transparent hover:text-admin-bar-foreground"
@@ -61,7 +61,7 @@ export default function AdminLayout() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setAdminMode("ghs")}
-                  className={`h-8 px-3 text-[11px] font-sans uppercase tracking-[0.16em] rounded-full transition-colors duration-200 ${
+                  className={`h-8 px-3 text-[11px] font-sans uppercase tracking-[0.16em] rounded-none transition-colors duration-200 ${
                     adminMode === "ghs"
                       ? "bg-accent text-accent-foreground hover:bg-accent"
                       : "text-admin-bar-foreground/70 hover:bg-transparent hover:text-admin-bar-foreground"
