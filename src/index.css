@@ -180,6 +180,19 @@
     font-size: 0.68rem;
     color: hsl(var(--muted-foreground));
   }
+  .admin-rail {
+    background-color: hsl(var(--overlay) / 0.18);
+    border: 1px solid hsl(var(--gold) / 0.35);
+    box-shadow: inset 0 1px 0 hsl(var(--cream) / 0.12), 0 1px 3px hsl(var(--overlay) / 0.12);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .admin-rail-divider {
+    width: 1px;
+    height: 1.25rem;
+    background-color: hsl(var(--gold) / 0.3);
+  }
+
 }
 
 /* Warm surfaces + editorial labels inside the dashboard */

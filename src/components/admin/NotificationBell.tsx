@@ -124,20 +124,21 @@ export function NotificationBell() {
     <div className="relative" ref={panelRef}>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="relative p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+        className="relative flex h-8 w-8 items-center justify-center rounded-full text-admin-bar-foreground/80 hover:text-accent hover:bg-admin-bar-foreground/10 transition-colors"
         aria-label="Notifications"
       >
-        <Bell size={18} />
+        <Bell size={17} />
         {unreadCount > 0 && (
           <motion.span
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className="absolute -top-0.5 -right-0.5 h-4 min-w-4 px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center"
+            className="absolute top-0.5 right-0.5 h-3.5 min-w-3.5 px-1 rounded-full bg-accent text-accent-foreground text-[9px] font-semibold flex items-center justify-center"
           >
             {unreadCount > 9 ? "9+" : unreadCount}
           </motion.span>
         )}
       </button>
+
 
       <AnimatePresence>
         {open && (
