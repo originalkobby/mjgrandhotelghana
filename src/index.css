@@ -49,14 +49,20 @@
 
     --ease-luxury: cubic-bezier(0.3, 0.0, 0.2, 1);
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Admin dashboard — warm editorial luxury */
+    --sidebar-background: 30 10% 16%;
+    --sidebar-foreground: 38 30% 90%;
+    --sidebar-primary: 38 60% 52%;
+    --sidebar-primary-foreground: 30 10% 12%;
+    --sidebar-accent: 38 40% 95%;
+    --sidebar-accent-foreground: 30 10% 14%;
+    --sidebar-border: 30 8% 24%;
+    --sidebar-ring: 38 60% 52%;
+
+    --admin-bar: 35 8% 56%;
+    --admin-bar-foreground: 38 40% 97%;
+    --admin-surface: 38 30% 98%;
+
   }
 
   .dark {
@@ -79,7 +85,21 @@
     --border: 30 10% 20%;
     --input: 30 10% 20%;
     --ring: 38 60% 52%;
+
+    --sidebar-background: 30 10% 11%;
+    --sidebar-foreground: 38 30% 88%;
+    --sidebar-primary: 38 60% 52%;
+    --sidebar-primary-foreground: 30 10% 10%;
+    --sidebar-accent: 30 10% 20%;
+    --sidebar-accent-foreground: 38 40% 95%;
+    --sidebar-border: 30 8% 20%;
+    --sidebar-ring: 38 60% 52%;
+
+    --admin-bar: 30 10% 14%;
+    --admin-bar-foreground: 38 35% 92%;
+    --admin-surface: 30 10% 11%;
   }
+
 }
 
 @layer base {
@@ -143,7 +163,38 @@
     height: 0;
     display: none;
   }
+
+  /* ── Admin dashboard (warm editorial luxury) ── */
+  .bg-admin-bar {
+    background-color: hsl(var(--admin-bar));
+  }
+  .text-admin-bar-foreground {
+    color: hsl(var(--admin-bar-foreground));
+  }
+  .admin-shell {
+    background-color: hsl(var(--background));
+  }
+  .admin-label {
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.68rem;
+    color: hsl(var(--muted-foreground));
+  }
 }
+
+/* Warm surfaces + editorial labels inside the dashboard */
+.admin-shell .rounded-lg[class*="bg-card"],
+.admin-shell [data-admin-surface] {
+  background-color: hsl(var(--admin-surface));
+}
+
+.admin-shell table thead th {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.68rem;
+  color: hsl(var(--muted-foreground));
+}
+
 
 /* Smooth scroll */
 html {
