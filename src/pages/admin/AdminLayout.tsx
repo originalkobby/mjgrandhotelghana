@@ -9,7 +9,6 @@ import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { Button } from "@/components/ui/button";
-import { DollarSign } from "lucide-react";
 
 
 export default function AdminLayout() {
