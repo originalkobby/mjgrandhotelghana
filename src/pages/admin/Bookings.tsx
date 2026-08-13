@@ -1,7 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
 import { Search, Filter, Download, CreditCard, Trash2, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { StickyHorizontalScrollbar } from "@/components/ui/StickyHorizontalScrollbar";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -175,6 +176,8 @@ export default function Bookings() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  const tableScrollRef = useRef<HTMLDivElement>(null);
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -553,7 +556,7 @@ export default function Bookings() {
   
 
   return (
-    <div className="h-full flex flex-col gap-6">
+    <div className="flex-1 min-h-0 flex flex-col gap-6">
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div>
           <h1 className="font-serif text-2xl md:text-3xl text-foreground">Bookings</h1>
@@ -644,7 +647,7 @@ export default function Bookings() {
       {/* Table */}
       <Card className="flex flex-col flex-1 min-h-0">
         <CardContent className="flex flex-col flex-1 min-h-0 p-0">
-          <div className="flex-1 min-h-0 overflow-auto">
+          <div ref={tableScrollRef} className="flex-1 min-h-0 overflow-y-auto scrollbar-x-always">
             <table className="w-full text-sm font-sans">
               <thead className="sticky top-0 z-10 bg-[hsl(var(--admin-surface))]">
                 <tr className="border-b border-border">
@@ -788,6 +791,8 @@ export default function Bookings() {
               </tbody>
             </table>
           </div>
+          <StickyHorizontalScrollbar targetRef={tableScrollRef} />
+
           
         </CardContent>
       </Card>
