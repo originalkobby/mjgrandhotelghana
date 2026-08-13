@@ -2,7 +2,6 @@ import { useState, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
 import { Search, Filter, Download, CreditCard, Trash2, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { StickyHorizontalScrollbar } from "@/components/ui/StickyHorizontalScrollbar";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -647,7 +646,7 @@ export default function Bookings() {
       {/* Table */}
       <Card className="flex flex-col flex-1 min-h-0">
         <CardContent className="flex flex-col flex-1 min-h-0 p-0">
-          <div ref={tableScrollRef} className="flex-1 min-h-0 overflow-y-auto scrollbar-x-always">
+          <div ref={tableScrollRef} className="flex-1 min-h-0 overflow-auto">
             <table className="w-full text-sm font-sans">
               <thead className="sticky top-0 z-10 bg-[hsl(var(--admin-surface))]">
                 <tr className="border-b border-border">
@@ -791,7 +790,7 @@ export default function Bookings() {
               </tbody>
             </table>
           </div>
-          <StickyHorizontalScrollbar targetRef={tableScrollRef} />
+          
 
           
         </CardContent>
