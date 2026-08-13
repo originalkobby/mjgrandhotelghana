@@ -32,10 +32,10 @@ export default function AdminLayout() {
   }
 
   return (
-    <SidebarProvider>
-      <div className="admin-shell min-h-screen flex w-full">
+    <SidebarProvider className="h-screen overflow-hidden w-full">
+      <div className="admin-shell h-screen overflow-hidden flex w-full">
         <AdminSidebar role={role} />
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 min-h-0">
           <header className="h-20 flex items-center gap-3 border-b border-border/40 px-4 md:px-6 bg-admin-bar text-admin-bar-foreground shrink-0 sticky top-0 z-30">
             <SidebarTrigger className="text-admin-bar-foreground/80 hover:text-admin-bar-foreground" />
             <span className="font-serif text-lg md:text-xl tracking-wide text-admin-bar-foreground flex-1">
@@ -87,7 +87,7 @@ export default function AdminLayout() {
             </div>
 
           </header>
-          <main className="flex-1 min-h-0 overflow-auto p-4 md:p-6 lg:p-8 flex flex-col">
+          <main className="flex-1 min-h-0 overflow-y-auto p-4 md:p-6 lg:p-8 flex flex-col">
             <Outlet />
           </main>
         </div>
