@@ -195,7 +195,7 @@ export default function Bookings() {
   });
   const { format: formatCurrency } = useCurrency();
   const isAdmin = role === "admin";
-  const tableScrollRef = useRef<HTMLDivElement>(null);
+  
 
   const { data: allBookings = [], isLoading: loading } = useQuery({
     queryKey: ["admin-bookings", statusFilter, sourceFilter],
