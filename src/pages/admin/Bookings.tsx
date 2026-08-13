@@ -556,7 +556,7 @@ export default function Bookings() {
   
 
   return (
-    <div className="h-full flex flex-col gap-6">
+    <div className="flex-1 min-h-0 flex flex-col gap-6">
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div>
           <h1 className="font-serif text-2xl md:text-3xl text-foreground">Bookings</h1>
