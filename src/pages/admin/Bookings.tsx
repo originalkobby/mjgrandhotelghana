@@ -790,7 +790,7 @@ export default function Bookings() {
               </tbody>
             </table>
           </div>
-          <StickyHorizontalScrollbar targetRef={tableScrollRef} />
+          
 
           
         </CardContent>
