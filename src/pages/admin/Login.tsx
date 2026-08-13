@@ -45,7 +45,7 @@ export default function AdminLogin() {
       <header className="bg-admin-bar h-[72px] flex items-center px-6 lg:px-16">
         <img src={logo} alt="MJ Grand Hotel" className="h-9 w-auto" />
         <span className="ml-auto font-sans text-[0.7rem] tracking-[0.25em] uppercase text-admin-bar-foreground/90">
-          Staff Portal
+          Reservation Portal
         </span>
       </header>
 
