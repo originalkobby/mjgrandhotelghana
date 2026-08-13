@@ -646,7 +646,7 @@ export default function Bookings() {
       {/* Table */}
       <Card className="flex flex-col flex-1 min-h-0">
         <CardContent className="flex flex-col flex-1 min-h-0 p-0">
-          <div ref={tableScrollRef} className="flex-1 min-h-0 overflow-y-auto scrollbar-x-always">
+          <div ref={tableScrollRef} className="flex-1 min-h-0 overflow-auto">
             <table className="w-full text-sm font-sans">
               <thead className="sticky top-0 z-10 bg-[hsl(var(--admin-surface))]">
                 <tr className="border-b border-border">
