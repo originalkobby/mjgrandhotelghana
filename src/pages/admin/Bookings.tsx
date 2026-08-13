@@ -177,6 +177,8 @@ export default function Bookings() {
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  const tableScrollRef = useRef<HTMLDivElement>(null);
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user, role, signOut } = useAdminAuth();
