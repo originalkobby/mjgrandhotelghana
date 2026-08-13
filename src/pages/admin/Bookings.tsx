@@ -1,7 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
 import { Search, Filter, Download, CreditCard, Trash2, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { StickyHorizontalScrollbar } from "@/components/ui/StickyHorizontalScrollbar";
 import {
   AlertDialog,
   AlertDialogAction,
