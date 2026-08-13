@@ -693,7 +693,7 @@ export default function Bookings() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: i * 0.02 }}
-                        className="border-b border-border/50 hover:bg-muted/30 transition-colors"
+                        className={`border-b border-border/50 transition-colors ${i % 2 === 1 ? "bg-muted/40" : ""} hover:bg-muted/60`}
                       >
                         {isAdmin && (
                           <td className="px-3 py-3">
