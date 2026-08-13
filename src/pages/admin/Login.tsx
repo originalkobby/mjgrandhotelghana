@@ -1,10 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Lock, Mail, Eye, EyeOff } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Eye, EyeOff } from "lucide-react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import logo from "@/assets/logo.png";
 
@@ -17,7 +14,6 @@ export default function AdminLogin() {
   const { signIn, user, role, loading } = useAdminAuth();
   const navigate = useNavigate();
 
-  // If already authed with a role, redirect (useEffect to avoid side-effect during render)
   useEffect(() => {
     if (!loading && user && role) {
       navigate("/admin", { replace: true });
@@ -44,80 +40,116 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-sm"
-      >
-        <div className="text-center mb-8">
-          <img src={logo} alt="MJ Grand Hotel" className="h-12 mx-auto mb-4" />
-          <h1 className="font-serif text-2xl text-foreground">Reservation Portal</h1>
-          <p className="font-sans text-sm text-muted-foreground mt-1">
-            Sign in to access the booking command center
-          </p>
-        </div>
+    <div className="min-h-screen bg-secondary flex flex-col">
+      {/* Top band — mirrors the public navbar */}
+      <header className="bg-admin-bar h-[72px] flex items-center px-6 lg:px-16">
+        <img src={logo} alt="MJ Grand Hotel" className="h-9 w-auto" />
+        <span className="ml-auto font-sans text-[0.7rem] tracking-[0.25em] uppercase text-admin-bar-foreground/90">
+          Staff Portal
+        </span>
+      </header>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email" className="font-sans text-sm">Email</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="staff@mjgrandhotel.com"
-                className="pl-10"
-                required
-              />
-            </div>
-          </div>
+      <main className="flex-1 flex items-center">
+        <div className="container mx-auto px-6 lg:px-16 max-w-6xl py-16 md:py-24">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-start">
+            {/* Left — editorial copy */}
+            <motion.div
+              initial={{ opacity: 0, x: -40 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, ease: [0.3, 0, 0.2, 1] }}
+            >
+              <p className="font-sans text-xs tracking-[0.25em] uppercase text-gold mb-6 font-bold">
+                Reservation Portal
+              </p>
+              <h1 className="font-serif text-4xl md:text-5xl lg:text-[3.5rem] text-foreground leading-[1.1] mb-8">
+                Booking
+                <br />
+                Command Center
+              </h1>
+              <p className="font-sans text-base md:text-lg text-muted-foreground leading-relaxed max-w-md">
+                Secure access for MJ Grand Hotel staff — reservations, inventory,
+                guests and revenue, all in one discreet place.
+              </p>
 
-          <div className="space-y-2">
-            <Label htmlFor="password" className="font-sans text-sm">Password</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                id="password"
-                type={showPw ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="pl-10 pr-10"
-                required
-              />
+              <div className="mt-12 space-y-2 font-sans text-sm tracking-[0.12em] uppercase text-muted-foreground">
+                <p>No. 460 Abotsi Street, East Legon, Accra</p>
+                <p>Tel: +233 302 544 212</p>
+              </div>
+            </motion.div>
+
+            {/* Right — form */}
+            <motion.form
+              onSubmit={handleSubmit}
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.1, ease: [0.3, 0, 0.2, 1] }}
+              className="w-full space-y-10"
+            >
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block font-sans text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3"
+                >
+                  Email Address
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  autoComplete="email"
+                  className="w-full bg-transparent border-0 border-b border-border pb-3 font-sans text-base text-foreground outline-none transition-colors focus:border-gold placeholder:text-muted-foreground/50"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block font-sans text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3"
+                >
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPw ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    autoComplete="current-password"
+                    className="w-full bg-transparent border-0 border-b border-border pb-3 pr-10 font-sans text-base text-foreground outline-none transition-colors focus:border-gold"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPw(!showPw)}
+                    aria-label={showPw ? "Hide password" : "Show password"}
+                    className="absolute right-0 bottom-3 text-muted-foreground transition-colors hover:text-gold"
+                  >
+                    {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {error && (
+                <p className="font-sans text-sm text-destructive">{error}</p>
+              )}
+
               <button
-                type="button"
-                onClick={() => setShowPw(!showPw)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                type="submit"
+                disabled={submitting}
+                className="w-full border border-gold py-5 font-sans text-sm tracking-[0.25em] uppercase text-gold transition-colors hover:bg-gold hover:text-cream disabled:opacity-60"
               >
-                {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {submitting ? "Signing In…" : "Sign In"}
               </button>
-            </div>
+
+              <p className="font-sans text-xs tracking-[0.12em] uppercase text-muted-foreground">
+                Contact your administrator if you need access
+              </p>
+            </motion.form>
           </div>
-
-          {error && (
-            <p className="font-sans text-sm text-destructive bg-destructive/10 rounded-md px-3 py-2">
-              {error}
-            </p>
-          )}
-
-          <Button
-            type="submit"
-            disabled={submitting}
-            className="w-full h-11 bg-accent text-accent-foreground hover:bg-accent/90 font-sans font-semibold"
-          >
-            {submitting ? "Signing in…" : "Sign In"}
-          </Button>
-        </form>
-
-        <p className="text-center text-xs text-muted-foreground mt-6 font-sans">
-          Contact your administrator if you need access
-        </p>
-      </motion.div>
+        </div>
+      </main>
     </div>
   );
 }
