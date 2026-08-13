@@ -670,7 +670,7 @@ export default function Bookings() {
               <tbody>
                 {loading ? (
                   Array.from({ length: 5 }).map((_, i) => (
-                    <tr key={i} className="border-b border-border/50">
+                    <tr key={i} className={`border-b border-border/50 ${i % 2 === 1 ? "bg-muted/40" : ""}`}>
                       {Array.from({ length: isAdmin ? 13 : 12 }).map((_, j) => (
                         <td key={j} className="px-4 py-3">
                           <div className="h-4 bg-muted rounded animate-pulse" />
@@ -693,7 +693,7 @@ export default function Bookings() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: i * 0.02 }}
-                        className="border-b border-border/50 hover:bg-muted/30 transition-colors"
+                        className={`border-b border-border/50 transition-colors ${i % 2 === 1 ? "bg-muted/40" : ""} hover:bg-muted/60`}
                       >
                         {isAdmin && (
                           <td className="px-3 py-3">
