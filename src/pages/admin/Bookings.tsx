@@ -612,6 +612,7 @@ export default function Bookings() {
           Export
         </Button>
       </div>
+      </div>
 
       {/* Bulk selection toolbar (admin only) */}
       {isAdmin && selectedIds.size > 0 && (
