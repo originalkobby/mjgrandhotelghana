@@ -555,12 +555,13 @@ export default function Bookings() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-serif text-2xl md:text-3xl text-foreground">Bookings</h1>
-        <p className="font-sans text-sm text-muted-foreground mt-1">
-          Manage reservations and update statuses
-        </p>
-      </div>
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+        <div>
+          <h1 className="font-serif text-2xl md:text-3xl text-foreground">Bookings</h1>
+          <p className="font-sans text-sm text-muted-foreground mt-1">
+            Manage reservations and update statuses
+          </p>
+        </div>
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
