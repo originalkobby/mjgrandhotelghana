@@ -1,5 +1,4 @@
-import { useState, useMemo, useRef } from "react";
-import { StickyHorizontalScrollbar } from "@/components/ui/StickyHorizontalScrollbar";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Search, Filter, Download, CreditCard, Trash2, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -196,7 +195,7 @@ export default function Bookings() {
   });
   const { format: formatCurrency } = useCurrency();
   const isAdmin = role === "admin";
-  const tableScrollRef = useRef<HTMLDivElement>(null);
+  
 
   const { data: allBookings = [], isLoading: loading } = useQuery({
     queryKey: ["admin-bookings", statusFilter, sourceFilter],
@@ -554,7 +553,7 @@ export default function Bookings() {
   
 
   return (
-    <div className="space-y-6">
+    <div className="h-full flex flex-col gap-6">
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div>
           <h1 className="font-serif text-2xl md:text-3xl text-foreground">Bookings</h1>
@@ -643,11 +642,11 @@ export default function Bookings() {
       )}
 
       {/* Table */}
-      <Card>
-        <CardContent className="p-0">
-          <div ref={tableScrollRef} className="scrollbar-x-always">
+      <Card className="flex flex-col flex-1 min-h-0">
+        <CardContent className="flex flex-col flex-1 min-h-0 p-0">
+          <div className="flex-1 min-h-0 overflow-auto">
             <table className="w-full text-sm font-sans">
-              <thead>
+              <thead className="sticky top-0 z-10 bg-[hsl(var(--admin-surface))]">
                 <tr className="border-b border-border">
                   {isAdmin && (
                     <th className="w-8 px-3 py-3">
@@ -789,7 +788,7 @@ export default function Bookings() {
               </tbody>
             </table>
           </div>
-          <StickyHorizontalScrollbar targetRef={tableScrollRef} />
+          
         </CardContent>
       </Card>
 
