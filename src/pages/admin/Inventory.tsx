@@ -34,6 +34,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import BulkBlockDatesDialog from "@/components/admin/BulkBlockDatesDialog";
+
 import {
   addDays,
   format,
