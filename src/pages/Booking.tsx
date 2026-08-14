@@ -318,6 +318,7 @@ const Booking = () => {
               <AddOnsStep
                 key="addons"
                 selectedRoom={state.selectedRoom}
+                groupRooms={state.isGroup ? state.groupRooms : undefined}
                 selectedAddOns={state.selectedAddOns}
                 onToggle={toggleAddOn}
                 onNext={goNext}
@@ -329,6 +330,7 @@ const Booking = () => {
                 key="details"
                 guestInfo={state.guestInfo}
                 selectedRoom={state.selectedRoom}
+                groupRooms={state.isGroup ? state.groupRooms : undefined}
                 selectedAddOns={state.selectedAddOns}
                 totalAmount={state.totalAmount}
                 appliedPromo={state.appliedPromo}
@@ -343,6 +345,7 @@ const Booking = () => {
               <PaymentStep
                 key="payment"
                 selectedRoom={state.selectedRoom}
+                groupRooms={state.isGroup ? state.groupRooms : undefined}
                 selectedAddOns={state.selectedAddOns}
                 guestInfo={state.guestInfo}
                 totalAmount={state.totalAmount}
