@@ -4,7 +4,7 @@ export interface BookingLifecycleSnapshot {
   status: string;
 }
 
-const ACTIVE_STATUSES = new Set(["pending", "confirmed"]);
+const ACTIVE_STATUSES = new Set(["pending", "confirmed", "checked_in"]);
 
 function toDateOnly(value: string) {
   return value.split("T")[0] ?? value;
