@@ -321,7 +321,7 @@ export default function Bookings() {
       .eq("id", selectedBooking.id);
 
     if (!error) {
-      const willBeActive = newStatus === "pending" || newStatus === "confirmed";
+      const willBeActive = newStatus === "pending" || newStatus === "confirmed" || newStatus === "checked_in";
 
       let inventoryNote: string | null = null;
 
