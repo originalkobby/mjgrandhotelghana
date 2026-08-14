@@ -80,11 +80,12 @@ interface Booking {
   booking_add_ons: BookingAddOn[];
 }
 
-const STATUS_OPTIONS: BookingStatus[] = ["pending", "confirmed", "cancelled", "completed", "no_show"];
+const STATUS_OPTIONS: BookingStatus[] = ["pending", "confirmed", "checked_in", "cancelled", "completed", "no_show"];
 
 const STATUS_LABELS: Record<string, string> = {
   pending: "pending",
   confirmed: "confirmed",
+  checked_in: "checked-in",
   cancelled: "cancelled",
   completed: "checked-out",
   no_show: "no show",
@@ -93,6 +94,7 @@ const STATUS_LABELS: Record<string, string> = {
 
 const STATUS_COLORS: Record<string, string> = {
   confirmed: "bg-green-600 text-white border-green-700",
+  checked_in: "bg-blue-600 text-white border-blue-700",
   pending: "bg-orange-500 text-white border-orange-600",
   cancelled: "bg-red-600 text-white border-red-700",
   completed: "bg-amber-800 text-white border-amber-900",
