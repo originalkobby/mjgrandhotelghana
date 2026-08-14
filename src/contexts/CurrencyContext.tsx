@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 import { fetchUsdToGhsRate, formatUsd, formatGhs, formatCurrency as formatCurrencyUtil, RATE_CACHE_TTL } from "@/lib/currency";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CurrencyContextValue {
   rate: number;
