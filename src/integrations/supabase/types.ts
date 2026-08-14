@@ -47,6 +47,33 @@ export type Database = {
         }
         Relationships: []
       }
+      app_settings: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          updated_at: string
+          updated_by: string | null
+          usd_to_ghs: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          usd_to_ghs?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          usd_to_ghs?: number
+        }
+        Relationships: []
+      }
       booking_add_ons: {
         Row: {
           add_on_id: string
