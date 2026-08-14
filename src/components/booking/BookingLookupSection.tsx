@@ -121,7 +121,7 @@ export default function BookingLookupSection() {
 
   const paymentDisplay = result ? getPaymentDisplay(result) : null;
   const displayStatus = paymentDisplay?.effectiveStatus ?? result?.status ?? "pending";
-  const canCancel = result && (displayStatus === "confirmed" || displayStatus === "pending");
+  const canCancel = result && (displayStatus === "confirmed" || displayStatus === "pending" || displayStatus === "checked_in");
 
   return (
     <section className="border-t border-border mt-16 pt-16 pb-4">

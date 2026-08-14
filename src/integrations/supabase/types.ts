@@ -983,6 +983,7 @@ export type Database = {
         | "cancelled"
         | "completed"
         | "no_show"
+        | "checked_in"
       payment_status: "pending" | "partial" | "paid" | "refunded" | "failed"
     }
     CompositeTypes: {
@@ -1124,6 +1125,7 @@ export const Constants = {
         "cancelled",
         "completed",
         "no_show",
+        "checked_in",
       ],
       payment_status: ["pending", "partial", "paid", "refunded", "failed"],
     },

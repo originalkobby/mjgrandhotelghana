@@ -80,11 +80,12 @@ interface Booking {
   booking_add_ons: BookingAddOn[];
 }
 
-const STATUS_OPTIONS: BookingStatus[] = ["pending", "confirmed", "cancelled", "completed", "no_show"];
+const STATUS_OPTIONS: BookingStatus[] = ["pending", "confirmed", "checked_in", "cancelled", "completed", "no_show"];
 
 const STATUS_LABELS: Record<string, string> = {
   pending: "pending",
   confirmed: "confirmed",
+  checked_in: "checked-in",
   cancelled: "cancelled",
   completed: "checked-out",
   no_show: "no show",
@@ -93,6 +94,7 @@ const STATUS_LABELS: Record<string, string> = {
 
 const STATUS_COLORS: Record<string, string> = {
   confirmed: "bg-green-600 text-white border-green-700",
+  checked_in: "bg-blue-600 text-white border-blue-700",
   pending: "bg-orange-500 text-white border-orange-600",
   cancelled: "bg-red-600 text-white border-red-700",
   completed: "bg-amber-800 text-white border-amber-900",
@@ -267,7 +269,7 @@ export default function Bookings() {
       }
     }
 
-    const wasActive = oldStatus === "pending" || oldStatus === "confirmed";
+    const wasActive = oldStatus === "pending" || oldStatus === "confirmed" || oldStatus === "checked_in";
 
     // If dates changed AND booking blocks inventory, release the OLD nights first
     // so the inventory check / re-reserve uses a clean slate.
@@ -319,7 +321,7 @@ export default function Bookings() {
       .eq("id", selectedBooking.id);
 
     if (!error) {
-      const willBeActive = newStatus === "pending" || newStatus === "confirmed";
+      const willBeActive = newStatus === "pending" || newStatus === "confirmed" || newStatus === "checked_in";
 
       let inventoryNote: string | null = null;
 
@@ -446,7 +448,7 @@ export default function Bookings() {
     for (const id of ids) {
       const b = idToBooking.get(id);
       try {
-        if (b && (b.status === "pending" || b.status === "confirmed")) {
+        if (b && (b.status === "pending" || b.status === "confirmed" || b.status === "checked_in")) {
           try { await releaseInventory(id); } catch { /* non-fatal */ }
         }
         // Related rows (booking_add_ons, payment_logs, booking_audit_log, webhook_logs)

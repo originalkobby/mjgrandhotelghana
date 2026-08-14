@@ -101,7 +101,7 @@ async function fetchOverviewData(dateFrom: string, dateTo: string) {
   const totalBookings = curr.length;
   const prevTotalBookings = prev.length;
 
-  const confirmed = curr.filter((b) => b.status === "confirmed" || b.status === "completed").length;
+  const confirmed = curr.filter((b) => b.status === "confirmed" || b.status === "checked_in" || b.status === "completed").length;
   const paidCount = curr.filter((b) => b.payment_status === "paid").length;
   const adr = paidCount > 0 ? totalRevenue / paidCount : 0;
   const prevPaidCount = prev.filter((b) => b.payment_status === "paid").length;

@@ -57,7 +57,7 @@ serve(async (req) => {
     const { data: expiredBookings, error: fetchErr } = await supabase
       .from("bookings")
       .select("id, room_id, check_in, check_out, status, payment_status")
-      .in("status", ["confirmed", "pending"])
+      .in("status", ["confirmed", "pending", "checked_in"])
       .lte("check_out", todayStr);
 
     if (fetchErr) throw fetchErr;
