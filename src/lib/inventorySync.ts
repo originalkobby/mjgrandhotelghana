@@ -90,7 +90,7 @@ export async function reserveInventory(bookingId: string): Promise<number> {
 
 // Bookings that occupy a room (block inventory) for their stay window.
 // Only `pending` and `confirmed` block inventory.
-const ACTIVE = new Set(["pending", "confirmed"]);
+const ACTIVE = new Set(["pending", "confirmed", "checked_in"]);
 // `completed` (released), cancellations and no-shows free nights back to availability.
 const RELEASED = new Set(["cancelled", "no_show", "completed"]);
 
