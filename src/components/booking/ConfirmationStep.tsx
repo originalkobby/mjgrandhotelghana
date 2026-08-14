@@ -205,9 +205,32 @@ export default function ConfirmationStep({ state }: Props) {
 
       {/* Reference */}
       <div className="inline-block bg-secondary rounded-lg px-6 py-3 mt-4 mb-8">
-        <p className="font-sans text-xs uppercase tracking-wider text-muted-foreground">Booking Reference</p>
+        <p className="font-sans text-xs uppercase tracking-wider text-muted-foreground">
+          {state.groupRef ? "Lead Booking Reference" : "Booking Reference"}
+        </p>
         <p className="font-serif text-2xl text-foreground tracking-wide">{bookingReference}</p>
       </div>
+
+      {state.groupRef && state.groupBookings && state.groupBookings.length > 1 && (
+        <div className="bg-card rounded-xl border border-border p-6 text-left mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-serif text-lg text-foreground">
+              Group Booking · {state.groupBookings.length} rooms
+            </h3>
+            <span className="font-sans text-xs uppercase tracking-wider text-accent">
+              Group ref: {state.groupRef}
+            </span>
+          </div>
+          <div className="space-y-1 text-sm font-sans">
+            {state.groupBookings.map((b) => (
+              <div key={b.reference} className="flex justify-between">
+                <span className="text-muted-foreground">{b.roomName}</span>
+                <span className="text-foreground">{b.reference}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Summary card */}
       <div className="bg-card rounded-xl border border-border p-6 text-left">
