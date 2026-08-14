@@ -4,11 +4,12 @@ import { ArrowLeft, CreditCard, Smartphone, Shield, CheckCircle2, Loader2, Alert
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import type { SelectedRoom, SelectedAddOn, GuestInfo, AppliedPromo } from "@/hooks/useBooking";
+import type { SelectedRoom, GroupRoom, SelectedAddOn, GuestInfo, AppliedPromo } from "@/hooks/useBooking";
 import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface Props {
   selectedRoom: SelectedRoom;
+  groupRooms?: GroupRoom[];
   selectedAddOns: SelectedAddOn[];
   guestInfo: GuestInfo;
   totalAmount: number;
@@ -21,6 +22,7 @@ interface Props {
 
 export default function PaymentStep({
   selectedRoom,
+  groupRooms,
   selectedAddOns,
   guestInfo,
   totalAmount,
@@ -92,12 +94,24 @@ export default function PaymentStep({
       <div className="bg-card rounded-xl border border-border p-6 mb-6">
         <h3 className="font-serif text-lg text-foreground mb-4">Booking Summary</h3>
         <div className="space-y-3 text-sm font-sans">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">
-              {selectedRoom.name} × {selectedRoom.totalNights} night{selectedRoom.totalNights !== 1 ? "s" : ""}
-            </span>
-            <span className="text-foreground">{toUsd(selectedRoom.totalPrice)}</span>
-          </div>
+          {groupRooms && groupRooms.length > 0 ? (
+            groupRooms.map((r) => (
+              <div key={r.id} className="flex justify-between">
+                <span className="text-muted-foreground">
+                  {r.name} × {r.quantity} room{r.quantity !== 1 ? "s" : ""} × {r.totalNights} night
+                  {r.totalNights !== 1 ? "s" : ""}
+                </span>
+                <span className="text-foreground">{toUsd(r.totalPrice * r.quantity)}</span>
+              </div>
+            ))
+          ) : (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">
+                {selectedRoom.name} × {selectedRoom.totalNights} night{selectedRoom.totalNights !== 1 ? "s" : ""}
+              </span>
+              <span className="text-foreground">{toUsd(selectedRoom.totalPrice)}</span>
+            </div>
+          )}
           {selectedAddOns.map((a) => (
             <div key={a.id} className="flex justify-between">
               <span className="text-muted-foreground">{a.name}</span>

@@ -4,7 +4,7 @@ import { ArrowLeft, Car, UtensilsCrossed, Heart, Clock, Sparkles, Check } from "
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
-import type { SelectedAddOn, SelectedRoom } from "@/hooks/useBooking";
+import type { GroupRoom, SelectedAddOn, SelectedRoom } from "@/hooks/useBooking";
 import { useCurrency } from "@/contexts/CurrencyContext";
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -26,6 +26,7 @@ interface AddOnData {
 
 interface Props {
   selectedRoom: SelectedRoom;
+  groupRooms?: GroupRoom[];
   selectedAddOns: SelectedAddOn[];
   onToggle: (addOn: Omit<SelectedAddOn, "quantity">) => void;
   onNext: () => void;
@@ -55,7 +56,7 @@ const SPA_TREATMENTS: { name: string; prices: { duration: number; price_ghs: num
 const SPA_FLAT: { name: string; price_ghs: number }[] = [{ name: "Sauna", price_ghs: 250 }];
 const SPA_MIN_PRICE = 250;
 
-export default function AddOnsStep({ selectedRoom, selectedAddOns, onToggle, onNext, onBack }: Props) {
+export default function AddOnsStep({ selectedRoom, groupRooms, selectedAddOns, onToggle, onNext, onBack }: Props) {
   const [addOns, setAddOns] = useState<AddOnData[]>([]);
   const [loading, setLoading] = useState(true);
   const [spaChoice, setSpaChoice] = useState<{ label: string; priceUsd: number } | null>(null);
@@ -80,6 +81,11 @@ export default function AddOnsStep({ selectedRoom, selectedAddOns, onToggle, onN
         setLoading(false);
       });
   }, [selectedRoom.nightlyRate]);
+
+  const roomsSubtotal =
+    groupRooms && groupRooms.length > 0
+      ? groupRooms.reduce((sum, r) => sum + r.totalPrice * r.quantity, 0)
+      : selectedRoom.totalPrice;
 
   const addOnsTotal = selectedAddOns.reduce((sum, a) => sum + a.price_ghs, 0);
 
@@ -290,8 +296,13 @@ export default function AddOnsStep({ selectedRoom, selectedAddOns, onToggle, onN
       {/* Summary bar */}
       <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
         <div className="font-sans text-sm text-muted-foreground">
-          <span className="text-foreground font-medium">Room:</span> {toUsd(selectedRoom.totalPrice)}
-          <span className="text-xs text-muted-foreground ml-1">({toGhs(selectedRoom.totalPrice)})</span>
+          <span className="text-foreground font-medium">
+            {groupRooms && groupRooms.length > 0
+              ? `Rooms (${groupRooms.reduce((n, r) => n + r.quantity, 0)}):`
+              : "Room:"}
+          </span>{" "}
+          {toUsd(roomsSubtotal)}
+          <span className="text-xs text-muted-foreground ml-1">({toGhs(roomsSubtotal)})</span>
           {addOnsTotal > 0 && (
             <>
               {" "}+ <span className="text-accent font-medium">Extras:</span> {toUsd(addOnsTotal)}

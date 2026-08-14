@@ -41,7 +41,7 @@ serve(async (req) => {
       // Look up the booking from DB to get the authoritative amount
       const { data: booking, error: bookingErr } = await supabase
         .from("bookings")
-        .select("final_total_ghs, status, payment_status")
+        .select("final_total_ghs, status, payment_status, group_ref")
         .eq("reference_code", booking_reference)
         .single();
 
@@ -59,8 +59,19 @@ serve(async (req) => {
         });
       }
 
-      // Use server-side amount from DB, never from client
-      const amount_ghs = Number(booking.final_total_ghs);
+      // Use server-side amount from DB, never from client.
+      // Group bookings are charged as a single transaction across all rooms.
+      let amount_ghs = Number(booking.final_total_ghs);
+      if (booking.group_ref) {
+        const { data: groupRows } = await supabase
+          .from("bookings")
+          .select("final_total_ghs")
+          .eq("group_ref", booking.group_ref);
+        if (groupRows && groupRows.length > 0) {
+          amount_ghs = groupRows.reduce((s, r) => s + Number(r.final_total_ghs), 0);
+        }
+      }
+
 
       const res = await fetch("https://api.paystack.co/transaction/initialize", {
         method: "POST",
@@ -168,12 +179,26 @@ serve(async (req) => {
         metadata: txn,
       });
 
-      // Update booking payment status
+      // Update booking payment status (all rooms when part of a group booking)
       if (isPaid) {
-        await supabase
+        const { data: paidRef } = await supabase
           .from("bookings")
-          .update({ payment_status: "paid" })
-          .eq("reference_code", reference);
+          .select("group_ref")
+          .eq("reference_code", reference)
+          .maybeSingle();
+
+        if (paidRef?.group_ref) {
+          await supabase
+            .from("bookings")
+            .update({ payment_status: "paid" })
+            .eq("group_ref", paidRef.group_ref);
+        } else {
+          await supabase
+            .from("bookings")
+            .update({ payment_status: "paid" })
+            .eq("reference_code", reference);
+        }
+
 
         // Fire-and-forget dual-write to Convex
         syncToConvex({

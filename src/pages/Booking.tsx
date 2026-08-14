@@ -26,6 +26,9 @@ const Booking = () => {
     setStep,
     setSearch,
     setSelectedRoom,
+    setIsGroup,
+    setGroupRooms,
+    setGroupResult,
     setRoomPreselected,
     toggleAddOn,
     setGuestInfo,
@@ -139,7 +142,9 @@ const Booking = () => {
   useEffect(() => {
     const code = state.search.promoCode?.trim().toUpperCase();
     const room = state.selectedRoom;
-    const baseTotal = room?.totalPrice ?? 0;
+    const baseTotal = state.isGroup
+      ? state.groupRooms.reduce((sum, r) => sum + r.totalPrice * r.quantity, 0)
+      : room?.totalPrice ?? 0;
     const shouldValidate = (state.step === "details" || state.step === "payment") && code && room && baseTotal > 0;
 
     if (!code) {
@@ -211,7 +216,14 @@ const Booking = () => {
     try {
       const addOnsTotal = state.selectedAddOns.reduce((s, a) => s + a.price_ghs * a.quantity, 0);
       const discountGhs = state.appliedPromo?.discountGhs ?? 0;
-      const finalTotal = Math.max(0, state.selectedRoom.totalPrice + addOnsTotal - discountGhs);
+      const roomsTotal = state.isGroup
+        ? state.groupRooms.reduce((sum, r) => sum + r.totalPrice * r.quantity, 0)
+        : state.selectedRoom.totalPrice;
+      const finalTotal = Math.max(0, roomsTotal + addOnsTotal - discountGhs);
+      const groupPayload =
+        state.isGroup && state.groupRooms.length > 0
+          ? state.groupRooms.map((r) => ({ roomId: r.id, quantity: r.quantity }))
+          : undefined;
 
       const { data, error: fnError } = await supabase.functions.invoke("create-booking", {
         body: {
@@ -226,7 +238,7 @@ const Booking = () => {
             checkOut: state.search.checkOut.toISOString().split("T")[0],
             adults: state.search.adults,
             children: state.search.children,
-            baseTotalGhs: state.selectedRoom.totalPrice,
+            baseTotalGhs: roomsTotal,
             addOnsTotalGhs: addOnsTotal,
             finalTotalGhs: finalTotal,
             promoCode: state.search.promoCode || null,
@@ -235,6 +247,7 @@ const Booking = () => {
             nationality: state.guestInfo.nationality || null,
             flightItinerary: state.guestInfo.flightItinerary || null,
           },
+          rooms: groupPayload,
           addOns: state.selectedAddOns.map((a) => ({
             id: a.id,
             quantity: a.quantity,
@@ -247,11 +260,14 @@ const Booking = () => {
       if (data?.error) throw new Error(data.error);
 
       setBookingReference(data.reference);
+      setGroupResult(data.groupRef ?? null, data.bookings ?? null);
       goNext();
 
       toast({
-        title: "Booking Created!",
-        description: `Reference: ${data.reference}. Proceed to payment.`,
+        title: data.groupRef ? "Group Booking Created!" : "Booking Created!",
+        description: data.groupRef
+          ? `${data.bookings?.length ?? 0} rooms held · Group ref: ${data.groupRef}. Proceed to payment.`
+          : `Reference: ${data.reference}. Proceed to payment.`,
       });
     } catch (err: any) {
       console.error("Booking error:", err);
@@ -263,7 +279,7 @@ const Booking = () => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [state, setBookingReference, goNext, toast]);
+  }, [state, setBookingReference, setGroupResult, goNext, toast]);
 
   const handlePaymentComplete = useCallback(() => {
     setStep("confirmation");
@@ -293,12 +309,16 @@ const Booking = () => {
                 search={state.search}
                 onSelect={(room) => { setSelectedRoom(room); goNext(); }}
                 onBack={goBack}
+                isGroup={state.isGroup}
+                onToggleGroup={setIsGroup}
+                onGroupContinue={(rooms) => { setGroupRooms(rooms); goNext(); }}
               />
             )}
             {state.step === "addons" && state.selectedRoom && (
               <AddOnsStep
                 key="addons"
                 selectedRoom={state.selectedRoom}
+                groupRooms={state.isGroup ? state.groupRooms : undefined}
                 selectedAddOns={state.selectedAddOns}
                 onToggle={toggleAddOn}
                 onNext={goNext}
@@ -310,6 +330,7 @@ const Booking = () => {
                 key="details"
                 guestInfo={state.guestInfo}
                 selectedRoom={state.selectedRoom}
+                groupRooms={state.isGroup ? state.groupRooms : undefined}
                 selectedAddOns={state.selectedAddOns}
                 totalAmount={state.totalAmount}
                 appliedPromo={state.appliedPromo}
@@ -324,6 +345,7 @@ const Booking = () => {
               <PaymentStep
                 key="payment"
                 selectedRoom={state.selectedRoom}
+                groupRooms={state.isGroup ? state.groupRooms : undefined}
                 selectedAddOns={state.selectedAddOns}
                 guestInfo={state.guestInfo}
                 totalAmount={state.totalAmount}

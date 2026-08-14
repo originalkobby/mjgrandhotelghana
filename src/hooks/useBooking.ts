@@ -25,6 +25,16 @@ export interface SelectedRoom {
   totalPrice: number;
 }
 
+export interface GroupRoom extends SelectedRoom {
+  quantity: number;
+}
+
+export interface GroupBookingResult {
+  reference: string;
+  roomName: string;
+  finalTotal: number;
+}
+
 export interface SelectedAddOn {
   id: string;
   name: string;
@@ -62,6 +72,10 @@ export interface BookingState {
   roomPreselected: boolean;
   appliedPromo: AppliedPromo | null;
   promoError: string | null;
+  isGroup: boolean;
+  groupRooms: GroupRoom[];
+  groupRef: string | null;
+  groupBookings: GroupBookingResult[] | null;
 }
 
 const STEPS: BookingStep[] = ["search", "rooms", "addons", "details", "payment", "confirmation"];
@@ -92,6 +106,10 @@ export function useBooking() {
     roomPreselected: false,
     appliedPromo: null,
     promoError: null,
+    isGroup: false,
+    groupRooms: [],
+    groupRef: null,
+    groupBookings: null,
   });
 
   const setStep = useCallback((step: BookingStep) => {
@@ -105,6 +123,30 @@ export function useBooking() {
   const setSelectedRoom = useCallback((room: SelectedRoom | null) => {
     setState((prev) => ({ ...prev, selectedRoom: room }));
   }, []);
+
+  const setIsGroup = useCallback((isGroup: boolean) => {
+    setState((prev) => ({
+      ...prev,
+      isGroup,
+      groupRooms: isGroup ? prev.groupRooms : [],
+    }));
+  }, []);
+
+  const setGroupRooms = useCallback((rooms: GroupRoom[]) => {
+    setState((prev) => ({
+      ...prev,
+      groupRooms: rooms,
+      // The first room in the group acts as the lead room for the remaining steps
+      selectedRoom: rooms.length > 0 ? rooms[0] : prev.selectedRoom,
+    }));
+  }, []);
+
+  const setGroupResult = useCallback(
+    (groupRef: string | null, bookings: GroupBookingResult[] | null) => {
+      setState((prev) => ({ ...prev, groupRef, groupBookings: bookings }));
+    },
+    []
+  );
 
   const setRoomPreselected = useCallback((val: boolean) => {
     setState((prev) => ({ ...prev, roomPreselected: val }));
@@ -164,14 +206,19 @@ export function useBooking() {
   }, [state.step, state.roomPreselected]);
 
   const addOnsTotal = state.selectedAddOns.reduce((sum, a) => sum + a.price_ghs * a.quantity, 0);
-  const roomTotal = state.selectedRoom?.totalPrice ?? 0;
+  const groupUnits = state.isGroup
+    ? state.groupRooms.reduce((sum, r) => sum + r.quantity, 0)
+    : 1;
+  const roomTotal = state.isGroup
+    ? state.groupRooms.reduce((sum, r) => sum + r.totalPrice * r.quantity, 0)
+    : state.selectedRoom?.totalPrice ?? 0;
   const preDiscountTotal = roomTotal + addOnsTotal;
   // For flat-rate group promos the room charge is always rate x nights, so derive the
   // adjustment from the currently selected room instead of a possibly stale server value.
   const nights = state.selectedRoom?.totalNights ?? 0;
   const discountGhs =
     state.appliedPromo?.discountType === "flat_rate" && nights > 0
-      ? roomTotal - state.appliedPromo.discountValue * nights
+      ? roomTotal - state.appliedPromo.discountValue * nights * groupUnits
       : state.appliedPromo?.discountGhs ?? 0;
   const totalAmount = Math.max(0, preDiscountTotal - discountGhs);
 
@@ -186,6 +233,9 @@ export function useBooking() {
     setStep,
     setSearch,
     setSelectedRoom,
+    setIsGroup,
+    setGroupRooms,
+    setGroupResult,
     setRoomPreselected,
     toggleAddOn,
     setGuestInfo,
