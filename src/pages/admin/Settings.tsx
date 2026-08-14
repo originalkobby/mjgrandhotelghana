@@ -26,7 +26,7 @@ import { useState } from "react";
 import { Settings2, ShieldCheck, Plus, Pencil } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
-import { formatDate } from "@/lib/dateUtils";
+import { formatDateGB } from "@/lib/dateUtils";
 
 type CancelPolicy = Tables<"cancellation_policies">;
 
