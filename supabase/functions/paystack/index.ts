@@ -179,12 +179,26 @@ serve(async (req) => {
         metadata: txn,
       });
 
-      // Update booking payment status
+      // Update booking payment status (all rooms when part of a group booking)
       if (isPaid) {
-        await supabase
+        const { data: paidRef } = await supabase
           .from("bookings")
-          .update({ payment_status: "paid" })
-          .eq("reference_code", reference);
+          .select("group_ref")
+          .eq("reference_code", reference)
+          .maybeSingle();
+
+        if (paidRef?.group_ref) {
+          await supabase
+            .from("bookings")
+            .update({ payment_status: "paid" })
+            .eq("group_ref", paidRef.group_ref);
+        } else {
+          await supabase
+            .from("bookings")
+            .update({ payment_status: "paid" })
+            .eq("reference_code", reference);
+        }
+
 
         // Fire-and-forget dual-write to Convex
         syncToConvex({
