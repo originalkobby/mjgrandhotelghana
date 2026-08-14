@@ -9,6 +9,7 @@ import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface Props {
   selectedRoom: SelectedRoom;
+  groupRooms?: GroupRoom[];
   selectedAddOns: SelectedAddOn[];
   guestInfo: GuestInfo;
   totalAmount: number;
@@ -21,6 +22,7 @@ interface Props {
 
 export default function PaymentStep({
   selectedRoom,
+  groupRooms,
   selectedAddOns,
   guestInfo,
   totalAmount,

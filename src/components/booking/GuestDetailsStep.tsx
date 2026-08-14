@@ -197,6 +197,7 @@ const DEFAULT_COUNTRY = COUNTRY_CODES.find((c) => c.country === "Ghana") || COUN
 interface Props {
   guestInfo: GuestInfo;
   selectedRoom: SelectedRoom;
+  groupRooms?: GroupRoom[];
   selectedAddOns: SelectedAddOn[];
   totalAmount: number;
   appliedPromo?: AppliedPromo | null;
@@ -210,6 +211,7 @@ interface Props {
 export default function GuestDetailsStep({
   guestInfo,
   selectedRoom,
+  groupRooms,
   selectedAddOns,
   totalAmount,
   appliedPromo,
@@ -406,17 +408,46 @@ export default function GuestDetailsStep({
           <h3 className="font-serif text-lg text-foreground mb-4">Booking Summary</h3>
 
           <div className="space-y-3 text-sm font-sans">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">{selectedRoom.name}</span>
-              <span className="text-foreground font-medium">
-                {toUsd(selectedRoom.nightlyRate)} × {selectedRoom.totalNights}
-                <span className="block text-xs text-muted-foreground">{toGhs(selectedRoom.nightlyRate)}/night</span>
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Room subtotal</span>
-              <span className="text-foreground">{toUsd(selectedRoom.totalPrice)}</span>
-            </div>
+            {groupRooms && groupRooms.length > 0 ? (
+              <>
+                <p className="text-xs uppercase tracking-wider text-accent">
+                  Group booking · {groupRooms.reduce((n, r) => n + r.quantity, 0)} rooms
+                </p>
+                {groupRooms.map((r) => (
+                  <div key={r.id} className="flex justify-between">
+                    <span className="text-muted-foreground">
+                      {r.name} × {r.quantity}
+                    </span>
+                    <span className="text-foreground font-medium">
+                      {toUsd(r.totalPrice * r.quantity)}
+                      <span className="block text-xs text-muted-foreground">
+                        {toGhs(r.nightlyRate)}/night
+                      </span>
+                    </span>
+                  </div>
+                ))}
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Rooms subtotal</span>
+                  <span className="text-foreground">
+                    {toUsd(groupRooms.reduce((sum, r) => sum + r.totalPrice * r.quantity, 0))}
+                  </span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{selectedRoom.name}</span>
+                  <span className="text-foreground font-medium">
+                    {toUsd(selectedRoom.nightlyRate)} × {selectedRoom.totalNights}
+                    <span className="block text-xs text-muted-foreground">{toGhs(selectedRoom.nightlyRate)}/night</span>
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Room subtotal</span>
+                  <span className="text-foreground">{toUsd(selectedRoom.totalPrice)}</span>
+                </div>
+              </>
+            )}
 
             {selectedAddOns.length > 0 && (
               <>
