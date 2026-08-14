@@ -302,6 +302,10 @@ export default function Inventory() {
           </p>
         </div>
         <div className="flex gap-2">
+          <BulkBlockDatesDialog
+            onDone={() => queryClient.invalidateQueries({ queryKey: ["admin-inventory"] })}
+          />
+
           <Button
             variant="outline"
             onClick={runDynamicPricing}
