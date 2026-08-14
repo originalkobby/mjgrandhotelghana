@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Wifi, Wind, Coffee, Tv, BedDouble, Maximize, Users, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Wifi, Wind, Coffee, Tv, BedDouble, Maximize, Users, ShieldCheck, Minus, Plus, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { differenceInDays } from "date-fns";
-import type { BookingSearch, SelectedRoom } from "@/hooks/useBooking";
+import type { BookingSearch, GroupRoom, SelectedRoom } from "@/hooks/useBooking";
 import { useCurrency } from "@/contexts/CurrencyContext";
 
 import roomDeluxe from "@/assets/room-deluxe.jpg";
@@ -45,16 +45,29 @@ interface RoomData {
   nightlyRate: number;
 }
 
+const MAX_GROUP_ROOMS = 20;
+
 interface Props {
   search: BookingSearch;
   onSelect: (room: SelectedRoom) => void;
   onBack: () => void;
+  isGroup?: boolean;
+  onToggleGroup?: (value: boolean) => void;
+  onGroupContinue?: (rooms: GroupRoom[]) => void;
 }
 
-export default function RoomSelectionStep({ search, onSelect, onBack }: Props) {
+export default function RoomSelectionStep({
+  search,
+  onSelect,
+  onBack,
+  isGroup = false,
+  onToggleGroup,
+  onGroupContinue,
+}: Props) {
   const [rooms, setRooms] = useState<RoomData[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<"price" | "recommended">("recommended");
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
 
   const nights = search.checkIn && search.checkOut
     ? differenceInDays(search.checkOut, search.checkIn)
@@ -153,6 +166,48 @@ export default function RoomSelectionStep({ search, onSelect, onBack }: Props) {
   // Note: realtime subscriptions are restricted to staff. Public booking page
   // refetches availability when the user changes dates or returns to this step.
 
+  const toSelectedRoom = (room: RoomData): SelectedRoom => ({
+    id: room.id,
+    name: room.name,
+    slug: room.slug,
+    description: room.description,
+    size_sqm: room.size_sqm,
+    bed_type: room.bed_type,
+    base_price_ghs: room.base_price_ghs,
+    amenities: room.amenities,
+    images: room.images,
+    nightlyRate: room.nightlyRate,
+    totalNights: nights,
+    totalPrice: room.nightlyRate * nights,
+  });
+
+  const totalSelectedRooms = Object.values(quantities).reduce((a, b) => a + b, 0);
+  const groupTotalPrice = rooms.reduce(
+    (sum, r) => sum + (quantities[r.id] ?? 0) * r.nightlyRate * nights,
+    0
+  );
+
+  const changeQuantity = (room: RoomData, delta: number) => {
+    setQuantities((prev) => {
+      const current = prev[room.id] ?? 0;
+      const others = totalSelectedRooms - current;
+      const max = Math.min(room.availableCount, MAX_GROUP_ROOMS - others);
+      const next = Math.max(0, Math.min(max, current + delta));
+      const updated = { ...prev, [room.id]: next };
+      if (next === 0) delete updated[room.id];
+      return updated;
+    });
+  };
+
+  const handleGroupContinue = () => {
+    if (!onGroupContinue) return;
+    const selection: GroupRoom[] = rooms
+      .filter((r) => (quantities[r.id] ?? 0) > 0)
+      .map((r) => ({ ...toSelectedRoom(r), quantity: quantities[r.id] }));
+    if (selection.length === 0) return;
+    onGroupContinue(selection);
+  };
+
   const handleSelect = (room: RoomData) => {
     onSelect({
       id: room.id,
@@ -192,6 +247,20 @@ export default function RoomSelectionStep({ search, onSelect, onBack }: Props) {
           </p>
         </div>
         <div className="flex gap-2">
+          {onToggleGroup && (
+            <Button
+              variant={isGroup ? "default" : "outline"}
+              size="sm"
+              onClick={() => {
+                setQuantities({});
+                onToggleGroup(!isGroup);
+              }}
+              className="text-xs gap-1"
+            >
+              <Layers className="w-3.5 h-3.5" />
+              {isGroup ? "Group booking on" : "Group booking"}
+            </Button>
+          )}
           <Button
             variant={sortBy === "recommended" ? "default" : "outline"}
             size="sm"
@@ -226,11 +295,48 @@ export default function RoomSelectionStep({ search, onSelect, onBack }: Props) {
               nights={nights}
               index={index}
               onSelect={() => handleSelect(room)}
+              isGroup={isGroup}
+              quantity={quantities[room.id] ?? 0}
+              onQuantityChange={(delta) => changeQuantity(room, delta)}
             />
           ))}
         </div>
       )}
+
+      {isGroup && !loading && (
+        <div className="sticky bottom-4 mt-6 bg-card border border-border rounded-xl shadow-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="font-sans text-sm text-muted-foreground">
+            {totalSelectedRooms === 0 ? (
+              <>Choose how many of each room type you need (up to {MAX_GROUP_ROOMS} rooms).</>
+            ) : (
+              <>
+                <span className="text-foreground font-semibold">
+                  {totalSelectedRooms} room{totalSelectedRooms !== 1 ? "s" : ""}
+                </span>{" "}
+                · {nights} night{nights !== 1 ? "s" : ""} ·{" "}
+                <GroupTotal amount={groupTotalPrice} />
+              </>
+            )}
+          </div>
+          <Button
+            onClick={handleGroupContinue}
+            disabled={totalSelectedRooms === 0}
+            className="bg-accent text-accent-foreground hover:bg-accent/90 font-sans text-xs font-semibold uppercase tracking-wider"
+          >
+            Continue with {totalSelectedRooms || 0} room{totalSelectedRooms !== 1 ? "s" : ""}
+          </Button>
+        </div>
+      )}
     </motion.div>
+  );
+}
+
+function GroupTotal({ amount }: { amount: number }) {
+  const { toUsd, toGhs } = useCurrency();
+  return (
+    <span className="text-foreground font-semibold">
+      {toUsd(amount)} <span className="text-muted-foreground font-normal">({toGhs(amount)})</span>
+    </span>
   );
 }
 
@@ -239,11 +345,17 @@ function RoomCard({
   nights,
   index,
   onSelect,
+  isGroup,
+  quantity,
+  onQuantityChange,
 }: {
   room: RoomData;
   nights: number;
   index: number;
   onSelect: () => void;
+  isGroup: boolean;
+  quantity: number;
+  onQuantityChange: (delta: number) => void;
 }) {
   const imgSrc = IMAGE_MAP[room.images[0]] ?? room.images[0];
   const { toUsd, toGhs } = useCurrency();
@@ -329,14 +441,42 @@ function RoomCard({
               </p>
               <p className="font-sans text-[10px] text-muted-foreground">{toGhs(room.nightlyRate)}/night</p>
             </div>
-            <Button
-              onClick={onSelect}
-              disabled={!room.available}
-              size="sm"
-              className="h-8 px-3 bg-accent text-accent-foreground hover:bg-accent/90 font-sans text-xs font-semibold uppercase tracking-wider"
-            >
-              {room.available ? "Select" : "Unavailable"}
-            </Button>
+            {isGroup ? (
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  disabled={!room.available || quantity === 0}
+                  onClick={() => onQuantityChange(-1)}
+                  aria-label={`Remove one ${room.name}`}
+                >
+                  <Minus className="w-3.5 h-3.5" />
+                </Button>
+                <span className="font-sans text-sm w-5 text-center tabular-nums">{quantity}</span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  disabled={!room.available || quantity >= room.availableCount}
+                  onClick={() => onQuantityChange(1)}
+                  aria-label={`Add one ${room.name}`}
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            ) : (
+              <Button
+                onClick={onSelect}
+                disabled={!room.available}
+                size="sm"
+                className="h-8 px-3 bg-accent text-accent-foreground hover:bg-accent/90 font-sans text-xs font-semibold uppercase tracking-wider"
+              >
+                {room.available ? "Select" : "Unavailable"}
+              </Button>
+            )}
           </div>
         </div>
       </div>
