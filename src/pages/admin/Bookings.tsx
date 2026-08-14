@@ -448,7 +448,7 @@ export default function Bookings() {
     for (const id of ids) {
       const b = idToBooking.get(id);
       try {
-        if (b && (b.status === "pending" || b.status === "confirmed")) {
+        if (b && (b.status === "pending" || b.status === "confirmed" || b.status === "checked_in")) {
           try { await releaseInventory(id); } catch { /* non-fatal */ }
         }
         // Related rows (booking_add_ons, payment_logs, booking_audit_log, webhook_logs)
