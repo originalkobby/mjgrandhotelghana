@@ -9,12 +9,24 @@ import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Settings2, ShieldCheck, Plus, Pencil } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { formatDateGB } from "@/lib/dateUtils";
 
 type CancelPolicy = Tables<"cancellation_policies">;
 
@@ -28,9 +40,61 @@ const emptyPolicy = {
 
 export default function AdminSettings() {
   const qc = useQueryClient();
+  const { user, role } = useAdminAuth();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyPolicy);
+  const [rateInput, setRateInput] = useState<string>("");
+  const [confirmRate, setConfirmRate] = useState(false);
+
+  const canEditRate = role === "admin" || role === "operations_manager";
+
+  const { data: currency, isLoading: loadingCurrency } = useQuery({
+    queryKey: ["admin-currency-setting"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("app_settings")
+        .select("*")
+        .eq("key", "currency")
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    staleTime: 30_000,
+  });
+
+  const { data: rateAuthor } = useQuery({
+    queryKey: ["admin-currency-author", currency?.updated_by],
+    enabled: !!currency?.updated_by,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", currency!.updated_by as string)
+        .maybeSingle();
+      return data?.full_name ?? null;
+    },
+    staleTime: 60_000,
+  });
+
+  const saveRateMutation = useMutation({
+    mutationFn: async () => {
+      const value = Number(rateInput);
+      const { error } = await supabase
+        .from("app_settings")
+        .update({ usd_to_ghs: value, updated_by: user?.id ?? null })
+        .eq("key", "currency");
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-currency-setting"] });
+      toast.success("Exchange rate updated");
+      setConfirmRate(false);
+      setRateInput("");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
 
   // Cancellation Policies
   const { data: policies, isLoading: loadingPolicies } = useQuery({
@@ -102,7 +166,7 @@ export default function AdminSettings() {
 
   const set = (key: string, val: any) => setForm((prev) => ({ ...prev, [key]: val }));
 
-  if (loadingPolicies || loadingRoles) {
+  if (loadingPolicies || loadingRoles || loadingCurrency) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-8 w-48" />
@@ -110,6 +174,10 @@ export default function AdminSettings() {
       </div>
     );
   }
+
+  const currentRate = Number(currency?.usd_to_ghs ?? 12.5);
+  const parsedRate = Number(rateInput);
+  const rateValid = Number.isFinite(parsedRate) && parsedRate >= 1 && parsedRate <= 100;
 
   return (
     <div className="space-y-6">
@@ -122,7 +190,85 @@ export default function AdminSettings() {
         <TabsList>
           <TabsTrigger value="policies">Cancellation Policies</TabsTrigger>
           <TabsTrigger value="roles">Staff Roles</TabsTrigger>
+          <TabsTrigger value="currency">Exchange Rate</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="currency" className="mt-4">
+          <Card className="max-w-xl">
+            <CardHeader>
+              <CardTitle className="text-base font-serif">USD → GH₵ Exchange Rate</CardTitle>
+              <CardDescription>
+                Used across the public website, the dashboard, and MJ AI quotes. Existing bookings keep their stored totals.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Current rate</p>
+                <p className="text-2xl font-serif text-foreground tabular-nums mt-1">
+                  1 USD = {currentRate.toFixed(2)} GH₵
+                </p>
+                {currency?.updated_at && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Last updated {formatDateGB(currency.updated_at)}
+                    {rateAuthor ? ` by ${rateAuthor}` : ""}
+                  </p>
+                )}
+              </div>
+
+              {canEditRate ? (
+                <div className="space-y-2">
+                  <Label className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                    New rate (GH₵ per 1 USD)
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min={1}
+                      max={100}
+                      value={rateInput}
+                      placeholder={currentRate.toFixed(2)}
+                      onChange={(e) => setRateInput(e.target.value)}
+                      className="max-w-[180px] tabular-nums"
+                    />
+                    <Button
+                      onClick={() => setConfirmRate(true)}
+                      disabled={!rateValid || parsedRate === currentRate || saveRateMutation.isPending}
+                    >
+                      {saveRateMutation.isPending ? "Saving…" : "Save Rate"}
+                    </Button>
+                  </div>
+                  {rateInput && !rateValid && (
+                    <p className="text-xs text-destructive">Enter a number between 1 and 100.</p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Only administrators and operations managers can change the exchange rate.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          <AlertDialog open={confirmRate} onOpenChange={setConfirmRate}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Update exchange rate?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  All GH₵ prices on the website, dashboard, and MJ AI will immediately use
+                  1 USD = {rateValid ? parsedRate.toFixed(2) : "—"} GH₵.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => saveRateMutation.mutate()}>
+                  Confirm
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </TabsContent>
+
 
         <TabsContent value="policies" className="mt-4 space-y-4">
           <div className="flex justify-end">

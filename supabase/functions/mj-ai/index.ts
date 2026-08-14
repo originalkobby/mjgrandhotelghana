@@ -1338,12 +1338,32 @@ async function cancelBooking(supabase: any, referenceCode: string) {
 }
 
 // --- Currency helpers (USD primary, GH₵ equivalent) ---
-// Fixed rate: 1 USD = 12.5 GHS
+// Fallback only — the live rate is stored in public.app_settings and editable by admins.
 const FIXED_USD_TO_GHS_RATE = 12.5;
 
+let _fxCache: { rate: number; at: number } | null = null;
+
 async function getUsdToGhsRate(): Promise<number> {
-  return FIXED_USD_TO_GHS_RATE;
+  if (_fxCache && Date.now() - _fxCache.at < 60_000) return _fxCache.rate;
+  try {
+    const client = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+    const { data } = await client
+      .from("app_settings")
+      .select("usd_to_ghs")
+      .eq("key", "currency")
+      .maybeSingle();
+    const rate = Number(data?.usd_to_ghs);
+    const value = Number.isFinite(rate) && rate > 0 ? rate : FIXED_USD_TO_GHS_RATE;
+    _fxCache = { rate: value, at: Date.now() };
+    return value;
+  } catch (_e) {
+    return FIXED_USD_TO_GHS_RATE;
+  }
 }
+
 
 
 function ghsToUsd(ghs: number, rate: number): number {
