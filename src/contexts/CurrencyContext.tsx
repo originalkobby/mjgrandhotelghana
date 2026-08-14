@@ -34,8 +34,25 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         .finally(() => setLoading(false));
     load();
     const id = setInterval(load, RATE_CACHE_TTL);
-    return () => clearInterval(id);
+
+    const channel = supabase
+      .channel("app-settings-currency")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "app_settings" },
+        (payload) => {
+          const next = Number((payload.new as { usd_to_ghs?: number } | null)?.usd_to_ghs);
+          if (Number.isFinite(next) && next > 0) setRate(next);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      clearInterval(id);
+      supabase.removeChannel(channel);
+    };
   }, []);
+
 
   const handleSetAdminMode = (mode: "usd" | "ghs") => {
     setAdminMode(mode);
