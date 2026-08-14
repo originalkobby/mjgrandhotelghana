@@ -269,7 +269,7 @@ export default function Bookings() {
       }
     }
 
-    const wasActive = oldStatus === "pending" || oldStatus === "confirmed";
+    const wasActive = oldStatus === "pending" || oldStatus === "confirmed" || oldStatus === "checked_in";
 
     // If dates changed AND booking blocks inventory, release the OLD nights first
     // so the inventory check / re-reserve uses a clean slate.
