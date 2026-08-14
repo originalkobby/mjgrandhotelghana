@@ -9,12 +9,24 @@ import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Settings2, ShieldCheck, Plus, Pencil } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { formatDate } from "@/lib/dateUtils";
 
 type CancelPolicy = Tables<"cancellation_policies">;
 
@@ -28,9 +40,61 @@ const emptyPolicy = {
 
 export default function AdminSettings() {
   const qc = useQueryClient();
+  const { user, role } = useAdminAuth();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyPolicy);
+  const [rateInput, setRateInput] = useState<string>("");
+  const [confirmRate, setConfirmRate] = useState(false);
+
+  const canEditRate = role === "admin" || role === "operations_manager";
+
+  const { data: currency, isLoading: loadingCurrency } = useQuery({
+    queryKey: ["admin-currency-setting"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("app_settings")
+        .select("*")
+        .eq("key", "currency")
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    staleTime: 30_000,
+  });
+
+  const { data: rateAuthor } = useQuery({
+    queryKey: ["admin-currency-author", currency?.updated_by],
+    enabled: !!currency?.updated_by,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", currency!.updated_by as string)
+        .maybeSingle();
+      return data?.full_name ?? null;
+    },
+    staleTime: 60_000,
+  });
+
+  const saveRateMutation = useMutation({
+    mutationFn: async () => {
+      const value = Number(rateInput);
+      const { error } = await supabase
+        .from("app_settings")
+        .update({ usd_to_ghs: value, updated_by: user?.id ?? null })
+        .eq("key", "currency");
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-currency-setting"] });
+      toast.success("Exchange rate updated");
+      setConfirmRate(false);
+      setRateInput("");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
 
   // Cancellation Policies
   const { data: policies, isLoading: loadingPolicies } = useQuery({
