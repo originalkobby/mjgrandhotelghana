@@ -89,13 +89,13 @@ async function fetchInventoryData(weekStart: Date, weekEnd: Date) {
       .select("id, check_in, status")
       .gte("check_in", startStr)
       .lte("check_in", endStr)
-      .in("status", ["pending", "confirmed"]),
+      .in("status", ["pending", "confirmed", "checked_in"]),
     supabase
       .from("bookings")
       .select("id, check_out, status")
       .gte("check_out", startStr)
       .lte("check_out", endStr)
-      .in("status", ["pending", "confirmed"]),
+      .in("status", ["pending", "confirmed", "checked_in"]),
   ]);
 
   const rooms = roomsData ?? [];

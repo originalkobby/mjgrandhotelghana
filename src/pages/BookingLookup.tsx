@@ -132,7 +132,7 @@ const BookingLookup = () => {
   const paymentDisplay = result ? getPaymentDisplay(result) : null;
   const displayStatus = paymentDisplay?.effectiveStatus ?? result?.status ?? "pending";
 
-  const canCancel = result && (result.status === "confirmed" || result.status === "pending");
+  const canCancel = result && (result.status === "confirmed" || result.status === "pending" || result.status === "checked_in");
 
   return (
     <div className="min-h-screen bg-background">

@@ -267,7 +267,7 @@ export default function Guests() {
   // Get latest room # for a guest from their bookings
   const getGuestRoomNumber = (guestId: string): string | null => {
     if (selectedGuest?.id === guestId && guestBookings.length > 0) {
-      const activeBooking = guestBookings.find(b => b.status === "confirmed" || b.status === "completed");
+      const activeBooking = guestBookings.find(b => b.status === "confirmed" || b.status === "checked_in" || b.status === "completed");
       return activeBooking?.room_number ?? null;
     }
     return null;
@@ -544,7 +544,7 @@ export default function Guests() {
                         </div>
 
                         {/* Record buttons */}
-                        {(b.status === "confirmed" || b.status === "completed") && (
+                        {(b.status === "confirmed" || b.status === "checked_in" || b.status === "completed") && (
                           <div className="pt-1">
                             {recordingBookingId === b.id ? (
                               <div className="space-y-2 bg-card p-2 rounded border border-border">
@@ -614,7 +614,7 @@ export default function Guests() {
                                 </Button>
                               )
                             )}
-                            {(b.status === "confirmed" || b.status === "completed") && (
+                            {(b.status === "confirmed" || b.status === "checked_in" || b.status === "completed") && (
                               <Button
                                 variant="outline"
                                 size="sm"
