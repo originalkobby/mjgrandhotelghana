@@ -170,6 +170,8 @@ export type Database = {
           created_at: string
           discount_ghs: number
           final_total_ghs: number
+          group_ref: string | null
+          group_size: number | null
           guest_id: string | null
           id: string
           nationality: string | null
@@ -199,6 +201,8 @@ export type Database = {
           created_at?: string
           discount_ghs?: number
           final_total_ghs: number
+          group_ref?: string | null
+          group_size?: number | null
           guest_id?: string | null
           id?: string
           nationality?: string | null
@@ -228,6 +232,8 @@ export type Database = {
           created_at?: string
           discount_ghs?: number
           final_total_ghs?: number
+          group_ref?: string | null
+          group_size?: number | null
           guest_id?: string | null
           id?: string
           nationality?: string | null
