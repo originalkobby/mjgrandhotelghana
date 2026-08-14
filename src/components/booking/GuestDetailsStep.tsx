@@ -11,7 +11,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import type { GuestInfo, SelectedRoom, SelectedAddOn, AppliedPromo } from "@/hooks/useBooking";
+import type { GuestInfo, SelectedRoom, SelectedAddOn, AppliedPromo, GroupRoom } from "@/hooks/useBooking";
 import { useCurrency } from "@/contexts/CurrencyContext";
 
 const COUNTRY_CODES = [

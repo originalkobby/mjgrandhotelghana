@@ -4,7 +4,7 @@ import { ArrowLeft, Car, UtensilsCrossed, Heart, Clock, Sparkles, Check } from "
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
-import type { SelectedAddOn, SelectedRoom } from "@/hooks/useBooking";
+import type { GroupRoom, SelectedAddOn, SelectedRoom } from "@/hooks/useBooking";
 import { useCurrency } from "@/contexts/CurrencyContext";
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -81,6 +81,11 @@ export default function AddOnsStep({ selectedRoom, groupRooms, selectedAddOns, o
         setLoading(false);
       });
   }, [selectedRoom.nightlyRate]);
+
+  const roomsSubtotal =
+    groupRooms && groupRooms.length > 0
+      ? groupRooms.reduce((sum, r) => sum + r.totalPrice * r.quantity, 0)
+      : selectedRoom.totalPrice;
 
   const addOnsTotal = selectedAddOns.reduce((sum, a) => sum + a.price_ghs, 0);
 
