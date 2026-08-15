@@ -122,6 +122,16 @@ export default function AdminMenu() {
     setOpen(true);
   };
 
+  const toggleCategory = (category: string) => {
+    setCollapsedCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(category)) next.delete(category);
+      else next.add(category);
+      return next;
+    });
+  };
+
+
   const set = (key: string, val: any) => setForm((p) => ({ ...p, [key]: val }));
 
   const filtered = items?.filter((i) => filterCategory === "all" || i.category === filterCategory) || [];
