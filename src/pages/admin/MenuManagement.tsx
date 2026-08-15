@@ -142,14 +142,16 @@ export default function AdminMenu() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
+    <div className="flex-1 min-h-0 flex flex-col gap-6">
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div className="flex items-center gap-3">
-          
-          <h1 className="text-2xl font-serif text-foreground">Menu Management</h1>
+          <div>
+            <h1 className="text-2xl font-serif text-foreground">Menu Management</h1>
+            <p className="text-sm text-muted-foreground">Manage dishes, pricing and availability</p>
+          </div>
           <Badge variant="secondary">{items?.length || 0} items</Badge>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <Select value={filterCategory} onValueChange={setFilterCategory}>
             <SelectTrigger className="w-48">
               <SelectValue placeholder="Filter category" />
