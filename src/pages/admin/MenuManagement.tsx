@@ -284,15 +284,25 @@ export default function AdminMenu() {
                   }
                   return entries.map(([category, categoryItems]) => (
                     <Fragment key={category}>
-                      <tr className="sticky top-[41px] z-10 bg-[hsl(var(--admin-surface))]">
+                      <tr
+                        className="sticky top-[41px] z-10 bg-[hsl(var(--admin-surface))] cursor-pointer hover:bg-cream/5 transition-colors"
+                        onClick={() => toggleCategory(category)}
+                      >
                         <td
                           colSpan={5}
                           className="px-4 py-2 border-y border-border font-serif text-sm font-semibold text-gold"
                         >
-                          {category}
+                          <div className="flex items-center gap-2">
+                            <ChevronDown
+                              className={`w-4 h-4 transition-transform ${
+                                collapsedCategories.has(category) ? "-rotate-90" : ""
+                              }`}
+                            />
+                            {category}
+                          </div>
                         </td>
                       </tr>
-                      {categoryItems.map((item) => {
+                      {!collapsedCategories.has(category) && categoryItems.map((item) => {
                         rowIndex += 1;
                         return (
                           <tr
