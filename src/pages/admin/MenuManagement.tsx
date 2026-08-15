@@ -47,6 +47,8 @@ export default function AdminMenu() {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [filterCategory, setFilterCategory] = useState<string>("all");
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
+
 
   const { data: items, isLoading, isFetching } = useQuery({
     queryKey: ["admin-menu-items"],
