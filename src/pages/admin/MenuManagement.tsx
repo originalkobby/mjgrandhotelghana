@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -142,14 +142,16 @@ export default function AdminMenu() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
+    <div className="flex-1 min-h-0 flex flex-col gap-6">
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div className="flex items-center gap-3">
-          
-          <h1 className="text-2xl font-serif text-foreground">Menu Management</h1>
+          <div>
+            <h1 className="text-2xl font-serif text-foreground">Menu Management</h1>
+            <p className="text-sm text-muted-foreground">Manage dishes, pricing and availability</p>
+          </div>
           <Badge variant="secondary">{items?.length || 0} items</Badge>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <Select value={filterCategory} onValueChange={setFilterCategory}>
             <SelectTrigger className="w-48">
               <SelectValue placeholder="Filter category" />
@@ -233,65 +235,98 @@ export default function AdminMenu() {
         </div>
       </div>
 
-      {Object.entries(grouped).map(([category, categoryItems]) => (
-        <Card key={category}>
-          <CardContent className="p-0">
-            <div className="px-4 py-3 border-b border-border bg-muted/30">
-              <h2 className="font-serif text-sm font-semibold text-foreground">{category}</h2>
-            </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Item</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-24" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {categoryItems.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-medium text-foreground">{item.name}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground max-w-xs truncate">{item.description || "—"}</TableCell>
-                    <TableCell className="whitespace-nowrap">{item.price}</TableCell>
-                    <TableCell>
-                      <Badge variant={item.is_active ? "default" : "secondary"}>
-                        {item.is_active ? "Active" : "Inactive"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => openEdit(item)}>
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => {
-                            if (confirm(`Delete "${item.name}"?`)) deleteMutation.mutate(item.id);
-                          }}
+      <Card className="flex flex-col flex-1 min-h-0">
+        <CardContent className="flex flex-col flex-1 min-h-0 p-0">
+          <div className="flex-1 min-h-0 overflow-auto">
+            <table className="w-full text-sm font-sans">
+              <thead className="sticky top-0 z-20 bg-[hsl(var(--admin-surface))]">
+                <tr className="border-b border-border">
+                  {[
+                    { label: "Item", cls: "w-[22%]" },
+                    { label: "Description", cls: "w-[38%]" },
+                    { label: "Price", cls: "w-[12%]" },
+                    { label: "Status", cls: "w-[12%]" },
+                    { label: "Actions", cls: "w-[16%]" },
+                  ].map((h) => (
+                    <th
+                      key={h.label}
+                      className={`${h.cls} px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider`}
+                    >
+                      {h.label}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {(() => {
+                  let rowIndex = -1;
+                  const entries = Object.entries(grouped);
+                  if (entries.length === 0) {
+                    return (
+                      <tr>
+                        <td colSpan={5} className="text-center py-12 text-muted-foreground">
+                          No menu items found
+                        </td>
+                      </tr>
+                    );
+                  }
+                  return entries.map(([category, categoryItems]) => (
+                    <Fragment key={category}>
+                      <tr className="sticky top-[41px] z-10 bg-[hsl(var(--admin-surface))]">
+                        <td
+                          colSpan={5}
+                          className="px-4 py-2 border-y border-border font-serif text-sm font-semibold text-foreground"
                         >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      ))}
-
-      {Object.keys(grouped).length === 0 && (
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            No menu items found
-          </CardContent>
-        </Card>
-      )}
+                          {category}
+                        </td>
+                      </tr>
+                      {categoryItems.map((item) => {
+                        rowIndex += 1;
+                        return (
+                          <tr
+                            key={item.id}
+                            className={`border-b border-border/50 transition-colors ${
+                              rowIndex % 2 === 0 ? "bg-muted/40" : ""
+                            } hover:bg-muted/60`}
+                          >
+                            <td className="px-4 py-3 font-medium text-foreground">{item.name}</td>
+                            <td className="px-4 py-3 text-sm text-muted-foreground">
+                              <span className="block max-w-md truncate">{item.description || "—"}</span>
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap">{item.price}</td>
+                            <td className="px-4 py-3">
+                              <Badge variant={item.is_active ? "default" : "secondary"}>
+                                {item.is_active ? "Active" : "Inactive"}
+                              </Badge>
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="flex gap-1">
+                                <Button variant="ghost" size="icon" onClick={() => openEdit(item)}>
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="text-destructive hover:text-destructive"
+                                  onClick={() => {
+                                    if (confirm(`Delete "${item.name}"?`)) deleteMutation.mutate(item.id);
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </Fragment>
+                  ));
+                })()}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
