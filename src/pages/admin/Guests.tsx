@@ -277,54 +277,57 @@ export default function Guests() {
   const refreshing = isLoading || isFetching;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="font-serif text-2xl md:text-3xl text-foreground">Guests</h1>
-        <p className="font-sans text-sm text-muted-foreground mt-1">
-          View guest profiles, booking history, and VIP status
-        </p>
-      </div>
-
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, email, or phone…"
-            className="pl-10"
-          />
+    <div className="flex-1 min-h-0 flex flex-col gap-6">
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+        <div>
+          <h1 className="font-serif text-2xl md:text-3xl text-foreground">Guests</h1>
+          <p className="font-sans text-sm text-muted-foreground mt-1">
+            View guest profiles, booking history, and VIP status
+          </p>
         </div>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => queryClient.invalidateQueries({ queryKey: ["admin-guests"] })}
-          disabled={refreshing}
-          title="Refresh guests"
-        >
-          <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-        </Button>
-        {isAdmin && selectedGuestCount > 0 && (
+
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by name, email, or phone…"
+              className="pl-10"
+            />
+          </div>
           <Button
-            variant="destructive"
-            className="gap-2"
-            onClick={() => setShowDeleteDialog(true)}
-            disabled={deletingGuests}
+            variant="outline"
+            size="icon"
+            onClick={() => queryClient.invalidateQueries({ queryKey: ["admin-guests"] })}
+            disabled={refreshing}
+            title="Refresh guests"
           >
-            <Trash2 className="w-4 h-4" />
-            Delete {selectedGuestCount} record{selectedGuestCount === 1 ? "" : "s"}
+            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
           </Button>
-        )}
+          {isAdmin && selectedGuestCount > 0 && (
+            <Button
+              variant="destructive"
+              className="gap-2"
+              onClick={() => setShowDeleteDialog(true)}
+              disabled={deletingGuests}
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete {selectedGuestCount} record{selectedGuestCount === 1 ? "" : "s"}
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Table */}
-      <Card>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
+      <Card className="flex flex-col flex-1 min-h-0">
+        <CardContent className="flex flex-col flex-1 min-h-0 p-0">
+          <div className="flex-1 min-h-0 overflow-auto">
             <table className="w-full text-sm font-sans">
-              <thead>
+              <thead className="sticky top-0 z-10 bg-[hsl(var(--admin-surface))]">
                 <tr className="border-b border-border">
+
                   {isAdmin && (
                     <th className="w-9 px-3 py-3">
                       <Checkbox
