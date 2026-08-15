@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, UtensilsCrossed, RefreshCw } from "lucide-react";
+import { Plus, Pencil, Trash2, UtensilsCrossed, RefreshCw, ChevronDown } from "lucide-react";
 import ImageUpload from "@/components/admin/ImageUpload";
 
 const CATEGORIES = [
