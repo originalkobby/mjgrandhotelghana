@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, UtensilsCrossed, RefreshCw } from "lucide-react";
+import { Plus, Pencil, Trash2, UtensilsCrossed, RefreshCw, ChevronDown } from "lucide-react";
 import ImageUpload from "@/components/admin/ImageUpload";
 
 const CATEGORIES = [
@@ -47,6 +47,8 @@ export default function AdminMenu() {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [filterCategory, setFilterCategory] = useState<string>("all");
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
+
 
   const { data: items, isLoading, isFetching } = useQuery({
     queryKey: ["admin-menu-items"],
@@ -119,6 +121,16 @@ export default function AdminMenu() {
     });
     setOpen(true);
   };
+
+  const toggleCategory = (category: string) => {
+    setCollapsedCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(category)) next.delete(category);
+      else next.add(category);
+      return next;
+    });
+  };
+
 
   const set = (key: string, val: any) => setForm((p) => ({ ...p, [key]: val }));
 
@@ -272,15 +284,25 @@ export default function AdminMenu() {
                   }
                   return entries.map(([category, categoryItems]) => (
                     <Fragment key={category}>
-                      <tr className="sticky top-[41px] z-10 bg-[hsl(var(--admin-surface))]">
+                      <tr
+                        className="sticky top-[41px] z-10 bg-[hsl(var(--admin-surface))] cursor-pointer hover:bg-cream/5 transition-colors"
+                        onClick={() => toggleCategory(category)}
+                      >
                         <td
                           colSpan={5}
                           className="px-4 py-2 border-y border-border font-serif text-sm font-semibold text-gold"
                         >
-                          {category}
+                          <div className="flex items-center gap-2">
+                            <ChevronDown
+                              className={`w-4 h-4 transition-transform ${
+                                collapsedCategories.has(category) ? "-rotate-90" : ""
+                              }`}
+                            />
+                            {category}
+                          </div>
                         </td>
                       </tr>
-                      {categoryItems.map((item) => {
+                      {!collapsedCategories.has(category) && categoryItems.map((item) => {
                         rowIndex += 1;
                         return (
                           <tr
