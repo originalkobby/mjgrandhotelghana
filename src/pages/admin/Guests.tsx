@@ -348,7 +348,7 @@ export default function Guests() {
               <tbody>
                 {isLoading ? (
                   Array.from({ length: 5 }).map((_, i) => (
-                    <tr key={i} className="border-b border-border/50">
+                    <tr key={i} className={`border-b border-border/50 ${i % 2 === 0 ? "bg-muted/40" : ""}`}>
                       {Array.from({ length: 7 }).map((_, j) => (
                         <td key={j} className="px-4 py-3">
                           <div className="h-4 bg-muted rounded animate-pulse" />
