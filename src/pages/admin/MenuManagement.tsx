@@ -275,7 +275,7 @@ export default function AdminMenu() {
                       <tr className="sticky top-[41px] z-10 bg-[hsl(var(--admin-surface))]">
                         <td
                           colSpan={5}
-                          className="px-4 py-2 border-y border-border font-serif text-sm font-semibold text-foreground"
+                          className="px-4 py-2 border-y border-border font-serif text-sm font-semibold text-gold"
                         >
                           {category}
                         </td>
