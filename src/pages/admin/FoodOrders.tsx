@@ -304,7 +304,16 @@ export default function AdminFoodOrders() {
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">
                         {TYPE_LABELS[order.order_type]}
+                        {order.order_type === "delivery" && order.delivery_zones?.name && (
+                          <Badge
+                            variant="outline"
+                            className="ml-1 text-[10px] border-amber-500/30 text-amber-500 bg-amber-500/10"
+                          >
+                            {order.delivery_zones.name}
+                          </Badge>
+                        )}
                       </td>
+
                       <td className="px-4 py-3">
                         <p className="text-sm text-foreground truncate max-w-xs">
                           {order.food_order_items.map((i) => `${i.quantity}× ${i.name}`).join(", ")}
