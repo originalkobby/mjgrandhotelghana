@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
     const { data: order, error } = await supabase
       .from("food_orders")
       .select(
-        "reference_code, guest_name, email, phone, room_number, order_type, notes, total_ghs, created_at, food_order_items(name, quantity, price_ghs, line_total_ghs)",
+        "reference_code, guest_name, email, phone, room_number, order_type, notes, total_ghs, created_at, delivery_address, delivery_landmark, delivery_fee_ghs, delivery_zones(name), food_order_items(name, quantity, price_ghs, line_total_ghs)",
       )
       .eq("id", orderId)
       .single();
@@ -54,7 +54,13 @@ Deno.serve(async (req) => {
       dine_in: "Dine-in",
       room_service: "Room Service",
       takeaway: "Takeaway",
+      delivery: "Delivery",
     };
+
+    const zoneName = (order as any).delivery_zones?.name ?? null;
+    const deliveryFee = Number(order.delivery_fee_ghs ?? 0);
+    const isDelivery = order.order_type === "delivery";
+
 
     const items = (order.food_order_items ?? []) as Array<{
       name: string;
@@ -105,6 +111,12 @@ Deno.serve(async (req) => {
               <p style="margin:0 0 16px;color:#1a1a1a;font-size:16px;font-family:monospace;font-weight:bold;">${order.reference_code}</p>
               <p style="margin:0 0 4px;color:#999;font-size:11px;text-transform:uppercase;letter-spacing:1px;font-family:Arial,sans-serif;">Order Type</p>
               <p style="margin:0 0 16px;color:#1a1a1a;font-size:14px;font-family:Arial,sans-serif;">${typeLabel[order.order_type] ?? order.order_type}${order.room_number ? ` · Room ${order.room_number}` : ""}</p>
+              ${
+    isDelivery
+      ? `<p style="margin:0 0 4px;color:#999;font-size:11px;text-transform:uppercase;letter-spacing:1px;font-family:Arial,sans-serif;">Delivery To</p>
+              <p style="margin:0 0 16px;color:#1a1a1a;font-size:14px;font-family:Arial,sans-serif;">${zoneName ? `${zoneName} · ` : ""}${order.delivery_address ?? ""}${order.delivery_landmark ? ` (${order.delivery_landmark})` : ""}</p>`
+      : ""
+  }
               <p style="margin:0 0 4px;color:#999;font-size:11px;text-transform:uppercase;letter-spacing:1px;font-family:Arial,sans-serif;">Placed</p>
               <p style="margin:0;color:#1a1a1a;font-size:14px;font-family:Arial,sans-serif;">${placedAt}</p>
             </td></tr>
@@ -113,11 +125,20 @@ Deno.serve(async (req) => {
           <p style="margin:0 0 8px;color:#999;font-size:11px;text-transform:uppercase;letter-spacing:1px;font-family:Arial,sans-serif;">Order Summary</p>
           <table width="100%" cellpadding="0" cellspacing="0">
             ${rows}
+            ${
+    isDelivery
+      ? `<tr>
+              <td style="padding:10px 0;border-bottom:1px solid #eee;color:#1a1a1a;font-size:14px;font-family:Arial,sans-serif;">Delivery${zoneName ? ` — ${zoneName}` : ""}</td>
+              <td align="right" style="padding:10px 0;border-bottom:1px solid #eee;color:#1a1a1a;font-size:14px;font-family:Arial,sans-serif;">GH₵ ${deliveryFee.toFixed(2)}</td>
+            </tr>`
+      : ""
+  }
             <tr>
               <td style="padding:14px 0;color:#1a1a1a;font-size:15px;font-family:Arial,sans-serif;font-weight:bold;">Total</td>
               <td align="right" style="padding:14px 0;color:#1a1a1a;font-size:15px;font-family:Arial,sans-serif;font-weight:bold;">GH₵ ${Number(order.total_ghs).toFixed(2)}</td>
             </tr>
           </table>
+
 
           ${order.notes ? `<p style="margin:16px 0 0;color:#666;font-size:13px;font-family:Arial,sans-serif;"><strong>Notes:</strong> ${order.notes}</p>` : ""}
 

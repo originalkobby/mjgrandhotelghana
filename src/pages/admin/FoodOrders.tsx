@@ -40,22 +40,34 @@ type FoodOrder = {
   email: string | null;
   phone: string | null;
   room_number: string | null;
-  order_type: "dine_in" | "room_service" | "takeaway";
-  status: "pending" | "confirmed" | "ready" | "completed" | "cancelled";
+  order_type: "dine_in" | "room_service" | "takeaway" | "delivery";
+  status: "pending" | "confirmed" | "ready" | "out_for_delivery" | "completed" | "cancelled";
   notes: string | null;
   total_ghs: number;
   reference_code: string;
   created_at: string;
   updated_at: string;
+  delivery_address: string | null;
+  delivery_landmark: string | null;
+  delivery_fee_ghs: number | null;
+  delivery_zones: { name: string } | null;
   food_order_items: FoodOrderItem[];
 };
 
 const STATUS_SEQUENCE: FoodOrder["status"][] = ["pending", "confirmed", "ready", "completed"];
+const DELIVERY_STATUS_SEQUENCE: FoodOrder["status"][] = [
+  "pending",
+  "confirmed",
+  "ready",
+  "out_for_delivery",
+  "completed",
+];
 
 const STATUS_LABELS: Record<FoodOrder["status"], string> = {
   pending: "Pending",
   confirmed: "Confirmed",
   ready: "Ready",
+  out_for_delivery: "Out for delivery",
   completed: "Completed",
   cancelled: "Cancelled",
 };
@@ -64,6 +76,7 @@ const STATUS_COLORS: Record<FoodOrder["status"], string> = {
   pending: "bg-orange-500/15 text-orange-400 border-orange-500/30",
   confirmed: "bg-blue-500/15 text-blue-400 border-blue-500/30",
   ready: "bg-green-500/15 text-green-400 border-green-500/30",
+  out_for_delivery: "bg-amber-500/15 text-amber-400 border-amber-500/30",
   completed: "bg-emerald-900/30 text-emerald-300 border-emerald-900/40",
   cancelled: "bg-red-500/15 text-red-400 border-red-500/30",
 };
@@ -72,18 +85,20 @@ const TYPE_LABELS: Record<FoodOrder["order_type"], string> = {
   dine_in: "Dine-in",
   room_service: "Room Service",
   takeaway: "Takeaway",
+  delivery: "Delivery",
 };
 
 async function fetchFoodOrders(): Promise<FoodOrder[]> {
   const { data, error } = await supabase
     .from("food_orders")
-    .select("*, food_order_items(*)")
+    .select("*, delivery_zones(name), food_order_items(*)")
     .order("created_at", { ascending: false })
     .limit(500);
 
   if (error) throw error;
   return (data as unknown as FoodOrder[]) ?? [];
 }
+
 
 export default function AdminFoodOrders() {
   const { role } = useAdminAuth();
@@ -152,12 +167,14 @@ export default function AdminFoodOrders() {
     toast.success(`Order marked ${STATUS_LABELS[newStatus].toLowerCase()}`);
   }
 
-  function nextStatus(status: FoodOrder["status"]): FoodOrder["status"] | null {
-    if (status === "cancelled") return null;
-    const idx = STATUS_SEQUENCE.indexOf(status);
-    if (idx === -1 || idx === STATUS_SEQUENCE.length - 1) return null;
-    return STATUS_SEQUENCE[idx + 1];
+  function nextStatus(order: Pick<FoodOrder, "status" | "order_type">): FoodOrder["status"] | null {
+    if (order.status === "cancelled") return null;
+    const seq = order.order_type === "delivery" ? DELIVERY_STATUS_SEQUENCE : STATUS_SEQUENCE;
+    const idx = seq.indexOf(order.status);
+    if (idx === -1 || idx === seq.length - 1) return null;
+    return seq[idx + 1];
   }
+
 
   if (isLoading) {
     return (
@@ -194,7 +211,7 @@ export default function AdminFoodOrders() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All statuses</SelectItem>
-              {STATUS_SEQUENCE.map((s) => (
+              {DELIVERY_STATUS_SEQUENCE.map((s) => (
                 <SelectItem key={s} value={s}>
                   {STATUS_LABELS[s]}
                 </SelectItem>
@@ -211,7 +228,9 @@ export default function AdminFoodOrders() {
               <SelectItem value="dine_in">Dine-in</SelectItem>
               <SelectItem value="room_service">Room Service</SelectItem>
               <SelectItem value="takeaway">Takeaway</SelectItem>
+              <SelectItem value="delivery">Delivery</SelectItem>
             </SelectContent>
+
           </Select>
           <Button
             variant="outline"
@@ -285,7 +304,16 @@ export default function AdminFoodOrders() {
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">
                         {TYPE_LABELS[order.order_type]}
+                        {order.order_type === "delivery" && order.delivery_zones?.name && (
+                          <Badge
+                            variant="outline"
+                            className="ml-1 text-[10px] border-amber-500/30 text-amber-500 bg-amber-500/10"
+                          >
+                            {order.delivery_zones.name}
+                          </Badge>
+                        )}
                       </td>
+
                       <td className="px-4 py-3">
                         <p className="text-sm text-foreground truncate max-w-xs">
                           {order.food_order_items.map((i) => `${i.quantity}× ${i.name}`).join(", ")}
@@ -307,15 +335,15 @@ export default function AdminFoodOrders() {
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
-                          {nextStatus(order.status) && (
+                          {nextStatus(order) && (
                             <Button
                               variant="ghost"
                               size="sm"
                               disabled={updatingId === order.id}
-                              onClick={() => updateStatus(order.id, nextStatus(order.status)!)}
+                              onClick={() => updateStatus(order.id, nextStatus(order)!)}
                               className="text-green-600 hover:text-green-700 hover:bg-green-50"
                             >
-                              {STATUS_LABELS[nextStatus(order.status)!]}
+                              {STATUS_LABELS[nextStatus(order)!]}
                             </Button>
                           )}
                           {order.status !== "cancelled" && order.status !== "completed" && (
@@ -377,6 +405,23 @@ export default function AdminFoodOrders() {
                 </div>
               </div>
 
+              {selected.order_type === "delivery" && (
+                <div className="rounded-lg border border-amber-500/25 bg-amber-500/5 p-3 space-y-1 text-sm">
+                  <p className="text-[10px] uppercase tracking-wider text-amber-500">Delivery</p>
+                  <p className="font-medium">{selected.delivery_zones?.name || "Unassigned zone"}</p>
+                  <p className="text-muted-foreground">{selected.delivery_address || "—"}</p>
+                  {selected.delivery_landmark && (
+                    <p className="text-xs text-muted-foreground">Landmark: {selected.delivery_landmark}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Fee: GH₵ {Number(selected.delivery_fee_ghs || 0).toFixed(2)} · Phone:{" "}
+                    {selected.phone || "—"}
+                  </p>
+                </div>
+              )}
+
+
+
               <div className="rounded-lg border border-border/60 bg-muted/30 p-3 space-y-2">
                 {selected.food_order_items.map((item) => (
                   <div key={item.id} className="flex justify-between text-sm">
@@ -400,7 +445,7 @@ export default function AdminFoodOrders() {
               )}
 
               <div className="flex justify-end gap-2 pt-2">
-                {selected.status !== "cancelled" && selected.status !== "completed" && nextStatus(selected.status) && (
+                {selected.status !== "cancelled" && selected.status !== "completed" && nextStatus(selected) && (
                   <>
                     <Button
                       variant="outline"
@@ -413,11 +458,11 @@ export default function AdminFoodOrders() {
                     </Button>
                     <Button
                       onClick={() => {
-                        updateStatus(selected.id, nextStatus(selected.status)!);
+                        updateStatus(selected.id, nextStatus(selected)!);
                         setSelected(null);
                       }}
                     >
-                      Mark {STATUS_LABELS[nextStatus(selected.status)!]}
+                      Mark {STATUS_LABELS[nextStatus(selected)!]}
                     </Button>
                   </>
                 )}

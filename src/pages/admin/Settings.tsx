@@ -38,6 +38,15 @@ const emptyPolicy = {
   is_default: false,
 };
 
+const emptyZone = {
+  id: undefined as string | undefined,
+  name: "",
+  fee_ghs: 0,
+  is_active: true,
+  sort_order: 0,
+};
+
+
 export default function AdminSettings() {
   const qc = useQueryClient();
   const { user, role } = useAdminAuth();
@@ -46,6 +55,9 @@ export default function AdminSettings() {
   const [form, setForm] = useState(emptyPolicy);
   const [rateInput, setRateInput] = useState<string>("");
   const [confirmRate, setConfirmRate] = useState(false);
+  const [zoneOpen, setZoneOpen] = useState(false);
+  const [zoneForm, setZoneForm] = useState(emptyZone);
+
 
   const canEditRate = role === "admin" || role === "operations_manager";
 
@@ -107,6 +119,46 @@ export default function AdminSettings() {
     staleTime: 60_000,
   });
 
+  // Delivery zones
+  const { data: zones } = useQuery({
+    queryKey: ["admin-delivery-zones"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("delivery_zones")
+        .select("*")
+        .order("sort_order");
+      if (error) throw error;
+      return data as Tables<"delivery_zones">[];
+    },
+    staleTime: 60_000,
+  });
+
+  const saveZoneMutation = useMutation({
+    mutationFn: async (payload: {
+      id?: string;
+      name: string;
+      fee_ghs: number;
+      is_active: boolean;
+      sort_order: number;
+    }) => {
+      if (payload.id) {
+        const { id, ...rest } = payload;
+        const { error } = await supabase.from("delivery_zones").update(rest).eq("id", id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("delivery_zones").insert(payload);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-delivery-zones"] });
+      toast.success("Delivery zone saved");
+      setZoneOpen(false);
+      setZoneForm(emptyZone);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   // User Roles
   const { data: roles, isLoading: loadingRoles } = useQuery({
     queryKey: ["admin-user-roles"],
@@ -120,6 +172,7 @@ export default function AdminSettings() {
     },
     staleTime: 60_000,
   });
+
 
   const savePolicyMutation = useMutation({
     mutationFn: async () => {
@@ -190,7 +243,135 @@ export default function AdminSettings() {
           <TabsTrigger value="policies">Cancellation Policies</TabsTrigger>
           <TabsTrigger value="roles">Staff Roles</TabsTrigger>
           <TabsTrigger value="currency">Exchange Rate</TabsTrigger>
+          {canEditRate && <TabsTrigger value="delivery">Delivery Zones</TabsTrigger>}
         </TabsList>
+
+        {canEditRate && (
+          <TabsContent value="delivery" className="mt-4 space-y-4">
+            <div className="flex justify-end">
+              <Dialog
+                open={zoneOpen}
+                onOpenChange={(v) => {
+                  setZoneOpen(v);
+                  if (!v) setZoneForm(emptyZone);
+                }}
+              >
+                <DialogTrigger asChild>
+                  <Button size="sm">
+                    <Plus className="h-4 w-4 mr-1" /> Add Zone
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>{zoneForm.id ? "Edit Delivery Zone" : "New Delivery Zone"}</DialogTitle>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-2">
+                    <div>
+                      <Label>Zone name *</Label>
+                      <Input
+                        value={zoneForm.name}
+                        onChange={(e) => setZoneForm((p) => ({ ...p, name: e.target.value }))}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Delivery fee (GH₵)</Label>
+                        <Input
+                          type="number"
+                          min={0}
+                          step="0.5"
+                          value={zoneForm.fee_ghs}
+                          onChange={(e) => setZoneForm((p) => ({ ...p, fee_ghs: +e.target.value }))}
+                        />
+                      </div>
+                      <div>
+                        <Label>Sort order</Label>
+                        <Input
+                          type="number"
+                          value={zoneForm.sort_order}
+                          onChange={(e) => setZoneForm((p) => ({ ...p, sort_order: +e.target.value }))}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={zoneForm.is_active}
+                        onCheckedChange={(v) => setZoneForm((p) => ({ ...p, is_active: v }))}
+                      />
+                      <Label>Active (visible to guests)</Label>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setZoneOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={() => saveZoneMutation.mutate(zoneForm)}
+                      disabled={!zoneForm.name || saveZoneMutation.isPending}
+                    >
+                      {saveZoneMutation.isPending ? "Saving…" : "Save"}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <Card>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Zone</TableHead>
+                      <TableHead>Fee</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="w-12" />
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {zones?.map((z) => (
+                      <TableRow key={z.id}>
+                        <TableCell className="font-medium text-foreground">{z.name}</TableCell>
+                        <TableCell className="tabular-nums">GH₵ {Number(z.fee_ghs).toFixed(2)}</TableCell>
+                        <TableCell>
+                          <Badge variant={z.is_active ? "default" : "secondary"}>
+                            {z.is_active ? "Active" : "Inactive"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              setZoneForm({
+                                id: z.id,
+                                name: z.name,
+                                fee_ghs: Number(z.fee_ghs),
+                                is_active: z.is_active,
+                                sort_order: z.sort_order,
+                              });
+                              setZoneOpen(true);
+                            }}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {zones?.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                          No delivery zones
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
+
+
 
         <TabsContent value="currency" className="mt-4">
           <Card className="max-w-xl">

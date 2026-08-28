@@ -31,6 +31,8 @@ function newOrderRef() {
   return "FO-MJ-" + Math.random().toString(36).substring(2, 6).toUpperCase();
 }
 
+type DeliveryZone = { id: string; name: string; fee_ghs: number };
+
 export default function FoodOrder() {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -46,8 +48,13 @@ export default function FoodOrder() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [roomNumber, setRoomNumber] = useState("");
-  const [orderType, setOrderType] = useState<"dine_in" | "room_service" | "takeaway">("dine_in");
+  const [orderType, setOrderType] = useState<"dine_in" | "room_service" | "takeaway" | "delivery">("dine_in");
   const [notes, setNotes] = useState("");
+
+  const [zones, setZones] = useState<DeliveryZone[]>([]);
+  const [zoneId, setZoneId] = useState("");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [deliveryLandmark, setDeliveryLandmark] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -59,10 +66,28 @@ export default function FoodOrder() {
     setItemPrice(initialPrice);
   }, [initialItem, initialPrice]);
 
-  const unitPrice = useMemo(() => parsePrice(itemPrice), [itemPrice]);
-  const total = useMemo(() => unitPrice * quantity, [unitPrice, quantity]);
+  useEffect(() => {
+    supabase
+      .from("delivery_zones")
+      .select("id, name, fee_ghs")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true })
+      .then(({ data }) => setZones((data as DeliveryZone[]) ?? []));
+  }, []);
 
-  const canSubmit = guestName.trim() && quantity > 0 && unitPrice > 0;
+  const isDelivery = orderType === "delivery";
+  const selectedZone = useMemo(() => zones.find((z) => z.id === zoneId) || null, [zones, zoneId]);
+  const deliveryFee = isDelivery && selectedZone ? Number(selectedZone.fee_ghs) : 0;
+
+  const unitPrice = useMemo(() => parsePrice(itemPrice), [itemPrice]);
+  const subtotal = useMemo(() => unitPrice * quantity, [unitPrice, quantity]);
+  const total = subtotal + deliveryFee;
+
+  const canSubmit =
+    !!guestName.trim() &&
+    quantity > 0 &&
+    unitPrice > 0 &&
+    (!isDelivery || (!!zoneId && !!deliveryAddress.trim() && !!phone.trim()));
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -86,6 +111,10 @@ export default function FoodOrder() {
           notes: notes.trim() || null,
           total_ghs: total,
           reference_code: ref,
+          delivery_zone_id: isDelivery ? zoneId : null,
+          delivery_address: isDelivery ? deliveryAddress.trim() : null,
+          delivery_landmark: isDelivery ? deliveryLandmark.trim() || null : null,
+          delivery_fee_ghs: deliveryFee,
         })
         .select("id")
         .single();
@@ -98,7 +127,7 @@ export default function FoodOrder() {
         name: itemName.trim(),
         price_ghs: unitPrice,
         quantity,
-        line_total_ghs: total,
+        line_total_ghs: subtotal,
       });
 
       if (itemsError) throw itemsError;
@@ -123,7 +152,9 @@ export default function FoodOrder() {
     dine_in: "Dine-in",
     room_service: "Room Service",
     takeaway: "Takeaway",
+    delivery: "Delivery",
   };
+
 
   return (
     <div className="min-h-screen bg-charcoal">
@@ -179,10 +210,21 @@ export default function FoodOrder() {
                   <p>
                     <span className="text-cream/40">Type:</span> {typeLabel[orderType]}
                   </p>
+                  {isDelivery && (
+                    <>
+                      <p>
+                        <span className="text-cream/40">Delivering to:</span> {selectedZone?.name} — {deliveryAddress}
+                      </p>
+                      <p>
+                        <span className="text-cream/40">Delivery fee:</span> GH₵ {deliveryFee.toFixed(2)}
+                      </p>
+                    </>
+                  )}
                   <p>
                     <span className="text-cream/40">Total:</span> GH₵ {total.toFixed(2)}
                   </p>
                 </div>
+
                 <Button asChild className="w-full sm:w-auto">
                   <Link to="/menu">Order another dish</Link>
                 </Button>
@@ -253,6 +295,7 @@ export default function FoodOrder() {
                         <SelectItem value="dine_in">Dine-in</SelectItem>
                         <SelectItem value="room_service">Room Service</SelectItem>
                         <SelectItem value="takeaway">Takeaway</SelectItem>
+                        <SelectItem value="delivery">Delivery</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -269,6 +312,55 @@ export default function FoodOrder() {
                     </div>
                   )}
 
+                  {isDelivery && (
+                    <div className="space-y-4 rounded-lg border border-gold/20 bg-gold/[0.04] p-4">
+                      <div className="space-y-2">
+                        <Label className="text-cream/70 text-sm">Delivery zone *</Label>
+                        <Select value={zoneId} onValueChange={setZoneId}>
+                          <SelectTrigger className="bg-charcoal border-cream/10 text-cream">
+                            <SelectValue placeholder="Select your area" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-charcoal border-cream/10">
+                            {zones.map((z) => (
+                              <SelectItem key={z.id} value={z.id}>
+                                {z.name} — GH₵ {Number(z.fee_ghs).toFixed(2)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {zones.length === 0 && (
+                          <p className="text-xs text-cream/40">
+                            No delivery areas available at the moment.
+                          </p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-cream/70 text-sm">Delivery address *</Label>
+                        <Textarea
+                          value={deliveryAddress}
+                          onChange={(e) => setDeliveryAddress(e.target.value)}
+                          className="bg-charcoal border-cream/10 text-cream"
+                          placeholder="House number, street, area"
+                          rows={2}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-cream/70 text-sm">Landmark / directions</Label>
+                        <Input
+                          value={deliveryLandmark}
+                          onChange={(e) => setDeliveryLandmark(e.target.value)}
+                          className="bg-charcoal border-cream/10 text-cream"
+                          placeholder="e.g. opposite the filling station"
+                        />
+                      </div>
+                      <p className="text-xs text-cream/50">
+                        A phone number is required for delivery so our rider can reach you.
+                      </p>
+                    </div>
+
+                  )}
+
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label className="text-cream/70 text-sm">Your name *</Label>
@@ -281,14 +373,16 @@ export default function FoodOrder() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-cream/70 text-sm">Phone</Label>
+                      <Label className="text-cream/70 text-sm">Phone {isDelivery && "*"}</Label>
                       <Input
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         className="bg-charcoal border-cream/10 text-cream"
                         placeholder="+233..."
+                        required={isDelivery}
                       />
                     </div>
+
                   </div>
 
                   <div className="space-y-2">
@@ -315,11 +409,25 @@ export default function FoodOrder() {
 
                   <Separator className="bg-cream/10" />
 
+                  {isDelivery && (
+                    <div className="space-y-1 text-sm">
+                      <div className="flex justify-between text-cream/60">
+                        <span>Items subtotal</span>
+                        <span>GH₵ {subtotal.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-cream/60">
+                        <span>Delivery{selectedZone ? ` — ${selectedZone.name}` : ""}</span>
+                        <span>GH₵ {deliveryFee.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-[10px] uppercase tracking-[0.2em] text-cream/40">Total due</p>
                       <p className="font-serif text-2xl text-gold">GH₵ {total.toFixed(2)}</p>
                     </div>
+
                     <Button
                       type="submit"
                       disabled={!canSubmit || submitting}
