@@ -38,6 +38,15 @@ const emptyPolicy = {
   is_default: false,
 };
 
+const emptyZone = {
+  id: undefined as string | undefined,
+  name: "",
+  fee_ghs: 0,
+  is_active: true,
+  sort_order: 0,
+};
+
+
 export default function AdminSettings() {
   const qc = useQueryClient();
   const { user, role } = useAdminAuth();
