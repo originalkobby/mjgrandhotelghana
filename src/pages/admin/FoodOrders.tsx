@@ -167,12 +167,14 @@ export default function AdminFoodOrders() {
     toast.success(`Order marked ${STATUS_LABELS[newStatus].toLowerCase()}`);
   }
 
-  function nextStatus(status: FoodOrder["status"]): FoodOrder["status"] | null {
-    if (status === "cancelled") return null;
-    const idx = STATUS_SEQUENCE.indexOf(status);
-    if (idx === -1 || idx === STATUS_SEQUENCE.length - 1) return null;
-    return STATUS_SEQUENCE[idx + 1];
+  function nextStatus(order: Pick<FoodOrder, "status" | "order_type">): FoodOrder["status"] | null {
+    if (order.status === "cancelled") return null;
+    const seq = order.order_type === "delivery" ? DELIVERY_STATUS_SEQUENCE : STATUS_SEQUENCE;
+    const idx = seq.indexOf(order.status);
+    if (idx === -1 || idx === seq.length - 1) return null;
+    return seq[idx + 1];
   }
+
 
   if (isLoading) {
     return (
