@@ -34,7 +34,7 @@ import revenueIntelIcon from "@/assets/revenue-intel-icon.jpeg";
 
 const NAV_ITEMS = [
   { title: "Overview", url: "/admin", icon: LayoutDashboard, end: true, roles: ["admin", "revenue_manager", "finance", "front_desk", "operations_manager"] },
-  { title: "Bookings", url: "/admin/bookings", icon: CalendarCheck, end: false, roles: null },
+  { title: "Bookings", url: "/admin/bookings", icon: CalendarCheck, end: false, roles: ["admin", "revenue_manager", "finance", "front_desk", "operations_manager"] },
   { title: "Guests", url: "/admin/guests", icon: Users, end: false, roles: ["admin", "front_desk", "operations_manager"] },
   { title: "Rooms", url: "/admin/rooms", icon: BedDouble, end: false, roles: ["admin"] },
   { title: "Inventory", url: "/admin/inventory", icon: CalendarRange, end: false, roles: ["admin", "revenue_manager", "front_desk", "operations_manager"] },
@@ -45,7 +45,7 @@ const NAV_ITEMS = [
   { title: "Revenue Intel", url: "/admin/revenue", icon: null, customIcon: revenueIntelIcon, end: false, roles: ["admin", "revenue_manager"] },
   { title: "Reports", url: "/admin/reports", icon: BarChart3, end: false, roles: ["admin", "revenue_manager", "finance"] },
   { title: "Support", url: "/admin/support", icon: Headset, end: false, roles: ["admin", "front_desk", "operations_manager"] },
-  { title: "Messages", url: "/admin/messages", icon: MessageSquareText, end: false, roles: null },
+  { title: "Messages", url: "/admin/messages", icon: MessageSquareText, end: false, roles: ["admin", "revenue_manager", "finance", "front_desk", "operations_manager"] },
   { title: "Settings", url: "/admin/settings", icon: Settings, end: false, roles: ["admin"] },
 ];
 
