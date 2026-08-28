@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.auto-status]
 verify_jwt = false
+
+[functions.send-food-order-email]
+verify_jwt = false
