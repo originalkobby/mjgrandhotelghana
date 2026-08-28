@@ -374,7 +374,7 @@ export default function AdminFoodOrders() {
           <DialogHeader>
             <DialogTitle className="font-serif text-lg">Order {selected?.reference_code}</DialogTitle>
             <DialogDescription>
-              {selected && `${TYPE_LABELS[selected.order_type]} • ${formatDateGB(selected.created_at)}`}
+              {selected && `${TYPE_LABELS[selected.order_type]} • ${formatDateTimeGB(selected.created_at)}`}
             </DialogDescription>
           </DialogHeader>
           {selected && (
