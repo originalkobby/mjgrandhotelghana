@@ -165,7 +165,9 @@ export default function FoodOrder() {
                 <h2 className="font-serif text-2xl text-cream mb-2">Order Received</h2>
                 <p className="text-cream/60 text-sm mb-6">
                   Thank you, {guestName}. Your order has been sent to the kitchen.
+                  {email.trim() ? ` A confirmation has been sent to ${email.trim()}.` : ""}
                 </p>
+
                 <div className="inline-block px-5 py-3 rounded-lg border border-gold/30 bg-gold/10 mb-6">
                   <p className="text-[10px] uppercase tracking-[0.2em] text-gold/80">Reference</p>
                   <p className="font-serif text-xl text-gold tracking-wide">{reference}</p>
