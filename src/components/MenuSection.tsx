@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { Plus } from "lucide-react";
 
 type MenuItem = {
   name: string;
@@ -109,24 +111,34 @@ const MenuSection = ({ title, subtitle, items, image, imageAlt, reverse = false 
             className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"
           >
             {items.map((item, i) => (
-              <motion.div
+              <Link
                 key={i}
-                variants={getItemVariants(i, cols)}
-                whileHover={{ scale: 1.04, y: -4 }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ type: "tween", duration: 0.25, ease }}
-                className="group p-4 rounded-xl border border-cream/5 bg-cream/[0.02] hover:bg-cream/[0.06] hover:border-gold/20 hover:shadow-[0_0_20px_rgba(212,175,55,0.08)] transition-colors duration-300 cursor-default"
+                to={`/food-order?item=${encodeURIComponent(item.name)}&price=${encodeURIComponent(item.price)}&category=${encodeURIComponent(title)}`}
+                className="group block"
               >
-                <h3 className="font-serif text-sm font-bold text-gold tracking-wide uppercase leading-tight">
-                  {item.name}
-                </h3>
-                <p className="font-sans text-[11px] text-cream/45 mt-1 leading-relaxed line-clamp-2">
-                  {item.description}
-                </p>
-                <p className="font-sans text-sm font-bold text-gold/90 mt-2">
-                  {item.price}
-                </p>
-              </motion.div>
+                <motion.div
+                  variants={getItemVariants(i, cols)}
+                  whileHover={{ scale: 1.04, y: -4 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: "tween", duration: 0.25, ease }}
+                  className="relative p-4 rounded-xl border border-cream/5 bg-cream/[0.02] hover:bg-cream/[0.06] hover:border-gold/20 hover:shadow-[0_0_20px_rgba(212,175,55,0.08)] transition-colors duration-300 cursor-pointer h-full"
+                >
+                  <h3 className="font-serif text-sm font-bold text-gold tracking-wide uppercase leading-tight">
+                    {item.name}
+                  </h3>
+                  <p className="font-sans text-[11px] text-cream/45 mt-1 leading-relaxed line-clamp-2">
+                    {item.description}
+                  </p>
+                  <div className="flex items-center justify-between mt-3">
+                    <p className="font-sans text-sm font-bold text-gold/90">
+                      {item.price}
+                    </p>
+                    <span className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-cream/40 group-hover:text-gold transition-colors">
+                      <Plus className="w-3 h-3" /> Order
+                    </span>
+                  </div>
+                </motion.div>
+              </Link>
             ))}
           </motion.div>
         </div>

@@ -85,20 +85,29 @@ const CompactSection = ({ title, items }: { title: string; items: { name: string
         className="grid grid-cols-1 sm:grid-cols-3 gap-4"
       >
         {items.map((item, i) => (
-          <motion.div
+          <Link
             key={i}
-            variants={getItemVariants(i, cols)}
-            whileHover={{ scale: 1.04, y: -4 }}
-            whileTap={{ scale: 0.98 }}
-            transition={{ type: "tween", duration: 0.25, ease: [0.3, 0, 0.2, 1] }}
-            className="p-4 rounded-xl border border-cream/5 bg-cream/[0.02] hover:bg-cream/[0.06] hover:border-gold/20 hover:shadow-[0_0_20px_rgba(212,175,55,0.08)] transition-colors duration-300 cursor-default"
+            to={`/food-order?item=${encodeURIComponent(item.name)}&price=${encodeURIComponent(item.price)}&category=${encodeURIComponent(title)}`}
+            className="group block"
           >
-            <h4 className="font-serif text-sm font-bold text-gold tracking-wide uppercase">{item.name}</h4>
-            {item.description && (
-              <p className="font-sans text-[11px] text-cream/45 mt-1 leading-relaxed">{item.description}</p>
-            )}
-            <p className="font-sans text-sm font-bold text-gold/90 mt-2">{item.price}</p>
-          </motion.div>
+            <motion.div
+              key={i}
+              variants={getItemVariants(i, cols)}
+              whileHover={{ scale: 1.04, y: -4 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: "tween", duration: 0.25, ease: [0.3, 0, 0.2, 1] }}
+              className="p-4 rounded-xl border border-cream/5 bg-cream/[0.02] hover:bg-cream/[0.06] hover:border-gold/20 hover:shadow-[0_0_20px_rgba(212,175,55,0.08)] transition-colors duration-300 cursor-pointer h-full"
+            >
+              <h4 className="font-serif text-sm font-bold text-gold tracking-wide uppercase">{item.name}</h4>
+              {item.description && (
+                <p className="font-sans text-[11px] text-cream/45 mt-1 leading-relaxed">{item.description}</p>
+              )}
+              <div className="flex items-center justify-between mt-3">
+                <p className="font-sans text-sm font-bold text-gold/90">{item.price}</p>
+                <span className="text-[10px] uppercase tracking-wider text-cream/40 group-hover:text-gold transition-colors">Order</span>
+              </div>
+            </motion.div>
+          </Link>
         ))}
       </motion.div>
     </div>

@@ -12,6 +12,7 @@ import { ScrollToTop } from "./components/ScrollToTop";
 // Public pages — lazy-loaded so the homepage ships a smaller initial bundle.
 const Menu = lazy(() => import("./pages/Menu"));
 const Dining = lazy(() => import("./pages/Dining"));
+const FoodOrder = lazy(() => import("./pages/FoodOrder"));
 const Policy = lazy(() => import("./pages/Policy"));
 const About = lazy(() => import("./pages/About"));
 const Booking = lazy(() => import("./pages/Booking"));
@@ -33,6 +34,7 @@ const AdminRooms = lazy(() => import("./pages/admin/Rooms"));
 const AdminSupport = lazy(() => import("./pages/admin/SupportTickets"));
 const AdminSettings = lazy(() => import("./pages/admin/Settings"));
 const AdminMenu = lazy(() => import("./pages/admin/MenuManagement"));
+const AdminFoodOrders = lazy(() => import("./pages/admin/FoodOrders"));
 const RevenueIntelligence = lazy(() => import("./pages/admin/RevenueIntelligence"));
 const AdminGallery = lazy(() => import("./pages/admin/GalleryManagement"));
 
@@ -71,6 +73,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/menu" element={<Menu />} />
             <Route path="/dining" element={<Dining />} />
+            <Route path="/food-order" element={<FoodOrder />} />
             <Route path="/about" element={<About />} />
             <Route path="/policy" element={<Policy />} />
             <Route path="/booking" element={<Booking />} />
@@ -88,6 +91,7 @@ const App = () => (
               <Route path="rooms" element={<AdminRooms />} />
               <Route path="promotions" element={<AdminPromotions />} />
               <Route path="menu" element={<AdminMenu />} />
+              <Route path="food-orders" element={<AdminFoodOrders />} />
               <Route path="gallery" element={<AdminGallery />} />
               <Route path="revenue" element={<RevenueIntelligence />} />
               <Route path="reports" element={<AdminReports />} />
