@@ -284,6 +284,7 @@ export default function FoodOrder() {
                         <SelectItem value="dine_in">Dine-in</SelectItem>
                         <SelectItem value="room_service">Room Service</SelectItem>
                         <SelectItem value="takeaway">Takeaway</SelectItem>
+                        <SelectItem value="delivery">Delivery</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -298,6 +299,55 @@ export default function FoodOrder() {
                         placeholder="e.g. 205"
                       />
                     </div>
+                  )}
+
+                  {isDelivery && (
+                    <div className="space-y-4 rounded-lg border border-gold/20 bg-gold/[0.04] p-4">
+                      <div className="space-y-2">
+                        <Label className="text-cream/70 text-sm">Delivery zone *</Label>
+                        <Select value={zoneId} onValueChange={setZoneId}>
+                          <SelectTrigger className="bg-charcoal border-cream/10 text-cream">
+                            <SelectValue placeholder="Select your area" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-charcoal border-cream/10">
+                            {zones.map((z) => (
+                              <SelectItem key={z.id} value={z.id}>
+                                {z.name} — GH₵ {Number(z.fee_ghs).toFixed(2)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {zones.length === 0 && (
+                          <p className="text-xs text-cream/40">
+                            No delivery areas available at the moment.
+                          </p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-cream/70 text-sm">Delivery address *</Label>
+                        <Textarea
+                          value={deliveryAddress}
+                          onChange={(e) => setDeliveryAddress(e.target.value)}
+                          className="bg-charcoal border-cream/10 text-cream"
+                          placeholder="House number, street, area"
+                          rows={2}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-cream/70 text-sm">Landmark / directions</Label>
+                        <Input
+                          value={deliveryLandmark}
+                          onChange={(e) => setDeliveryLandmark(e.target.value)}
+                          className="bg-charcoal border-cream/10 text-cream"
+                          placeholder="e.g. opposite the filling station"
+                        />
+                      </div>
+                      <p className="text-xs text-cream/50">
+                        A phone number is required for delivery so our rider can reach you.
+                      </p>
+                    </div>
+
                   )}
 
                   <div className="grid md:grid-cols-2 gap-4">
