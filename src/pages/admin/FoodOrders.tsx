@@ -40,22 +40,34 @@ type FoodOrder = {
   email: string | null;
   phone: string | null;
   room_number: string | null;
-  order_type: "dine_in" | "room_service" | "takeaway";
-  status: "pending" | "confirmed" | "ready" | "completed" | "cancelled";
+  order_type: "dine_in" | "room_service" | "takeaway" | "delivery";
+  status: "pending" | "confirmed" | "ready" | "out_for_delivery" | "completed" | "cancelled";
   notes: string | null;
   total_ghs: number;
   reference_code: string;
   created_at: string;
   updated_at: string;
+  delivery_address: string | null;
+  delivery_landmark: string | null;
+  delivery_fee_ghs: number | null;
+  delivery_zones: { name: string } | null;
   food_order_items: FoodOrderItem[];
 };
 
 const STATUS_SEQUENCE: FoodOrder["status"][] = ["pending", "confirmed", "ready", "completed"];
+const DELIVERY_STATUS_SEQUENCE: FoodOrder["status"][] = [
+  "pending",
+  "confirmed",
+  "ready",
+  "out_for_delivery",
+  "completed",
+];
 
 const STATUS_LABELS: Record<FoodOrder["status"], string> = {
   pending: "Pending",
   confirmed: "Confirmed",
   ready: "Ready",
+  out_for_delivery: "Out for delivery",
   completed: "Completed",
   cancelled: "Cancelled",
 };
@@ -64,6 +76,7 @@ const STATUS_COLORS: Record<FoodOrder["status"], string> = {
   pending: "bg-orange-500/15 text-orange-400 border-orange-500/30",
   confirmed: "bg-blue-500/15 text-blue-400 border-blue-500/30",
   ready: "bg-green-500/15 text-green-400 border-green-500/30",
+  out_for_delivery: "bg-amber-500/15 text-amber-400 border-amber-500/30",
   completed: "bg-emerald-900/30 text-emerald-300 border-emerald-900/40",
   cancelled: "bg-red-500/15 text-red-400 border-red-500/30",
 };
@@ -72,18 +85,20 @@ const TYPE_LABELS: Record<FoodOrder["order_type"], string> = {
   dine_in: "Dine-in",
   room_service: "Room Service",
   takeaway: "Takeaway",
+  delivery: "Delivery",
 };
 
 async function fetchFoodOrders(): Promise<FoodOrder[]> {
   const { data, error } = await supabase
     .from("food_orders")
-    .select("*, food_order_items(*)")
+    .select("*, delivery_zones(name), food_order_items(*)")
     .order("created_at", { ascending: false })
     .limit(500);
 
   if (error) throw error;
   return (data as unknown as FoodOrder[]) ?? [];
 }
+
 
 export default function AdminFoodOrders() {
   const { role } = useAdminAuth();
