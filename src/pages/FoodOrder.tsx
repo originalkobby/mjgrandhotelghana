@@ -210,10 +210,21 @@ export default function FoodOrder() {
                   <p>
                     <span className="text-cream/40">Type:</span> {typeLabel[orderType]}
                   </p>
+                  {isDelivery && (
+                    <>
+                      <p>
+                        <span className="text-cream/40">Delivering to:</span> {selectedZone?.name} — {deliveryAddress}
+                      </p>
+                      <p>
+                        <span className="text-cream/40">Delivery fee:</span> GH₵ {deliveryFee.toFixed(2)}
+                      </p>
+                    </>
+                  )}
                   <p>
                     <span className="text-cream/40">Total:</span> GH₵ {total.toFixed(2)}
                   </p>
                 </div>
+
                 <Button asChild className="w-full sm:w-auto">
                   <Link to="/menu">Order another dish</Link>
                 </Button>
