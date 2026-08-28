@@ -324,15 +324,15 @@ export default function AdminFoodOrders() {
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
-                          {nextStatus(order.status) && (
+                          {nextStatus(order) && (
                             <Button
                               variant="ghost"
                               size="sm"
                               disabled={updatingId === order.id}
-                              onClick={() => updateStatus(order.id, nextStatus(order.status)!)}
+                              onClick={() => updateStatus(order.id, nextStatus(order)!)}
                               className="text-green-600 hover:text-green-700 hover:bg-green-50"
                             >
-                              {STATUS_LABELS[nextStatus(order.status)!]}
+                              {STATUS_LABELS[nextStatus(order)!]}
                             </Button>
                           )}
                           {order.status !== "cancelled" && order.status !== "completed" && (
@@ -417,7 +417,7 @@ export default function AdminFoodOrders() {
               )}
 
               <div className="flex justify-end gap-2 pt-2">
-                {selected.status !== "cancelled" && selected.status !== "completed" && nextStatus(selected.status) && (
+                {selected.status !== "cancelled" && selected.status !== "completed" && nextStatus(selected) && (
                   <>
                     <Button
                       variant="outline"
@@ -430,11 +430,11 @@ export default function AdminFoodOrders() {
                     </Button>
                     <Button
                       onClick={() => {
-                        updateStatus(selected.id, nextStatus(selected.status)!);
+                        updateStatus(selected.id, nextStatus(selected)!);
                         setSelected(null);
                       }}
                     >
-                      Mark {STATUS_LABELS[nextStatus(selected.status)!]}
+                      Mark {STATUS_LABELS[nextStatus(selected)!]}
                     </Button>
                   </>
                 )}
