@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus } from "lucide-react";
 
 type MenuItem = {
   name: string;
@@ -133,8 +132,8 @@ const MenuSection = ({ title, subtitle, items, image, imageAlt, reverse = false 
                     <p className="font-sans text-sm font-bold text-gold/90">
                       {item.price}
                     </p>
-                    <span className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-cream/40 group-hover:text-gold transition-colors">
-                      <Plus className="w-3 h-3" /> Order
+                    <span className="inline-flex items-center px-2 py-1 rounded-md bg-emerald-600 text-white text-[10px] font-bold uppercase tracking-wider group-hover:bg-emerald-500 transition-colors">
+                      Order Now
                     </span>
                   </div>
                 </motion.div>
