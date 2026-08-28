@@ -361,6 +361,36 @@ export type Database = {
           },
         ]
       }
+      delivery_zones: {
+        Row: {
+          created_at: string
+          fee_ghs: number
+          id: string
+          is_active: boolean
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          fee_ghs?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          fee_ghs?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       demand_alerts: {
         Row: {
           alert_type: string
@@ -462,6 +492,10 @@ export type Database = {
       food_orders: {
         Row: {
           created_at: string
+          delivery_address: string | null
+          delivery_fee_ghs: number
+          delivery_landmark: string | null
+          delivery_zone_id: string | null
           email: string | null
           guest_name: string
           id: string
@@ -476,6 +510,10 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          delivery_address?: string | null
+          delivery_fee_ghs?: number
+          delivery_landmark?: string | null
+          delivery_zone_id?: string | null
           email?: string | null
           guest_name: string
           id?: string
@@ -490,6 +528,10 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          delivery_address?: string | null
+          delivery_fee_ghs?: number
+          delivery_landmark?: string | null
+          delivery_zone_id?: string | null
           email?: string | null
           guest_name?: string
           id?: string
@@ -502,7 +544,15 @@ export type Database = {
           total_ghs?: number
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "food_orders_delivery_zone_id_fkey"
+            columns: ["delivery_zone_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_zones"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       gallery_images: {
         Row: {
@@ -1087,9 +1137,10 @@ export type Database = {
         | "pending"
         | "confirmed"
         | "ready"
+        | "out_for_delivery"
         | "completed"
         | "cancelled"
-      order_type: "dine_in" | "room_service" | "takeaway"
+      order_type: "dine_in" | "room_service" | "takeaway" | "delivery"
       payment_status: "pending" | "partial" | "paid" | "refunded" | "failed"
     }
     CompositeTypes: {
@@ -1233,8 +1284,15 @@ export const Constants = {
         "no_show",
         "checked_in",
       ],
-      order_status: ["pending", "confirmed", "ready", "completed", "cancelled"],
-      order_type: ["dine_in", "room_service", "takeaway"],
+      order_status: [
+        "pending",
+        "confirmed",
+        "ready",
+        "out_for_delivery",
+        "completed",
+        "cancelled",
+      ],
+      order_type: ["dine_in", "room_service", "takeaway", "delivery"],
       payment_status: ["pending", "partial", "paid", "refunded", "failed"],
     },
   },
