@@ -1,4 +1,4 @@
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import {
   SidebarProvider,
   SidebarTrigger,
@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button";
 export default function AdminLayout() {
   const { user, role, loading } = useAdminAuth();
   const { adminMode, setAdminMode, rate } = useCurrency();
+  const location = useLocation();
+  const isFoodOrders = location.pathname.startsWith("/admin/food-orders");
 
   if (loading) {
     return (
@@ -31,6 +33,11 @@ export default function AdminLayout() {
     return <Navigate to="/admin/login" replace />;
   }
 
+  // Restaurant / kitchen staff may only access Food Orders
+  if (role === "restaurant_staff" && !isFoodOrders) {
+    return <Navigate to="/admin/food-orders" replace />;
+  }
+
   return (
     <SidebarProvider className="h-screen overflow-hidden w-full">
       <div className="admin-shell h-screen overflow-hidden flex w-full">
@@ -39,45 +46,49 @@ export default function AdminLayout() {
           <header className="h-20 flex items-center gap-3 border-b border-border/40 px-4 md:px-6 bg-admin-bar text-admin-bar-foreground shrink-0 sticky top-0 z-30">
             <SidebarTrigger className="text-admin-bar-foreground/80 hover:text-admin-bar-foreground" />
             <span className="font-serif text-lg md:text-xl tracking-wide text-admin-bar-foreground flex-1">
-              Booking Command Center
+              {isFoodOrders ? "Order Command Center" : "Booking Command Center"}
             </span>
 
             <div className="admin-rail flex items-center h-11 pl-1 pr-1">
-              <div className="flex items-center gap-0.5 px-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setAdminMode("usd")}
-                  className={`h-8 px-3 text-[11px] font-sans uppercase tracking-[0.16em] rounded-none transition-colors duration-200 ${
-                    adminMode === "usd"
-                      ? "bg-accent text-accent-foreground hover:bg-accent border border-accent"
-                      : "text-admin-bar-foreground/70 hover:bg-transparent hover:text-admin-bar-foreground border border-accent"
-                  }`}
-                >
-                  $ USD
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setAdminMode("ghs")}
-                  className={`h-8 px-3 text-[11px] font-sans uppercase tracking-[0.16em] rounded-none transition-colors duration-200 ${
-                    adminMode === "ghs"
-                      ? "bg-accent text-accent-foreground hover:bg-accent border border-accent"
-                      : "text-admin-bar-foreground/70 hover:bg-transparent hover:text-admin-bar-foreground border border-accent"
-                  }`}
-                >
-                  GH₵
-                </Button>
-              </div>
+              {!isFoodOrders && (
+                <>
+                <div className="flex items-center gap-0.5 px-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setAdminMode("usd")}
+                    className={`h-8 px-3 text-[11px] font-sans uppercase tracking-[0.16em] rounded-none transition-colors duration-200 ${
+                      adminMode === "usd"
+                        ? "bg-accent text-accent-foreground hover:bg-accent border border-accent"
+                        : "text-admin-bar-foreground/70 hover:bg-transparent hover:text-admin-bar-foreground border border-accent"
+                    }`}
+                  >
+                    $ USD
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setAdminMode("ghs")}
+                    className={`h-8 px-3 text-[11px] font-sans uppercase tracking-[0.16em] rounded-none transition-colors duration-200 ${
+                      adminMode === "ghs"
+                        ? "bg-accent text-accent-foreground hover:bg-accent border border-accent"
+                        : "text-admin-bar-foreground/70 hover:bg-transparent hover:text-admin-bar-foreground border border-accent"
+                    }`}
+                  >
+                    GH₵
+                  </Button>
+                </div>
 
-              <div className="hidden md:flex flex-col justify-center px-3 leading-none">
-                <span className="text-[8px] uppercase tracking-[0.24em] text-admin-bar-foreground/55 font-sans">
-                  Exchange Rate
-                </span>
-                <span className="text-[11px] tracking-[0.08em] text-admin-bar-foreground font-sans tabular-nums mt-0.5">
-                  1 USD = {rate.toFixed(2)} GHS
-                </span>
-              </div>
+                <div className="hidden md:flex flex-col justify-center px-3 leading-none">
+                  <span className="text-[8px] uppercase tracking-[0.24em] text-admin-bar-foreground/55 font-sans">
+                    Exchange Rate
+                  </span>
+                  <span className="text-[11px] tracking-[0.08em] text-admin-bar-foreground font-sans tabular-nums mt-0.5">
+                    1 USD = {rate.toFixed(2)} GHS
+                  </span>
+                </div>
+                </>
+              )}
 
               <span className="admin-rail-divider" />
 
