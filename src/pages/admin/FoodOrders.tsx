@@ -405,6 +405,23 @@ export default function AdminFoodOrders() {
                 </div>
               </div>
 
+              {selected.order_type === "delivery" && (
+                <div className="rounded-lg border border-amber-500/25 bg-amber-500/5 p-3 space-y-1 text-sm">
+                  <p className="text-[10px] uppercase tracking-wider text-amber-500">Delivery</p>
+                  <p className="font-medium">{selected.delivery_zones?.name || "Unassigned zone"}</p>
+                  <p className="text-muted-foreground">{selected.delivery_address || "—"}</p>
+                  {selected.delivery_landmark && (
+                    <p className="text-xs text-muted-foreground">Landmark: {selected.delivery_landmark}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Fee: GH₵ {Number(selected.delivery_fee_ghs || 0).toFixed(2)} · Phone:{" "}
+                    {selected.phone || "—"}
+                  </p>
+                </div>
+              )}
+
+
+
               <div className="rounded-lg border border-border/60 bg-muted/30 p-3 space-y-2">
                 {selected.food_order_items.map((item) => (
                   <div key={item.id} className="flex justify-between text-sm">
