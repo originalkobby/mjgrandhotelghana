@@ -211,7 +211,7 @@ export default function AdminFoodOrders() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All statuses</SelectItem>
-              {STATUS_SEQUENCE.map((s) => (
+              {DELIVERY_STATUS_SEQUENCE.map((s) => (
                 <SelectItem key={s} value={s}>
                   {STATUS_LABELS[s]}
                 </SelectItem>
@@ -228,7 +228,9 @@ export default function AdminFoodOrders() {
               <SelectItem value="dine_in">Dine-in</SelectItem>
               <SelectItem value="room_service">Room Service</SelectItem>
               <SelectItem value="takeaway">Takeaway</SelectItem>
+              <SelectItem value="delivery">Delivery</SelectItem>
             </SelectContent>
+
           </Select>
           <Button
             variant="outline"
