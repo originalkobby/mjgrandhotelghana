@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Search, RefreshCw, Eye, UtensilsCrossed } from "lucide-react";
-import { formatDateGB } from "@/lib/dateUtils";
+import { formatDateGB, formatDateTimeGB } from "@/lib/dateUtils";
 
 type FoodOrderItem = {
   id: string;
