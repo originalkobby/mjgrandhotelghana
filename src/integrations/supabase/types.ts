@@ -411,6 +411,99 @@ export type Database = {
           },
         ]
       }
+      food_order_items: {
+        Row: {
+          created_at: string
+          food_order_id: string
+          id: string
+          line_total_ghs: number
+          menu_item_id: string | null
+          name: string
+          price_ghs: number
+          quantity: number
+        }
+        Insert: {
+          created_at?: string
+          food_order_id: string
+          id?: string
+          line_total_ghs: number
+          menu_item_id?: string | null
+          name: string
+          price_ghs: number
+          quantity?: number
+        }
+        Update: {
+          created_at?: string
+          food_order_id?: string
+          id?: string
+          line_total_ghs?: number
+          menu_item_id?: string | null
+          name?: string
+          price_ghs?: number
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "food_order_items_food_order_id_fkey"
+            columns: ["food_order_id"]
+            isOneToOne: false
+            referencedRelation: "food_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "food_order_items_menu_item_id_fkey"
+            columns: ["menu_item_id"]
+            isOneToOne: false
+            referencedRelation: "menu_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      food_orders: {
+        Row: {
+          created_at: string
+          email: string | null
+          guest_name: string
+          id: string
+          notes: string | null
+          order_type: Database["public"]["Enums"]["order_type"]
+          phone: string | null
+          reference_code: string
+          room_number: string | null
+          status: Database["public"]["Enums"]["order_status"]
+          total_ghs: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          guest_name: string
+          id?: string
+          notes?: string | null
+          order_type: Database["public"]["Enums"]["order_type"]
+          phone?: string | null
+          reference_code: string
+          room_number?: string | null
+          status?: Database["public"]["Enums"]["order_status"]
+          total_ghs?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          guest_name?: string
+          id?: string
+          notes?: string | null
+          order_type?: Database["public"]["Enums"]["order_type"]
+          phone?: string | null
+          reference_code?: string
+          room_number?: string | null
+          status?: Database["public"]["Enums"]["order_status"]
+          total_ghs?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       gallery_images: {
         Row: {
           alt_text: string
@@ -990,6 +1083,13 @@ export type Database = {
         | "completed"
         | "no_show"
         | "checked_in"
+      order_status:
+        | "pending"
+        | "confirmed"
+        | "ready"
+        | "completed"
+        | "cancelled"
+      order_type: "dine_in" | "room_service" | "takeaway"
       payment_status: "pending" | "partial" | "paid" | "refunded" | "failed"
     }
     CompositeTypes: {
@@ -1133,6 +1233,8 @@ export const Constants = {
         "no_show",
         "checked_in",
       ],
+      order_status: ["pending", "confirmed", "ready", "completed", "cancelled"],
+      order_type: ["dine_in", "room_service", "takeaway"],
       payment_status: ["pending", "partial", "paid", "refunded", "failed"],
     },
   },
