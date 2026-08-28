@@ -103,6 +103,12 @@ export default function FoodOrder() {
 
       if (itemsError) throw itemsError;
 
+      if (email.trim()) {
+        supabase.functions
+          .invoke("send-food-order-email", { body: { orderId: order.id } })
+          .catch((e) => console.error("Confirmation email failed", e));
+      }
+
       setReference(ref);
       setSubmitted(true);
       setSearchParams({}, { replace: true });
