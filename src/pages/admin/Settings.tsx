@@ -46,6 +46,9 @@ export default function AdminSettings() {
   const [form, setForm] = useState(emptyPolicy);
   const [rateInput, setRateInput] = useState<string>("");
   const [confirmRate, setConfirmRate] = useState(false);
+  const [zoneOpen, setZoneOpen] = useState(false);
+  const [zoneForm, setZoneForm] = useState(emptyZone);
+
 
   const canEditRate = role === "admin" || role === "operations_manager";
 
