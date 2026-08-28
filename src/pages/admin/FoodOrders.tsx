@@ -323,7 +323,8 @@ export default function AdminFoodOrders() {
                         GH₵ {Number(order.total_ghs).toFixed(2)}
                       </td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">
-                        {formatDateGB(order.created_at)}
+                        <p>{formatDateGB(order.created_at)}</p>
+                        <p className="tabular-nums">{formatDateTimeGB(order.created_at).split(" ")[1]}</p>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1">
