@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
     const { data: order, error } = await supabase
       .from("food_orders")
       .select(
-        "reference_code, guest_name, email, phone, room_number, order_type, notes, total_ghs, created_at, food_order_items(name, quantity, price_ghs, line_total_ghs)",
+        "reference_code, guest_name, email, phone, room_number, order_type, notes, total_ghs, created_at, delivery_address, delivery_landmark, delivery_fee_ghs, delivery_zones(name), food_order_items(name, quantity, price_ghs, line_total_ghs)",
       )
       .eq("id", orderId)
       .single();
@@ -54,7 +54,13 @@ Deno.serve(async (req) => {
       dine_in: "Dine-in",
       room_service: "Room Service",
       takeaway: "Takeaway",
+      delivery: "Delivery",
     };
+
+    const zoneName = (order as any).delivery_zones?.name ?? null;
+    const deliveryFee = Number(order.delivery_fee_ghs ?? 0);
+    const isDelivery = order.order_type === "delivery";
+
 
     const items = (order.food_order_items ?? []) as Array<{
       name: string;
