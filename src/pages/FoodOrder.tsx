@@ -362,14 +362,16 @@ export default function FoodOrder() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-cream/70 text-sm">Phone</Label>
+                      <Label className="text-cream/70 text-sm">Phone {isDelivery && "*"}</Label>
                       <Input
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         className="bg-charcoal border-cream/10 text-cream"
                         placeholder="+233..."
+                        required={isDelivery}
                       />
                     </div>
+
                   </div>
 
                   <div className="space-y-2">
