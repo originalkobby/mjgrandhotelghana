@@ -1126,6 +1126,7 @@ export type Database = {
         | "front_desk"
         | "finance"
         | "operations_manager"
+        | "restaurant_staff"
       booking_status:
         | "pending"
         | "confirmed"
@@ -1275,6 +1276,7 @@ export const Constants = {
         "front_desk",
         "finance",
         "operations_manager",
+        "restaurant_staff",
       ],
       booking_status: [
         "pending",
