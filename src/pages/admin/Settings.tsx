@@ -23,7 +23,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useState } from "react";
-import { Settings2, ShieldCheck, Plus, Pencil } from "lucide-react";
+import { ShieldCheck, Plus, Pencil } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { formatDateGB } from "@/lib/dateUtils";
@@ -182,7 +182,6 @@ export default function AdminSettings() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        
         <h1 className="text-2xl font-serif text-foreground">Settings</h1>
       </div>
 
