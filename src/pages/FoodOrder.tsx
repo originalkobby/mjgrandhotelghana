@@ -31,6 +31,8 @@ function newOrderRef() {
   return "FO-MJ-" + Math.random().toString(36).substring(2, 6).toUpperCase();
 }
 
+type DeliveryZone = { id: string; name: string; fee_ghs: number };
+
 export default function FoodOrder() {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -46,8 +48,13 @@ export default function FoodOrder() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [roomNumber, setRoomNumber] = useState("");
-  const [orderType, setOrderType] = useState<"dine_in" | "room_service" | "takeaway">("dine_in");
+  const [orderType, setOrderType] = useState<"dine_in" | "room_service" | "takeaway" | "delivery">("dine_in");
   const [notes, setNotes] = useState("");
+
+  const [zones, setZones] = useState<DeliveryZone[]>([]);
+  const [zoneId, setZoneId] = useState("");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [deliveryLandmark, setDeliveryLandmark] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -59,10 +66,28 @@ export default function FoodOrder() {
     setItemPrice(initialPrice);
   }, [initialItem, initialPrice]);
 
-  const unitPrice = useMemo(() => parsePrice(itemPrice), [itemPrice]);
-  const total = useMemo(() => unitPrice * quantity, [unitPrice, quantity]);
+  useEffect(() => {
+    supabase
+      .from("delivery_zones")
+      .select("id, name, fee_ghs")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true })
+      .then(({ data }) => setZones((data as DeliveryZone[]) ?? []));
+  }, []);
 
-  const canSubmit = guestName.trim() && quantity > 0 && unitPrice > 0;
+  const isDelivery = orderType === "delivery";
+  const selectedZone = useMemo(() => zones.find((z) => z.id === zoneId) || null, [zones, zoneId]);
+  const deliveryFee = isDelivery && selectedZone ? Number(selectedZone.fee_ghs) : 0;
+
+  const unitPrice = useMemo(() => parsePrice(itemPrice), [itemPrice]);
+  const subtotal = useMemo(() => unitPrice * quantity, [unitPrice, quantity]);
+  const total = subtotal + deliveryFee;
+
+  const canSubmit =
+    !!guestName.trim() &&
+    quantity > 0 &&
+    unitPrice > 0 &&
+    (!isDelivery || (!!zoneId && !!deliveryAddress.trim() && !!phone.trim()));
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -86,6 +111,10 @@ export default function FoodOrder() {
           notes: notes.trim() || null,
           total_ghs: total,
           reference_code: ref,
+          delivery_zone_id: isDelivery ? zoneId : null,
+          delivery_address: isDelivery ? deliveryAddress.trim() : null,
+          delivery_landmark: isDelivery ? deliveryLandmark.trim() || null : null,
+          delivery_fee_ghs: deliveryFee,
         })
         .select("id")
         .single();
@@ -98,7 +127,7 @@ export default function FoodOrder() {
         name: itemName.trim(),
         price_ghs: unitPrice,
         quantity,
-        line_total_ghs: total,
+        line_total_ghs: subtotal,
       });
 
       if (itemsError) throw itemsError;
@@ -123,7 +152,9 @@ export default function FoodOrder() {
     dine_in: "Dine-in",
     room_service: "Room Service",
     takeaway: "Takeaway",
+    delivery: "Delivery",
   };
+
 
   return (
     <div className="min-h-screen bg-charcoal">
