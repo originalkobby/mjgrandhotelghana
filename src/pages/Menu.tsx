@@ -147,7 +147,7 @@ const Menu = () => {
             transition={{ duration: 0.6, delay: 0.5, ease: [0.3, 0, 0.2, 1] }}
             className="font-sans text-cream/60 max-w-xl mx-auto"
           >
-            Explore our carefully curated selection of dishes, from local Ghanaian delicacies to international favorites.
+            Explore our carefully curated selection of dishes, from local Ghanaian delicacies to international favorites and place your order!
           </motion.p>
         </motion.div>
       </div>
