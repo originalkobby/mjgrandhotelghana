@@ -398,11 +398,25 @@ export default function FoodOrder() {
 
                   <Separator className="bg-cream/10" />
 
+                  {isDelivery && (
+                    <div className="space-y-1 text-sm">
+                      <div className="flex justify-between text-cream/60">
+                        <span>Items subtotal</span>
+                        <span>GH₵ {subtotal.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-cream/60">
+                        <span>Delivery{selectedZone ? ` — ${selectedZone.name}` : ""}</span>
+                        <span>GH₵ {deliveryFee.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-[10px] uppercase tracking-[0.2em] text-cream/40">Total due</p>
                       <p className="font-serif text-2xl text-gold">GH₵ {total.toFixed(2)}</p>
                     </div>
+
                     <Button
                       type="submit"
                       disabled={!canSubmit || submitting}
