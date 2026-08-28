@@ -98,10 +98,12 @@ export default function FoodOrder() {
 
     try {
       const ref = newOrderRef();
+      const orderId = crypto.randomUUID();
 
-      const { data: order, error: orderError } = await supabase
+      const { error: orderError } = await supabase
         .from("food_orders")
         .insert({
+          id: orderId,
           guest_name: guestName.trim(),
           email: email.trim() || null,
           phone: phone.trim() || null,
@@ -115,15 +117,12 @@ export default function FoodOrder() {
           delivery_address: isDelivery ? deliveryAddress.trim() : null,
           delivery_landmark: isDelivery ? deliveryLandmark.trim() || null : null,
           delivery_fee_ghs: deliveryFee,
-        })
-        .select("id")
-        .single();
+        });
 
       if (orderError) throw orderError;
-      if (!order?.id) throw new Error("Order could not be created");
 
       const { error: itemsError } = await supabase.from("food_order_items").insert({
-        food_order_id: order.id,
+        food_order_id: orderId,
         name: itemName.trim(),
         price_ghs: unitPrice,
         quantity,
@@ -134,9 +133,10 @@ export default function FoodOrder() {
 
       if (email.trim()) {
         supabase.functions
-          .invoke("send-food-order-email", { body: { orderId: order.id } })
+          .invoke("send-food-order-email", { body: { orderId } })
           .catch((e) => console.error("Confirmation email failed", e));
       }
+
 
       setReference(ref);
       setSubmitted(true);
