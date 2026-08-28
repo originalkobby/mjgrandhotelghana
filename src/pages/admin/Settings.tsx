@@ -107,6 +107,46 @@ export default function AdminSettings() {
     staleTime: 60_000,
   });
 
+  // Delivery zones
+  const { data: zones } = useQuery({
+    queryKey: ["admin-delivery-zones"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("delivery_zones")
+        .select("*")
+        .order("sort_order");
+      if (error) throw error;
+      return data as Tables<"delivery_zones">[];
+    },
+    staleTime: 60_000,
+  });
+
+  const saveZoneMutation = useMutation({
+    mutationFn: async (payload: {
+      id?: string;
+      name: string;
+      fee_ghs: number;
+      is_active: boolean;
+      sort_order: number;
+    }) => {
+      if (payload.id) {
+        const { id, ...rest } = payload;
+        const { error } = await supabase.from("delivery_zones").update(rest).eq("id", id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("delivery_zones").insert(payload);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-delivery-zones"] });
+      toast.success("Delivery zone saved");
+      setZoneOpen(false);
+      setZoneForm(emptyZone);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   // User Roles
   const { data: roles, isLoading: loadingRoles } = useQuery({
     queryKey: ["admin-user-roles"],
@@ -120,6 +160,7 @@ export default function AdminSettings() {
     },
     staleTime: 60_000,
   });
+
 
   const savePolicyMutation = useMutation({
     mutationFn: async () => {
