@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Search, RefreshCw, Eye, UtensilsCrossed } from "lucide-react";
-import { formatDateGB } from "@/lib/dateUtils";
+import { formatDateGB, formatDateTimeGB } from "@/lib/dateUtils";
 
 type FoodOrderItem = {
   id: string;
@@ -323,7 +323,8 @@ export default function AdminFoodOrders() {
                         GH₵ {Number(order.total_ghs).toFixed(2)}
                       </td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">
-                        {formatDateGB(order.created_at)}
+                        <p>{formatDateGB(order.created_at)}</p>
+                        <p className="tabular-nums">{formatDateTimeGB(order.created_at).split(" ")[1]}</p>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1">
@@ -373,7 +374,7 @@ export default function AdminFoodOrders() {
           <DialogHeader>
             <DialogTitle className="font-serif text-lg">Order {selected?.reference_code}</DialogTitle>
             <DialogDescription>
-              {selected && `${TYPE_LABELS[selected.order_type]} • ${formatDateGB(selected.created_at)}`}
+              {selected && `${TYPE_LABELS[selected.order_type]} • ${formatDateTimeGB(selected.created_at)}`}
             </DialogDescription>
           </DialogHeader>
           {selected && (
