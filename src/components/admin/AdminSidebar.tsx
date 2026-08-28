@@ -40,7 +40,7 @@ const NAV_ITEMS = [
   { title: "Inventory", url: "/admin/inventory", icon: CalendarRange, end: false, roles: ["admin", "revenue_manager", "front_desk", "operations_manager"] },
   { title: "Promotions", url: "/admin/promotions", icon: Tag, end: false, roles: ["admin"] },
   { title: "Menu", url: "/admin/menu", icon: UtensilsCrossed, end: false, roles: ["admin"] },
-  { title: "Food Orders", url: "/admin/food-orders", icon: UtensilsCrossed, end: false, roles: ["admin", "operations_manager", "front_desk"] },
+  { title: "Food Orders", url: "/admin/food-orders", icon: UtensilsCrossed, end: false, roles: ["admin", "operations_manager", "front_desk", "restaurant_staff"] },
   { title: "Gallery", url: "/admin/gallery", icon: ImageIcon, end: false, roles: ["admin"] },
   { title: "Revenue Intel", url: "/admin/revenue", icon: null, customIcon: revenueIntelIcon, end: false, roles: ["admin", "revenue_manager"] },
   { title: "Reports", url: "/admin/reports", icon: BarChart3, end: false, roles: ["admin", "revenue_manager", "finance"] },
