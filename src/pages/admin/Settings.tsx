@@ -61,9 +61,11 @@ export default function AdminSettings() {
 
 
   const canEditRate = role === "admin" || role === "operations_manager";
+  const staffOnly = role === "restaurant_staff";
 
   const { data: currency, isLoading: loadingCurrency } = useQuery({
     queryKey: ["admin-currency-setting"],
+    enabled: !staffOnly,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("app_settings")
