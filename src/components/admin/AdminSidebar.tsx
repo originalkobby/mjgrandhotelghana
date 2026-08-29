@@ -46,7 +46,7 @@ const NAV_ITEMS = [
   { title: "Reports", url: "/admin/reports", icon: BarChart3, end: false, roles: ["admin", "revenue_manager", "finance"] },
   { title: "Support", url: "/admin/support", icon: Headset, end: false, roles: ["admin", "front_desk", "operations_manager"] },
   { title: "Messages", url: "/admin/messages", icon: MessageSquareText, end: false, roles: ["admin", "revenue_manager", "finance", "front_desk", "operations_manager"] },
-  { title: "Settings", url: "/admin/settings", icon: Settings, end: false, roles: ["admin"] },
+  { title: "Settings", url: "/admin/settings", icon: Settings, end: false, roles: ["admin", "restaurant_staff"] },
 ];
 
 interface Props {

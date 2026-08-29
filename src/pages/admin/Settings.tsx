@@ -27,6 +27,7 @@ import { ShieldCheck, Plus, Pencil } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { formatDateGB } from "@/lib/dateUtils";
+import { ChangePasswordCard } from "@/components/admin/ChangePasswordCard";
 
 type CancelPolicy = Tables<"cancellation_policies">;
 
@@ -60,9 +61,11 @@ export default function AdminSettings() {
 
 
   const canEditRate = role === "admin" || role === "operations_manager";
+  const staffOnly = role === "restaurant_staff";
 
   const { data: currency, isLoading: loadingCurrency } = useQuery({
     queryKey: ["admin-currency-setting"],
+    enabled: role !== null && !staffOnly,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("app_settings")
@@ -111,6 +114,7 @@ export default function AdminSettings() {
   // Cancellation Policies
   const { data: policies, isLoading: loadingPolicies } = useQuery({
     queryKey: ["admin-cancel-policies"],
+    enabled: role !== null && !staffOnly,
     queryFn: async () => {
       const { data, error } = await supabase.from("cancellation_policies").select("*").order("deadline_hours");
       if (error) throw error;
@@ -122,6 +126,7 @@ export default function AdminSettings() {
   // Delivery zones
   const { data: zones } = useQuery({
     queryKey: ["admin-delivery-zones"],
+    enabled: canEditRate,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("delivery_zones")
@@ -162,6 +167,7 @@ export default function AdminSettings() {
   // User Roles
   const { data: roles, isLoading: loadingRoles } = useQuery({
     queryKey: ["admin-user-roles"],
+    enabled: role !== null && !staffOnly,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("user_roles")
@@ -218,6 +224,15 @@ export default function AdminSettings() {
   };
 
   const set = (key: string, val: any) => setForm((prev) => ({ ...prev, [key]: val }));
+
+  if (staffOnly) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-serif text-foreground">Settings</h1>
+        <ChangePasswordCard />
+      </div>
+    );
+  }
 
   if (loadingPolicies || loadingRoles || loadingCurrency) {
     return (
