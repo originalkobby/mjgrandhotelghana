@@ -27,6 +27,7 @@ import { ShieldCheck, Plus, Pencil } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { formatDateGB } from "@/lib/dateUtils";
+import { ChangePasswordCard } from "@/components/admin/ChangePasswordCard";
 
 type CancelPolicy = Tables<"cancellation_policies">;
 
