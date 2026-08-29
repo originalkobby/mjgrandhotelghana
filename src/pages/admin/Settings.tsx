@@ -126,6 +126,7 @@ export default function AdminSettings() {
   // Delivery zones
   const { data: zones } = useQuery({
     queryKey: ["admin-delivery-zones"],
+    enabled: canEditRate,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("delivery_zones")
@@ -223,6 +224,15 @@ export default function AdminSettings() {
   };
 
   const set = (key: string, val: any) => setForm((prev) => ({ ...prev, [key]: val }));
+
+  if (staffOnly) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-serif text-foreground">Settings</h1>
+        <ChangePasswordCard />
+      </div>
+    );
+  }
 
   if (loadingPolicies || loadingRoles || loadingCurrency) {
     return (
