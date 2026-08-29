@@ -65,7 +65,7 @@ export default function AdminSettings() {
 
   const { data: currency, isLoading: loadingCurrency } = useQuery({
     queryKey: ["admin-currency-setting"],
-    enabled: !staffOnly,
+    enabled: role !== null && !staffOnly,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("app_settings")
@@ -114,7 +114,7 @@ export default function AdminSettings() {
   // Cancellation Policies
   const { data: policies, isLoading: loadingPolicies } = useQuery({
     queryKey: ["admin-cancel-policies"],
-    enabled: !staffOnly,
+    enabled: role !== null && !staffOnly,
     queryFn: async () => {
       const { data, error } = await supabase.from("cancellation_policies").select("*").order("deadline_hours");
       if (error) throw error;
@@ -167,7 +167,7 @@ export default function AdminSettings() {
   // User Roles
   const { data: roles, isLoading: loadingRoles } = useQuery({
     queryKey: ["admin-user-roles"],
-    enabled: !staffOnly,
+    enabled: role !== null && !staffOnly,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("user_roles")
