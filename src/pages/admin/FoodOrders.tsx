@@ -21,8 +21,19 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Search, RefreshCw, Eye, UtensilsCrossed } from "lucide-react";
+import { Search, RefreshCw, Eye, UtensilsCrossed, Trash2, X } from "lucide-react";
 import { formatDateGB, formatDateTimeGB } from "@/lib/dateUtils";
 
 type FoodOrderItem = {
