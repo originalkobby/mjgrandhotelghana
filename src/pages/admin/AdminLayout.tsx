@@ -33,9 +33,8 @@ export default function AdminLayout() {
     return <Navigate to="/admin/login" replace />;
   }
 
-  // Restaurant / kitchen staff may only access Food Orders and Settings (change password)
-  const isSettings = location.pathname.startsWith("/admin/settings");
-  if (role === "restaurant_staff" && !isFoodOrders && !isSettings) {
+  // Restaurant / kitchen staff may only access Food Orders
+  if (role === "restaurant_staff" && !isFoodOrders) {
     return <Navigate to="/admin/food-orders" replace />;
   }
 
