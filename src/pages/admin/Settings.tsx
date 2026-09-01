@@ -27,7 +27,7 @@ import { ShieldCheck, Plus, Pencil } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { formatDateGB } from "@/lib/dateUtils";
-import { ChangePasswordCard } from "@/components/admin/ChangePasswordCard";
+import { AccountPasswordsCard } from "@/components/admin/AccountPasswordsCard";
 
 type CancelPolicy = Tables<"cancellation_policies">;
 
@@ -225,15 +225,6 @@ export default function AdminSettings() {
 
   const set = (key: string, val: any) => setForm((prev) => ({ ...prev, [key]: val }));
 
-  if (staffOnly) {
-    return (
-      <div className="space-y-6">
-        <h1 className="text-2xl font-serif text-foreground">Settings</h1>
-        <ChangePasswordCard />
-      </div>
-    );
-  }
-
   if (loadingPolicies || loadingRoles || loadingCurrency) {
     return (
       <div className="space-y-4">
@@ -259,7 +250,14 @@ export default function AdminSettings() {
           <TabsTrigger value="roles">Staff Roles</TabsTrigger>
           <TabsTrigger value="currency">Exchange Rate</TabsTrigger>
           {canEditRate && <TabsTrigger value="delivery">Delivery Zones</TabsTrigger>}
+          {role === "admin" && <TabsTrigger value="security">Security</TabsTrigger>}
         </TabsList>
+
+        {role === "admin" && (
+          <TabsContent value="security" className="mt-4">
+            <AccountPasswordsCard />
+          </TabsContent>
+        )}
 
         {canEditRate && (
           <TabsContent value="delivery" className="mt-4 space-y-4">
