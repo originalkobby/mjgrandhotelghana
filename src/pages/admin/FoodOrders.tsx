@@ -190,6 +190,51 @@ export default function AdminFoodOrders() {
     return seq[idx + 1];
   }
 
+  const allVisibleSelected = filtered.length > 0 && filtered.every((o) => selectedIds.has(o.id));
+  const someVisibleSelected = filtered.some((o) => selectedIds.has(o.id));
+
+  function toggleAll(checked: boolean | "indeterminate") {
+    if (checked === true) {
+      setSelectedIds(new Set(filtered.map((o) => o.id)));
+    } else {
+      setSelectedIds(new Set());
+    }
+  }
+
+  function toggleOne(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function clearSelection() {
+    setSelectedIds(new Set());
+  }
+
+  async function handleBulkDelete() {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    setDeleting(true);
+
+    // food_order_items cascade automatically on delete
+    const { error } = await supabase.from("food_orders").delete().in("id", ids);
+
+    setDeleting(false);
+    setBulkDeleteOpen(false);
+
+    if (error) {
+      toast.error(`Failed to delete orders: ${error.message}`);
+      return;
+    }
+
+    setSelectedIds(new Set());
+    queryClient.invalidateQueries({ queryKey: ["admin-food-orders"] });
+    toast.success(`Deleted ${ids.length} order${ids.length === 1 ? "" : "s"}`);
+  }
+
 
   if (isLoading) {
     return (
