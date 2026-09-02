@@ -38,6 +38,11 @@ export default function AdminLayout() {
     return <Navigate to="/admin/food-orders" replace />;
   }
 
+  // Front desk may not access Food Orders
+  if (role === "front_desk" && isFoodOrders) {
+    return <Navigate to="/admin" replace />;
+  }
+
   return (
     <SidebarProvider className="h-screen overflow-hidden w-full">
       <div className="admin-shell h-screen overflow-hidden flex w-full">
