@@ -119,6 +119,10 @@ export default function AdminFoodOrders() {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [selected, setSelected] = useState<FoodOrder | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const isAdmin = role === "admin";
 
   const { data: orders, isLoading } = useQuery({
     queryKey: ["admin-food-orders"],
