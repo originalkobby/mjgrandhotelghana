@@ -302,12 +302,48 @@ export default function AdminFoodOrders() {
         </div>
       </div>
 
+      {isAdmin && selectedIds.size > 0 && (
+        <div className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-lg bg-muted border border-border">
+          <p className="text-sm font-sans text-foreground">
+            <span className="font-medium">{selectedIds.size}</span> order
+            {selectedIds.size === 1 ? "" : "s"} selected
+          </p>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={clearSelection} className="text-xs">
+              <X className="w-3.5 h-3.5 mr-1" />
+              Clear selection
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setBulkDeleteOpen(true)}
+              className="text-xs"
+            >
+              <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+              Delete {selectedIds.size} selected
+            </Button>
+          </div>
+        </div>
+      )}
+
       <Card className="flex flex-col flex-1 min-h-0">
         <CardContent className="flex flex-col flex-1 min-h-0 p-0">
           <div className="flex-1 min-h-0 overflow-auto">
             <table className="w-full text-sm font-sans">
               <thead className="sticky top-0 z-20 bg-[hsl(var(--admin-surface))]">
                 <tr className="border-b border-border">
+                  {isAdmin && (
+                    <th className="w-8 px-3 py-3">
+                      <Checkbox
+                        className="h-3 w-3 [&_svg]:h-3 [&_svg]:w-3"
+                        checked={
+                          allVisibleSelected ? true : someVisibleSelected ? "indeterminate" : false
+                        }
+                        onCheckedChange={toggleAll}
+                        aria-label="Select all orders"
+                      />
+                    </th>
+                  )}
                   {[
                     { label: "Reference", cls: "w-[14%]" },
                     { label: "Status", cls: "w-[12%]" },
@@ -332,7 +368,7 @@ export default function AdminFoodOrders() {
               <tbody>
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="text-center py-16 text-muted-foreground">
+                    <td colSpan={isAdmin ? 9 : 8} className="text-center py-16 text-muted-foreground">
                       <UtensilsCrossed className="w-8 h-8 mx-auto mb-3 opacity-40" />
                       No food orders found
                     </td>
@@ -345,6 +381,16 @@ export default function AdminFoodOrders() {
                         idx % 2 === 0 ? "bg-muted/40" : ""
                       } hover:bg-muted/60`}
                     >
+                      {isAdmin && (
+                        <td className="px-3 py-3">
+                          <Checkbox
+                            className="h-3 w-3 [&_svg]:h-3 [&_svg]:w-3"
+                            checked={selectedIds.has(order.id)}
+                            onCheckedChange={() => toggleOne(order.id)}
+                            aria-label={`Select order ${order.reference_code}`}
+                          />
+                        </td>
+                      )}
                       <td className="px-4 py-3 font-medium text-foreground">
                         {order.reference_code}
                       </td>
