@@ -129,8 +129,9 @@ Deno.serve(async (req) => {
         <tr><td style="padding:40px;">
           <h2 style="margin:0 0 8px;color:#1a1a1a;font-size:20px;">Order Confirmed</h2>
           <p style="margin:0 0 24px;color:#666;font-size:14px;font-family:Arial,sans-serif;">
-            Hi ${order.guest_name}, thank you for your order. Our kitchen has received it.
+            Hi ${firstName}, thank you for your order — our kitchen has received it. ${closingLine} ${readyEstimate}
           </p>
+
 
           <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f7f4;border-radius:6px;margin-bottom:24px;">
             <tr><td style="padding:20px;">
