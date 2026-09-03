@@ -61,6 +61,33 @@ Deno.serve(async (req) => {
     const deliveryFee = Number(order.delivery_fee_ghs ?? 0);
     const isDelivery = order.order_type === "delivery";
 
+    const firstName = String(order.guest_name || "Guest").trim().split(/\s+/)[0];
+
+    const closingLine = (() => {
+      switch (order.order_type) {
+        case "dine_in":
+          return "Your table order is being prepared — please quote your reference when you arrive at the restaurant.";
+        case "room_service":
+          return order.room_number
+            ? `We'll bring your order up to Room ${order.room_number} shortly.`
+            : "We'll bring your order up to your room shortly.";
+        case "takeaway":
+          return "We'll have it packed and ready for collection at the restaurant — we'll call you when it's ready.";
+        case "delivery":
+          return `We'll deliver to ${
+            [zoneName, order.delivery_address].filter(Boolean).join(" · ") ||
+            "your delivery address"
+          } as soon as it's ready.`;
+        default:
+          return "Our kitchen is preparing your order.";
+      }
+    })();
+
+    const readyEstimate = isDelivery
+      ? "Typical delivery time is 45–60 minutes."
+      : "Typical preparation time is 25–35 minutes.";
+
+
 
     const items = (order.food_order_items ?? []) as Array<{
       name: string;
@@ -102,8 +129,9 @@ Deno.serve(async (req) => {
         <tr><td style="padding:40px;">
           <h2 style="margin:0 0 8px;color:#1a1a1a;font-size:20px;">Order Confirmed</h2>
           <p style="margin:0 0 24px;color:#666;font-size:14px;font-family:Arial,sans-serif;">
-            Hi ${order.guest_name}, thank you for your order. Our kitchen has received it.
+            Hi ${firstName}, thank you for your order — our kitchen has received it. ${closingLine} ${readyEstimate}
           </p>
+
 
           <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f7f4;border-radius:6px;margin-bottom:24px;">
             <tr><td style="padding:20px;">
@@ -145,10 +173,16 @@ Deno.serve(async (req) => {
           <p style="margin:24px 0 0;color:#666;font-size:13px;font-family:Arial,sans-serif;">
             Payment is made on collection or delivery. Please quote your reference code.
           </p>
+          <p style="margin:12px 0 0;color:#666;font-size:13px;font-family:Arial,sans-serif;">
+            Need to change or cancel this order? Call us on
+            <a href="tel:+233302544212" style="color:#b8860b;text-decoration:none;">+233 30 254 4212</a>
+            and quote <strong>${order.reference_code}</strong>.
+          </p>
         </td></tr>
         <tr><td style="background:#f8f7f4;padding:24px 40px;text-align:center;">
-          <p style="margin:0;color:#999;font-size:12px;font-family:Arial,sans-serif;">MJ Grand Hotel · East Legon, Accra</p>
+          <p style="margin:0;color:#999;font-size:12px;font-family:Arial,sans-serif;">MJ Grand Hotel · No. 460 Abotsi Street, East Legon, Accra</p>
         </td></tr>
+
       </table>
     </td></tr>
   </table>
@@ -162,9 +196,12 @@ Deno.serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "MJ Grand Hotel <onboarding@resend.dev>",
+        from: Deno.env.get("RESEND_FROM_EMAIL") ??
+          "MJ Grand Hotel Restaurant <orders@mjgrandhotelghana.com>",
+        reply_to: "mj@mjgrandhotelghana.com",
+
         to: [order.email],
-        subject: `Order ${order.reference_code} Confirmed`,
+        subject: `${firstName}, your order ${order.reference_code} is confirmed`,
         html,
       }),
     });

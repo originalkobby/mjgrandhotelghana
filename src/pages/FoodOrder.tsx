@@ -60,6 +60,8 @@ export default function FoodOrder() {
   const [submitted, setSubmitted] = useState(false);
   const [reference, setReference] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [emailWarning, setEmailWarning] = useState(false);
+
 
   useEffect(() => {
     setItemName(initialItem);
@@ -83,8 +85,11 @@ export default function FoodOrder() {
   const subtotal = useMemo(() => unitPrice * quantity, [unitPrice, quantity]);
   const total = subtotal + deliveryFee;
 
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+
   const canSubmit =
     !!guestName.trim() &&
+    emailValid &&
     quantity > 0 &&
     unitPrice > 0 &&
     (!isDelivery || (!!zoneId && !!deliveryAddress.trim() && !!phone.trim()));
@@ -95,6 +100,8 @@ export default function FoodOrder() {
 
     setSubmitting(true);
     setError(null);
+    setEmailWarning(false);
+
 
     try {
       const ref = newOrderRef();
@@ -131,11 +138,17 @@ export default function FoodOrder() {
 
       if (itemsError) throw itemsError;
 
-      if (email.trim()) {
-        supabase.functions
-          .invoke("send-food-order-email", { body: { orderId } })
-          .catch((e) => console.error("Confirmation email failed", e));
+      try {
+        const { error: mailError } = await supabase.functions.invoke(
+          "send-food-order-email",
+          { body: { orderId } },
+        );
+        if (mailError) throw mailError;
+      } catch (mailErr) {
+        console.error("Confirmation email failed", mailErr);
+        setEmailWarning(true);
       }
+
 
 
       setReference(ref);
@@ -196,8 +209,11 @@ export default function FoodOrder() {
                 <h2 className="font-serif text-2xl text-cream mb-2">Order Received</h2>
                 <p className="text-cream/60 text-sm mb-6">
                   Thank you, {guestName}. Your order has been sent to the kitchen.
-                  {email.trim() ? ` A confirmation has been sent to ${email.trim()}.` : ""}
+                  {emailWarning
+                    ? " We couldn't email your confirmation — please keep your reference code below."
+                    : ` A confirmation has been sent to ${email.trim()}.`}
                 </p>
+
 
                 <div className="inline-block px-5 py-3 rounded-lg border border-gold/30 bg-gold/10 mb-6">
                   <p className="text-[10px] uppercase tracking-[0.2em] text-gold/80">Reference</p>
@@ -386,15 +402,20 @@ export default function FoodOrder() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-cream/70 text-sm">Email</Label>
+                    <Label className="text-cream/70 text-sm">Email *</Label>
                     <Input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="bg-charcoal border-cream/10 text-cream"
                       placeholder="you@example.com"
+                      required
                     />
+                    <p className="text-[11px] text-cream/40">
+                      We'll send your order confirmation here.
+                    </p>
                   </div>
+
 
                   <div className="space-y-2">
                     <Label className="text-cream/70 text-sm">Notes</Label>
