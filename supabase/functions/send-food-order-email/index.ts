@@ -196,7 +196,10 @@ Deno.serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "MJ Grand Hotel <onboarding@resend.dev>",
+        from: Deno.env.get("RESEND_FROM_EMAIL") ??
+          "MJ Grand Hotel Restaurant <orders@mjgrandhotelghana.com>",
+        reply_to: "mj@mjgrandhotelghana.com",
+
         to: [order.email],
         subject: `Order ${order.reference_code} Confirmed`,
         html,
