@@ -386,15 +386,20 @@ export default function FoodOrder() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-cream/70 text-sm">Email</Label>
+                    <Label className="text-cream/70 text-sm">Email *</Label>
                     <Input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="bg-charcoal border-cream/10 text-cream"
                       placeholder="you@example.com"
+                      required
                     />
+                    <p className="text-[11px] text-cream/40">
+                      We'll send your order confirmation here.
+                    </p>
                   </div>
+
 
                   <div className="space-y-2">
                     <Label className="text-cream/70 text-sm">Notes</Label>
