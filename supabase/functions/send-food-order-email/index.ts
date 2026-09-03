@@ -201,7 +201,7 @@ Deno.serve(async (req) => {
         reply_to: "mj@mjgrandhotelghana.com",
 
         to: [order.email],
-        subject: `Order ${order.reference_code} Confirmed`,
+        subject: `${firstName}, your order ${order.reference_code} is confirmed`,
         html,
       }),
     });
