@@ -61,6 +61,33 @@ Deno.serve(async (req) => {
     const deliveryFee = Number(order.delivery_fee_ghs ?? 0);
     const isDelivery = order.order_type === "delivery";
 
+    const firstName = String(order.guest_name || "Guest").trim().split(/\s+/)[0];
+
+    const closingLine = (() => {
+      switch (order.order_type) {
+        case "dine_in":
+          return "Your table order is being prepared — please quote your reference when you arrive at the restaurant.";
+        case "room_service":
+          return order.room_number
+            ? `We'll bring your order up to Room ${order.room_number} shortly.`
+            : "We'll bring your order up to your room shortly.";
+        case "takeaway":
+          return "We'll have it packed and ready for collection at the restaurant — we'll call you when it's ready.";
+        case "delivery":
+          return `We'll deliver to ${
+            [zoneName, order.delivery_address].filter(Boolean).join(" · ") ||
+            "your delivery address"
+          } as soon as it's ready.`;
+        default:
+          return "Our kitchen is preparing your order.";
+      }
+    })();
+
+    const readyEstimate = isDelivery
+      ? "Typical delivery time is 45–60 minutes."
+      : "Typical preparation time is 25–35 minutes.";
+
+
 
     const items = (order.food_order_items ?? []) as Array<{
       name: string;
