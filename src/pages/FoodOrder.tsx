@@ -85,8 +85,11 @@ export default function FoodOrder() {
   const subtotal = useMemo(() => unitPrice * quantity, [unitPrice, quantity]);
   const total = subtotal + deliveryFee;
 
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+
   const canSubmit =
     !!guestName.trim() &&
+    emailValid &&
     quantity > 0 &&
     unitPrice > 0 &&
     (!isDelivery || (!!zoneId && !!deliveryAddress.trim() && !!phone.trim()));
@@ -97,6 +100,8 @@ export default function FoodOrder() {
 
     setSubmitting(true);
     setError(null);
+    setEmailWarning(false);
+
 
     try {
       const ref = newOrderRef();
