@@ -173,10 +173,16 @@ Deno.serve(async (req) => {
           <p style="margin:24px 0 0;color:#666;font-size:13px;font-family:Arial,sans-serif;">
             Payment is made on collection or delivery. Please quote your reference code.
           </p>
+          <p style="margin:12px 0 0;color:#666;font-size:13px;font-family:Arial,sans-serif;">
+            Need to change or cancel this order? Call us on
+            <a href="tel:+233302544212" style="color:#b8860b;text-decoration:none;">+233 30 254 4212</a>
+            and quote <strong>${order.reference_code}</strong>.
+          </p>
         </td></tr>
         <tr><td style="background:#f8f7f4;padding:24px 40px;text-align:center;">
-          <p style="margin:0;color:#999;font-size:12px;font-family:Arial,sans-serif;">MJ Grand Hotel · East Legon, Accra</p>
+          <p style="margin:0;color:#999;font-size:12px;font-family:Arial,sans-serif;">MJ Grand Hotel · No. 460 Abotsi Street, East Legon, Accra</p>
         </td></tr>
+
       </table>
     </td></tr>
   </table>
