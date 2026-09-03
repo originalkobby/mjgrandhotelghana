@@ -197,7 +197,7 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         from: Deno.env.get("RESEND_FROM_EMAIL") ??
-          "MJ Grand Hotel Restaurant <orders@mjgrandhotelghana.com>",
+          "MJ Grand Hotel Restaurant <restaurant@mjgrandhotelghana.com>",
         reply_to: "mj@mjgrandhotelghana.com",
 
         to: [order.email],
