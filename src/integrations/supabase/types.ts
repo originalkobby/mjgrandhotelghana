@@ -491,11 +491,13 @@ export type Database = {
       }
       food_orders: {
         Row: {
+          confirmation_email_sent_at: string | null
           created_at: string
           delivery_address: string | null
           delivery_fee_ghs: number
           delivery_landmark: string | null
           delivery_zone_id: string | null
+          dispatch_email_sent_at: string | null
           email: string | null
           guest_name: string
           id: string
@@ -509,11 +511,13 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          confirmation_email_sent_at?: string | null
           created_at?: string
           delivery_address?: string | null
           delivery_fee_ghs?: number
           delivery_landmark?: string | null
           delivery_zone_id?: string | null
+          dispatch_email_sent_at?: string | null
           email?: string | null
           guest_name: string
           id?: string
@@ -527,11 +531,13 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          confirmation_email_sent_at?: string | null
           created_at?: string
           delivery_address?: string | null
           delivery_fee_ghs?: number
           delivery_landmark?: string | null
           delivery_zone_id?: string | null
+          dispatch_email_sent_at?: string | null
           email?: string | null
           guest_name?: string
           id?: string

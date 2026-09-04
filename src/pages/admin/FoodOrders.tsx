@@ -78,7 +78,7 @@ const STATUS_LABELS: Record<FoodOrder["status"], string> = {
   pending: "Pending",
   confirmed: "Confirmed",
   ready: "Ready",
-  out_for_delivery: "Out for delivery",
+  out_for_delivery: "On its way",
   completed: "Completed",
   cancelled: "Cancelled",
 };
@@ -180,6 +180,26 @@ export default function AdminFoodOrders() {
     }
     queryClient.invalidateQueries({ queryKey: ["admin-food-orders"] });
     toast.success(`Order marked ${STATUS_LABELS[newStatus].toLowerCase()}`);
+
+    const stage =
+      newStatus === "confirmed"
+        ? "confirmed"
+        : newStatus === "out_for_delivery"
+          ? "on_the_way"
+          : null;
+
+    if (stage) {
+      try {
+        const { error: mailError } = await supabase.functions.invoke(
+          "send-food-order-email",
+          { body: { orderId: id, stage } },
+        );
+        if (mailError) throw mailError;
+      } catch (mailErr) {
+        console.error("Guest email failed", mailErr);
+        toast.warning("Status saved, but the guest email could not be sent.");
+      }
+    }
   }
 
   function nextStatus(order: Pick<FoodOrder, "status" | "order_type">): FoodOrder["status"] | null {
