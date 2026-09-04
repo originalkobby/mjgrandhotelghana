@@ -60,7 +60,6 @@ export default function FoodOrder() {
   const [submitted, setSubmitted] = useState(false);
   const [reference, setReference] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [emailWarning, setEmailWarning] = useState(false);
 
 
   useEffect(() => {
