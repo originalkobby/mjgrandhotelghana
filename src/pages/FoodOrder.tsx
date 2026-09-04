@@ -195,10 +195,8 @@ export default function FoodOrder() {
                 <CheckCircle2 className="w-14 h-14 text-green-500 mx-auto mb-4" />
                 <h2 className="font-serif text-2xl text-cream mb-2">Order Received</h2>
                 <p className="text-cream/60 text-sm mb-6">
-                  Thank you, {guestName}. Your order has been sent to the kitchen.
-                  {emailWarning
-                    ? " We couldn't email your confirmation — please keep your reference code below."
-                    : ` A confirmation has been sent to ${email.trim()}.`}
+                  Thank you, {guestName}. Your order has been sent to the restaurant.
+                  {` We'll email a confirmation to ${email.trim()} as soon as our team accepts it — please keep your reference code below.`}
                 </p>
 
 
