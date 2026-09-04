@@ -6,6 +6,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+type Stage = "confirmed" | "on_the_way";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -19,6 +21,7 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const orderId = typeof body?.orderId === "string" ? body.orderId : null;
+    const stage: Stage = body?.stage === "on_the_way" ? "on_the_way" : "confirmed";
     if (!orderId) {
       return new Response(JSON.stringify({ error: "orderId is required" }), {
         status: 400,
@@ -34,7 +37,7 @@ Deno.serve(async (req) => {
     const { data: order, error } = await supabase
       .from("food_orders")
       .select(
-        "reference_code, guest_name, email, phone, room_number, order_type, notes, total_ghs, created_at, delivery_address, delivery_landmark, delivery_fee_ghs, delivery_zones(name), food_order_items(name, quantity, price_ghs, line_total_ghs)",
+        "reference_code, guest_name, email, phone, room_number, order_type, notes, total_ghs, created_at, delivery_address, delivery_landmark, delivery_fee_ghs, confirmation_email_sent_at, dispatch_email_sent_at, delivery_zones(name), food_order_items(name, quantity, price_ghs, line_total_ghs)",
       )
       .eq("id", orderId)
       .single();
@@ -46,6 +49,16 @@ Deno.serve(async (req) => {
     if (!order.email) {
       return new Response(
         JSON.stringify({ skipped: true, reason: "No email on order" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    const alreadySent = stage === "confirmed"
+      ? order.confirmation_email_sent_at
+      : order.dispatch_email_sent_at;
+    if (alreadySent) {
+      return new Response(
+        JSON.stringify({ skipped: true, reason: "Already sent" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
@@ -63,7 +76,7 @@ Deno.serve(async (req) => {
 
     const firstName = String(order.guest_name || "Guest").trim().split(/\s+/)[0];
 
-    const closingLine = (() => {
+    const confirmedIntro = (() => {
       switch (order.order_type) {
         case "dine_in":
           return "Your table order is being prepared — please quote your reference when you arrive at the restaurant.";
@@ -87,7 +100,17 @@ Deno.serve(async (req) => {
       ? "Typical delivery time is 45–60 minutes."
       : "Typical preparation time is 25–35 minutes.";
 
+    const heading = stage === "confirmed"
+      ? "Order Confirmed"
+      : "Your Order Is On Its Way";
 
+    const intro = stage === "confirmed"
+      ? `Hi ${firstName}, thank you for your order — our restaurant has now confirmed it and the kitchen is on it. ${confirmedIntro} ${readyEstimate}`
+      : `Hi ${firstName}, good news — your order has just left our restaurant and is on its way to you. Our rider should reach you within the next 20–30 minutes.`;
+
+    const subject = stage === "confirmed"
+      ? `${firstName}, your order ${order.reference_code} is confirmed`
+      : `${firstName}, your order ${order.reference_code} is on its way`;
 
     const items = (order.food_order_items ?? []) as Array<{
       name: string;
@@ -114,6 +137,32 @@ Deno.serve(async (req) => {
       )
       .join("");
 
+    const detailBlock = stage === "on_the_way"
+      ? `
+              <p style="margin:0 0 4px;color:#999;font-size:11px;text-transform:uppercase;letter-spacing:1px;font-family:Arial,sans-serif;">Reference</p>
+              <p style="margin:0 0 16px;color:#1a1a1a;font-size:16px;font-family:monospace;font-weight:bold;">${order.reference_code}</p>
+              <p style="margin:0 0 4px;color:#999;font-size:11px;text-transform:uppercase;letter-spacing:1px;font-family:Arial,sans-serif;">Delivering To</p>
+              <p style="margin:0 0 16px;color:#1a1a1a;font-size:14px;font-family:Arial,sans-serif;">${zoneName ? `${zoneName} · ` : ""}${order.delivery_address ?? ""}${order.delivery_landmark ? ` (${order.delivery_landmark})` : ""}</p>
+              <p style="margin:0 0 4px;color:#999;font-size:11px;text-transform:uppercase;letter-spacing:1px;font-family:Arial,sans-serif;">Estimated Arrival</p>
+              <p style="margin:0;color:#1a1a1a;font-size:14px;font-family:Arial,sans-serif;">Within 20–30 minutes</p>`
+      : `
+              <p style="margin:0 0 4px;color:#999;font-size:11px;text-transform:uppercase;letter-spacing:1px;font-family:Arial,sans-serif;">Reference</p>
+              <p style="margin:0 0 16px;color:#1a1a1a;font-size:16px;font-family:monospace;font-weight:bold;">${order.reference_code}</p>
+              <p style="margin:0 0 4px;color:#999;font-size:11px;text-transform:uppercase;letter-spacing:1px;font-family:Arial,sans-serif;">Order Type</p>
+              <p style="margin:0 0 16px;color:#1a1a1a;font-size:14px;font-family:Arial,sans-serif;">${typeLabel[order.order_type] ?? order.order_type}${order.room_number ? ` · Room ${order.room_number}` : ""}</p>
+              ${
+        isDelivery
+          ? `<p style="margin:0 0 4px;color:#999;font-size:11px;text-transform:uppercase;letter-spacing:1px;font-family:Arial,sans-serif;">Delivery To</p>
+              <p style="margin:0 0 16px;color:#1a1a1a;font-size:14px;font-family:Arial,sans-serif;">${zoneName ? `${zoneName} · ` : ""}${order.delivery_address ?? ""}${order.delivery_landmark ? ` (${order.delivery_landmark})` : ""}</p>`
+          : ""
+      }
+              <p style="margin:0 0 4px;color:#999;font-size:11px;text-transform:uppercase;letter-spacing:1px;font-family:Arial,sans-serif;">Placed</p>
+              <p style="margin:0;color:#1a1a1a;font-size:14px;font-family:Arial,sans-serif;">${placedAt}</p>`;
+
+    const closingNote = stage === "on_the_way"
+      ? `Please have <strong>GH₵ ${Number(order.total_ghs).toFixed(2)}</strong> ready — payment is made on delivery. Our rider may call you on arrival.`
+      : "Payment is made on collection or delivery. Please quote your reference code.";
+
     const html = `
 <!DOCTYPE html>
 <html>
@@ -127,52 +176,33 @@ Deno.serve(async (req) => {
           <p style="margin:6px 0 0;color:#999;font-size:11px;letter-spacing:2px;font-family:Arial,sans-serif;text-transform:uppercase;">Restaurant</p>
         </td></tr>
         <tr><td style="padding:40px;">
-          <h2 style="margin:0 0 8px;color:#1a1a1a;font-size:20px;">Order Confirmed</h2>
-          <p style="margin:0 0 24px;color:#666;font-size:14px;font-family:Arial,sans-serif;">
-            Hi ${firstName}, thank you for your order — our kitchen has received it. ${closingLine} ${readyEstimate}
-          </p>
-
+          <h2 style="margin:0 0 8px;color:#1a1a1a;font-size:20px;">${heading}</h2>
+          <p style="margin:0 0 24px;color:#666;font-size:14px;font-family:Arial,sans-serif;">${intro}</p>
 
           <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f7f4;border-radius:6px;margin-bottom:24px;">
-            <tr><td style="padding:20px;">
-              <p style="margin:0 0 4px;color:#999;font-size:11px;text-transform:uppercase;letter-spacing:1px;font-family:Arial,sans-serif;">Reference</p>
-              <p style="margin:0 0 16px;color:#1a1a1a;font-size:16px;font-family:monospace;font-weight:bold;">${order.reference_code}</p>
-              <p style="margin:0 0 4px;color:#999;font-size:11px;text-transform:uppercase;letter-spacing:1px;font-family:Arial,sans-serif;">Order Type</p>
-              <p style="margin:0 0 16px;color:#1a1a1a;font-size:14px;font-family:Arial,sans-serif;">${typeLabel[order.order_type] ?? order.order_type}${order.room_number ? ` · Room ${order.room_number}` : ""}</p>
-              ${
-    isDelivery
-      ? `<p style="margin:0 0 4px;color:#999;font-size:11px;text-transform:uppercase;letter-spacing:1px;font-family:Arial,sans-serif;">Delivery To</p>
-              <p style="margin:0 0 16px;color:#1a1a1a;font-size:14px;font-family:Arial,sans-serif;">${zoneName ? `${zoneName} · ` : ""}${order.delivery_address ?? ""}${order.delivery_landmark ? ` (${order.delivery_landmark})` : ""}</p>`
-      : ""
-  }
-              <p style="margin:0 0 4px;color:#999;font-size:11px;text-transform:uppercase;letter-spacing:1px;font-family:Arial,sans-serif;">Placed</p>
-              <p style="margin:0;color:#1a1a1a;font-size:14px;font-family:Arial,sans-serif;">${placedAt}</p>
-            </td></tr>
+            <tr><td style="padding:20px;">${detailBlock}</td></tr>
           </table>
 
           <p style="margin:0 0 8px;color:#999;font-size:11px;text-transform:uppercase;letter-spacing:1px;font-family:Arial,sans-serif;">Order Summary</p>
           <table width="100%" cellpadding="0" cellspacing="0">
             ${rows}
             ${
-    isDelivery
-      ? `<tr>
+      isDelivery
+        ? `<tr>
               <td style="padding:10px 0;border-bottom:1px solid #eee;color:#1a1a1a;font-size:14px;font-family:Arial,sans-serif;">Delivery${zoneName ? ` — ${zoneName}` : ""}</td>
               <td align="right" style="padding:10px 0;border-bottom:1px solid #eee;color:#1a1a1a;font-size:14px;font-family:Arial,sans-serif;">GH₵ ${deliveryFee.toFixed(2)}</td>
             </tr>`
-      : ""
-  }
+        : ""
+    }
             <tr>
               <td style="padding:14px 0;color:#1a1a1a;font-size:15px;font-family:Arial,sans-serif;font-weight:bold;">Total</td>
               <td align="right" style="padding:14px 0;color:#1a1a1a;font-size:15px;font-family:Arial,sans-serif;font-weight:bold;">GH₵ ${Number(order.total_ghs).toFixed(2)}</td>
             </tr>
           </table>
 
-
           ${order.notes ? `<p style="margin:16px 0 0;color:#666;font-size:13px;font-family:Arial,sans-serif;"><strong>Notes:</strong> ${order.notes}</p>` : ""}
 
-          <p style="margin:24px 0 0;color:#666;font-size:13px;font-family:Arial,sans-serif;">
-            Payment is made on collection or delivery. Please quote your reference code.
-          </p>
+          <p style="margin:24px 0 0;color:#666;font-size:13px;font-family:Arial,sans-serif;">${closingNote}</p>
           <p style="margin:12px 0 0;color:#666;font-size:13px;font-family:Arial,sans-serif;">
             Need to change or cancel this order? Call us on
             <a href="tel:+233302544212" style="color:#b8860b;text-decoration:none;">+233 30 254 4212</a>
@@ -182,7 +212,6 @@ Deno.serve(async (req) => {
         <tr><td style="background:#f8f7f4;padding:24px 40px;text-align:center;">
           <p style="margin:0;color:#999;font-size:12px;font-family:Arial,sans-serif;">MJ Grand Hotel · No. 460 Abotsi Street, East Legon, Accra</p>
         </td></tr>
-
       </table>
     </td></tr>
   </table>
@@ -199,9 +228,8 @@ Deno.serve(async (req) => {
         from: Deno.env.get("RESEND_FROM_EMAIL") ??
           "MJ Grand Hotel Restaurant <restaurant@mjgrandhotelghana.com>",
         reply_to: "mj@mjgrandhotelghana.com",
-
         to: [order.email],
-        subject: `${firstName}, your order ${order.reference_code} is confirmed`,
+        subject,
         html,
       }),
     });
@@ -212,7 +240,16 @@ Deno.serve(async (req) => {
       throw new Error(resData.message || "Failed to send email");
     }
 
-    return new Response(JSON.stringify({ success: true }), {
+    await supabase
+      .from("food_orders")
+      .update(
+        stage === "confirmed"
+          ? { confirmation_email_sent_at: new Date().toISOString() }
+          : { dispatch_email_sent_at: new Date().toISOString() },
+      )
+      .eq("id", orderId);
+
+    return new Response(JSON.stringify({ success: true, stage }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
