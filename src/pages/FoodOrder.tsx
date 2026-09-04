@@ -138,19 +138,6 @@ export default function FoodOrder() {
 
       if (itemsError) throw itemsError;
 
-      try {
-        const { error: mailError } = await supabase.functions.invoke(
-          "send-food-order-email",
-          { body: { orderId } },
-        );
-        if (mailError) throw mailError;
-      } catch (mailErr) {
-        console.error("Confirmation email failed", mailErr);
-        setEmailWarning(true);
-      }
-
-
-
       setReference(ref);
       setSubmitted(true);
       setSearchParams({}, { replace: true });
