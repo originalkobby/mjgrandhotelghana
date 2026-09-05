@@ -130,6 +130,7 @@ const GoogleMapsTest = () => {
     return () => {
       window.initMapTest = undefined;
       (window as any).gm_authFailure = prevAuthFailure;
+      console.error = prevConsoleError;
     };
   }, []);
 
