@@ -81,6 +81,7 @@ const App = () => (
             <Route path="/booking/lookup" element={<Navigate to="/booking" replace />} />
             <Route path="/guest-services" element={<GuestServices />} />
             <Route path="/gallery" element={<GalleryPage />} />
+            <Route path="/map-test" element={<GoogleMapsTest />} />
 
             {/* Admin Dashboard */}
             <Route path="/admin/login" element={<AdminLogin />} />
