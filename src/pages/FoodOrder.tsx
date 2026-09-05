@@ -99,8 +99,6 @@ export default function FoodOrder() {
 
     setSubmitting(true);
     setError(null);
-    setEmailWarning(false);
-
 
     try {
       const ref = newOrderRef();
