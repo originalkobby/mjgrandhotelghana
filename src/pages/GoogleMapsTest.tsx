@@ -19,9 +19,18 @@ type Status = "loading" | "loaded" | "error";
 
 const GoogleMapsTest = () => {
   const mapRef = useRef<HTMLDivElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
+  const searchMarkerRef = useRef<any>(null);
+  const locationMarkerRef = useRef<any>(null);
+
   const [status, setStatus] = useState<Status>("loading");
   const [message, setMessage] = useState("Loading Google Maps JavaScript API…");
   const [markerReady, setMarkerReady] = useState(false);
+  const [searchReady, setSearchReady] = useState(false);
+  const [searchMessage, setSearchMessage] = useState("Address search not yet initialized.");
+  const [locationMessage, setLocationMessage] = useState("Current location not yet requested.");
+  const [locating, setLocating] = useState(false);
 
   useEffect(() => {
     const apiKey = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY;
@@ -35,7 +44,7 @@ const GoogleMapsTest = () => {
       return;
     }
 
-    const initMap = () => {
+    const initMap = async () => {
       try {
         if (!mapRef.current || !window.google?.maps) {
           setStatus("error");
@@ -50,6 +59,7 @@ const GoogleMapsTest = () => {
           streetViewControl: true,
           fullscreenControl: true,
         });
+        mapInstanceRef.current = map;
 
         const marker = new window.google.maps.Marker({
           position: { lat: HOTEL.lat, lng: HOTEL.lng },
@@ -71,6 +81,62 @@ const GoogleMapsTest = () => {
         setMarkerReady(true);
         setStatus("loaded");
         setMessage("Map and hotel marker loaded successfully. Click the marker to see the hotel name.");
+
+        // ---- Address search: Places API (New) browser autocomplete element ----
+        try {
+          const placesLib = (await window.google.maps.importLibrary("places")) as any;
+          const PlaceAutocompleteElement = placesLib.PlaceAutocompleteElement;
+          if (!PlaceAutocompleteElement) {
+            throw new Error("PlaceAutocompleteElement not available in the Places library.");
+          }
+          if (searchContainerRef.current && !searchContainerRef.current.hasChildNodes()) {
+            const autocompleteEl: any = new PlaceAutocompleteElement();
+            autocompleteEl.id = "test-place-autocomplete";
+            autocompleteEl.style.width = "100%";
+            searchContainerRef.current.appendChild(autocompleteEl);
+
+            autocompleteEl.addEventListener("gmp-placeselect", async (event: any) => {
+              try {
+                const place = event.place;
+                await place.fetchFields({ fields: ["displayName", "formattedAddress", "location"] });
+                if (!place.location) {
+                  setSearchMessage("Selected place has no coordinates.");
+                  return;
+                }
+                const pos = { lat: place.location.lat(), lng: place.location.lng() };
+                map.setCenter(pos);
+                map.setZoom(17);
+
+                if (searchMarkerRef.current) searchMarkerRef.current.setMap(null);
+                const searchMarker = new window.google.maps.Marker({
+                  position: pos,
+                  map,
+                  title: place.displayName,
+                });
+                searchMarkerRef.current = searchMarker;
+
+                const searchInfo = new window.google.maps.InfoWindow({
+                  content: `<div style="font-family:sans-serif;padding:4px 2px">
+                    <strong>${place.displayName}</strong><br/>
+                    <span style="font-size:12px;color:#555">${place.formattedAddress ?? ""}</span>
+                  </div>`,
+                });
+                searchInfo.open({ anchor: searchMarker, map });
+
+                setSearchMessage(
+                  `✓ Selected: ${place.displayName} — ${place.formattedAddress ?? ""} (${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)})`
+                );
+              } catch (err: any) {
+                setSearchMessage(`Place selection failed: ${err?.message ?? String(err)}`);
+              }
+            });
+            setSearchReady(true);
+            setSearchMessage("Address search ready — start typing an address or place name.");
+          }
+        } catch (err: any) {
+          setSearchReady(false);
+          setSearchMessage(`Address search failed to initialize: ${err?.message ?? String(err)}`);
+        }
       } catch (err: any) {
         setStatus("error");
         setMessage(`Map initialization failed: ${err?.message ?? String(err)}`);
@@ -79,12 +145,12 @@ const GoogleMapsTest = () => {
 
     // If the API is already loaded (HMR / remount), initialize directly.
     if (window.google?.maps) {
-      initMap();
+      void initMap();
       return;
     }
 
     // Register the global callback BEFORE loading the script (required with loading=async).
-    window.initMapTest = initMap;
+    window.initMapTest = () => void initMap();
 
     const script = document.createElement("script");
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&loading=async&callback=initMapTest${channel ? `&channel=${channel}` : ""}`;
@@ -134,6 +200,59 @@ const GoogleMapsTest = () => {
     };
   }, []);
 
+  const handleUseCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationMessage("Geolocation is not supported by this browser.");
+      return;
+    }
+    const map = mapInstanceRef.current;
+    if (!map) {
+      setLocationMessage("Map is not ready yet.");
+      return;
+    }
+    setLocating(true);
+    setLocationMessage("Requesting your current location…");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const pos = { lat: position.coords.latitude, lng: position.coords.longitude };
+        map.setCenter(pos);
+        map.setZoom(17);
+
+        if (locationMarkerRef.current) locationMarkerRef.current.setMap(null);
+        const locationMarker = new window.google.maps.Marker({
+          position: pos,
+          map,
+          title: "Your current location",
+          icon: {
+            path: window.google.maps.SymbolPath.CIRCLE,
+            scale: 9,
+            fillColor: "#1a73e8",
+            fillOpacity: 1,
+            strokeColor: "#ffffff",
+            strokeWeight: 3,
+          },
+        });
+        locationMarkerRef.current = locationMarker;
+
+        const info = new window.google.maps.InfoWindow({
+          content: `<div style="font-family:sans-serif;padding:4px 2px"><strong>Your current location</strong><br/>
+            <span style="font-size:12px;color:#555">${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)} (±${Math.round(position.coords.accuracy)}m)</span></div>`,
+        });
+        info.open({ anchor: locationMarker, map });
+
+        setLocationMessage(
+          `✓ Location found: ${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)} (accuracy ±${Math.round(position.coords.accuracy)}m). Map centered on you.`
+        );
+        setLocating(false);
+      },
+      (err) => {
+        setLocationMessage(`Could not get current location: ${err.message} (code ${err.code}).`);
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-6 py-10 max-w-5xl">
@@ -159,6 +278,36 @@ const GoogleMapsTest = () => {
           <p className="mt-1 text-xs opacity-75">
             Marker: {markerReady ? "✓ created" : "not yet created"} · Center: {HOTEL.lat}, {HOTEL.lng} (East Legon, Accra)
           </p>
+        </div>
+
+        {/* Address search + current location */}
+        <div className="mb-4 rounded-xl border p-4 space-y-3">
+          <div>
+            <label htmlFor="test-place-autocomplete" className="block text-sm font-medium mb-1">
+              Address search (Places API autocomplete)
+            </label>
+            <div ref={searchContainerRef} id="address-search-container" className="w-full" />
+            <p
+              id="search-status"
+              className={`mt-1 text-xs ${searchReady ? "text-green-700" : "text-red-700"}`}
+            >
+              {searchMessage}
+            </p>
+          </div>
+
+          <div>
+            <button
+              type="button"
+              onClick={handleUseCurrentLocation}
+              disabled={locating || !markerReady}
+              className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            >
+              {locating ? "Locating…" : "Use my current location"}
+            </button>
+            <p id="location-status" className="mt-1 text-xs text-muted-foreground">
+              {locationMessage}
+            </p>
+          </div>
         </div>
 
         <div
