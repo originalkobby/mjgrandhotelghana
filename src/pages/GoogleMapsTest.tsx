@@ -108,6 +108,25 @@ const GoogleMapsTest = () => {
       if (typeof prevAuthFailure === "function") prevAuthFailure();
     };
 
+    // Google surfaces billing / quota errors only via console.error — intercept them
+    // so this test page can display the exact failure.
+    const prevConsoleError = console.error;
+    console.error = (...args: any[]) => {
+      const text = args.map(String).join(" ");
+      if (text.includes("BillingNotEnabledMapError")) {
+        setStatus("error");
+        setMessage(
+          "BillingNotEnabledMapError: the Google Cloud project behind this Browser API key has no billing account linked. Enable billing in Google Cloud Console (Billing → link a billing account). The Maps JavaScript API itself is enabled — only billing is missing."
+        );
+      } else if (text.includes("ApiNotActivatedMapError")) {
+        setStatus("error");
+        setMessage(
+          "ApiNotActivatedMapError: the Maps JavaScript API is NOT enabled on the Google Cloud project behind this key. Enable it in Google Cloud Console → APIs & Services."
+        );
+      }
+      prevConsoleError.apply(console, args);
+    };
+
     return () => {
       window.initMapTest = undefined;
       (window as any).gm_authFailure = prevAuthFailure;
