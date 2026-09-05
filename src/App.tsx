@@ -19,6 +19,7 @@ const Booking = lazy(() => import("./pages/Booking"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const GuestServices = lazy(() => import("./pages/GuestServices"));
 const GalleryPage = lazy(() => import("./pages/GalleryPage"));
+const GoogleMapsTest = lazy(() => import("./pages/GoogleMapsTest"));
 
 // Admin (always lazy — never needed for public visitors).
 const AdminLogin = lazy(() => import("./pages/admin/Login"));
