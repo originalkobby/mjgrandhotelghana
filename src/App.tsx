@@ -19,6 +19,7 @@ const Booking = lazy(() => import("./pages/Booking"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const GuestServices = lazy(() => import("./pages/GuestServices"));
 const GalleryPage = lazy(() => import("./pages/GalleryPage"));
+const GoogleMapsTest = lazy(() => import("./pages/GoogleMapsTest"));
 
 // Admin (always lazy — never needed for public visitors).
 const AdminLogin = lazy(() => import("./pages/admin/Login"));
@@ -80,6 +81,7 @@ const App = () => (
             <Route path="/booking/lookup" element={<Navigate to="/booking" replace />} />
             <Route path="/guest-services" element={<GuestServices />} />
             <Route path="/gallery" element={<GalleryPage />} />
+            <Route path="/map-test" element={<GoogleMapsTest />} />
 
             {/* Admin Dashboard */}
             <Route path="/admin/login" element={<AdminLogin />} />
