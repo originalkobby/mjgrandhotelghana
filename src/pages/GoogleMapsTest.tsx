@@ -19,10 +19,12 @@ type Status = "loading" | "loaded" | "error";
 
 const GoogleMapsTest = () => {
   const mapRef = useRef<HTMLDivElement>(null);
-  const searchContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const searchMarkerRef = useRef<any>(null);
   const locationMarkerRef = useRef<any>(null);
+  const placesLibRef = useRef<any>(null);
+  const sessionTokenRef = useRef<any>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [status, setStatus] = useState<Status>("loading");
   const [message, setMessage] = useState("Loading Google Maps JavaScript API…");
@@ -31,6 +33,8 @@ const GoogleMapsTest = () => {
   const [searchMessage, setSearchMessage] = useState("Address search not yet initialized.");
   const [locationMessage, setLocationMessage] = useState("Current location not yet requested.");
   const [locating, setLocating] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [suggestions, setSuggestions] = useState<any[]>([]);
 
   useEffect(() => {
     const apiKey = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY;
@@ -82,57 +86,15 @@ const GoogleMapsTest = () => {
         setStatus("loaded");
         setMessage("Map and hotel marker loaded successfully. Click the marker to see the hotel name.");
 
-        // ---- Address search: Places API (New) browser autocomplete element ----
+        // ---- Address search: Places API (New) AutocompleteSuggestion API ----
         try {
           const placesLib = (await window.google.maps.importLibrary("places")) as any;
-          const PlaceAutocompleteElement = placesLib.PlaceAutocompleteElement;
-          if (!PlaceAutocompleteElement) {
-            throw new Error("PlaceAutocompleteElement not available in the Places library.");
+          if (!placesLib.AutocompleteSuggestion || !placesLib.AutocompleteSessionToken) {
+            throw new Error("AutocompleteSuggestion API not available in the Places library.");
           }
-          if (searchContainerRef.current && !searchContainerRef.current.hasChildNodes()) {
-            const autocompleteEl: any = new PlaceAutocompleteElement();
-            autocompleteEl.id = "test-place-autocomplete";
-            autocompleteEl.style.width = "100%";
-            searchContainerRef.current.appendChild(autocompleteEl);
-
-            autocompleteEl.addEventListener("gmp-placeselect", async (event: any) => {
-              try {
-                const place = event.place;
-                await place.fetchFields({ fields: ["displayName", "formattedAddress", "location"] });
-                if (!place.location) {
-                  setSearchMessage("Selected place has no coordinates.");
-                  return;
-                }
-                const pos = { lat: place.location.lat(), lng: place.location.lng() };
-                map.setCenter(pos);
-                map.setZoom(17);
-
-                if (searchMarkerRef.current) searchMarkerRef.current.setMap(null);
-                const searchMarker = new window.google.maps.Marker({
-                  position: pos,
-                  map,
-                  title: place.displayName,
-                });
-                searchMarkerRef.current = searchMarker;
-
-                const searchInfo = new window.google.maps.InfoWindow({
-                  content: `<div style="font-family:sans-serif;padding:4px 2px">
-                    <strong>${place.displayName}</strong><br/>
-                    <span style="font-size:12px;color:#555">${place.formattedAddress ?? ""}</span>
-                  </div>`,
-                });
-                searchInfo.open({ anchor: searchMarker, map });
-
-                setSearchMessage(
-                  `✓ Selected: ${place.displayName} — ${place.formattedAddress ?? ""} (${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)})`
-                );
-              } catch (err: any) {
-                setSearchMessage(`Place selection failed: ${err?.message ?? String(err)}`);
-              }
-            });
-            setSearchReady(true);
-            setSearchMessage("Address search ready — start typing an address or place name.");
-          }
+          placesLibRef.current = placesLib;
+          setSearchReady(true);
+          setSearchMessage("Address search ready — start typing an address or place name.");
         } catch (err: any) {
           setSearchReady(false);
           setSearchMessage(`Address search failed to initialize: ${err?.message ?? String(err)}`);
@@ -253,6 +215,72 @@ const GoogleMapsTest = () => {
     );
   };
 
+  // ---- Address search handlers (Places API New: AutocompleteSuggestion) ----
+  const handleSearchChange = (value: string) => {
+    setSearchText(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!value.trim() || !placesLibRef.current) {
+      setSuggestions([]);
+      return;
+    }
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const { AutocompleteSuggestion, AutocompleteSessionToken } = placesLibRef.current;
+        if (!sessionTokenRef.current) sessionTokenRef.current = new AutocompleteSessionToken();
+        const { suggestions: results } = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
+          input: value,
+          sessionToken: sessionTokenRef.current,
+        });
+        setSuggestions(results ?? []);
+        if (!results?.length) setSearchMessage("No suggestions found for that text.");
+      } catch (err: any) {
+        setSearchMessage(`Autocomplete failed: ${err?.message ?? String(err)}`);
+        setSuggestions([]);
+      }
+    }, 300);
+  };
+
+  const handleSelectSuggestion = async (suggestion: any) => {
+    try {
+      const place = suggestion.placePrediction.toPlace();
+      await place.fetchFields({ fields: ["displayName", "formattedAddress", "location"] });
+      setSuggestions([]);
+      setSearchText(place.formattedAddress || place.displayName || "");
+      sessionTokenRef.current = null; // end session after selection
+
+      if (!place.location) {
+        setSearchMessage("Selected place has no coordinates.");
+        return;
+      }
+      const map = mapInstanceRef.current;
+      const pos = { lat: place.location.lat(), lng: place.location.lng() };
+      map.setCenter(pos);
+      map.setZoom(17);
+
+      if (searchMarkerRef.current) searchMarkerRef.current.setMap(null);
+      const searchMarker = new window.google.maps.Marker({
+        position: pos,
+        map,
+        title: place.displayName,
+      });
+      searchMarkerRef.current = searchMarker;
+
+      const searchInfo = new window.google.maps.InfoWindow({
+        content: `<div style="font-family:sans-serif;padding:4px 2px">
+          <strong>${place.displayName}</strong><br/>
+          <span style="font-size:12px;color:#555">${place.formattedAddress ?? ""}</span>
+        </div>`,
+      });
+      searchInfo.open({ anchor: searchMarker, map });
+
+      setSearchMessage(
+        `✓ Selected: ${place.displayName} — ${place.formattedAddress ?? ""} (${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)})`
+      );
+    } catch (err: any) {
+      setSearchMessage(`Place selection failed: ${err?.message ?? String(err)}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-6 py-10 max-w-5xl">
@@ -282,11 +310,45 @@ const GoogleMapsTest = () => {
 
         {/* Address search + current location */}
         <div className="mb-4 rounded-xl border p-4 space-y-3">
-          <div>
+          <div className="relative">
             <label htmlFor="test-place-autocomplete" className="block text-sm font-medium mb-1">
               Address search (Places API autocomplete)
             </label>
-            <div ref={searchContainerRef} id="address-search-container" className="w-full" />
+            <input
+              id="test-place-autocomplete"
+              type="text"
+              value={searchText}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              disabled={!searchReady}
+              placeholder="Type an address or place name…"
+              autoComplete="off"
+              className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-50"
+            />
+            {suggestions.length > 0 && (
+              <ul
+                id="search-suggestions"
+                role="listbox"
+                className="absolute z-50 mt-1 w-full rounded-md border bg-white shadow-lg max-h-64 overflow-auto"
+              >
+                {suggestions.map((s, i) => {
+                  const prediction = s.placePrediction;
+                  return (
+                    <li key={prediction?.placeId ?? i} role="option" aria-selected="false">
+                      <button
+                        type="button"
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-muted"
+                        onClick={() => handleSelectSuggestion(s)}
+                      >
+                        <span className="block font-medium">{prediction?.mainText?.text ?? ""}</span>
+                        <span className="block text-xs text-muted-foreground">
+                          {prediction?.secondaryText?.text ?? ""}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
             <p
               id="search-status"
               className={`mt-1 text-xs ${searchReady ? "text-green-700" : "text-red-700"}`}
