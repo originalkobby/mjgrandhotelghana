@@ -82,57 +82,15 @@ const GoogleMapsTest = () => {
         setStatus("loaded");
         setMessage("Map and hotel marker loaded successfully. Click the marker to see the hotel name.");
 
-        // ---- Address search: Places API (New) browser autocomplete element ----
+        // ---- Address search: Places API (New) AutocompleteSuggestion API ----
         try {
           const placesLib = (await window.google.maps.importLibrary("places")) as any;
-          const PlaceAutocompleteElement = placesLib.PlaceAutocompleteElement;
-          if (!PlaceAutocompleteElement) {
-            throw new Error("PlaceAutocompleteElement not available in the Places library.");
+          if (!placesLib.AutocompleteSuggestion || !placesLib.AutocompleteSessionToken) {
+            throw new Error("AutocompleteSuggestion API not available in the Places library.");
           }
-          if (searchContainerRef.current && !searchContainerRef.current.hasChildNodes()) {
-            const autocompleteEl: any = new PlaceAutocompleteElement();
-            autocompleteEl.id = "test-place-autocomplete";
-            autocompleteEl.style.width = "100%";
-            searchContainerRef.current.appendChild(autocompleteEl);
-
-            autocompleteEl.addEventListener("gmp-placeselect", async (event: any) => {
-              try {
-                const place = event.place;
-                await place.fetchFields({ fields: ["displayName", "formattedAddress", "location"] });
-                if (!place.location) {
-                  setSearchMessage("Selected place has no coordinates.");
-                  return;
-                }
-                const pos = { lat: place.location.lat(), lng: place.location.lng() };
-                map.setCenter(pos);
-                map.setZoom(17);
-
-                if (searchMarkerRef.current) searchMarkerRef.current.setMap(null);
-                const searchMarker = new window.google.maps.Marker({
-                  position: pos,
-                  map,
-                  title: place.displayName,
-                });
-                searchMarkerRef.current = searchMarker;
-
-                const searchInfo = new window.google.maps.InfoWindow({
-                  content: `<div style="font-family:sans-serif;padding:4px 2px">
-                    <strong>${place.displayName}</strong><br/>
-                    <span style="font-size:12px;color:#555">${place.formattedAddress ?? ""}</span>
-                  </div>`,
-                });
-                searchInfo.open({ anchor: searchMarker, map });
-
-                setSearchMessage(
-                  `✓ Selected: ${place.displayName} — ${place.formattedAddress ?? ""} (${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)})`
-                );
-              } catch (err: any) {
-                setSearchMessage(`Place selection failed: ${err?.message ?? String(err)}`);
-              }
-            });
-            setSearchReady(true);
-            setSearchMessage("Address search ready — start typing an address or place name.");
-          }
+          placesLibRef.current = placesLib;
+          setSearchReady(true);
+          setSearchMessage("Address search ready — start typing an address or place name.");
         } catch (err: any) {
           setSearchReady(false);
           setSearchMessage(`Address search failed to initialize: ${err?.message ?? String(err)}`);
