@@ -19,10 +19,12 @@ type Status = "loading" | "loaded" | "error";
 
 const GoogleMapsTest = () => {
   const mapRef = useRef<HTMLDivElement>(null);
-  const searchContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const searchMarkerRef = useRef<any>(null);
   const locationMarkerRef = useRef<any>(null);
+  const placesLibRef = useRef<any>(null);
+  const sessionTokenRef = useRef<any>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [status, setStatus] = useState<Status>("loading");
   const [message, setMessage] = useState("Loading Google Maps JavaScript API…");
@@ -31,6 +33,8 @@ const GoogleMapsTest = () => {
   const [searchMessage, setSearchMessage] = useState("Address search not yet initialized.");
   const [locationMessage, setLocationMessage] = useState("Current location not yet requested.");
   const [locating, setLocating] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [suggestions, setSuggestions] = useState<any[]>([]);
 
   useEffect(() => {
     const apiKey = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY;
