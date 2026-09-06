@@ -215,6 +215,72 @@ const GoogleMapsTest = () => {
     );
   };
 
+  // ---- Address search handlers (Places API New: AutocompleteSuggestion) ----
+  const handleSearchChange = (value: string) => {
+    setSearchText(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!value.trim() || !placesLibRef.current) {
+      setSuggestions([]);
+      return;
+    }
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const { AutocompleteSuggestion, AutocompleteSessionToken } = placesLibRef.current;
+        if (!sessionTokenRef.current) sessionTokenRef.current = new AutocompleteSessionToken();
+        const { suggestions: results } = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
+          input: value,
+          sessionToken: sessionTokenRef.current,
+        });
+        setSuggestions(results ?? []);
+        if (!results?.length) setSearchMessage("No suggestions found for that text.");
+      } catch (err: any) {
+        setSearchMessage(`Autocomplete failed: ${err?.message ?? String(err)}`);
+        setSuggestions([]);
+      }
+    }, 300);
+  };
+
+  const handleSelectSuggestion = async (suggestion: any) => {
+    try {
+      const place = suggestion.placePrediction.toPlace();
+      await place.fetchFields({ fields: ["displayName", "formattedAddress", "location"] });
+      setSuggestions([]);
+      setSearchText(place.formattedAddress || place.displayName || "");
+      sessionTokenRef.current = null; // end session after selection
+
+      if (!place.location) {
+        setSearchMessage("Selected place has no coordinates.");
+        return;
+      }
+      const map = mapInstanceRef.current;
+      const pos = { lat: place.location.lat(), lng: place.location.lng() };
+      map.setCenter(pos);
+      map.setZoom(17);
+
+      if (searchMarkerRef.current) searchMarkerRef.current.setMap(null);
+      const searchMarker = new window.google.maps.Marker({
+        position: pos,
+        map,
+        title: place.displayName,
+      });
+      searchMarkerRef.current = searchMarker;
+
+      const searchInfo = new window.google.maps.InfoWindow({
+        content: `<div style="font-family:sans-serif;padding:4px 2px">
+          <strong>${place.displayName}</strong><br/>
+          <span style="font-size:12px;color:#555">${place.formattedAddress ?? ""}</span>
+        </div>`,
+      });
+      searchInfo.open({ anchor: searchMarker, map });
+
+      setSearchMessage(
+        `✓ Selected: ${place.displayName} — ${place.formattedAddress ?? ""} (${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)})`
+      );
+    } catch (err: any) {
+      setSearchMessage(`Place selection failed: ${err?.message ?? String(err)}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-6 py-10 max-w-5xl">
@@ -244,11 +310,45 @@ const GoogleMapsTest = () => {
 
         {/* Address search + current location */}
         <div className="mb-4 rounded-xl border p-4 space-y-3">
-          <div>
+          <div className="relative">
             <label htmlFor="test-place-autocomplete" className="block text-sm font-medium mb-1">
               Address search (Places API autocomplete)
             </label>
-            <div ref={searchContainerRef} id="address-search-container" className="w-full" />
+            <input
+              id="test-place-autocomplete"
+              type="text"
+              value={searchText}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              disabled={!searchReady}
+              placeholder="Type an address or place name…"
+              autoComplete="off"
+              className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-50"
+            />
+            {suggestions.length > 0 && (
+              <ul
+                id="search-suggestions"
+                role="listbox"
+                className="absolute z-50 mt-1 w-full rounded-md border bg-white shadow-lg max-h-64 overflow-auto"
+              >
+                {suggestions.map((s, i) => {
+                  const prediction = s.placePrediction;
+                  return (
+                    <li key={prediction?.placeId ?? i} role="option" aria-selected="false">
+                      <button
+                        type="button"
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-muted"
+                        onClick={() => handleSelectSuggestion(s)}
+                      >
+                        <span className="block font-medium">{prediction?.mainText?.text ?? ""}</span>
+                        <span className="block text-xs text-muted-foreground">
+                          {prediction?.secondaryText?.text ?? ""}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
             <p
               id="search-status"
               className={`mt-1 text-xs ${searchReady ? "text-green-700" : "text-red-700"}`}
