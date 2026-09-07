@@ -361,6 +361,369 @@ export type Database = {
           },
         ]
       }
+      deliveries: {
+        Row: {
+          accepted_at: string | null
+          assigned_at: string | null
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          created_at: string
+          delivered_at: string | null
+          dest_address: string
+          dest_landmark: string | null
+          dest_lat: number
+          dest_lng: number
+          distance_km: number
+          eta_max_minutes: number
+          eta_min_minutes: number
+          fee_breakdown: Json
+          fee_ghs: number
+          fee_overridden_by: string | null
+          food_order_id: string
+          id: string
+          last_customer_email_status:
+            | Database["public"]["Enums"]["delivery_status"]
+            | null
+          on_the_way_at: string | null
+          origin_lat: number
+          origin_lng: number
+          picked_up_at: string | null
+          requires_review: boolean
+          review_decision: string | null
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          rider_id: string | null
+          status: Database["public"]["Enums"]["delivery_status"]
+          tracking_token: string
+          travel_minutes: number
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          assigned_at?: string | null
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          dest_address: string
+          dest_landmark?: string | null
+          dest_lat: number
+          dest_lng: number
+          distance_km?: number
+          eta_max_minutes?: number
+          eta_min_minutes?: number
+          fee_breakdown?: Json
+          fee_ghs?: number
+          fee_overridden_by?: string | null
+          food_order_id: string
+          id?: string
+          last_customer_email_status?:
+            | Database["public"]["Enums"]["delivery_status"]
+            | null
+          on_the_way_at?: string | null
+          origin_lat: number
+          origin_lng: number
+          picked_up_at?: string | null
+          requires_review?: boolean
+          review_decision?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          rider_id?: string | null
+          status?: Database["public"]["Enums"]["delivery_status"]
+          tracking_token?: string
+          travel_minutes?: number
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          assigned_at?: string | null
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          dest_address?: string
+          dest_landmark?: string | null
+          dest_lat?: number
+          dest_lng?: number
+          distance_km?: number
+          eta_max_minutes?: number
+          eta_min_minutes?: number
+          fee_breakdown?: Json
+          fee_ghs?: number
+          fee_overridden_by?: string | null
+          food_order_id?: string
+          id?: string
+          last_customer_email_status?:
+            | Database["public"]["Enums"]["delivery_status"]
+            | null
+          on_the_way_at?: string | null
+          origin_lat?: number
+          origin_lng?: number
+          picked_up_at?: string | null
+          requires_review?: boolean
+          review_decision?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          rider_id?: string | null
+          status?: Database["public"]["Enums"]["delivery_status"]
+          tracking_token?: string
+          travel_minutes?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deliveries_food_order_id_fkey"
+            columns: ["food_order_id"]
+            isOneToOne: true
+            referencedRelation: "food_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deliveries_rider_id_fkey"
+            columns: ["rider_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_riders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      delivery_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          actor_role: string | null
+          created_at: string
+          details: Json
+          entity_id: string | null
+          entity_type: string
+          id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          actor_role?: string | null
+          created_at?: string
+          details?: Json
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          actor_role?: string | null
+          created_at?: string
+          details?: Json
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      delivery_riders: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          is_active: boolean
+          last_active_at: string | null
+          last_lat: number | null
+          last_lng: number | null
+          last_location_at: string | null
+          notes: string | null
+          phone: string
+          rider_code: string
+          status: Database["public"]["Enums"]["rider_status"]
+          updated_at: string
+          user_id: string | null
+          vehicle_reference: string | null
+          vehicle_type: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          is_active?: boolean
+          last_active_at?: string | null
+          last_lat?: number | null
+          last_lng?: number | null
+          last_location_at?: string | null
+          notes?: string | null
+          phone: string
+          rider_code: string
+          status?: Database["public"]["Enums"]["rider_status"]
+          updated_at?: string
+          user_id?: string | null
+          vehicle_reference?: string | null
+          vehicle_type?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          is_active?: boolean
+          last_active_at?: string | null
+          last_lat?: number | null
+          last_lng?: number | null
+          last_location_at?: string | null
+          notes?: string | null
+          phone?: string
+          rider_code?: string
+          status?: Database["public"]["Enums"]["rider_status"]
+          updated_at?: string
+          user_id?: string | null
+          vehicle_reference?: string | null
+          vehicle_type?: string
+        }
+        Relationships: []
+      }
+      delivery_settings: {
+        Row: {
+          auto_assign_riders: boolean
+          base_fee_ghs: number
+          created_at: string
+          customer_tracking_enabled: boolean
+          default_prep_minutes: number
+          delivery_emails_enabled: boolean
+          delivery_enabled: boolean
+          discount_percent: number
+          eta_buffer_minutes: number
+          id: string
+          manual_review_km: number
+          max_delivery_km: number
+          max_fee_ghs: number
+          min_fee_ghs: number
+          origin_address: string
+          origin_lat: number
+          origin_lng: number
+          origin_name: string
+          peak_end_hour: number
+          peak_start_hour: number
+          peak_uplift_percent: number
+          price_per_km_ghs: number
+          reference_rate_ghs: number
+          rider_ping_seconds: number
+          service_area_label: string
+          singleton: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          auto_assign_riders?: boolean
+          base_fee_ghs?: number
+          created_at?: string
+          customer_tracking_enabled?: boolean
+          default_prep_minutes?: number
+          delivery_emails_enabled?: boolean
+          delivery_enabled?: boolean
+          discount_percent?: number
+          eta_buffer_minutes?: number
+          id?: string
+          manual_review_km?: number
+          max_delivery_km?: number
+          max_fee_ghs?: number
+          min_fee_ghs?: number
+          origin_address?: string
+          origin_lat?: number
+          origin_lng?: number
+          origin_name?: string
+          peak_end_hour?: number
+          peak_start_hour?: number
+          peak_uplift_percent?: number
+          price_per_km_ghs?: number
+          reference_rate_ghs?: number
+          rider_ping_seconds?: number
+          service_area_label?: string
+          singleton?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          auto_assign_riders?: boolean
+          base_fee_ghs?: number
+          created_at?: string
+          customer_tracking_enabled?: boolean
+          default_prep_minutes?: number
+          delivery_emails_enabled?: boolean
+          delivery_enabled?: boolean
+          discount_percent?: number
+          eta_buffer_minutes?: number
+          id?: string
+          manual_review_km?: number
+          max_delivery_km?: number
+          max_fee_ghs?: number
+          min_fee_ghs?: number
+          origin_address?: string
+          origin_lat?: number
+          origin_lng?: number
+          origin_name?: string
+          peak_end_hour?: number
+          peak_start_hour?: number
+          peak_uplift_percent?: number
+          price_per_km_ghs?: number
+          reference_rate_ghs?: number
+          rider_ping_seconds?: number
+          service_area_label?: string
+          singleton?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      delivery_status_history: {
+        Row: {
+          actor_role: string | null
+          changed_by: string | null
+          created_at: string
+          delivery_id: string
+          id: string
+          new_status: Database["public"]["Enums"]["delivery_status"]
+          note: string | null
+          previous_status: Database["public"]["Enums"]["delivery_status"] | null
+        }
+        Insert: {
+          actor_role?: string | null
+          changed_by?: string | null
+          created_at?: string
+          delivery_id: string
+          id?: string
+          new_status: Database["public"]["Enums"]["delivery_status"]
+          note?: string | null
+          previous_status?:
+            | Database["public"]["Enums"]["delivery_status"]
+            | null
+        }
+        Update: {
+          actor_role?: string | null
+          changed_by?: string | null
+          created_at?: string
+          delivery_id?: string
+          id?: string
+          new_status?: Database["public"]["Enums"]["delivery_status"]
+          note?: string | null
+          previous_status?:
+            | Database["public"]["Enums"]["delivery_status"]
+            | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_status_history_delivery_id_fkey"
+            columns: ["delivery_id"]
+            isOneToOne: false
+            referencedRelation: "deliveries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       delivery_zones: {
         Row: {
           created_at: string
@@ -491,8 +854,10 @@ export type Database = {
       }
       food_orders: {
         Row: {
+          cancelled_email_sent_at: string | null
           confirmation_email_sent_at: string | null
           created_at: string
+          delivered_email_sent_at: string | null
           delivery_address: string | null
           delivery_fee_ghs: number
           delivery_landmark: string | null
@@ -503,16 +868,26 @@ export type Database = {
           id: string
           notes: string | null
           order_type: Database["public"]["Enums"]["order_type"]
+          paid_at: string | null
+          payment_method:
+            | Database["public"]["Enums"]["delivery_payment_method"]
+            | null
+          payment_status: Database["public"]["Enums"]["food_payment_status"]
+          paystack_reference: string | null
           phone: string | null
+          ready_email_sent_at: string | null
           reference_code: string
           room_number: string | null
           status: Database["public"]["Enums"]["order_status"]
+          subtotal_ghs: number
           total_ghs: number
           updated_at: string
         }
         Insert: {
+          cancelled_email_sent_at?: string | null
           confirmation_email_sent_at?: string | null
           created_at?: string
+          delivered_email_sent_at?: string | null
           delivery_address?: string | null
           delivery_fee_ghs?: number
           delivery_landmark?: string | null
@@ -523,16 +898,26 @@ export type Database = {
           id?: string
           notes?: string | null
           order_type: Database["public"]["Enums"]["order_type"]
+          paid_at?: string | null
+          payment_method?:
+            | Database["public"]["Enums"]["delivery_payment_method"]
+            | null
+          payment_status?: Database["public"]["Enums"]["food_payment_status"]
+          paystack_reference?: string | null
           phone?: string | null
+          ready_email_sent_at?: string | null
           reference_code: string
           room_number?: string | null
           status?: Database["public"]["Enums"]["order_status"]
+          subtotal_ghs?: number
           total_ghs?: number
           updated_at?: string
         }
         Update: {
+          cancelled_email_sent_at?: string | null
           confirmation_email_sent_at?: string | null
           created_at?: string
+          delivered_email_sent_at?: string | null
           delivery_address?: string | null
           delivery_fee_ghs?: number
           delivery_landmark?: string | null
@@ -543,10 +928,18 @@ export type Database = {
           id?: string
           notes?: string | null
           order_type?: Database["public"]["Enums"]["order_type"]
+          paid_at?: string | null
+          payment_method?:
+            | Database["public"]["Enums"]["delivery_payment_method"]
+            | null
+          payment_status?: Database["public"]["Enums"]["food_payment_status"]
+          paystack_reference?: string | null
           phone?: string | null
+          ready_email_sent_at?: string | null
           reference_code?: string
           room_number?: string | null
           status?: Database["public"]["Enums"]["order_status"]
+          subtotal_ghs?: number
           total_ghs?: number
           updated_at?: string
         }
@@ -834,6 +1227,57 @@ export type Database = {
         }
         Relationships: []
       }
+      rider_locations: {
+        Row: {
+          accuracy_m: number | null
+          delivery_id: string | null
+          heading: number | null
+          id: string
+          lat: number
+          lng: number
+          recorded_at: string
+          rider_id: string
+          speed_mps: number | null
+        }
+        Insert: {
+          accuracy_m?: number | null
+          delivery_id?: string | null
+          heading?: number | null
+          id?: string
+          lat: number
+          lng: number
+          recorded_at?: string
+          rider_id: string
+          speed_mps?: number | null
+        }
+        Update: {
+          accuracy_m?: number | null
+          delivery_id?: string | null
+          heading?: number | null
+          id?: string
+          lat?: number
+          lng?: number
+          recorded_at?: string
+          rider_id?: string
+          speed_mps?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rider_locations_delivery_id_fkey"
+            columns: ["delivery_id"]
+            isOneToOne: false
+            referencedRelation: "deliveries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rider_locations_rider_id_fkey"
+            columns: ["rider_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_riders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       room_inventory: {
         Row: {
           booked_count: number
@@ -1115,6 +1559,7 @@ export type Database = {
       }
     }
     Functions: {
+      current_rider_id: { Args: never; Returns: string }
       generate_booking_ref: { Args: never; Returns: string }
       get_my_admin_role: { Args: never; Returns: string }
       has_role: {
@@ -1124,6 +1569,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_delivery_ops: { Args: { _user_id: string }; Returns: boolean }
+      is_delivery_staff: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role:
@@ -1140,6 +1587,27 @@ export type Database = {
         | "completed"
         | "no_show"
         | "checked_in"
+      delivery_payment_method: "paystack" | "cash_on_delivery"
+      delivery_status:
+        | "pending_review"
+        | "review_rejected"
+        | "confirmed"
+        | "preparing"
+        | "ready_for_pickup"
+        | "rider_assigned"
+        | "rider_accepted"
+        | "rider_picked_up"
+        | "on_the_way"
+        | "delivered"
+        | "cancelled"
+        | "failed"
+      food_payment_status:
+        | "pending"
+        | "paid"
+        | "failed"
+        | "cancelled"
+        | "cash_on_delivery"
+        | "refunded"
       order_status:
         | "pending"
         | "confirmed"
@@ -1149,6 +1617,7 @@ export type Database = {
         | "cancelled"
       order_type: "dine_in" | "room_service" | "takeaway" | "delivery"
       payment_status: "pending" | "partial" | "paid" | "refunded" | "failed"
+      rider_status: "available" | "busy" | "offline" | "suspended"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1292,6 +1761,29 @@ export const Constants = {
         "no_show",
         "checked_in",
       ],
+      delivery_payment_method: ["paystack", "cash_on_delivery"],
+      delivery_status: [
+        "pending_review",
+        "review_rejected",
+        "confirmed",
+        "preparing",
+        "ready_for_pickup",
+        "rider_assigned",
+        "rider_accepted",
+        "rider_picked_up",
+        "on_the_way",
+        "delivered",
+        "cancelled",
+        "failed",
+      ],
+      food_payment_status: [
+        "pending",
+        "paid",
+        "failed",
+        "cancelled",
+        "cash_on_delivery",
+        "refunded",
+      ],
       order_status: [
         "pending",
         "confirmed",
@@ -1302,6 +1794,7 @@ export const Constants = {
       ],
       order_type: ["dine_in", "room_service", "takeaway", "delivery"],
       payment_status: ["pending", "partial", "paid", "refunded", "failed"],
+      rider_status: ["available", "busy", "offline", "suspended"],
     },
   },
 } as const
