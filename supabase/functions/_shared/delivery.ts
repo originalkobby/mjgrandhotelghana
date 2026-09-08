@@ -130,20 +130,22 @@ export async function computeRoute(
     };
   };
 
-  const key = Deno.env.get("GOOGLE_MAPS_API_KEY");
-  if (!key) return estimate();
+  const connKey = Deno.env.get("GOOGLE_MAPS_API_KEY");
+  const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+  if (!connKey || !lovableKey) return estimate();
 
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 6000);
     const res = await fetch(
-      "https://routes.googleapis.com/directions/v2:computeRoutes",
+      "https://connector-gateway.lovable.dev/google_maps/routes/directions/v2:computeRoutes",
       {
         method: "POST",
         signal: controller.signal,
         headers: {
           "Content-Type": "application/json",
-          "X-Goog-Api-Key": key,
+          "Authorization": `Bearer ${lovableKey}`,
+          "X-Connection-Api-Key": connKey,
           "X-Goog-FieldMask": "routes.distanceMeters,routes.duration",
         },
         body: JSON.stringify({
