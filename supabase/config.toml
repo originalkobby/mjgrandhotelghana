@@ -33,3 +33,17 @@ verify_jwt = false
 [functions.admin-users]
 verify_jwt = false
 
+[functions.delivery-quote]
+verify_jwt = false
+
+[functions.place-food-order]
+verify_jwt = false
+
+[functions.track-order]
+verify_jwt = false
+
+[functions.delivery-action]
+verify_jwt = false
+
+[functions.send-delivery-email]
+verify_jwt = false
