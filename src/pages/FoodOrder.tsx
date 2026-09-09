@@ -18,7 +18,17 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle2, Minus, Plus, UtensilsCrossed, ArrowLeft } from "lucide-react";
+import {
+  CheckCircle2,
+  Minus,
+  Plus,
+  UtensilsCrossed,
+  ArrowLeft,
+  Loader2,
+  Bike,
+  Wallet,
+} from "lucide-react";
+import DeliveryLocationPicker, { PickedLocation } from "@/components/delivery/DeliveryLocationPicker";
 
 function parsePrice(value: string): number {
   if (!value) return 0;
@@ -27,11 +37,17 @@ function parsePrice(value: string): number {
   return Number.isFinite(n) ? n : 0;
 }
 
-function newOrderRef() {
-  return "FO-MJ-" + Math.random().toString(36).substring(2, 6).toUpperCase();
-}
-
-type DeliveryZone = { id: string; name: string; fee_ghs: number };
+type Quote = {
+  delivery_enabled: boolean;
+  distance_km?: number;
+  fee_ghs?: number;
+  eta_min_minutes?: number;
+  eta_max_minutes?: number;
+  requires_review?: boolean;
+  out_of_range?: boolean;
+  max_delivery_km?: number;
+  message?: string;
+};
 
 export default function FoodOrder() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -51,38 +67,55 @@ export default function FoodOrder() {
   const [orderType, setOrderType] = useState<"dine_in" | "room_service" | "takeaway" | "delivery">("dine_in");
   const [notes, setNotes] = useState("");
 
-  const [zones, setZones] = useState<DeliveryZone[]>([]);
-  const [zoneId, setZoneId] = useState("");
-  const [deliveryAddress, setDeliveryAddress] = useState("");
-  const [deliveryLandmark, setDeliveryLandmark] = useState("");
+  const [location, setLocation] = useState<PickedLocation | null>(null);
+  const [landmark, setLandmark] = useState("");
+  const [quote, setQuote] = useState<Quote | null>(null);
+  const [quoting, setQuoting] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"cash_on_delivery" | "paystack">("cash_on_delivery");
 
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [reference, setReference] = useState("");
+  const [trackingToken, setTrackingToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
 
   useEffect(() => {
     setItemName(initialItem);
     setItemPrice(initialPrice);
   }, [initialItem, initialPrice]);
 
-  useEffect(() => {
-    supabase
-      .from("delivery_zones")
-      .select("id, name, fee_ghs")
-      .eq("is_active", true)
-      .order("sort_order", { ascending: true })
-      .then(({ data }) => setZones((data as DeliveryZone[]) ?? []));
-  }, []);
-
   const isDelivery = orderType === "delivery";
-  const selectedZone = useMemo(() => zones.find((z) => z.id === zoneId) || null, [zones, zoneId]);
-  const deliveryFee = isDelivery && selectedZone ? Number(selectedZone.fee_ghs) : 0;
-
   const unitPrice = useMemo(() => parsePrice(itemPrice), [itemPrice]);
   const subtotal = useMemo(() => unitPrice * quantity, [unitPrice, quantity]);
+  const deliveryFee = isDelivery && quote?.fee_ghs && !quote.out_of_range ? quote.fee_ghs : 0;
   const total = subtotal + deliveryFee;
+
+  // Fetch a fresh, server-calculated delivery quote whenever the pin moves.
+  useEffect(() => {
+    if (!isDelivery || !location || !Number.isFinite(location.lat) || !Number.isFinite(location.lng)) {
+      setQuote(null);
+      return;
+    }
+    let cancelled = false;
+    setQuoting(true);
+    const t = setTimeout(async () => {
+      const { data, error: qErr } = await supabase.functions.invoke("delivery-quote", {
+        body: { lat: location.lat, lng: location.lng },
+      });
+      if (cancelled) return;
+      setQuoting(false);
+      if (qErr) {
+        setQuote(null);
+        return;
+      }
+      setQuote(data as Quote);
+    }, 500);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+      setQuoting(false);
+    };
+  }, [isDelivery, location?.lat, location?.lng]);
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
@@ -91,7 +124,12 @@ export default function FoodOrder() {
     emailValid &&
     quantity > 0 &&
     unitPrice > 0 &&
-    (!isDelivery || (!!zoneId && !!deliveryAddress.trim() && !!phone.trim()));
+    !!itemName.trim() &&
+    (!isDelivery ||
+      (!!location?.address?.trim() &&
+        !!phone.trim() &&
+        !quoting &&
+        !quote?.out_of_range));
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -101,41 +139,34 @@ export default function FoodOrder() {
     setError(null);
 
     try {
-      const ref = newOrderRef();
-      const orderId = crypto.randomUUID();
-
-      const { error: orderError } = await supabase
-        .from("food_orders")
-        .insert({
-          id: orderId,
+      const { data, error: fnError } = await supabase.functions.invoke("place-food-order", {
+        body: {
           guest_name: guestName.trim(),
-          email: email.trim() || null,
-          phone: phone.trim() || null,
-          room_number: roomNumber.trim() || null,
+          email: email.trim(),
+          phone: phone.trim(),
+          room_number: roomNumber.trim(),
           order_type: orderType,
-          status: "pending",
-          notes: notes.trim() || null,
-          total_ghs: total,
-          reference_code: ref,
-          delivery_zone_id: isDelivery ? zoneId : null,
-          delivery_address: isDelivery ? deliveryAddress.trim() : null,
-          delivery_landmark: isDelivery ? deliveryLandmark.trim() || null : null,
-          delivery_fee_ghs: deliveryFee,
-        });
-
-      if (orderError) throw orderError;
-
-      const { error: itemsError } = await supabase.from("food_order_items").insert({
-        food_order_id: orderId,
-        name: itemName.trim(),
-        price_ghs: unitPrice,
-        quantity,
-        line_total_ghs: subtotal,
+          notes: notes.trim(),
+          payment_method: isDelivery ? paymentMethod : "cash_on_delivery",
+          items: [{ name: itemName.trim(), price_ghs: unitPrice, quantity }],
+          dest_lat: location?.lat,
+          dest_lng: location?.lng,
+          delivery_address: location?.address ?? "",
+          delivery_landmark: landmark.trim(),
+        },
       });
 
-      if (itemsError) throw itemsError;
+      if (fnError) {
+        const message =
+          (fnError as any)?.context?.body
+            ? String((fnError as any).context.body)
+            : fnError.message;
+        throw new Error(message);
+      }
+      if ((data as any)?.error) throw new Error((data as any).error);
 
-      setReference(ref);
+      setReference((data as any).reference_code);
+      setTrackingToken((data as any).tracking_token ?? null);
       setSubmitted(true);
       setSearchParams({}, { replace: true });
     } catch (err: any) {
@@ -152,12 +183,11 @@ export default function FoodOrder() {
     delivery: "Delivery",
   };
 
-
   return (
     <div className="min-h-screen bg-charcoal">
       <SEO
         title="Order Food — MJ Grand Hotel Restaurant"
-        description="Order from the MJ Grand Hotel restaurant menu for dine-in, room service or takeaway in East Legon, Accra."
+        description="Order from the MJ Grand Hotel restaurant menu for dine-in, room service, takeaway or doorstep delivery in Accra."
         path="/food-order"
       />
       <Navbar />
@@ -182,7 +212,7 @@ export default function FoodOrder() {
             <p className="font-sans text-cream/60 text-sm max-w-md mx-auto">
               {initialCategory && `From ${initialCategory}`}
               {initialCategory && ". "}
-              Confirm your dish, quantity and collection details. Payment is made on collection or delivery.
+              Confirm your dish, quantity and how you'd like it served.
             </p>
           </div>
 
@@ -196,11 +226,11 @@ export default function FoodOrder() {
                   {` We'll email a confirmation to ${email.trim()} as soon as our team accepts it — please keep your reference code below.`}
                 </p>
 
-
                 <div className="inline-block px-5 py-3 rounded-lg border border-gold/30 bg-gold/10 mb-6">
                   <p className="text-[10px] uppercase tracking-[0.2em] text-gold/80">Reference</p>
                   <p className="font-serif text-xl text-gold tracking-wide">{reference}</p>
                 </div>
+
                 <div className="space-y-2 text-sm text-cream/70 mb-6">
                   <p>
                     <span className="text-cream/40">Item:</span> {itemName} × {quantity}
@@ -211,7 +241,7 @@ export default function FoodOrder() {
                   {isDelivery && (
                     <>
                       <p>
-                        <span className="text-cream/40">Delivering to:</span> {selectedZone?.name} — {deliveryAddress}
+                        <span className="text-cream/40">Delivering to:</span> {location?.address}
                       </p>
                       <p>
                         <span className="text-cream/40">Delivery fee:</span> GH₵ {deliveryFee.toFixed(2)}
@@ -223,9 +253,16 @@ export default function FoodOrder() {
                   </p>
                 </div>
 
-                <Button asChild className="w-full sm:w-auto">
-                  <Link to="/menu">Order another dish</Link>
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  {trackingToken && (
+                    <Button asChild className="w-full sm:w-auto">
+                      <Link to={`/track/${trackingToken}`}>Track your order</Link>
+                    </Button>
+                  )}
+                  <Button asChild variant="outline" className="w-full sm:w-auto border-gold/40 text-gold hover:bg-gold/10">
+                    <Link to="/menu">Order another dish</Link>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ) : (
@@ -282,10 +319,7 @@ export default function FoodOrder() {
 
                   <div className="space-y-2">
                     <Label className="text-cream/70 text-sm">Order type</Label>
-                    <Select
-                      value={orderType}
-                      onValueChange={(v) => setOrderType(v as any)}
-                    >
+                    <Select value={orderType} onValueChange={(v) => setOrderType(v as any)}>
                       <SelectTrigger className="bg-charcoal border-cream/10 text-cream">
                         <SelectValue />
                       </SelectTrigger>
@@ -312,51 +346,74 @@ export default function FoodOrder() {
 
                   {isDelivery && (
                     <div className="space-y-4 rounded-lg border border-gold/20 bg-gold/[0.04] p-4">
-                      <div className="space-y-2">
-                        <Label className="text-cream/70 text-sm">Delivery zone *</Label>
-                        <Select value={zoneId} onValueChange={setZoneId}>
-                          <SelectTrigger className="bg-charcoal border-cream/10 text-cream">
-                            <SelectValue placeholder="Select your area" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-charcoal border-cream/10">
-                            {zones.map((z) => (
-                              <SelectItem key={z.id} value={z.id}>
-                                {z.name} — GH₵ {Number(z.fee_ghs).toFixed(2)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {zones.length === 0 && (
-                          <p className="text-xs text-cream/40">
-                            No delivery areas available at the moment.
-                          </p>
-                        )}
+                      <div className="flex items-center gap-2 text-gold text-sm">
+                        <Bike className="w-4 h-4" /> Where should we deliver?
                       </div>
-                      <div className="space-y-2">
-                        <Label className="text-cream/70 text-sm">Delivery address *</Label>
-                        <Textarea
-                          value={deliveryAddress}
-                          onChange={(e) => setDeliveryAddress(e.target.value)}
-                          className="bg-charcoal border-cream/10 text-cream"
-                          placeholder="House number, street, area"
-                          rows={2}
-                          required
-                        />
-                      </div>
+
+                      <DeliveryLocationPicker value={location} onChange={setLocation} />
+
                       <div className="space-y-2">
                         <Label className="text-cream/70 text-sm">Landmark / directions</Label>
                         <Input
-                          value={deliveryLandmark}
-                          onChange={(e) => setDeliveryLandmark(e.target.value)}
+                          value={landmark}
+                          onChange={(e) => setLandmark(e.target.value)}
                           className="bg-charcoal border-cream/10 text-cream"
                           placeholder="e.g. opposite the filling station"
                         />
                       </div>
-                      <p className="text-xs text-cream/50">
-                        A phone number is required for delivery so our rider can reach you.
-                      </p>
-                    </div>
 
+                      <div className="rounded-md border border-cream/10 bg-charcoal/60 p-3 text-sm">
+                        {quoting ? (
+                          <p className="text-cream/60 flex items-center gap-2">
+                            <Loader2 className="w-4 h-4 animate-spin" /> Calculating your delivery fee…
+                          </p>
+                        ) : quote?.out_of_range ? (
+                          <p className="text-red-400">
+                            That address is {quote.distance_km} km away — beyond our{" "}
+                            {quote.max_delivery_km} km delivery range.
+                          </p>
+                        ) : quote?.fee_ghs !== undefined ? (
+                          <div className="space-y-1 text-cream/70">
+                            <p>
+                              <span className="text-cream/40">Distance:</span> {quote.distance_km} km
+                            </p>
+                            <p>
+                              <span className="text-cream/40">Delivery fee:</span> GH₵{" "}
+                              {quote.fee_ghs.toFixed(2)}
+                            </p>
+                            <p>
+                              <span className="text-cream/40">Estimated arrival:</span>{" "}
+                              {quote.eta_min_minutes}–{quote.eta_max_minutes} minutes
+                            </p>
+                            {quote.requires_review && (
+                              <p className="text-amber-400 text-xs pt-1">
+                                This is a long trip — our team will confirm it before dispatch.
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-cream/50">
+                            Set your delivery location to see the fee and arrival estimate.
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-cream/70 text-sm">Payment</Label>
+                        <Select value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as any)}>
+                          <SelectTrigger className="bg-charcoal border-cream/10 text-cream">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-charcoal border-cream/10">
+                            <SelectItem value="cash_on_delivery">Cash on delivery</SelectItem>
+                            <SelectItem value="paystack">Pay on collection at reception</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-[11px] text-cream/40 flex items-center gap-1.5">
+                          <Wallet className="w-3 h-3" /> Have the exact amount ready for our rider.
+                        </p>
+                      </div>
+                    </div>
                   )}
 
                   <div className="grid md:grid-cols-2 gap-4">
@@ -380,7 +437,6 @@ export default function FoodOrder() {
                         required={isDelivery}
                       />
                     </div>
-
                   </div>
 
                   <div className="space-y-2">
@@ -394,10 +450,9 @@ export default function FoodOrder() {
                       required
                     />
                     <p className="text-[11px] text-cream/40">
-                      We'll send your order confirmation here.
+                      We'll send your order updates here.
                     </p>
                   </div>
-
 
                   <div className="space-y-2">
                     <Label className="text-cream/70 text-sm">Notes</Label>
@@ -419,7 +474,7 @@ export default function FoodOrder() {
                         <span>GH₵ {subtotal.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between text-cream/60">
-                        <span>Delivery{selectedZone ? ` — ${selectedZone.name}` : ""}</span>
+                        <span>Delivery</span>
                         <span>GH₵ {deliveryFee.toFixed(2)}</span>
                       </div>
                     </div>
@@ -431,11 +486,7 @@ export default function FoodOrder() {
                       <p className="font-serif text-2xl text-gold">GH₵ {total.toFixed(2)}</p>
                     </div>
 
-                    <Button
-                      type="submit"
-                      disabled={!canSubmit || submitting}
-                      className="px-8"
-                    >
+                    <Button type="submit" disabled={!canSubmit || submitting} className="px-8">
                       {submitting ? "Sending…" : "Place Order"}
                     </Button>
                   </div>
