@@ -38,6 +38,7 @@ const AdminSupport = lazy(() => import("./pages/admin/SupportTickets"));
 const AdminSettings = lazy(() => import("./pages/admin/Settings"));
 const AdminMenu = lazy(() => import("./pages/admin/MenuManagement"));
 const AdminFoodOrders = lazy(() => import("./pages/admin/FoodOrders"));
+const AdminDeliveries = lazy(() => import("./pages/admin/Deliveries"));
 const RevenueIntelligence = lazy(() => import("./pages/admin/RevenueIntelligence"));
 const AdminGallery = lazy(() => import("./pages/admin/GalleryManagement"));
 
