@@ -84,6 +84,8 @@ const App = () => (
             <Route path="/guest-services" element={<GuestServices />} />
             <Route path="/gallery" element={<GalleryPage />} />
             <Route path="/map-test" element={<GoogleMapsTest />} />
+            <Route path="/track/:token" element={<OrderTracking />} />
+            <Route path="/rider" element={<RiderPortal />} />
 
             {/* Admin Dashboard */}
             <Route path="/admin/login" element={<AdminLogin />} />
