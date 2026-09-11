@@ -192,7 +192,7 @@ export default function FoodOrder() {
       />
       <Navbar />
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-12 pt-28 md:pt-36 pb-20">
+      <div className="w-full px-0 pt-28 md:pt-36 pb-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
