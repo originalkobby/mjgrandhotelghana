@@ -28,7 +28,11 @@ export default function OrderTracking() {
   const mapsReady = useRef(false);
 
   const fetchStatus = useCallback(async () => {
-    if (!token) return;
+    if (!token || !/^[a-f0-9]{16,80}$/i.test(token)) {
+      setError("This tracking link is not valid. Please use the link from your order confirmation.");
+      setLoading(false);
+      return;
+    }
     const { data: res, error: fnError } = await supabase.functions.invoke("track-order", {
       body: { token },
     });
