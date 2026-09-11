@@ -245,7 +245,7 @@ export default function DeliveryLocationPicker({ value, onChange }: Props) {
 
       <div
         ref={mapRef}
-        className="w-full h-[280px] rounded-xl border border-cream/10 overflow-hidden bg-charcoal/60"
+        className="w-full h-[420px] md:h-[400px] rounded-xl border border-cream/10 overflow-hidden bg-charcoal/60"
       />
 
       <p className="text-xs text-cream/50 flex items-start gap-2">
