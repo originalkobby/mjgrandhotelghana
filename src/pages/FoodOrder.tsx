@@ -24,7 +24,7 @@ import {
   Plus,
   UtensilsCrossed,
   ArrowLeft,
-  Loader2,
+  
   Bike,
   Wallet,
 } from "lucide-react";
