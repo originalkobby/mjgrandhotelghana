@@ -362,41 +362,6 @@ export default function FoodOrder() {
                         />
                       </div>
 
-                      <div className="rounded-md border border-cream/10 bg-charcoal/60 p-3 text-sm">
-                        {quoting ? (
-                          <p className="text-cream/60 flex items-center gap-2">
-                            <Loader2 className="w-4 h-4 animate-spin" /> Calculating your delivery fee…
-                          </p>
-                        ) : quote?.out_of_range ? (
-                          <p className="text-red-400">
-                            That address is {quote.distance_km} km away — beyond our{" "}
-                            {quote.max_delivery_km} km delivery range.
-                          </p>
-                        ) : quote?.fee_ghs !== undefined ? (
-                          <div className="space-y-1 text-cream/70">
-                            <p>
-                              <span className="text-cream/40">Distance:</span> {quote.distance_km} km
-                            </p>
-                            <p>
-                              <span className="text-cream/40">Delivery fee:</span> GH₵{" "}
-                              {quote.fee_ghs.toFixed(2)}
-                            </p>
-                            <p>
-                              <span className="text-cream/40">Estimated arrival:</span>{" "}
-                              {quote.eta_min_minutes}–{quote.eta_max_minutes} minutes
-                            </p>
-                            {quote.requires_review && (
-                              <p className="text-amber-400 text-xs pt-1">
-                                This is a long trip — our team will confirm it before dispatch.
-                              </p>
-                            )}
-                          </div>
-                        ) : (
-                          <p className="text-cream/50">
-                            Set your delivery location to see the fee and arrival estimate.
-                          </p>
-                        )}
-                      </div>
 
                       <div className="space-y-2">
                         <Label className="text-cream/70 text-sm">Payment</Label>
