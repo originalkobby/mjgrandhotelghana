@@ -15,7 +15,9 @@ export default function AdminLayout() {
   const { user, role, loading } = useAdminAuth();
   const { adminMode, setAdminMode, rate } = useCurrency();
   const location = useLocation();
-  const isFoodOrders = location.pathname.startsWith("/admin/food-orders");
+  const isFoodOrders =
+    location.pathname.startsWith("/admin/food-orders") ||
+    location.pathname.startsWith("/admin/deliveries");
 
   if (loading) {
     return (
