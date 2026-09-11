@@ -197,7 +197,7 @@ export default function FoodOrder() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.3, 0, 0.2, 1] }}
-          className="w-full"
+          className="w-full [&_*]:rounded-none"
         >
           <Link
             to="/menu"
@@ -323,7 +323,7 @@ export default function FoodOrder() {
                       <SelectTrigger className="bg-charcoal border-cream/10 text-cream">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-charcoal border-cream/10">
+                      <SelectContent className="bg-charcoal border-cream/10 rounded-none">
                         <SelectItem value="dine_in">Dine-in</SelectItem>
                         <SelectItem value="room_service">Room Service</SelectItem>
                         <SelectItem value="takeaway">Takeaway</SelectItem>
@@ -369,7 +369,7 @@ export default function FoodOrder() {
                           <SelectTrigger className="bg-charcoal border-cream/10 text-cream">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="bg-charcoal border-cream/10">
+                          <SelectContent className="bg-charcoal border-cream/10 rounded-none">
                             <SelectItem value="cash_on_delivery">Cash on delivery</SelectItem>
                             <SelectItem value="paystack">Pay on collection at reception</SelectItem>
                           </SelectContent>
