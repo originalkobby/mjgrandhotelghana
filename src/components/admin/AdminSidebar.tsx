@@ -13,6 +13,7 @@ import {
   Settings,
   UtensilsCrossed,
   ImageIcon,
+  Bike,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
