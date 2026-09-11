@@ -345,7 +345,7 @@ export default function FoodOrder() {
                   )}
 
                   {isDelivery && (
-                    <div className="space-y-4 rounded-lg border border-gold/20 bg-gold/[0.04] p-4">
+                    <div className="space-y-4 p-4">
                       <div className="flex items-center gap-2 text-gold text-sm">
                         <Bike className="w-4 h-4" /> Where should we deliver?
                       </div>
