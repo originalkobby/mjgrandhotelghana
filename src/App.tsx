@@ -20,6 +20,8 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const GuestServices = lazy(() => import("./pages/GuestServices"));
 const GalleryPage = lazy(() => import("./pages/GalleryPage"));
 const GoogleMapsTest = lazy(() => import("./pages/GoogleMapsTest"));
+const OrderTracking = lazy(() => import("./pages/OrderTracking"));
+const RiderPortal = lazy(() => import("./pages/RiderPortal"));
 
 // Admin (always lazy — never needed for public visitors).
 const AdminLogin = lazy(() => import("./pages/admin/Login"));
@@ -36,6 +38,7 @@ const AdminSupport = lazy(() => import("./pages/admin/SupportTickets"));
 const AdminSettings = lazy(() => import("./pages/admin/Settings"));
 const AdminMenu = lazy(() => import("./pages/admin/MenuManagement"));
 const AdminFoodOrders = lazy(() => import("./pages/admin/FoodOrders"));
+const AdminDeliveries = lazy(() => import("./pages/admin/Deliveries"));
 const RevenueIntelligence = lazy(() => import("./pages/admin/RevenueIntelligence"));
 const AdminGallery = lazy(() => import("./pages/admin/GalleryManagement"));
 
@@ -82,6 +85,8 @@ const App = () => (
             <Route path="/guest-services" element={<GuestServices />} />
             <Route path="/gallery" element={<GalleryPage />} />
             <Route path="/map-test" element={<GoogleMapsTest />} />
+            <Route path="/track/:token" element={<OrderTracking />} />
+            <Route path="/rider" element={<RiderPortal />} />
 
             {/* Admin Dashboard */}
             <Route path="/admin/login" element={<AdminLogin />} />
@@ -94,6 +99,7 @@ const App = () => (
               <Route path="promotions" element={<AdminPromotions />} />
               <Route path="menu" element={<AdminMenu />} />
               <Route path="food-orders" element={<AdminFoodOrders />} />
+              <Route path="deliveries" element={<AdminDeliveries />} />
               <Route path="gallery" element={<AdminGallery />} />
               <Route path="revenue" element={<RevenueIntelligence />} />
               <Route path="reports" element={<AdminReports />} />

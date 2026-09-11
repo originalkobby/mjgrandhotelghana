@@ -13,6 +13,7 @@ import {
   Settings,
   UtensilsCrossed,
   ImageIcon,
+  Bike,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
@@ -41,6 +42,7 @@ const NAV_ITEMS = [
   { title: "Promotions", url: "/admin/promotions", icon: Tag, end: false, roles: ["admin"] },
   { title: "Menu", url: "/admin/menu", icon: UtensilsCrossed, end: false, roles: ["admin"] },
   { title: "Food Orders", url: "/admin/food-orders", icon: UtensilsCrossed, end: false, roles: ["admin", "operations_manager", "restaurant_staff"] },
+  { title: "Deliveries", url: "/admin/deliveries", icon: Bike, end: false, roles: ["admin", "operations_manager", "restaurant_staff"] },
   { title: "Gallery", url: "/admin/gallery", icon: ImageIcon, end: false, roles: ["admin"] },
   { title: "Revenue Intel", url: "/admin/revenue", icon: null, customIcon: revenueIntelIcon, end: false, roles: ["admin", "revenue_manager"] },
   { title: "Reports", url: "/admin/reports", icon: BarChart3, end: false, roles: ["admin", "revenue_manager", "finance"] },
