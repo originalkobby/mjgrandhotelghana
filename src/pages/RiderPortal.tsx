@@ -8,6 +8,15 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { Bike, Loader2, MapPin, Navigation, Phone } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import RiderEarnings from "@/components/rider/RiderEarnings";
 import {
   DELIVERY_STATUS_LABELS,
   DELIVERY_STATUS_TONE,
@@ -53,6 +62,8 @@ export default function RiderPortal() {
   const [loading, setLoading] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const watchId = useRef<number | null>(null);
+  const [cashJob, setCashJob] = useState<Job | null>(null);
+  const [cashAmount, setCashAmount] = useState("");
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
@@ -132,10 +143,15 @@ export default function RiderPortal() {
     if (error) toast({ title: "Sign in failed", description: error.message, variant: "destructive" });
   }
 
-  async function act(job: Job, status: DeliveryStatus) {
+  async function act(job: Job, status: DeliveryStatus, cashCollected?: number) {
     setBusyId(job.id);
     const { data, error } = await supabase.functions.invoke("delivery-action", {
-      body: { delivery_id: job.id, action: "update_status", status },
+      body: {
+        delivery_id: job.id,
+        action: "update_status",
+        status,
+        ...(cashCollected !== undefined ? { cash_collected_ghs: cashCollected } : {}),
+      },
     });
     setBusyId(null);
     if (error || (data as any)?.error) {
@@ -228,7 +244,13 @@ export default function RiderPortal() {
         </Button>
       </div>
 
-      <div className="max-w-xl mx-auto px-4 py-6 space-y-5">
+      <div className="max-w-xl mx-auto px-4 py-6">
+      <Tabs defaultValue="jobs">
+        <TabsList className="mb-5">
+          <TabsTrigger value="jobs">My jobs</TabsTrigger>
+          <TabsTrigger value="earnings">Earnings</TabsTrigger>
+        </TabsList>
+        <TabsContent value="jobs" className="space-y-5">
         {loading && (
           <div className="flex justify-center py-6">
             <Loader2 className="w-5 h-5 text-gold animate-spin" />
@@ -288,7 +310,17 @@ export default function RiderPortal() {
                     size="sm"
                     disabled={busyId === job.id}
                     variant={n === "failed" ? "outline" : "default"}
-                    onClick={() => act(job, n)}
+                    onClick={() => {
+                      if (
+                        n === "delivered" &&
+                        job.food_orders?.payment_method === "cash_on_delivery"
+                      ) {
+                        setCashJob(job);
+                        setCashAmount(String(Number(job.food_orders?.total_ghs ?? 0).toFixed(2)));
+                        return;
+                      }
+                      act(job, n);
+                    }}
                   >
                     {busyId === job.id ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -318,7 +350,54 @@ export default function RiderPortal() {
             </div>
           </div>
         )}
+        </TabsContent>
+        <TabsContent value="earnings">
+          <RiderEarnings riderId={rider.id} />
+        </TabsContent>
+      </Tabs>
       </div>
+
+      <Dialog open={!!cashJob} onOpenChange={(o) => !o && setCashJob(null)}>
+        <DialogContent className="bg-charcoal border-cream/10">
+          <DialogHeader>
+            <DialogTitle className="text-cream font-serif">Cash collected</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-cream/60">
+              Amount due from the guest: GH₵{" "}
+              {Number(cashJob?.food_orders?.total_ghs ?? 0).toFixed(2)}. This cash belongs to the
+              hotel and must be handed over at reception.
+            </p>
+            <div className="space-y-1.5">
+              <Label className="text-cream/70 text-sm">Cash received (GH₵)</Label>
+              <Input
+                type="number"
+                step="0.01"
+                min="0"
+                value={cashAmount}
+                onChange={(e) => setCashAmount(e.target.value)}
+                className="bg-charcoal border-cream/10 text-cream"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" className="text-cream/70" onClick={() => setCashJob(null)}>
+              Cancel
+            </Button>
+            <Button
+              disabled={!cashJob || busyId === cashJob?.id}
+              onClick={async () => {
+                const job = cashJob;
+                if (!job) return;
+                setCashJob(null);
+                await act(job, "delivered", Number(cashAmount) || 0);
+              }}
+            >
+              Confirm delivered
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

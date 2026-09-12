@@ -50,3 +50,6 @@ verify_jwt = false
 
 [functions.food-payment]
 verify_jwt = false
+
+[functions.rider-payouts]
+verify_jwt = false
