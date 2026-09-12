@@ -19,6 +19,11 @@ import {
   DeliveryStatus,
   isClosed,
 } from "@/lib/deliveryStatus";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
+import RidersPanel from "@/components/admin/RidersPanel";
+import DeliverySettingsPanel from "@/components/admin/DeliverySettingsPanel";
+import DeliveryReportsPanel from "@/components/admin/DeliveryReportsPanel";
 
 type Rider = { id: string; full_name: string; status: string; is_active: boolean };
 
@@ -285,6 +290,46 @@ function DeliveryBoard() {
           })}
         </div>
       )}
+    </div>
+  );
+}
+
+export default function Deliveries() {
+  const { role } = useAdminAuth();
+  const canManage = role === "admin" || role === "operations_manager";
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="font-serif text-2xl text-foreground">Deliveries</h1>
+        <p className="text-sm text-muted-foreground">
+          Dispatch riders, manage the delivery team, tune pricing and review performance.
+        </p>
+      </div>
+
+      <Tabs defaultValue="board">
+        <TabsList>
+          <TabsTrigger value="board">Board</TabsTrigger>
+          <TabsTrigger value="riders">Riders</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
+          {canManage && <TabsTrigger value="reports">Reports</TabsTrigger>}
+        </TabsList>
+
+        <TabsContent value="board" className="mt-6">
+          <DeliveryBoard />
+        </TabsContent>
+        <TabsContent value="riders" className="mt-6">
+          <RidersPanel canManage={canManage} />
+        </TabsContent>
+        <TabsContent value="settings" className="mt-6">
+          <DeliverySettingsPanel canEdit={canManage} />
+        </TabsContent>
+        {canManage && (
+          <TabsContent value="reports" className="mt-6">
+            <DeliveryReportsPanel />
+          </TabsContent>
+        )}
+      </Tabs>
     </div>
   );
 }
