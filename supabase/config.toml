@@ -53,3 +53,6 @@ verify_jwt = false
 
 [functions.rider-payouts]
 verify_jwt = false
+
+[functions.dispatch-rider]
+verify_jwt = false

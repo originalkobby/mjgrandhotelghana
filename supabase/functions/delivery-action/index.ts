@@ -95,6 +95,23 @@ Deno.serve(async (req) => {
       });
     };
 
+    // Hands the delivery to the automatic dispatch engine. Best effort: a
+    // dispatch failure must never block the kitchen's status change.
+    const autoDispatch = async () => {
+      try {
+        await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/dispatch-rider`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+          },
+          body: JSON.stringify({ action: "dispatch", delivery_id: deliveryId }),
+        });
+      } catch (e) {
+        console.error("auto dispatch failed", e);
+      }
+    };
+
     const notify = async (stage: string) => {
       if (!EMAIL_STAGES.has(stage)) return;
       try {
@@ -131,9 +148,21 @@ Deno.serve(async (req) => {
 
       const { error } = await admin
         .from("deliveries")
-        .update({ rider_id: rider.id, assigned_at: new Date().toISOString(), status: nextStatus })
+        .update({
+          rider_id: rider.id,
+          assigned_at: new Date().toISOString(),
+          status: nextStatus,
+          dispatch_state: "assigned",
+        })
         .eq("id", deliveryId);
       if (error) throw error;
+
+      // A manual assignment always wins: close any open automatic offer.
+      await admin
+        .from("delivery_offers")
+        .update({ status: "superseded", responded_at: new Date().toISOString() })
+        .eq("delivery_id", deliveryId)
+        .eq("status", "offered");
 
       await admin.from("delivery_riders").update({ status: "busy" }).eq("id", rider.id);
       await admin.from("delivery_status_history").insert({
@@ -329,6 +358,12 @@ Deno.serve(async (req) => {
       await notify(next);
 
       const settings = await loadSettings(admin);
+
+      // The food is packed — hand it to the dispatch engine.
+      if (next === "ready_for_pickup" && !delivery.rider_id && settings.auto_assign_riders) {
+        await autoDispatch();
+      }
+
       return json({ ok: true, status: next, poll_seconds: settings.rider_ping_seconds });
     }
 
