@@ -152,6 +152,8 @@ export default function DeliverySettingsPanel({ canEdit }: { canEdit: boolean })
           </Button>
         </div>
       )}
+
+      <RiderCompensationCard canEdit={canEdit} />
     </div>
   );
 }
