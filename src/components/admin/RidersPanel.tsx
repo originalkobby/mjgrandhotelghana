@@ -23,6 +23,8 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { Bike, KeyRound, Loader2, Pencil, Plus } from "lucide-react";
 
+type RiderStatus = "available" | "busy" | "offline" | "suspended";
+
 export type Rider = {
   id: string;
   user_id: string | null;
@@ -32,14 +34,14 @@ export type Rider = {
   email: string | null;
   vehicle_type: string;
   vehicle_reference: string | null;
-  status: string;
+  status: RiderStatus;
   is_active: boolean;
   notes: string | null;
   last_active_at: string | null;
 };
 
 const VEHICLES = ["motorbike", "bicycle", "car", "van", "on_foot"];
-const STATUSES = ["available", "busy", "offline", "suspended"];
+const STATUSES: RiderStatus[] = ["available", "busy", "offline", "suspended"];
 
 const blank = {
   full_name: "",
@@ -124,7 +126,7 @@ export default function RidersPanel({ canManage }: { canManage: boolean }) {
             vehicle_type: form.vehicle_type,
             vehicle_reference: form.vehicle_reference.trim() || null,
             notes: form.notes.trim() || null,
-            status: form.status as Rider["status"],
+            status: form.status as RiderStatus,
           })
           .eq("id", editing.id);
         if (error) throw error;
@@ -157,7 +159,7 @@ export default function RidersPanel({ canManage }: { canManage: boolean }) {
           vehicle_type: form.vehicle_type,
           vehicle_reference: form.vehicle_reference.trim() || null,
           notes: form.notes.trim() || null,
-          status: form.status as Rider["status"],
+          status: form.status as RiderStatus,
           user_id: userId,
         });
         if (error) throw error;
