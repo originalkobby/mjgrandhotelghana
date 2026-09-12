@@ -358,6 +358,12 @@ Deno.serve(async (req) => {
       await notify(next);
 
       const settings = await loadSettings(admin);
+
+      // The food is packed — hand it to the dispatch engine.
+      if (next === "ready_for_pickup" && !delivery.rider_id && settings.auto_assign_riders) {
+        await autoDispatch();
+      }
+
       return json({ ok: true, status: next, poll_seconds: settings.rider_ping_seconds });
     }
 
