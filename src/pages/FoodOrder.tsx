@@ -78,6 +78,29 @@ export default function FoodOrder() {
   const [reference, setReference] = useState("");
   const [trackingToken, setTrackingToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [payNotice, setPayNotice] = useState<string | null>(null);
+
+  // Returning from Paystack: confirm the payment server-side.
+  useEffect(() => {
+    const payRef = searchParams.get("pay");
+    const trxRef = searchParams.get("reference") || searchParams.get("trxref");
+    if (!payRef || !trxRef) return;
+    (async () => {
+      const { data } = await supabase.functions.invoke("food-payment", {
+        body: { action: "verify", reference: trxRef },
+      });
+      const ok = (data as any)?.paid;
+      setReference(payRef);
+      setSubmitted(true);
+      setPayNotice(
+        ok
+          ? "Payment received — thank you. The kitchen has your order."
+          : "We could not confirm your payment yet. If you were charged, our team will confirm it shortly.",
+      );
+      setSearchParams({}, { replace: true });
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     setItemName(initialItem);
@@ -165,6 +188,22 @@ export default function FoodOrder() {
       }
       if ((data as any)?.error) throw new Error((data as any).error);
 
+      const orderId = (data as any).order_id;
+
+      // Online payment: hand the guest over to Paystack before confirming.
+      if (isDelivery && paymentMethod === "paystack") {
+        const { data: pay, error: payError } = await supabase.functions.invoke("food-payment", {
+          body: { action: "initialize", order_id: orderId, origin: window.location.origin },
+        });
+        if (!payError && (pay as any)?.authorization_url) {
+          window.location.href = (pay as any).authorization_url;
+          return;
+        }
+        setPayNotice(
+          "Your order is placed, but online payment could not be started. Please pay our rider on delivery.",
+        );
+      }
+
       setReference((data as any).reference_code);
       setTrackingToken((data as any).tracking_token ?? null);
       setSubmitted(true);
@@ -225,6 +264,10 @@ export default function FoodOrder() {
                   Thank you, {guestName}. Your order has been sent to the restaurant.
                   {` We'll email a confirmation to ${email.trim()} as soon as our team accepts it — please keep your reference code below.`}
                 </p>
+
+                {payNotice && (
+                  <p className="text-sm text-gold/90 mb-6 max-w-md mx-auto">{payNotice}</p>
+                )}
 
                 <div className="inline-block px-5 py-3 rounded-lg border border-gold/30 bg-gold/10 mb-6">
                   <p className="text-[10px] uppercase tracking-[0.2em] text-gold/80">Reference</p>
@@ -371,11 +414,14 @@ export default function FoodOrder() {
                           </SelectTrigger>
                           <SelectContent className="bg-charcoal border-cream/10 rounded-none">
                             <SelectItem value="cash_on_delivery">Cash on delivery</SelectItem>
-                            <SelectItem value="paystack">Pay on collection at reception</SelectItem>
+                            <SelectItem value="paystack">Pay online (card or mobile money)</SelectItem>
                           </SelectContent>
                         </Select>
                         <p className="text-[11px] text-cream/40 flex items-center gap-1.5">
-                          <Wallet className="w-3 h-3" /> Have the exact amount ready for our rider.
+                          <Wallet className="w-3 h-3" />{" "}
+                          {paymentMethod === "paystack"
+                            ? "You'll be taken to a secure payment page before your order is dispatched."
+                            : "Have the exact amount ready for our rider."}
                         </p>
                       </div>
                     </div>
