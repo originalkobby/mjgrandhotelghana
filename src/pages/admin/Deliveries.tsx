@@ -40,6 +40,8 @@ type Row = {
   eta_max_minutes: number;
   requires_review: boolean;
   rider_id: string | null;
+  dispatch_state: string | null;
+  dispatch_attempts: number | null;
   created_at: string;
   food_orders: {
     reference_code: string;
@@ -71,7 +73,7 @@ function DeliveryBoard() {
       supabase
         .from("deliveries")
         .select(
-          "id, status, dest_address, dest_landmark, distance_km, fee_ghs, eta_min_minutes, eta_max_minutes, requires_review, rider_id, created_at, food_orders(reference_code, guest_name, phone, total_ghs, payment_method, payment_status)",
+          "id, status, dest_address, dest_landmark, distance_km, fee_ghs, eta_min_minutes, eta_max_minutes, requires_review, rider_id, dispatch_state, dispatch_attempts, created_at, food_orders(reference_code, guest_name, phone, total_ghs, payment_method, payment_status)",
         )
         .order("created_at", { ascending: false })
         .limit(200),

@@ -39,6 +39,8 @@ export type DeliverySettings = {
   customer_tracking_enabled: boolean;
   delivery_emails_enabled: boolean;
   rider_ping_seconds: number;
+  offer_timeout_seconds: number;
+  max_dispatch_attempts: number;
 };
 
 const FALLBACK_SETTINGS: DeliverySettings = {
