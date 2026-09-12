@@ -4,6 +4,7 @@ import { rankRiders } from "../../supabase/functions/_shared/dispatch.ts";
 const HOTEL = { lat: 5.6365, lng: -0.1738 };
 
 const rider = (over: Partial<any>) => ({
+  open_jobs: 0,
   id: "r1",
   full_name: "Rider",
   status: "available",
@@ -17,7 +18,7 @@ describe("rankRiders", () => {
   it("puts the nearest available rider first", () => {
     const near = rider({ id: "near", last_lat: 5.637, last_lng: -0.174 });
     const far = rider({ id: "far", last_lat: 5.75, last_lng: -0.3 });
-    const out = rankRiders([far, near], HOTEL, new Set(), new Map());
+    const out = rankRiders([far, near], HOTEL, []);
     expect(out[0].id).toBe("near");
   });
 
@@ -30,18 +31,16 @@ describe("rankRiders", () => {
         rider({ id: "ok" }),
       ],
       HOTEL,
-      new Set(),
-      new Map(),
+      [],
     );
     expect(out.map((r) => r.id)).toEqual(["ok"]);
   });
 
   it("skips riders who already have an open job", () => {
     const out = rankRiders(
-      [rider({ id: "busy" }), rider({ id: "free" })],
+      [rider({ id: "busy", open_jobs: 1 }), rider({ id: "free" })],
       HOTEL,
-      new Set(),
-      new Map([["busy", 1]]),
+      [],
     );
     expect(out.map((r) => r.id)).toEqual(["free"]);
   });
@@ -50,8 +49,7 @@ describe("rankRiders", () => {
     const out = rankRiders(
       [rider({ id: "declined" }), rider({ id: "fresh" })],
       HOTEL,
-      new Set(["declined"]),
-      new Map(),
+      ["declined"],
     );
     expect(out.map((r) => r.id)).toEqual(["fresh"]);
   });
@@ -63,14 +61,13 @@ describe("rankRiders", () => {
         rider({ id: "known", last_lat: 5.8, last_lng: -0.4 }),
       ],
       HOTEL,
-      new Set(),
-      new Map(),
+      [],
     );
     expect(out.map((r) => r.id)).toEqual(["known", "nowhere"]);
   });
 
   it("returns nobody when every rider has been tried", () => {
-    const out = rankRiders([rider({ id: "a" })], HOTEL, new Set(["a"]), new Map());
+    const out = rankRiders([rider({ id: "a" })], HOTEL, ["a"]);
     expect(out).toHaveLength(0);
   });
 });

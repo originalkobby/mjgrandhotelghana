@@ -1,7 +1,16 @@
 // Rider dispatch ranking. Pure and deterministic so it can be unit tested
 // without a database.
 
-import { haversineKm } from "./delivery.ts";
+/** Great-circle distance in km. Kept local so this module stays dependency-free. */
+function haversineKm(aLat: number, aLng: number, bLat: number, bLng: number): number {
+  const R = 6371;
+  const dLat = ((bLat - aLat) * Math.PI) / 180;
+  const dLng = ((bLng - aLng) * Math.PI) / 180;
+  const s =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((aLat * Math.PI) / 180) * Math.cos((bLat * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(s)));
+}
 
 export type Candidate = {
   id: string;
