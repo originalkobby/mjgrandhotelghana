@@ -19,6 +19,7 @@ import {
   DeliveryStatus,
   isClosed,
 } from "@/lib/deliveryStatus";
+import { haversineKm, formatDistance } from "@/lib/distance";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import RidersPanel from "@/components/admin/RidersPanel";
@@ -27,7 +28,7 @@ import RiderPayoutsPanel from "@/components/admin/RiderPayoutsPanel";
 import CashReconciliationPanel from "@/components/admin/CashReconciliationPanel";
 import DeliveryReportsPanel from "@/components/admin/DeliveryReportsPanel";
 
-type Rider = { id: string; full_name: string; status: string; is_active: boolean };
+type Rider = { id: string; full_name: string; status: string; is_active: boolean; last_lat: number | null; last_lng: number | null };
 
 type Row = {
   id: string;
@@ -35,6 +36,8 @@ type Row = {
   dest_address: string;
   dest_landmark: string | null;
   distance_km: number;
+  origin_lat: number;
+  origin_lng: number;
   fee_ghs: number;
   eta_min_minutes: number;
   eta_max_minutes: number;
@@ -73,13 +76,13 @@ function DeliveryBoard() {
       supabase
         .from("deliveries")
         .select(
-          "id, status, dest_address, dest_landmark, distance_km, fee_ghs, eta_min_minutes, eta_max_minutes, requires_review, rider_id, dispatch_state, dispatch_attempts, created_at, food_orders(reference_code, guest_name, phone, total_ghs, payment_method, payment_status)",
+          "id, status, dest_address, dest_landmark, distance_km, origin_lat, origin_lng, fee_ghs, eta_min_minutes, eta_max_minutes, requires_review, rider_id, dispatch_state, dispatch_attempts, created_at, food_orders(reference_code, guest_name, phone, total_ghs, payment_method, payment_status)",
         )
         .order("created_at", { ascending: false })
         .limit(200),
       supabase
         .from("delivery_riders")
-        .select("id, full_name, status, is_active")
+        .select("id, full_name, status, is_active, last_lat, last_lng")
         .eq("is_active", true)
         .order("full_name"),
     ]);
@@ -304,11 +307,17 @@ function DeliveryBoard() {
                           <SelectValue placeholder="Assign a rider" />
                         </SelectTrigger>
                         <SelectContent>
-                          {riders.map((r) => (
-                            <SelectItem key={r.id} value={r.id}>
-                              {r.full_name} — {r.status}
-                            </SelectItem>
-                          ))}
+                          {riders.map((r) => {
+                            const km =
+                              r.last_lat != null && r.last_lng != null
+                                ? haversineKm(row.origin_lat, row.origin_lng, r.last_lat, r.last_lng)
+                                : null;
+                            return (
+                              <SelectItem key={r.id} value={r.id}>
+                                {r.full_name} — {r.status} · {formatDistance(km)}
+                              </SelectItem>
+                            );
+                          })}
                         </SelectContent>
                       </Select>
 
