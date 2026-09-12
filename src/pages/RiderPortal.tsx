@@ -252,6 +252,7 @@ export default function RiderPortal() {
           <TabsTrigger value="earnings">Earnings</TabsTrigger>
         </TabsList>
         <TabsContent value="jobs" className="space-y-5">
+        <RiderOffers riderId={rider.id} onAccepted={load} />
         {loading && (
           <div className="flex justify-center py-6">
             <Loader2 className="w-5 h-5 text-gold animate-spin" />
