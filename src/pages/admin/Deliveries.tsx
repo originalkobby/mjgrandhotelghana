@@ -121,6 +121,25 @@ function DeliveryBoard() {
     load();
   }
 
+  // Ask the dispatch engine to look for a rider again.
+  async function redispatch(deliveryId: string) {
+    setBusyId(deliveryId);
+    const { data, error } = await supabase.functions.invoke("dispatch-rider", {
+      body: { action: "dispatch", delivery_id: deliveryId },
+    });
+    setBusyId(null);
+    if (error || (data as any)?.error) {
+      toast({
+        title: "No rider found",
+        description: (data as any)?.error ?? error?.message ?? "Please assign someone manually.",
+        variant: "destructive",
+      });
+      return;
+    }
+    toast({ title: "Offer sent to a rider" });
+    load();
+  }
+
   const visible = useMemo(() => {
     const q = search.trim().toLowerCase();
     return rows.filter((r) => {
