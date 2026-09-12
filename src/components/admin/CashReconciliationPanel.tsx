@@ -159,6 +159,25 @@ export default function CashReconciliationPanel() {
         </div>
       </div>
 
+      <Card className="border-primary/30 bg-primary/5">
+        <CardContent className="p-4">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+            Daily delivery P&L
+          </p>
+          <p className="text-sm md:text-base font-medium text-foreground flex flex-wrap gap-x-3 gap-y-1">
+            <span>Sales {money(totals.sales)}</span>
+            <span className="text-muted-foreground">·</span>
+            <span>Delivery fees {money(totals.fees)}</span>
+            <span className="text-muted-foreground">·</span>
+            <span>Rider cost {money(totals.accrued)}</span>
+            <span className="text-muted-foreground">·</span>
+            <span>Net delivery margin {money(totals.hotelRevenue)}</span>
+            <span className="text-muted-foreground">·</span>
+            <span>Owed to riders {money(totals.outstanding)}</span>
+          </p>
+        </CardContent>
+      </Card>
+
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {cards.map(([label, value]) => (
           <Card key={label}>
