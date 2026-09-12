@@ -58,7 +58,7 @@ export default function CashReconciliationPanel() {
       supabase.from("delivery_riders").select("id, full_name"),
       supabase
         .from("food_orders")
-        .select("id, total_ghs, payment_method, payment_status, created_at")
+        .select("id, total_ghs, delivery_fee_ghs, payment_method, payment_status, created_at")
         .gte("created_at", from)
         .lte("created_at", to),
       supabase
@@ -90,6 +90,7 @@ export default function CashReconciliationPanel() {
     const paystack = orders.filter((o) => o.payment_method === "paystack" && o.payment_status === "paid");
     const codCollected = sum(cod, "total_ghs");
     const online = sum(paystack, "total_ghs");
+    const fees = sum(orders, "delivery_fee_ghs");
     const accrued = sum(earnings, "earning_ghs");
     const paid = sum(payouts, "amount_ghs");
     return {
@@ -99,6 +100,8 @@ export default function CashReconciliationPanel() {
       accrued,
       paid,
       outstanding: accrued - paid,
+      fees,
+      hotelRevenue: fees - accrued,
     };
   }, [orders, earnings, payouts]);
 
@@ -144,7 +147,7 @@ export default function CashReconciliationPanel() {
     ["Rider earnings accrued", money(totals.accrued)],
     ["Rider payouts", money(totals.paid)],
     ["Outstanding rider balance", money(totals.outstanding)],
-    ["Hotel delivery revenue", money(totals.sales > 0 ? 0 : 0)],
+    ["Hotel delivery revenue", money(totals.hotelRevenue)],
   ];
 
   return (
@@ -157,7 +160,7 @@ export default function CashReconciliationPanel() {
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {cards.slice(0, 6).map(([label, value]) => (
+        {cards.map(([label, value]) => (
           <Card key={label}>
             <CardContent className="p-4">
               <p className="text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
