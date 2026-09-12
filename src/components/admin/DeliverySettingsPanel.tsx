@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import RiderCompensationCard from "@/components/admin/RiderCompensationCard";
 
 type Settings = Record<string, any>;
 
