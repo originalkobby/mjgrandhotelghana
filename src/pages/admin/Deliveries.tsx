@@ -243,6 +243,25 @@ function DeliveryBoard() {
                     </div>
                   )}
 
+                  {!isClosed(row.status) && !row.rider_id && row.dispatch_state === "offering" && (
+                    <p className="text-sm text-muted-foreground flex items-center gap-2">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      Offered to a rider — waiting for a reply (attempt {row.dispatch_attempts ?? 1}).
+                    </p>
+                  )}
+
+                  {!isClosed(row.status) && !row.rider_id && row.dispatch_state === "needs_rider" && (
+                    <div className="rounded-md border border-amber-300 bg-amber-50 p-3 space-y-2">
+                      <p className="text-sm text-amber-900 flex items-center gap-2">
+                        <ShieldAlert className="w-4 h-4" /> Rider required — no rider accepted this
+                        order. Assign one below or try again.
+                      </p>
+                      <Button size="sm" variant="outline" disabled={busy} onClick={() => redispatch(row.id)}>
+                        Try riders again
+                      </Button>
+                    </div>
+                  )}
+
                   {!isClosed(row.status) && (
                     <div className="flex flex-wrap items-center gap-2">
                       <Select
