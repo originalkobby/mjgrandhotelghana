@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import RiderEarnings from "@/components/rider/RiderEarnings";
+import RiderOffers from "@/components/rider/RiderOffers";
 import {
   DELIVERY_STATUS_LABELS,
   DELIVERY_STATUS_TONE,
