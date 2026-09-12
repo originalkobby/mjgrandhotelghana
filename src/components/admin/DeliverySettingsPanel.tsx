@@ -25,11 +25,17 @@ const NUMBER_FIELDS: { key: string; label: string; hint?: string; step?: string 
   { key: "default_prep_minutes", label: "Kitchen prep time (minutes)" },
   { key: "eta_buffer_minutes", label: "Delivery time buffer (minutes)" },
   { key: "rider_ping_seconds", label: "Rider location update (seconds)" },
+  { key: "offer_timeout_seconds", label: "Rider has to respond within (seconds)" },
+  { key: "max_dispatch_attempts", label: "Riders to try before asking staff" },
 ];
 
 const TOGGLES: { key: string; label: string; hint: string }[] = [
   { key: "delivery_enabled", label: "Accept delivery orders", hint: "Turn off to pause doorstep delivery." },
-  { key: "auto_assign_riders", label: "Auto-assign riders", hint: "Pick the first available rider automatically." },
+  {
+    key: "auto_assign_riders",
+    label: "Automatic dispatch",
+    hint: "Offer each ready order to the nearest free rider, then the next one if declined.",
+  },
   { key: "customer_tracking_enabled", label: "Customer tracking link", hint: "Let guests follow their order live." },
   { key: "delivery_emails_enabled", label: "Delivery emails", hint: "Send status emails to the guest." },
 ];
