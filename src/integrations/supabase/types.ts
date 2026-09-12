@@ -2002,6 +2002,7 @@ export type Database = {
       }
       is_delivery_ops: { Args: { _user_id: string }; Returns: boolean }
       is_delivery_staff: { Args: { _user_id: string }; Returns: boolean }
+      rider_has_open_offer: { Args: { _delivery_id: string }; Returns: boolean }
     }
     Enums: {
       app_role:
