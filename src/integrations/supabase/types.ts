@@ -447,6 +447,8 @@ export type Database = {
           dest_landmark: string | null
           dest_lat: number
           dest_lng: number
+          dispatch_attempts: number
+          dispatch_state: Database["public"]["Enums"]["dispatch_state"]
           distance_km: number
           eta_max_minutes: number
           eta_min_minutes: number
@@ -485,6 +487,8 @@ export type Database = {
           dest_landmark?: string | null
           dest_lat: number
           dest_lng: number
+          dispatch_attempts?: number
+          dispatch_state?: Database["public"]["Enums"]["dispatch_state"]
           distance_km?: number
           eta_max_minutes?: number
           eta_min_minutes?: number
@@ -523,6 +527,8 @@ export type Database = {
           dest_landmark?: string | null
           dest_lat?: number
           dest_lng?: number
+          dispatch_attempts?: number
+          dispatch_state?: Database["public"]["Enums"]["dispatch_state"]
           distance_km?: number
           eta_max_minutes?: number
           eta_min_minutes?: number
@@ -599,6 +605,69 @@ export type Database = {
         }
         Relationships: []
       }
+      delivery_offers: {
+        Row: {
+          attempt: number
+          created_at: string
+          decline_reason: string | null
+          delivery_id: string
+          distance_km: number
+          estimated_earning_ghs: number
+          expires_at: string
+          id: string
+          offered_at: string
+          responded_at: string | null
+          rider_id: string
+          status: Database["public"]["Enums"]["delivery_offer_status"]
+          updated_at: string
+        }
+        Insert: {
+          attempt?: number
+          created_at?: string
+          decline_reason?: string | null
+          delivery_id: string
+          distance_km?: number
+          estimated_earning_ghs?: number
+          expires_at: string
+          id?: string
+          offered_at?: string
+          responded_at?: string | null
+          rider_id: string
+          status?: Database["public"]["Enums"]["delivery_offer_status"]
+          updated_at?: string
+        }
+        Update: {
+          attempt?: number
+          created_at?: string
+          decline_reason?: string | null
+          delivery_id?: string
+          distance_km?: number
+          estimated_earning_ghs?: number
+          expires_at?: string
+          id?: string
+          offered_at?: string
+          responded_at?: string | null
+          rider_id?: string
+          status?: Database["public"]["Enums"]["delivery_offer_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_offers_delivery_id_fkey"
+            columns: ["delivery_id"]
+            isOneToOne: false
+            referencedRelation: "deliveries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_offers_rider_id_fkey"
+            columns: ["rider_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_riders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       delivery_riders: {
         Row: {
           created_at: string
@@ -673,8 +742,10 @@ export type Database = {
           id: string
           manual_review_km: number
           max_delivery_km: number
+          max_dispatch_attempts: number
           max_fee_ghs: number
           min_fee_ghs: number
+          offer_timeout_seconds: number
           origin_address: string
           origin_lat: number
           origin_lng: number
@@ -703,8 +774,10 @@ export type Database = {
           id?: string
           manual_review_km?: number
           max_delivery_km?: number
+          max_dispatch_attempts?: number
           max_fee_ghs?: number
           min_fee_ghs?: number
+          offer_timeout_seconds?: number
           origin_address?: string
           origin_lat?: number
           origin_lng?: number
@@ -733,8 +806,10 @@ export type Database = {
           id?: string
           manual_review_km?: number
           max_delivery_km?: number
+          max_dispatch_attempts?: number
           max_fee_ghs?: number
           min_fee_ghs?: number
+          offer_timeout_seconds?: number
           origin_address?: string
           origin_lat?: number
           origin_lng?: number
@@ -1943,6 +2018,12 @@ export type Database = {
         | "completed"
         | "no_show"
         | "checked_in"
+      delivery_offer_status:
+        | "offered"
+        | "accepted"
+        | "declined"
+        | "expired"
+        | "superseded"
       delivery_payment_method: "paystack" | "cash_on_delivery"
       delivery_status:
         | "pending_review"
@@ -1957,6 +2038,7 @@ export type Database = {
         | "delivered"
         | "cancelled"
         | "failed"
+      dispatch_state: "idle" | "offering" | "assigned" | "needs_rider"
       food_payment_status:
         | "pending"
         | "paid"
@@ -2126,6 +2208,13 @@ export const Constants = {
         "no_show",
         "checked_in",
       ],
+      delivery_offer_status: [
+        "offered",
+        "accepted",
+        "declined",
+        "expired",
+        "superseded",
+      ],
       delivery_payment_method: ["paystack", "cash_on_delivery"],
       delivery_status: [
         "pending_review",
@@ -2141,6 +2230,7 @@ export const Constants = {
         "cancelled",
         "failed",
       ],
+      dispatch_state: ["idle", "offering", "assigned", "needs_rider"],
       food_payment_status: [
         "pending",
         "paid",
