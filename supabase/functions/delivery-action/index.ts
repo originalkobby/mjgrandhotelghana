@@ -148,9 +148,21 @@ Deno.serve(async (req) => {
 
       const { error } = await admin
         .from("deliveries")
-        .update({ rider_id: rider.id, assigned_at: new Date().toISOString(), status: nextStatus })
+        .update({
+          rider_id: rider.id,
+          assigned_at: new Date().toISOString(),
+          status: nextStatus,
+          dispatch_state: "assigned",
+        })
         .eq("id", deliveryId);
       if (error) throw error;
+
+      // A manual assignment always wins: close any open automatic offer.
+      await admin
+        .from("delivery_offers")
+        .update({ status: "superseded", responded_at: new Date().toISOString() })
+        .eq("delivery_id", deliveryId)
+        .eq("status", "offered");
 
       await admin.from("delivery_riders").update({ status: "busy" }).eq("id", rider.id);
       await admin.from("delivery_status_history").insert({
