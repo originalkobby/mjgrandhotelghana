@@ -286,7 +286,7 @@ export default function RidersPanel({ canManage }: { canManage: boolean }) {
                   </p>
                   <div className="flex items-center gap-2 pt-1">
                     <Badge variant="outline">{r.status}</Badge>
-                    {!r.is_active && <Badge variant="outline">inactive</Badge>
+                    {!r.is_active && <Badge variant="outline">inactive</Badge>}
                     {!r.user_id && <Badge variant="outline">no login</Badge>}
                   </div>
                   <p className="text-xs text-muted-foreground">
