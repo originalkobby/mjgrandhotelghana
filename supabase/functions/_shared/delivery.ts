@@ -65,6 +65,8 @@ const FALLBACK_SETTINGS: DeliverySettings = {
   customer_tracking_enabled: true,
   delivery_emails_enabled: true,
   rider_ping_seconds: 20,
+  offer_timeout_seconds: 60,
+  max_dispatch_attempts: 3,
 };
 
 /** Loads the singleton settings row; never throws — falls back to safe defaults. */
