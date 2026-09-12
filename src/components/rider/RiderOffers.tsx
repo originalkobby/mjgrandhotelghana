@@ -55,7 +55,14 @@ export default function RiderOffers({
   useEffect(() => {
     const t = setInterval(() => {
       setNow(Date.now());
-      setOffers((prev) => prev.filter((o) => new Date(o.expires_at).getTime() > Date.now()));
+      setOffers((prev) => {
+        const live = prev.filter((o) => new Date(o.expires_at).getTime() > Date.now());
+        // An offer lapsed on this phone — nudge the engine to try the next rider.
+        if (live.length !== prev.length) {
+          supabase.functions.invoke("dispatch-rider", { body: { action: "sweep" } });
+        }
+        return live;
+      });
     }, 1000);
     return () => clearInterval(t);
   }, []);

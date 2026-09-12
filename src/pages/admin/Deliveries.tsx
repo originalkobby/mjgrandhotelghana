@@ -121,6 +121,17 @@ function DeliveryBoard() {
     load();
   }
 
+  // Keep the dispatch engine honest: expire lapsed offers and retry anything
+  // that is ready but still riderless whenever staff look at the board.
+  useEffect(() => {
+    supabase.functions.invoke("dispatch-rider", { body: { action: "sweep" } });
+    const t = setInterval(
+      () => supabase.functions.invoke("dispatch-rider", { body: { action: "sweep" } }),
+      60_000,
+    );
+    return () => clearInterval(t);
+  }, []);
+
   // Ask the dispatch engine to look for a rider again.
   async function redispatch(deliveryId: string) {
     setBusyId(deliveryId);
