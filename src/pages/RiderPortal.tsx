@@ -63,6 +63,7 @@ export default function RiderPortal() {
   const [loading, setLoading] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const watchId = useRef<number | null>(null);
+  const idleWatchId = useRef<number | null>(null);
   const [cashJob, setCashJob] = useState<Job | null>(null);
   const [cashAmount, setCashAmount] = useState("");
 
@@ -130,6 +131,41 @@ export default function RiderPortal() {
     return () => {
       if (watchId.current !== null) navigator.geolocation.clearWatch(watchId.current);
       watchId.current = null;
+    };
+  }, [jobs, rider?.id]);
+
+  // Keep a position on file while idle so the dispatch engine can rank this
+  // rider by distance for the next offer. Throttled to one ping per ~30s. The
+  // higher-frequency watch above already covers active runs.
+  useEffect(() => {
+    if (!rider?.id || !navigator.geolocation) return;
+    const active = jobs.some((j) =>
+      ["rider_accepted", "rider_picked_up", "on_the_way"].includes(j.status),
+    );
+    if (active) return;
+    let last = 0;
+    idleWatchId.current = navigator.geolocation.watchPosition(
+      async (pos) => {
+        const now = Date.now();
+        if (now - last < 30_000) return;
+        last = now;
+        await supabase.from("rider_locations").insert({
+          rider_id: rider.id,
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          accuracy_m: pos.coords.accuracy,
+          heading: pos.coords.heading,
+          speed_mps: pos.coords.speed,
+        });
+      },
+      () => {
+        /* location sharing is best-effort */
+      },
+      { enableHighAccuracy: true, maximumAge: 30000, timeout: 20000 },
+    );
+    return () => {
+      if (idleWatchId.current !== null) navigator.geolocation.clearWatch(idleWatchId.current);
+      idleWatchId.current = null;
     };
   }, [jobs, rider?.id]);
 
