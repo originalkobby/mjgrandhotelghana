@@ -77,7 +77,7 @@ export default function RiderOffers({
   async function respond(offer: Offer, response: "accept" | "decline") {
     setBusyId(offer.id);
     const { data, error } = await supabase.functions.invoke("dispatch-rider", {
-      body: { action: "respond", offer_id: offer.id, response },
+      body: { action: "respond", offer_id: offer.id, decision: response },
     });
     setBusyId(null);
     if (error || (data as any)?.error) {
