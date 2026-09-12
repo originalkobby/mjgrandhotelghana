@@ -95,6 +95,23 @@ Deno.serve(async (req) => {
       });
     };
 
+    // Hands the delivery to the automatic dispatch engine. Best effort: a
+    // dispatch failure must never block the kitchen's status change.
+    const autoDispatch = async () => {
+      try {
+        await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/dispatch-rider`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+          },
+          body: JSON.stringify({ action: "dispatch", delivery_id: deliveryId }),
+        });
+      } catch (e) {
+        console.error("auto dispatch failed", e);
+      }
+    };
+
     const notify = async (stage: string) => {
       if (!EMAIL_STAGES.has(stage)) return;
       try {
