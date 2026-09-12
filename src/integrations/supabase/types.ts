@@ -299,6 +299,79 @@ export type Database = {
         }
         Relationships: []
       }
+      cod_remittances: {
+        Row: {
+          amount_due_ghs: number
+          amount_remitted_ghs: number
+          cash_collected_ghs: number
+          collected_at: string | null
+          confirmed_at: string | null
+          confirmed_by: string | null
+          created_at: string
+          delivery_id: string
+          food_order_id: string | null
+          id: string
+          note: string | null
+          outstanding_ghs: number
+          rider_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_due_ghs?: number
+          amount_remitted_ghs?: number
+          cash_collected_ghs?: number
+          collected_at?: string | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          delivery_id: string
+          food_order_id?: string | null
+          id?: string
+          note?: string | null
+          outstanding_ghs?: number
+          rider_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_due_ghs?: number
+          amount_remitted_ghs?: number
+          cash_collected_ghs?: number
+          collected_at?: string | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          delivery_id?: string
+          food_order_id?: string | null
+          id?: string
+          note?: string | null
+          outstanding_ghs?: number
+          rider_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cod_remittances_delivery_id_fkey"
+            columns: ["delivery_id"]
+            isOneToOne: true
+            referencedRelation: "deliveries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cod_remittances_food_order_id_fkey"
+            columns: ["food_order_id"]
+            isOneToOne: false
+            referencedRelation: "food_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cod_remittances_rider_id_fkey"
+            columns: ["rider_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_riders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_messages: {
         Row: {
           created_at: string
@@ -1227,6 +1300,197 @@ export type Database = {
         }
         Relationships: []
       }
+      rider_compensation_rules: {
+        Row: {
+          base_ghs: number
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          max_earning_ghs: number
+          min_earning_ghs: number
+          model: Database["public"]["Enums"]["rider_comp_model"]
+          note: string | null
+          peak_bonus_ghs: number
+          peak_end_hour: number
+          peak_start_hour: number
+          per_km_ghs: number
+          percent_of_fee: number
+          updated_at: string
+        }
+        Insert: {
+          base_ghs?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          max_earning_ghs?: number
+          min_earning_ghs?: number
+          model?: Database["public"]["Enums"]["rider_comp_model"]
+          note?: string | null
+          peak_bonus_ghs?: number
+          peak_end_hour?: number
+          peak_start_hour?: number
+          per_km_ghs?: number
+          percent_of_fee?: number
+          updated_at?: string
+        }
+        Update: {
+          base_ghs?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          max_earning_ghs?: number
+          min_earning_ghs?: number
+          model?: Database["public"]["Enums"]["rider_comp_model"]
+          note?: string | null
+          peak_bonus_ghs?: number
+          peak_end_hour?: number
+          peak_start_hour?: number
+          per_km_ghs?: number
+          percent_of_fee?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      rider_earning_adjustments: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          delta_ghs: number
+          earning_id: string
+          id: string
+          reason: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          delta_ghs: number
+          earning_id: string
+          id?: string
+          reason: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          delta_ghs?: number
+          earning_id?: string
+          id?: string
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rider_earning_adjustments_earning_id_fkey"
+            columns: ["earning_id"]
+            isOneToOne: false
+            referencedRelation: "rider_earnings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rider_earnings: {
+        Row: {
+          adjustment_total_ghs: number
+          approved_at: string | null
+          approved_by: string | null
+          base_earning_ghs: number
+          created_at: string
+          customer_fee_ghs: number
+          delivered_at: string | null
+          delivery_id: string
+          distance_km: number
+          earning_ghs: number
+          food_order_id: string | null
+          id: string
+          paid_at: string | null
+          payout_id: string | null
+          rider_id: string
+          rule_id: string | null
+          rule_snapshot: Json
+          status: Database["public"]["Enums"]["rider_earning_status"]
+          updated_at: string
+        }
+        Insert: {
+          adjustment_total_ghs?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          base_earning_ghs?: number
+          created_at?: string
+          customer_fee_ghs?: number
+          delivered_at?: string | null
+          delivery_id: string
+          distance_km?: number
+          earning_ghs?: number
+          food_order_id?: string | null
+          id?: string
+          paid_at?: string | null
+          payout_id?: string | null
+          rider_id: string
+          rule_id?: string | null
+          rule_snapshot?: Json
+          status?: Database["public"]["Enums"]["rider_earning_status"]
+          updated_at?: string
+        }
+        Update: {
+          adjustment_total_ghs?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          base_earning_ghs?: number
+          created_at?: string
+          customer_fee_ghs?: number
+          delivered_at?: string | null
+          delivery_id?: string
+          distance_km?: number
+          earning_ghs?: number
+          food_order_id?: string | null
+          id?: string
+          paid_at?: string | null
+          payout_id?: string | null
+          rider_id?: string
+          rule_id?: string | null
+          rule_snapshot?: Json
+          status?: Database["public"]["Enums"]["rider_earning_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rider_earnings_delivery_id_fkey"
+            columns: ["delivery_id"]
+            isOneToOne: true
+            referencedRelation: "deliveries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rider_earnings_food_order_id_fkey"
+            columns: ["food_order_id"]
+            isOneToOne: false
+            referencedRelation: "food_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rider_earnings_payout_fk"
+            columns: ["payout_id"]
+            isOneToOne: false
+            referencedRelation: "rider_payouts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rider_earnings_rider_id_fkey"
+            columns: ["rider_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_riders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rider_earnings_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "rider_compensation_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rider_locations: {
         Row: {
           accuracy_m: number | null
@@ -1271,6 +1535,98 @@ export type Database = {
           },
           {
             foreignKeyName: "rider_locations_rider_id_fkey"
+            columns: ["rider_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_riders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rider_payout_items: {
+        Row: {
+          amount_ghs: number
+          created_at: string
+          earning_id: string
+          id: string
+          payout_id: string
+        }
+        Insert: {
+          amount_ghs: number
+          created_at?: string
+          earning_id: string
+          id?: string
+          payout_id: string
+        }
+        Update: {
+          amount_ghs?: number
+          created_at?: string
+          earning_id?: string
+          id?: string
+          payout_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rider_payout_items_earning_id_fkey"
+            columns: ["earning_id"]
+            isOneToOne: true
+            referencedRelation: "rider_earnings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rider_payout_items_payout_id_fkey"
+            columns: ["payout_id"]
+            isOneToOne: false
+            referencedRelation: "rider_payouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rider_payouts: {
+        Row: {
+          amount_ghs: number
+          created_at: string
+          delivery_count: number
+          id: string
+          method: Database["public"]["Enums"]["rider_payout_method"]
+          notes: string | null
+          period_end: string | null
+          period_start: string | null
+          processed_at: string
+          processed_by: string | null
+          reference: string | null
+          rider_id: string
+        }
+        Insert: {
+          amount_ghs: number
+          created_at?: string
+          delivery_count?: number
+          id?: string
+          method: Database["public"]["Enums"]["rider_payout_method"]
+          notes?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          processed_at?: string
+          processed_by?: string | null
+          reference?: string | null
+          rider_id: string
+        }
+        Update: {
+          amount_ghs?: number
+          created_at?: string
+          delivery_count?: number
+          id?: string
+          method?: Database["public"]["Enums"]["rider_payout_method"]
+          notes?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          processed_at?: string
+          processed_by?: string | null
+          reference?: string | null
+          rider_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rider_payouts_rider_id_fkey"
             columns: ["rider_id"]
             isOneToOne: false
             referencedRelation: "delivery_riders"
@@ -1617,6 +1973,15 @@ export type Database = {
         | "cancelled"
       order_type: "dine_in" | "room_service" | "takeaway" | "delivery"
       payment_status: "pending" | "partial" | "paid" | "refunded" | "failed"
+      rider_comp_model: "fixed" | "per_km" | "percentage" | "hybrid"
+      rider_earning_status:
+        | "pending"
+        | "approved"
+        | "payable"
+        | "paid"
+        | "disputed"
+        | "adjusted"
+      rider_payout_method: "cash" | "mobile_money" | "bank_transfer"
       rider_status: "available" | "busy" | "offline" | "suspended"
     }
     CompositeTypes: {
@@ -1794,6 +2159,16 @@ export const Constants = {
       ],
       order_type: ["dine_in", "room_service", "takeaway", "delivery"],
       payment_status: ["pending", "partial", "paid", "refunded", "failed"],
+      rider_comp_model: ["fixed", "per_km", "percentage", "hybrid"],
+      rider_earning_status: [
+        "pending",
+        "approved",
+        "payable",
+        "paid",
+        "disputed",
+        "adjusted",
+      ],
+      rider_payout_method: ["cash", "mobile_money", "bank_transfer"],
       rider_status: ["available", "busy", "offline", "suspended"],
     },
   },
