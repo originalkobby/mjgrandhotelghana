@@ -336,17 +336,6 @@ Deno.serve(async (req) => {
         attempt: offer.attempt,
       });
 
-      try {
-        await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-delivery-email`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
-          },
-          body: JSON.stringify({ deliveryId: offer.delivery_id, stage: "rider_assigned" }),
-        });
-      } catch (_) { /* email is best effort */ }
-
       return json({ ok: true, accepted: true, delivery_id: offer.delivery_id });
     }
 
