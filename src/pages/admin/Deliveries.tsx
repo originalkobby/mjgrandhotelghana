@@ -51,7 +51,7 @@ const STAFF_NEXT: Partial<Record<DeliveryStatus, DeliveryStatus[]>> = {
   rider_assigned: ["cancelled"],
 };
 
-export default function Deliveries() {
+function DeliveryBoard() {
   const [rows, setRows] = useState<Row[]>([]);
   const [riders, setRiders] = useState<Rider[]>([]);
   const [loading, setLoading] = useState(true);
@@ -129,13 +129,7 @@ export default function Deliveries() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="font-serif text-2xl text-foreground">Deliveries</h1>
-          <p className="text-sm text-muted-foreground">
-            Dispatch riders, review long trips and follow every order to the door.
-          </p>
-        </div>
+      <div className="flex flex-wrap items-end justify-end gap-4">
         <div className="flex items-center gap-2">
           <Input
             value={search}
