@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { Bike, KeyRound, Loader2, Pencil, Plus } from "lucide-react";
+import { haversineKm, formatDistance } from "@/lib/distance";
 
 type RiderStatus = "available" | "busy" | "offline" | "suspended";
 
@@ -38,10 +39,24 @@ export type Rider = {
   is_active: boolean;
   notes: string | null;
   last_active_at: string | null;
+  last_lat: number | null;
+  last_lng: number | null;
+  last_location_at: string | null;
 };
 
 const VEHICLES = ["motorbike", "bicycle", "car", "van", "on_foot"];
 const STATUSES: RiderStatus[] = ["available", "busy", "offline", "suspended"];
+
+function timeAgo(iso: string | null): string {
+  if (!iso) return "unknown";
+  const ms = Date.now() - new Date(iso).getTime();
+  const min = Math.round(ms / 60000);
+  if (min < 1) return "just now";
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.round(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  return `${Math.round(hr / 24)}d ago`;
+}
 
 const blank = {
   full_name: "",
@@ -71,12 +86,13 @@ export default function RidersPanel({ canManage }: { canManage: boolean }) {
   const [saving, setSaving] = useState(false);
   const [pwFor, setPwFor] = useState<Rider | null>(null);
   const [newPassword, setNewPassword] = useState("");
+  const [hotelOrigin, setHotelOrigin] = useState<{ lat: number; lng: number } | null>(null);
 
   const load = useCallback(async () => {
     const { data, error } = await supabase
       .from("delivery_riders")
       .select(
-        "id, user_id, rider_code, full_name, phone, email, vehicle_type, vehicle_reference, status, is_active, notes, last_active_at",
+        "id, user_id, rider_code, full_name, phone, email, vehicle_type, vehicle_reference, status, is_active, notes, last_active_at, last_lat, last_lng, last_location_at",
       )
       .order("full_name");
     if (error) toast({ title: "Could not load riders", description: error.message, variant: "destructive" });
@@ -87,6 +103,17 @@ export default function RidersPanel({ canManage }: { canManage: boolean }) {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    supabase
+      .from("delivery_settings")
+      .select("origin_lat, origin_lng")
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setHotelOrigin({ lat: Number(data.origin_lat), lng: Number(data.origin_lng) });
+      });
+  }, []);
 
   function openNew() {
     setEditing(null);
@@ -259,9 +286,15 @@ export default function RidersPanel({ canManage }: { canManage: boolean }) {
                   </p>
                   <div className="flex items-center gap-2 pt-1">
                     <Badge variant="outline">{r.status}</Badge>
-                    {!r.is_active && <Badge variant="outline">inactive</Badge>}
+                    {!r.is_active && <Badge variant="outline">inactive</Badge>
                     {!r.user_id && <Badge variant="outline">no login</Badge>}
                   </div>
+                  <p className="text-xs text-muted-foreground">
+                    {hotelOrigin && r.last_lat != null && r.last_lng != null
+                      ? `${formatDistance(haversineKm(hotelOrigin.lat, hotelOrigin.lng, r.last_lat, r.last_lng))} from hotel · `
+                      : ""}
+                    last seen {timeAgo(r.last_location_at)}
+                  </p>
                 </div>
                 {canManage && (
                   <div className="flex flex-col items-end gap-2">
