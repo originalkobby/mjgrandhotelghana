@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.sync_rider_location() FROM anon, authenticated;
