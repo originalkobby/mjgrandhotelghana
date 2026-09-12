@@ -23,6 +23,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import RidersPanel from "@/components/admin/RidersPanel";
 import DeliverySettingsPanel from "@/components/admin/DeliverySettingsPanel";
+import RiderPayoutsPanel from "@/components/admin/RiderPayoutsPanel";
+import CashReconciliationPanel from "@/components/admin/CashReconciliationPanel";
 import DeliveryReportsPanel from "@/components/admin/DeliveryReportsPanel";
 
 type Rider = { id: string; full_name: string; status: string; is_active: boolean };
@@ -312,6 +314,8 @@ export default function Deliveries() {
           <TabsTrigger value="board">Board</TabsTrigger>
           <TabsTrigger value="riders">Riders</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
+          {canManage && <TabsTrigger value="payouts">Payouts</TabsTrigger>}
+          {canManage && <TabsTrigger value="cash">Cash &amp; reconciliation</TabsTrigger>}
           {canManage && <TabsTrigger value="reports">Reports</TabsTrigger>}
         </TabsList>
 
@@ -324,6 +328,16 @@ export default function Deliveries() {
         <TabsContent value="settings" className="mt-6">
           <DeliverySettingsPanel canEdit={canManage} />
         </TabsContent>
+        {canManage && (
+          <TabsContent value="payouts" className="mt-6">
+            <RiderPayoutsPanel />
+          </TabsContent>
+        )}
+        {canManage && (
+          <TabsContent value="cash" className="mt-6">
+            <CashReconciliationPanel />
+          </TabsContent>
+        )}
         {canManage && (
           <TabsContent value="reports" className="mt-6">
             <DeliveryReportsPanel />
