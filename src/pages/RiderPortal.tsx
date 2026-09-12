@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import RiderEarnings from "@/components/rider/RiderEarnings";
+import RiderOffers from "@/components/rider/RiderOffers";
 import {
   DELIVERY_STATUS_LABELS,
   DELIVERY_STATUS_TONE,
@@ -251,6 +252,7 @@ export default function RiderPortal() {
           <TabsTrigger value="earnings">Earnings</TabsTrigger>
         </TabsList>
         <TabsContent value="jobs" className="space-y-5">
+        <RiderOffers riderId={rider.id} onAccepted={load} />
         {loading && (
           <div className="flex justify-center py-6">
             <Loader2 className="w-5 h-5 text-gold animate-spin" />

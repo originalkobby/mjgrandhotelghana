@@ -39,6 +39,8 @@ export type DeliverySettings = {
   customer_tracking_enabled: boolean;
   delivery_emails_enabled: boolean;
   rider_ping_seconds: number;
+  offer_timeout_seconds: number;
+  max_dispatch_attempts: number;
 };
 
 const FALLBACK_SETTINGS: DeliverySettings = {
@@ -65,6 +67,8 @@ const FALLBACK_SETTINGS: DeliverySettings = {
   customer_tracking_enabled: true,
   delivery_emails_enabled: true,
   rider_ping_seconds: 20,
+  offer_timeout_seconds: 60,
+  max_dispatch_attempts: 3,
 };
 
 /** Loads the singleton settings row; never throws — falls back to safe defaults. */

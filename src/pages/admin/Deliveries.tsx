@@ -40,6 +40,8 @@ type Row = {
   eta_max_minutes: number;
   requires_review: boolean;
   rider_id: string | null;
+  dispatch_state: string | null;
+  dispatch_attempts: number | null;
   created_at: string;
   food_orders: {
     reference_code: string;
@@ -71,7 +73,7 @@ function DeliveryBoard() {
       supabase
         .from("deliveries")
         .select(
-          "id, status, dest_address, dest_landmark, distance_km, fee_ghs, eta_min_minutes, eta_max_minutes, requires_review, rider_id, created_at, food_orders(reference_code, guest_name, phone, total_ghs, payment_method, payment_status)",
+          "id, status, dest_address, dest_landmark, distance_km, fee_ghs, eta_min_minutes, eta_max_minutes, requires_review, rider_id, dispatch_state, dispatch_attempts, created_at, food_orders(reference_code, guest_name, phone, total_ghs, payment_method, payment_status)",
         )
         .order("created_at", { ascending: false })
         .limit(200),
@@ -116,6 +118,36 @@ function DeliveryBoard() {
       return;
     }
     toast({ title: okMsg });
+    load();
+  }
+
+  // Keep the dispatch engine honest: expire lapsed offers and retry anything
+  // that is ready but still riderless whenever staff look at the board.
+  useEffect(() => {
+    supabase.functions.invoke("dispatch-rider", { body: { action: "sweep" } });
+    const t = setInterval(
+      () => supabase.functions.invoke("dispatch-rider", { body: { action: "sweep" } }),
+      60_000,
+    );
+    return () => clearInterval(t);
+  }, []);
+
+  // Ask the dispatch engine to look for a rider again.
+  async function redispatch(deliveryId: string) {
+    setBusyId(deliveryId);
+    const { data, error } = await supabase.functions.invoke("dispatch-rider", {
+      body: { action: "dispatch", delivery_id: deliveryId },
+    });
+    setBusyId(null);
+    if (error || (data as any)?.error) {
+      toast({
+        title: "No rider found",
+        description: (data as any)?.error ?? error?.message ?? "Please assign someone manually.",
+        variant: "destructive",
+      });
+      return;
+    }
+    toast({ title: "Offer sent to a rider" });
     load();
   }
 
@@ -238,6 +270,25 @@ function DeliveryBoard() {
                           Decline
                         </Button>
                       </div>
+                    </div>
+                  )}
+
+                  {!isClosed(row.status) && !row.rider_id && row.dispatch_state === "offering" && (
+                    <p className="text-sm text-muted-foreground flex items-center gap-2">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      Offered to a rider — waiting for a reply (attempt {row.dispatch_attempts ?? 1}).
+                    </p>
+                  )}
+
+                  {!isClosed(row.status) && !row.rider_id && row.dispatch_state === "needs_rider" && (
+                    <div className="rounded-md border border-amber-300 bg-amber-50 p-3 space-y-2">
+                      <p className="text-sm text-amber-900 flex items-center gap-2">
+                        <ShieldAlert className="w-4 h-4" /> Rider required — no rider accepted this
+                        order. Assign one below or try again.
+                      </p>
+                      <Button size="sm" variant="outline" disabled={busy} onClick={() => redispatch(row.id)}>
+                        Try riders again
+                      </Button>
                     </div>
                   )}
 
