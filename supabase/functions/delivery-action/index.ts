@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { canTransition, corsHeaders, json, loadSettings } from "../_shared/delivery.ts";
+import { accrueEarning } from "../_shared/riderPay.ts";
 
 /**
  * Single authenticated entry point for every delivery state change.
@@ -275,14 +276,44 @@ Deno.serve(async (req) => {
       if (next === "delivered") {
         const { data: order } = await admin
           .from("food_orders")
-          .select("payment_method, payment_status")
+          .select("payment_method, payment_status, total_ghs")
           .eq("id", delivery.food_order_id)
           .maybeSingle();
-        if (order?.payment_method === "cash_on_delivery" && order.payment_status !== "paid") {
-          await admin
-            .from("food_orders")
-            .update({ payment_status: "paid", paid_at: now })
-            .eq("id", delivery.food_order_id);
+
+        // Cash on delivery: the rider holds the hotel's money until staff
+        // confirm the remittance. The order is NOT auto-marked paid.
+        if (order?.payment_method === "cash_on_delivery") {
+          const due = Number(order.total_ghs) || 0;
+          const collectedRaw = Number(body?.cash_collected_ghs);
+          const collected = Number.isFinite(collectedRaw) && collectedRaw >= 0
+            ? Math.min(Math.round(collectedRaw * 100) / 100, due * 2)
+            : 0;
+          const { error: codErr } = await admin.from("cod_remittances").insert({
+            delivery_id: deliveryId,
+            food_order_id: delivery.food_order_id,
+            rider_id: delivery.rider_id,
+            amount_due_ghs: due,
+            cash_collected_ghs: collected,
+            amount_remitted_ghs: 0,
+            outstanding_ghs: Math.round(collected * 100) / 100,
+            collected_at: now,
+          });
+          if (codErr && !String(codErr.code).includes("23505")) {
+            console.error("cod remittance insert failed", codErr);
+          }
+          await audit("cod_collected", { amount_due_ghs: due, cash_collected_ghs: collected });
+        }
+
+        // Rider compensation — separate from anything the customer paid.
+        const accrual = await accrueEarning(admin, {
+          id: deliveryId,
+          rider_id: delivery.rider_id,
+          food_order_id: delivery.food_order_id,
+          distance_km: delivery.distance_km,
+          fee_ghs: delivery.fee_ghs,
+        });
+        if (accrual.created) {
+          await audit("rider_earning_accrued", { earning_ghs: accrual.earning_ghs });
         }
       }
 
