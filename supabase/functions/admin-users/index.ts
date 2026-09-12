@@ -28,7 +28,8 @@ Deno.serve(async (req) => {
       _role: "admin",
     });
     if (roleErr) return json({ error: "Role check failed" }, 500);
-    if (!isAdmin) return json({ error: "Forbidden: admin access required" }, 403);
+
+    const { data: isOps } = await admin.rpc("is_delivery_ops", { _user_id: callerId });
 
     let body: Record<string, unknown> = {};
     try {
@@ -37,6 +38,43 @@ Deno.serve(async (req) => {
       body = {};
     }
     const action = String(body.action ?? "");
+
+    // Rider login accounts may also be managed by the operations manager.
+    const RIDER_ACTIONS = ["create_rider_account", "set_rider_password"];
+    const allowed = RIDER_ACTIONS.includes(action) ? isAdmin || isOps : isAdmin;
+    if (!allowed) return json({ error: "Forbidden: admin access required" }, 403);
+
+    if (action === "create_rider_account") {
+      const email = String(body.email ?? "").trim().toLowerCase();
+      const password = String(body.password ?? "");
+      const fullName = String(body.full_name ?? "").trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: "A valid email is required" }, 400);
+      if (password.length < 8 || password.length > 72) {
+        return json({ error: "Password must be 8-72 characters" }, 400);
+      }
+
+      const { data: created, error: createErr } = await admin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: { full_name: fullName, rider: true },
+      });
+      if (createErr) return json({ error: createErr.message }, 400);
+
+      return json({ success: true, user_id: created.user?.id ?? null });
+    }
+
+    if (action === "set_rider_password") {
+      const userId = String(body.userId ?? "");
+      const password = String(body.password ?? "");
+      if (!/^[0-9a-f-]{36}$/i.test(userId)) return json({ error: "Invalid user id" }, 400);
+      if (password.length < 8 || password.length > 72) {
+        return json({ error: "Password must be 8-72 characters" }, 400);
+      }
+      const { error: updErr } = await admin.auth.admin.updateUserById(userId, { password });
+      if (updErr) return json({ error: updErr.message }, 400);
+      return json({ success: true });
+    }
 
     if (action === "list") {
       const { data: list, error: listErr } = await admin.auth.admin.listUsers({
