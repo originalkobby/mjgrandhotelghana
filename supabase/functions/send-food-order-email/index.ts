@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
     const deliveryFee = Number(order.delivery_fee_ghs ?? 0);
     const isDelivery = order.order_type === "delivery";
 
-    const firstName = String(order.guest_name || "Guest").trim().split(/\s+/)[0];
+    const firstName = String(order.guest_name || "Customer").trim().split(/\s+/)[0];
 
     const confirmedIntro = (() => {
       switch (order.order_type) {
