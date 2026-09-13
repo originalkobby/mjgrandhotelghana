@@ -42,7 +42,7 @@ export const DELIVERY_STATUS_TONE: Record<DeliveryStatus, string> = {
   failed: "bg-red-100 text-red-800 border-red-300",
 };
 
-/** Guest-facing progress steps used on the tracking page. */
+/** Customer-facing progress steps used on the tracking page. */
 export const TRACKING_STEPS: { key: DeliveryStatus; label: string; blurb: string }[] = [
   { key: "confirmed", label: "Confirmed", blurb: "The restaurant accepted your order" },
   { key: "preparing", label: "Preparing", blurb: "Our chefs are cooking" },

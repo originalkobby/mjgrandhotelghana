@@ -4,7 +4,7 @@ import { accrueEarning } from "../_shared/riderPay.ts";
 
 /**
  * Single authenticated entry point for every delivery state change.
- * Enforces role permissions, legal transitions, audit logging and guest emails
+ * Enforces role permissions, legal transitions, audit logging and customer emails
  * so no client can push a delivery into an invalid or unauthorised state.
  */
 
