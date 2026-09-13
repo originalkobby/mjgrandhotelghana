@@ -196,7 +196,7 @@ export default function AdminFoodOrders() {
         );
         if (mailError) throw mailError;
       } catch (mailErr) {
-        console.error("Guest email failed", mailErr);
+        console.error("Customer email failed", mailErr);
         toast.warning("Status saved, but the customer email could not be sent.");
       }
     }

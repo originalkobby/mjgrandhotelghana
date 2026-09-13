@@ -108,7 +108,7 @@ export default function RiderCompensationCard({ canEdit }: { canEdit: boolean })
       <CardHeader className="pb-3">
         <CardTitle className="text-base">Rider compensation</CardTitle>
         <p className="text-xs text-muted-foreground">
-          What the hotel pays the rider. This is separate from the delivery fee the guest pays.
+          What the hotel pays the rider. This is separate from the delivery fee the customer pays.
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -147,7 +147,7 @@ export default function RiderCompensationCard({ canEdit }: { canEdit: boolean })
         <p className="text-xs text-muted-foreground">
           Peak window:{" "}
           {peak ? `${pad(peak.start)}–${pad(peak.end)}` : "loading…"} — set once under Pricing and
-          timing above, and used for both the guest peak uplift and this rider bonus.
+          timing above, and used for both the customer peak uplift and this rider bonus.
         </p>
 
         {canEdit && (

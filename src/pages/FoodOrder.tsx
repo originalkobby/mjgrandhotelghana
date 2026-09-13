@@ -190,7 +190,7 @@ export default function FoodOrder() {
 
       const orderId = (data as any).order_id;
 
-      // Online payment: hand the guest over to Paystack before confirming.
+      // Online payment: hand the customer over to Paystack before confirming.
       if (isDelivery && paymentMethod === "paystack") {
         const { data: pay, error: payError } = await supabase.functions.invoke("food-payment", {
           body: { action: "initialize", order_id: orderId, origin: window.location.origin },

@@ -3,7 +3,7 @@ import { clientKey, corsHeaders, json, loadSettings, rateLimit } from "../_share
 
 /**
  * Public order tracking. Access is only ever granted through the delivery's
- * unguessable tracking token — no browsing of other guests' orders is possible.
+ * unguessable tracking token — no browsing of other customers' orders is possible.
  * Only non-sensitive fields are returned.
  */
 Deno.serve(async (req) => {
