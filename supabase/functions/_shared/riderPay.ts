@@ -94,6 +94,7 @@ export function computeRiderEarning(
   distanceKm: number,
   customerFeeGhs: number,
   at: Date = new Date(),
+  peakWindow: PeakWindow = DEFAULT_PEAK_WINDOW,
 ): EarningResult {
   const distance = Math.max(0, Number(distanceKm) || 0);
   const fee = Math.max(0, Number(customerFeeGhs) || 0);
