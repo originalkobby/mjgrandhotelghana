@@ -13,9 +13,16 @@ export type CompRule = {
   min_earning_ghs: number;
   max_earning_ghs: number;
   peak_bonus_ghs: number;
-  peak_start_hour: number;
-  peak_end_hour: number;
 };
+
+/**
+ * The peak window is a single, system-wide setting stored on
+ * `delivery_settings` — the same window that drives the guest peak uplift.
+ * Rider pay reads it from there so the two can never drift apart.
+ */
+export type PeakWindow = { peak_start_hour: number; peak_end_hour: number };
+
+export const DEFAULT_PEAK_WINDOW: PeakWindow = { peak_start_hour: 18, peak_end_hour: 21 };
 
 export const FALLBACK_RULE: CompRule = {
   id: null,
@@ -26,8 +33,6 @@ export const FALLBACK_RULE: CompRule = {
   min_earning_ghs: 0,
   max_earning_ghs: 200,
   peak_bonus_ghs: 0,
-  peak_start_hour: 18,
-  peak_end_hour: 21,
 };
 
 const round2 = (n: number) => Math.round((Number(n) || 0) * 100) / 100;
