@@ -136,6 +136,7 @@ Deno.serve(async (req) => {
       },
       rider,
       rider_location: riderLocation,
+      live_eta_minutes: liveEta,
       history: history ?? [],
       poll_seconds: Math.max(10, settings.rider_ping_seconds),
     });
