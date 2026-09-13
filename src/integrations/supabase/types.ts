@@ -952,6 +952,45 @@ export type Database = {
           },
         ]
       }
+      food_customers: {
+        Row: {
+          created_at: string
+          device_id: string
+          email: string
+          first_seen_at: string
+          full_name: string
+          id: string
+          last_seen_at: string
+          phone: string
+          updated_at: string
+          visit_count: number
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          email: string
+          first_seen_at?: string
+          full_name: string
+          id?: string
+          last_seen_at?: string
+          phone: string
+          updated_at?: string
+          visit_count?: number
+        }
+        Update: {
+          created_at?: string
+          device_id?: string
+          email?: string
+          first_seen_at?: string
+          full_name?: string
+          id?: string
+          last_seen_at?: string
+          phone?: string
+          updated_at?: string
+          visit_count?: number
+        }
+        Relationships: []
+      }
       food_order_items: {
         Row: {
           created_at: string
