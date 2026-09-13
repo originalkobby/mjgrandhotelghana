@@ -191,7 +191,7 @@ Deno.serve(async (req) => {
         delivery_id: delivery.id,
         new_status: delivery.status,
         actor_role: "system",
-        note: "Order placed by guest",
+        note: "Order placed by customer",
       });
     }
 

@@ -117,7 +117,7 @@ export default function RiderPortal() {
     load();
   }, [load]);
 
-  // Share the rider's position while a run is live so guests can follow it.
+  // Share the rider's position while a run is live so customers can follow it.
   useEffect(() => {
     const active = jobs.find((j) =>
       ["rider_accepted", "rider_picked_up", "on_the_way"].includes(j.status),
@@ -343,7 +343,7 @@ export default function RiderPortal() {
                 {job.food_orders?.phone && (
                   <Button asChild variant="outline" size="sm" className="border-gold/40 text-gold">
                     <a href={`tel:${job.food_orders.phone}`}>
-                      <Phone className="w-3.5 h-3.5 mr-1.5" /> Call guest
+                      <Phone className="w-3.5 h-3.5 mr-1.5" /> Call customer
                     </a>
                   </Button>
                 )}
@@ -416,7 +416,7 @@ export default function RiderPortal() {
           </DialogHeader>
           <div className="space-y-3">
             <p className="text-sm text-cream/60">
-              Amount due from the guest: GH₵{" "}
+              Amount due from the customer: GH₵{" "}
               {Number(cashJob?.food_orders?.total_ghs ?? 0).toFixed(2)}. This cash belongs to the
               hotel and must be handed over at reception.
             </p>

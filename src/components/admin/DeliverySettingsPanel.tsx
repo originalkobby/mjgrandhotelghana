@@ -36,8 +36,8 @@ const TOGGLES: { key: string; label: string; hint: string }[] = [
     label: "Automatic dispatch",
     hint: "Offer each ready order to the nearest free rider, then the next one if declined.",
   },
-  { key: "customer_tracking_enabled", label: "Customer tracking link", hint: "Let guests follow their order live." },
-  { key: "delivery_emails_enabled", label: "Delivery emails", hint: "Send status emails to the guest." },
+  { key: "customer_tracking_enabled", label: "Customer tracking link", hint: "Let customers follow their order live." },
+  { key: "delivery_emails_enabled", label: "Delivery emails", hint: "Send status emails to the customer." },
 ];
 
 export default function DeliverySettingsPanel({ canEdit }: { canEdit: boolean }) {
@@ -121,7 +121,7 @@ export default function DeliverySettingsPanel({ canEdit }: { canEdit: boolean })
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Service area shown to guests</Label>
+              <Label>Service area shown to customers</Label>
               <Input
                 value={settings.service_area_label ?? ""}
                 disabled={!canEdit}

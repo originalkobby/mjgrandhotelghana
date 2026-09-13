@@ -195,7 +195,7 @@ export default function CashReconciliationPanel() {
             Cash held by riders · {money(cashOutstanding)} outstanding
           </CardTitle>
           <p className="text-xs text-muted-foreground">
-            Cash the rider collected from guests belongs to the hotel until it is handed over.
+            Cash the rider collected from customers belongs to the hotel until it is handed over.
           </p>
         </CardHeader>
         <CardContent>
