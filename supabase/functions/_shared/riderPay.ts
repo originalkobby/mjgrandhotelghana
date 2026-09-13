@@ -169,11 +169,16 @@ export async function accrueEarning(
     .maybeSingle();
   if (existing) return { created: false, reason: "already_accrued" };
 
-  const rule = await loadCompRule(supabase);
+  const [rule, peakWindow] = await Promise.all([
+    loadCompRule(supabase),
+    loadPeakWindow(supabase),
+  ]);
   const { earning_ghs, snapshot } = computeRiderEarning(
     rule,
     Number(delivery.distance_km),
     Number(delivery.fee_ghs),
+    new Date(),
+    peakWindow,
   );
 
   const { error } = await supabase.from("rider_earnings").insert({
