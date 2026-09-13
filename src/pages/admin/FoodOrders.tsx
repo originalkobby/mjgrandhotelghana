@@ -77,7 +77,7 @@ const DELIVERY_STATUS_SEQUENCE: FoodOrder["status"][] = [
 const STATUS_LABELS: Record<FoodOrder["status"], string> = {
   pending: "Pending",
   confirmed: "Confirmed",
-  ready: "Ready",
+  ready: "Ready for pick-up",
   out_for_delivery: "On the way",
   completed: "Completed",
   cancelled: "Cancelled",
