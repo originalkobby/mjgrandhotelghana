@@ -101,16 +101,55 @@ const TYPE_LABELS: Record<FoodOrder["order_type"], string> = {
   delivery: "Delivery",
 };
 
+/**
+ * Delivery orders are driven by the delivery record, not by the order row on
+ * its own — that is the only path that wakes the automatic dispatch engine.
+ */
+const ORDER_TO_DELIVERY_STATUS: Partial<Record<FoodOrder["status"], string>> = {
+  confirmed: "confirmed",
+  ready: "ready_for_pickup",
+  cancelled: "cancelled",
+};
+
+// Forward transitions staff are allowed to drive (mirrors the edge function).
+const STAFF_DELIVERY_TRANSITIONS: Record<string, string[]> = {
+  pending_review: ["confirmed", "cancelled"],
+  review_rejected: ["confirmed", "cancelled"],
+  confirmed: ["preparing", "cancelled"],
+  preparing: ["ready_for_pickup", "cancelled"],
+  ready_for_pickup: ["cancelled"],
+};
+
+/** Shortest legal chain of delivery statuses from `from` to `target`. */
+function deliveryPath(from: string, target: string): string[] | null {
+  if (from === target) return [];
+  const queue: string[][] = [[from]];
+  const seen = new Set([from]);
+  while (queue.length) {
+    const path = queue.shift()!;
+    for (const next of STAFF_DELIVERY_TRANSITIONS[path[path.length - 1]] ?? []) {
+      if (seen.has(next)) continue;
+      const extended = [...path, next];
+      if (next === target) return extended.slice(1);
+      seen.add(next);
+      queue.push(extended);
+    }
+  }
+  return null;
+}
+
 async function fetchFoodOrders(): Promise<FoodOrder[]> {
   const { data, error } = await supabase
     .from("food_orders")
-    .select("*, delivery_zones(name), food_order_items(*)")
+    .select("*, delivery_zones(name), deliveries(id, status), food_order_items(*)")
     .order("created_at", { ascending: false })
     .limit(500);
 
   if (error) throw error;
   return (data as unknown as FoodOrder[]) ?? [];
 }
+
+
 
 
 export default function AdminFoodOrders() {
