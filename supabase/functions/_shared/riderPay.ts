@@ -58,11 +58,29 @@ export async function loadCompRule(supabase: any): Promise<CompRule> {
   }
 }
 
-export function isPeak(rule: CompRule, at: Date): boolean {
+/** Loads the system-wide peak window; never throws. */
+export async function loadPeakWindow(supabase: any): Promise<PeakWindow> {
+  try {
+    const { data } = await supabase
+      .from("delivery_settings")
+      .select("peak_start_hour, peak_end_hour")
+      .limit(1)
+      .maybeSingle();
+    if (!data) return DEFAULT_PEAK_WINDOW;
+    return {
+      peak_start_hour: Number(data.peak_start_hour ?? DEFAULT_PEAK_WINDOW.peak_start_hour),
+      peak_end_hour: Number(data.peak_end_hour ?? DEFAULT_PEAK_WINDOW.peak_end_hour),
+    };
+  } catch {
+    return DEFAULT_PEAK_WINDOW;
+  }
+}
+
+export function isPeak(window: PeakWindow, at: Date): boolean {
   const h = at.getUTCHours(); // Accra is UTC+0 year round
-  return rule.peak_start_hour <= rule.peak_end_hour
-    ? h >= rule.peak_start_hour && h <= rule.peak_end_hour
-    : h >= rule.peak_start_hour || h <= rule.peak_end_hour;
+  return window.peak_start_hour <= window.peak_end_hour
+    ? h >= window.peak_start_hour && h <= window.peak_end_hour
+    : h >= window.peak_start_hour || h <= window.peak_end_hour;
 }
 
 export type EarningResult = {
