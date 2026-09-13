@@ -38,6 +38,7 @@ export default function RiderCompensationCard({ canEdit }: { canEdit: boolean })
   const [rule, setRule] = useState<Rule | null>(null);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [peak, setPeak] = useState<{ start: number; end: number } | null>(null);
 
   useEffect(() => {
     supabase
@@ -48,6 +49,14 @@ export default function RiderCompensationCard({ canEdit }: { canEdit: boolean })
       .then(({ data }) => {
         setRule(data ?? null);
         setLoading(false);
+      });
+    supabase
+      .from("delivery_settings")
+      .select("peak_start_hour, peak_end_hour")
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setPeak({ start: Number(data.peak_start_hour), end: Number(data.peak_end_hour) });
       });
   }, []);
 
