@@ -63,6 +63,7 @@ type FoodOrder = {
   delivery_landmark: string | null;
   delivery_fee_ghs: number | null;
   delivery_zones: { name: string } | null;
+  deliveries: { id: string; status: string }[] | null;
   food_order_items: FoodOrderItem[];
 };
 
