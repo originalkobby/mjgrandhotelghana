@@ -29,6 +29,8 @@ import {
   Wallet,
 } from "lucide-react";
 import DeliveryLocationPicker, { PickedLocation } from "@/components/delivery/DeliveryLocationPicker";
+import CustomerDetailsDialog from "@/components/food/CustomerDetailsDialog";
+import { getCachedCustomer, type CustomerDetails } from "@/lib/customerDevice";
 
 function parsePrice(value: string): number {
   if (!value) return 0;
@@ -106,6 +108,26 @@ export default function FoodOrder() {
     setItemName(initialItem);
     setItemPrice(initialPrice);
   }, [initialItem, initialPrice]);
+
+  // First-time device: capture details once, otherwise prefill from this device.
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  useEffect(() => {
+    const cached = getCachedCustomer();
+    if (cached) {
+      setGuestName((v) => v || cached.full_name);
+      setEmail((v) => v || cached.email);
+      setPhone((v) => v || cached.phone);
+    } else {
+      setDetailsOpen(true);
+    }
+  }, []);
+
+  function applyCustomer(details: CustomerDetails) {
+    setGuestName(details.full_name);
+    setEmail(details.email);
+    setPhone(details.phone);
+    setDetailsOpen(false);
+  }
 
   const isDelivery = orderType === "delivery";
   const unitPrice = useMemo(() => parsePrice(itemPrice), [itemPrice]);
@@ -513,6 +535,12 @@ export default function FoodOrder() {
           )}
         </motion.div>
       </div>
+
+      <CustomerDetailsDialog
+        open={detailsOpen}
+        onOpenChange={setDetailsOpen}
+        onSaved={applyCustomer}
+      />
 
       <Footer />
     </div>
