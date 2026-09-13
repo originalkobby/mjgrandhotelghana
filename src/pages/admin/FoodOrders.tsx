@@ -212,8 +212,55 @@ export default function AdminFoodOrders() {
     });
   }, [orders, statusFilter, typeFilter, search]);
 
-  async function updateStatus(id: string, newStatus: FoodOrder["status"]) {
+  /**
+   * Drives a delivery order through the delivery record so the dispatch engine,
+   * status history and customer emails all fire. Returns false when this order
+   * cannot be handled that way, so the caller falls back to a plain update.
+   */
+  async function advanceDelivery(
+    order: FoodOrder,
+    newStatus: FoodOrder["status"],
+  ): Promise<boolean> {
+    const delivery = order.deliveries?.[0];
+    const target = ORDER_TO_DELIVERY_STATUS[newStatus];
+    if (order.order_type !== "delivery" || !delivery || !target) return false;
+
+    const path = deliveryPath(delivery.status, target);
+    if (path === null) return false;
+    if (path.length === 0) return false;
+
+    for (const status of path) {
+      const { data, error } = await supabase.functions.invoke("delivery-action", {
+        body: { action: "update_status", delivery_id: delivery.id, status },
+      });
+      const message = (error as { message?: string } | null)?.message ?? (data as { error?: string } | null)?.error;
+      if (message) {
+        console.error("delivery-action failed", status, message);
+        return false;
+      }
+    }
+    return true;
+  }
+
+  async function updateStatus(order: FoodOrder, newStatus: FoodOrder["status"]) {
+    const id = order.id;
     setUpdatingId(id);
+
+    // Delivery orders: let the delivery pipeline own the change.
+    let handled = false;
+    try {
+      handled = await advanceDelivery(order, newStatus);
+    } catch (err) {
+      console.error("delivery advance failed", err);
+    }
+
+    if (handled) {
+      setUpdatingId(null);
+      queryClient.invalidateQueries({ queryKey: ["admin-food-orders"] });
+      toast.success(`Order marked ${STATUS_LABELS[newStatus].toLowerCase()}`);
+      return;
+    }
+
     const { error } = await supabase.from("food_orders").update({ status: newStatus }).eq("id", id);
     setUpdatingId(null);
     if (error) {
