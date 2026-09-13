@@ -16,6 +16,15 @@ import {
   stepIndex,
 } from "@/lib/deliveryStatus";
 
+/** Human-friendly age of the rider's last position fix. */
+function formatFixAge(recordedAt?: string | null): string {
+  if (!recordedAt) return "just now";
+  const ms = Date.now() - Date.parse(recordedAt);
+  if (!Number.isFinite(ms) || ms < 60_000) return "just now";
+  const minutes = Math.round(ms / 60_000);
+  return `${minutes} min ago`;
+}
+
 export default function OrderTracking() {
   const { token } = useParams<{ token: string }>();
   const [data, setData] = useState<any>(null);
