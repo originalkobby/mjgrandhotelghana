@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { clientKey, corsHeaders, json, loadSettings, rateLimit } from "../_shared/delivery.ts";
-import { computeRiderEarning, loadCompRule } from "../_shared/riderPay.ts";
+import { computeRiderEarning, loadCompRule, loadPeakWindow } from "../_shared/riderPay.ts";
 import { ACTIVE_JOB_STATUSES, type Candidate, rankRiders } from "../_shared/dispatch.ts";
 
 /**
