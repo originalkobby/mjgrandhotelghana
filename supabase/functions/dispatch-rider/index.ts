@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { clientKey, corsHeaders, json, loadSettings, rateLimit } from "../_shared/delivery.ts";
-import { computeRiderEarning, loadCompRule } from "../_shared/riderPay.ts";
+import { computeRiderEarning, loadCompRule, loadPeakWindow } from "../_shared/riderPay.ts";
 import { ACTIVE_JOB_STATUSES, type Candidate, rankRiders } from "../_shared/dispatch.ts";
 
 /**
@@ -139,11 +139,13 @@ async function offerNext(
   if (!ranked.length) return await flagNeedsRider("no_available_rider");
 
   const pick = ranked[0];
-  const rule = await loadCompRule(db);
+  const [rule, peakWindow] = await Promise.all([loadCompRule(db), loadPeakWindow(db)]);
   const { earning_ghs } = computeRiderEarning(
     rule,
     Number(delivery.distance_km),
     Number(delivery.fee_ghs),
+    new Date(),
+    peakWindow,
   );
 
   const { error } = await db.from("delivery_offers").insert({

@@ -66,6 +66,20 @@ export default function RiderPortal() {
   const idleWatchId = useRef<number | null>(null);
   const [cashJob, setCashJob] = useState<Job | null>(null);
   const [cashAmount, setCashAmount] = useState("");
+  // Configurable under Deliveries → Settings ("Tracking page refresh").
+  const [pingSeconds, setPingSeconds] = useState(30);
+
+  useEffect(() => {
+    supabase
+      .from("delivery_settings")
+      .select("rider_ping_seconds")
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        const n = Number(data?.rider_ping_seconds);
+        if (Number.isFinite(n) && n > 0) setPingSeconds(Math.max(10, n));
+      });
+  }, []);
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
@@ -135,8 +149,8 @@ export default function RiderPortal() {
   }, [jobs, rider?.id]);
 
   // Keep a position on file while idle so the dispatch engine can rank this
-  // rider by distance for the next offer. Throttled to one ping per ~30s. The
-  // higher-frequency watch above already covers active runs.
+  // rider by distance for the next offer. Throttled to the configured interval.
+  // The higher-frequency watch above already covers active runs.
   useEffect(() => {
     if (!rider?.id || !navigator.geolocation) return;
     const active = jobs.some((j) =>
@@ -147,7 +161,7 @@ export default function RiderPortal() {
     idleWatchId.current = navigator.geolocation.watchPosition(
       async (pos) => {
         const now = Date.now();
-        if (now - last < 30_000) return;
+        if (now - last < pingSeconds * 1000) return;
         last = now;
         await supabase.from("rider_locations").insert({
           rider_id: rider.id,
@@ -167,7 +181,7 @@ export default function RiderPortal() {
       if (idleWatchId.current !== null) navigator.geolocation.clearWatch(idleWatchId.current);
       idleWatchId.current = null;
     };
-  }, [jobs, rider?.id]);
+  }, [jobs, rider?.id, pingSeconds]);
 
   async function signIn(e: React.FormEvent) {
     e.preventDefault();

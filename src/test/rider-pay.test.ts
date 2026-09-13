@@ -51,12 +51,17 @@ describe("rider compensation models", () => {
       model: "fixed",
       base_ghs: 20,
       peak_bonus_ghs: 5,
-      peak_start_hour: 18,
-      peak_end_hour: 21,
       min_earning_ghs: 0,
     });
     expect(computeRiderEarning(r, 4, 30, noon).earning_ghs).toBe(20);
     expect(computeRiderEarning(r, 4, 30, evening).earning_ghs).toBe(25);
+  });
+
+  it("uses the delivery-settings peak window, not a rider-specific one", () => {
+    const r = rule({ model: "fixed", base_ghs: 20, peak_bonus_ghs: 5, min_earning_ghs: 0 });
+    const lunchWindow = { peak_start_hour: 11, peak_end_hour: 13 };
+    expect(computeRiderEarning(r, 4, 30, noon, lunchWindow).earning_ghs).toBe(25);
+    expect(computeRiderEarning(r, 4, 30, evening, lunchWindow).earning_ghs).toBe(20);
   });
 
   it("never returns a negative earning and is deterministic", () => {

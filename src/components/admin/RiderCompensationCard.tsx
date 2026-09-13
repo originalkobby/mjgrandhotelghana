@@ -30,14 +30,15 @@ const FIELDS: { key: string; label: string }[] = [
   { key: "min_earning_ghs", label: "Minimum earning (GH₵)" },
   { key: "max_earning_ghs", label: "Maximum earning (GH₵)" },
   { key: "peak_bonus_ghs", label: "Peak-time bonus (GH₵)" },
-  { key: "peak_start_hour", label: "Peak starts (hour, 0–23)" },
-  { key: "peak_end_hour", label: "Peak ends (hour, 0–23)" },
 ];
+
+const pad = (h: number) => `${String(h).padStart(2, "0")}:00`;
 
 export default function RiderCompensationCard({ canEdit }: { canEdit: boolean }) {
   const [rule, setRule] = useState<Rule | null>(null);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [peak, setPeak] = useState<{ start: number; end: number } | null>(null);
 
   useEffect(() => {
     supabase
@@ -48,6 +49,14 @@ export default function RiderCompensationCard({ canEdit }: { canEdit: boolean })
       .then(({ data }) => {
         setRule(data ?? null);
         setLoading(false);
+      });
+    supabase
+      .from("delivery_settings")
+      .select("peak_start_hour, peak_end_hour")
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setPeak({ start: Number(data.peak_start_hour), end: Number(data.peak_end_hour) });
       });
   }, []);
 
@@ -134,6 +143,12 @@ export default function RiderCompensationCard({ canEdit }: { canEdit: boolean })
             </div>
           ))}
         </div>
+
+        <p className="text-xs text-muted-foreground">
+          Peak window:{" "}
+          {peak ? `${pad(peak.start)}–${pad(peak.end)}` : "loading…"} — set once under Pricing and
+          timing above, and used for both the guest peak uplift and this rider bonus.
+        </p>
 
         {canEdit && (
           <div className="flex justify-end">

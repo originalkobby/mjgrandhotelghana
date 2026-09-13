@@ -13,9 +13,16 @@ export type CompRule = {
   min_earning_ghs: number;
   max_earning_ghs: number;
   peak_bonus_ghs: number;
-  peak_start_hour: number;
-  peak_end_hour: number;
 };
+
+/**
+ * The peak window is a single, system-wide setting stored on
+ * `delivery_settings` — the same window that drives the guest peak uplift.
+ * Rider pay reads it from there so the two can never drift apart.
+ */
+export type PeakWindow = { peak_start_hour: number; peak_end_hour: number };
+
+export const DEFAULT_PEAK_WINDOW: PeakWindow = { peak_start_hour: 18, peak_end_hour: 21 };
 
 export const FALLBACK_RULE: CompRule = {
   id: null,
@@ -26,8 +33,6 @@ export const FALLBACK_RULE: CompRule = {
   min_earning_ghs: 0,
   max_earning_ghs: 200,
   peak_bonus_ghs: 0,
-  peak_start_hour: 18,
-  peak_end_hour: 21,
 };
 
 const round2 = (n: number) => Math.round((Number(n) || 0) * 100) / 100;
@@ -53,11 +58,29 @@ export async function loadCompRule(supabase: any): Promise<CompRule> {
   }
 }
 
-export function isPeak(rule: CompRule, at: Date): boolean {
+/** Loads the system-wide peak window; never throws. */
+export async function loadPeakWindow(supabase: any): Promise<PeakWindow> {
+  try {
+    const { data } = await supabase
+      .from("delivery_settings")
+      .select("peak_start_hour, peak_end_hour")
+      .limit(1)
+      .maybeSingle();
+    if (!data) return DEFAULT_PEAK_WINDOW;
+    return {
+      peak_start_hour: Number(data.peak_start_hour ?? DEFAULT_PEAK_WINDOW.peak_start_hour),
+      peak_end_hour: Number(data.peak_end_hour ?? DEFAULT_PEAK_WINDOW.peak_end_hour),
+    };
+  } catch {
+    return DEFAULT_PEAK_WINDOW;
+  }
+}
+
+export function isPeak(window: PeakWindow, at: Date): boolean {
   const h = at.getUTCHours(); // Accra is UTC+0 year round
-  return rule.peak_start_hour <= rule.peak_end_hour
-    ? h >= rule.peak_start_hour && h <= rule.peak_end_hour
-    : h >= rule.peak_start_hour || h <= rule.peak_end_hour;
+  return window.peak_start_hour <= window.peak_end_hour
+    ? h >= window.peak_start_hour && h <= window.peak_end_hour
+    : h >= window.peak_start_hour || h <= window.peak_end_hour;
 }
 
 export type EarningResult = {
@@ -71,6 +94,7 @@ export function computeRiderEarning(
   distanceKm: number,
   customerFeeGhs: number,
   at: Date = new Date(),
+  peakWindow: PeakWindow = DEFAULT_PEAK_WINDOW,
 ): EarningResult {
   const distance = Math.max(0, Number(distanceKm) || 0);
   const fee = Math.max(0, Number(customerFeeGhs) || 0);
@@ -94,7 +118,7 @@ export function computeRiderEarning(
       break;
   }
 
-  const peak = rule.peak_bonus_ghs > 0 && isPeak(rule, at);
+  const peak = rule.peak_bonus_ghs > 0 && isPeak(peakWindow, at);
   const withBonus = raw + (peak ? rule.peak_bonus_ghs : 0);
   const clamped = Math.min(
     rule.max_earning_ghs,
@@ -113,6 +137,7 @@ export function computeRiderEarning(
       customer_fee_ghs: fee,
       raw_ghs: round2(raw),
       peak_applied: peak,
+      peak_window: peakWindow,
       peak_bonus_ghs: peak ? rule.peak_bonus_ghs : 0,
       min_earning_ghs: rule.min_earning_ghs,
       max_earning_ghs: rule.max_earning_ghs,
@@ -144,11 +169,16 @@ export async function accrueEarning(
     .maybeSingle();
   if (existing) return { created: false, reason: "already_accrued" };
 
-  const rule = await loadCompRule(supabase);
+  const [rule, peakWindow] = await Promise.all([
+    loadCompRule(supabase),
+    loadPeakWindow(supabase),
+  ]);
   const { earning_ghs, snapshot } = computeRiderEarning(
     rule,
     Number(delivery.distance_km),
     Number(delivery.fee_ghs),
+    new Date(),
+    peakWindow,
   );
 
   const { error } = await supabase.from("rider_earnings").insert({

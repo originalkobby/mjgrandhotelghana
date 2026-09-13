@@ -24,7 +24,7 @@ const NUMBER_FIELDS: { key: string; label: string; hint?: string; step?: string 
   { key: "peak_uplift_percent", label: "Peak uplift (%)" },
   { key: "default_prep_minutes", label: "Kitchen prep time (minutes)" },
   { key: "eta_buffer_minutes", label: "Delivery time buffer (minutes)" },
-  { key: "rider_ping_seconds", label: "Rider location update (seconds)" },
+  { key: "rider_ping_seconds", label: "Tracking page refresh (seconds)" },
   { key: "offer_timeout_seconds", label: "Rider has to respond within (seconds)" },
   { key: "max_dispatch_attempts", label: "Riders to try before asking staff" },
 ];
