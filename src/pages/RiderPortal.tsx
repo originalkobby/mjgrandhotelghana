@@ -161,7 +161,7 @@ export default function RiderPortal() {
     idleWatchId.current = navigator.geolocation.watchPosition(
       async (pos) => {
         const now = Date.now();
-        if (now - last < 30_000) return;
+        if (now - last < pingSeconds * 1000) return;
         last = now;
         await supabase.from("rider_locations").insert({
           rider_id: rider.id,
