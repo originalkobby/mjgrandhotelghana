@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { clientKey, corsHeaders, json, loadSettings, rateLimit } from "../_shared/delivery.ts";
+import { liveEtaMinutes } from "../_shared/eta.ts";
 
 /**
  * Public order tracking. Access is only ever granted through the delivery's
