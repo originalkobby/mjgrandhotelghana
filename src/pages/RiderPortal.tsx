@@ -149,8 +149,8 @@ export default function RiderPortal() {
   }, [jobs, rider?.id]);
 
   // Keep a position on file while idle so the dispatch engine can rank this
-  // rider by distance for the next offer. Throttled to one ping per ~30s. The
-  // higher-frequency watch above already covers active runs.
+  // rider by distance for the next offer. Throttled to the configured interval.
+  // The higher-frequency watch above already covers active runs.
   useEffect(() => {
     if (!rider?.id || !navigator.geolocation) return;
     const active = jobs.some((j) =>
