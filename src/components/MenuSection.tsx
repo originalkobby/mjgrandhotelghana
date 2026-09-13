@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useOrderGate } from "@/hooks/useOrderGate";
 
 type MenuItem = {
   name: string;
