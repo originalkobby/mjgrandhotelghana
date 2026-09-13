@@ -66,6 +66,20 @@ export default function RiderPortal() {
   const idleWatchId = useRef<number | null>(null);
   const [cashJob, setCashJob] = useState<Job | null>(null);
   const [cashAmount, setCashAmount] = useState("");
+  // Configurable under Deliveries → Settings ("Tracking page refresh").
+  const [pingSeconds, setPingSeconds] = useState(30);
+
+  useEffect(() => {
+    supabase
+      .from("delivery_settings")
+      .select("rider_ping_seconds")
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        const n = Number(data?.rider_ping_seconds);
+        if (Number.isFinite(n) && n > 0) setPingSeconds(Math.max(10, n));
+      });
+  }, []);
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
