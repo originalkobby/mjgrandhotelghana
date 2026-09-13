@@ -21,7 +21,7 @@ export const DELIVERY_STATUS_LABELS: Record<DeliveryStatus, string> = {
   rider_assigned: "Rider assigned",
   rider_accepted: "Rider accepted",
   rider_picked_up: "Picked up",
-  on_the_way: "On its way",
+  on_the_way: "On the way",
   delivered: "Delivered",
   cancelled: "Cancelled",
   failed: "Failed",
@@ -48,7 +48,7 @@ export const TRACKING_STEPS: { key: DeliveryStatus; label: string; blurb: string
   { key: "preparing", label: "Preparing", blurb: "Our chefs are cooking" },
   { key: "ready_for_pickup", label: "Ready", blurb: "Packed and waiting for a rider" },
   { key: "rider_picked_up", label: "Picked up", blurb: "Your rider has your order" },
-  { key: "on_the_way", label: "On its way", blurb: "Heading to your address" },
+  { key: "on_the_way", label: "On the way", blurb: "Heading to your address" },
   { key: "delivered", label: "Delivered", blurb: "Enjoy your meal" },
 ];
 
