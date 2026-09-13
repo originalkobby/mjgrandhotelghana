@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-import { Bike, Loader2, MapPin, Navigation, Phone } from "lucide-react";
+import { Bike, Eye, EyeOff, Loader2, MapPin, Navigation, Phone } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
@@ -56,6 +56,7 @@ export default function RiderPortal() {
   const [checking, setChecking] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPw, setShowPw] = useState(false);
   const [signingIn, setSigningIn] = useState(false);
 
   const [rider, setRider] = useState<any>(null);
