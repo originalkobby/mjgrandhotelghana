@@ -118,7 +118,7 @@ export function computeRiderEarning(
       break;
   }
 
-  const peak = rule.peak_bonus_ghs > 0 && isPeak(rule, at);
+  const peak = rule.peak_bonus_ghs > 0 && isPeak(peakWindow, at);
   const withBonus = raw + (peak ? rule.peak_bonus_ghs : 0);
   const clamped = Math.min(
     rule.max_earning_ghs,
