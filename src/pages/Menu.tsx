@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import SEO from "@/components/SEO";
 import { Link } from "react-router-dom";
+import { useOrderGate } from "@/hooks/useOrderGate";
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -55,6 +56,7 @@ const containerVariants = {
 
 const CompactSection = ({ title, items }: { title: string; items: { name: string; description: string; price: string }[] }) => {
   const [cols, setCols] = useState(1);
+  const { handleOrderClick, gateDialog } = useOrderGate();
 
   useEffect(() => {
     const update = () => {
@@ -84,10 +86,13 @@ const CompactSection = ({ title, items }: { title: string; items: { name: string
         viewport={{ once: true, margin: "-50px" }}
         className="grid grid-cols-1 sm:grid-cols-3 gap-4"
       >
-        {items.map((item, i) => (
+        {items.map((item, i) => {
+          const orderUrl = `/food-order?item=${encodeURIComponent(item.name)}&price=${encodeURIComponent(item.price)}&category=${encodeURIComponent(title)}`;
+          return (
           <Link
             key={i}
-            to={`/food-order?item=${encodeURIComponent(item.name)}&price=${encodeURIComponent(item.price)}&category=${encodeURIComponent(title)}`}
+            to={orderUrl}
+            onClick={(e) => handleOrderClick(e, orderUrl)}
             className="group block"
           >
             <motion.div
