@@ -30,9 +30,9 @@ const FIELDS: { key: string; label: string }[] = [
   { key: "min_earning_ghs", label: "Minimum earning (GH₵)" },
   { key: "max_earning_ghs", label: "Maximum earning (GH₵)" },
   { key: "peak_bonus_ghs", label: "Peak-time bonus (GH₵)" },
-  { key: "peak_start_hour", label: "Peak starts (hour, 0–23)" },
-  { key: "peak_end_hour", label: "Peak ends (hour, 0–23)" },
 ];
+
+const pad = (h: number) => `${String(h).padStart(2, "0")}:00`;
 
 export default function RiderCompensationCard({ canEdit }: { canEdit: boolean }) {
   const [rule, setRule] = useState<Rule | null>(null);
