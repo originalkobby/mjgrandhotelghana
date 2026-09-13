@@ -249,13 +249,23 @@ export default function RiderPortal() {
               </div>
               <div className="space-y-1.5">
                 <Label className="text-cream/70 text-sm">Password</Label>
-                <Input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="bg-charcoal border-cream/10 text-cream"
-                  required
-                />
+                <div className="relative">
+                  <Input
+                    type={showPw ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="bg-charcoal border-cream/10 text-cream pr-10"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPw((s) => !s)}
+                    aria-label={showPw ? "Hide password" : "Show password"}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-cream/50 hover:text-cream transition-colors"
+                  >
+                    {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
               <Button type="submit" className="w-full" disabled={signingIn}>
                 {signingIn ? "Signing in…" : "Sign in"}
