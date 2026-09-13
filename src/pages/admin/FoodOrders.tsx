@@ -78,7 +78,7 @@ const STATUS_LABELS: Record<FoodOrder["status"], string> = {
   pending: "Pending",
   confirmed: "Confirmed",
   ready: "Ready",
-  out_for_delivery: "On its way",
+  out_for_delivery: "On the way",
   completed: "Completed",
   cancelled: "Cancelled",
 };
