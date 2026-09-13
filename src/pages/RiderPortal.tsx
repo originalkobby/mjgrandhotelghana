@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-import { Bike, Loader2, MapPin, Navigation, Phone } from "lucide-react";
+import { Bike, Eye, EyeOff, Loader2, MapPin, Navigation, Phone } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
@@ -56,6 +56,7 @@ export default function RiderPortal() {
   const [checking, setChecking] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPw, setShowPw] = useState(false);
   const [signingIn, setSigningIn] = useState(false);
 
   const [rider, setRider] = useState<any>(null);
@@ -248,13 +249,23 @@ export default function RiderPortal() {
               </div>
               <div className="space-y-1.5">
                 <Label className="text-cream/70 text-sm">Password</Label>
-                <Input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="bg-charcoal border-cream/10 text-cream"
-                  required
-                />
+                <div className="relative">
+                  <Input
+                    type={showPw ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="bg-charcoal border-cream/10 text-cream pr-10"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPw((s) => !s)}
+                    aria-label={showPw ? "Hide password" : "Show password"}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-cream/50 hover:text-cream transition-colors"
+                  >
+                    {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
               <Button type="submit" className="w-full" disabled={signingIn}>
                 {signingIn ? "Signing in…" : "Sign in"}
