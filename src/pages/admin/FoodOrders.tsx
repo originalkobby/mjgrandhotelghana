@@ -123,6 +123,7 @@ export default function AdminFoodOrders() {
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const isAdmin = role === "admin";
+  const [view, setView] = useState<"orders" | "customers">("orders");
 
   const { data: orders, isLoading } = useQuery({
     queryKey: ["admin-food-orders"],
@@ -265,8 +266,37 @@ export default function AdminFoodOrders() {
     );
   }
 
+  const viewTabs = (
+    <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-muted w-fit">
+      {(["orders", "customers"] as const).map((v) => (
+        <button
+          key={v}
+          type="button"
+          onClick={() => setView(v)}
+          className={`px-3 py-1.5 text-xs uppercase tracking-wider rounded-md transition-colors ${
+            view === v
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          {v === "orders" ? "Orders" : "Customers"}
+        </button>
+      ))}
+    </div>
+  );
+
+  if (view === "customers") {
+    return (
+      <div className="flex-1 min-h-0 flex flex-col gap-6">
+        {viewTabs}
+        <FoodCustomersPanel isAdmin={isAdmin} />
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 min-h-0 flex flex-col gap-6">
+      {viewTabs}
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div className="flex items-center gap-3">
           <div>
