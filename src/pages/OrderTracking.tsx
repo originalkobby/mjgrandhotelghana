@@ -16,6 +16,15 @@ import {
   stepIndex,
 } from "@/lib/deliveryStatus";
 
+/** Human-friendly age of the rider's last position fix. */
+function formatFixAge(recordedAt?: string | null): string {
+  if (!recordedAt) return "just now";
+  const ms = Date.now() - Date.parse(recordedAt);
+  if (!Number.isFinite(ms) || ms < 60_000) return "just now";
+  const minutes = Math.round(ms / 60_000);
+  return `${minutes} min ago`;
+}
+
 export default function OrderTracking() {
   const { token } = useParams<{ token: string }>();
   const [data, setData] = useState<any>(null);
@@ -207,10 +216,22 @@ export default function OrderTracking() {
                       {data.delivery.dest_address}
                       {data.delivery.dest_landmark ? ` (${data.delivery.dest_landmark})` : ""}
                     </p>
-                    <p>
-                      <span className="text-cream/40">Estimated arrival:</span>{" "}
-                      {data.delivery.eta_min_minutes}–{data.delivery.eta_max_minutes} minutes from confirmation
-                    </p>
+                    {data.live_eta_minutes ? (
+                      <div>
+                        <p>
+                          <span className="text-cream/40">Arriving in about</span>{" "}
+                          <span className="text-gold">{data.live_eta_minutes} minutes</span>
+                        </p>
+                        <p className="text-xs text-cream/35">
+                          Updated {formatFixAge(data.rider_location?.recorded_at)}
+                        </p>
+                      </div>
+                    ) : (
+                      <p>
+                        <span className="text-cream/40">Estimated arrival:</span>{" "}
+                        {data.delivery.eta_min_minutes}–{data.delivery.eta_max_minutes} minutes from confirmation
+                      </p>
+                    )}
                     {data.rider && (
                       <p className="flex items-center gap-2">
                         <Bike className="w-4 h-4 text-gold" /> {data.rider.first_name} ·{" "}
