@@ -143,8 +143,10 @@ const MenuSection = ({ title, subtitle, items, image, imageAlt, reverse = false 
                   </div>
                 </motion.div>
               </Link>
-            ))}
+              );
+            })}
           </motion.div>
+          {gateDialog}
         </div>
       </div>
     </section>
