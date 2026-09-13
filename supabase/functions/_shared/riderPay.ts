@@ -137,6 +137,7 @@ export function computeRiderEarning(
       customer_fee_ghs: fee,
       raw_ghs: round2(raw),
       peak_applied: peak,
+      peak_window: peakWindow,
       peak_bonus_ghs: peak ? rule.peak_bonus_ghs : 0,
       min_earning_ghs: rule.min_earning_ghs,
       max_earning_ghs: rule.max_earning_ghs,
