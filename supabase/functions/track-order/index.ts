@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
     const { data: delivery, error } = await supabase
       .from("deliveries")
       .select(
-        "id, status, dest_address, dest_landmark, dest_lat, dest_lng, origin_lat, origin_lng, distance_km, eta_min_minutes, eta_max_minutes, fee_ghs, assigned_at, accepted_at, picked_up_at, on_the_way_at, delivered_at, cancelled_at, created_at, rider_id, food_order_id",
+        "id, status, dest_address, dest_landmark, dest_lat, dest_lng, origin_lat, origin_lng, distance_km, travel_minutes, eta_min_minutes, eta_max_minutes, fee_ghs, assigned_at, accepted_at, picked_up_at, on_the_way_at, delivered_at, cancelled_at, created_at, rider_id, food_order_id",
       )
       .eq("tracking_token", token)
       .maybeSingle();
@@ -86,6 +86,21 @@ Deno.serve(async (req) => {
           .maybeSingle();
         riderLocation = loc ?? null;
       }
+    }
+
+    // Live countdown once the rider is actually moving with a fresh position fix.
+    let liveEta: number | null = null;
+    if (riderLocation && ["rider_picked_up", "on_the_way"].includes(delivery.status)) {
+      liveEta = liveEtaMinutes({
+        riderLat: riderLocation.lat,
+        riderLng: riderLocation.lng,
+        recordedAt: riderLocation.recorded_at,
+        destLat: delivery.dest_lat,
+        destLng: delivery.dest_lng,
+        distanceKm: Number(delivery.distance_km) || 0,
+        travelMinutes: Number((delivery as any).travel_minutes) || 0,
+        bufferMinutes: settings.eta_buffer_minutes,
+      });
     }
 
     return json({
