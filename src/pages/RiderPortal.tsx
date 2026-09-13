@@ -181,7 +181,7 @@ export default function RiderPortal() {
       if (idleWatchId.current !== null) navigator.geolocation.clearWatch(idleWatchId.current);
       idleWatchId.current = null;
     };
-  }, [jobs, rider?.id]);
+  }, [jobs, rider?.id, pingSeconds]);
 
   async function signIn(e: React.FormEvent) {
     e.preventDefault();
