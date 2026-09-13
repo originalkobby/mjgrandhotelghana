@@ -536,6 +536,12 @@ export default function FoodOrder() {
         </motion.div>
       </div>
 
+      <CustomerDetailsDialog
+        open={detailsOpen}
+        onOpenChange={setDetailsOpen}
+        onSaved={applyCustomer}
+      />
+
       <Footer />
     </div>
   );
