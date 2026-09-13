@@ -585,7 +585,7 @@ export default function AdminFoodOrders() {
                               variant="ghost"
                               size="sm"
                               disabled={updatingId === order.id}
-                              onClick={() => updateStatus(order.id, nextStatus(order)!)}
+                              onClick={() => updateStatus(order, nextStatus(order)!)}
                               className="text-green-600 hover:text-green-700 hover:bg-green-50"
                             >
                               {STATUS_LABELS[nextStatus(order)!]}
@@ -596,7 +596,7 @@ export default function AdminFoodOrders() {
                               variant="ghost"
                               size="sm"
                               disabled={updatingId === order.id}
-                              onClick={() => updateStatus(order.id, "cancelled")}
+                              onClick={() => updateStatus(order, "cancelled")}
                               className="text-red-600 hover:text-red-700 hover:bg-red-50"
                             >
                               Cancel
@@ -695,7 +695,7 @@ export default function AdminFoodOrders() {
                     <Button
                       variant="outline"
                       onClick={() => {
-                        updateStatus(selected.id, "cancelled");
+                        updateStatus(selected, "cancelled");
                         setSelected(null);
                       }}
                     >
@@ -703,7 +703,7 @@ export default function AdminFoodOrders() {
                     </Button>
                     <Button
                       onClick={() => {
-                        updateStatus(selected.id, nextStatus(selected)!);
+                        updateStatus(selected, nextStatus(selected)!);
                         setSelected(null);
                       }}
                     >
