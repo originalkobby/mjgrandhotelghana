@@ -416,7 +416,7 @@ export default function RiderPortal() {
           </DialogHeader>
           <div className="space-y-3">
             <p className="text-sm text-cream/60">
-              Amount due from the guest: GH₵{" "}
+              Amount due from the customer: GH₵{" "}
               {Number(cashJob?.food_orders?.total_ghs ?? 0).toFixed(2)}. This cash belongs to the
               hotel and must be handed over at reception.
             </p>

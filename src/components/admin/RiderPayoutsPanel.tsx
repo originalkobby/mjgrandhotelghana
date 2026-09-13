@@ -270,7 +270,7 @@ export default function RiderPayoutsPanel() {
                   <th className="p-2">Order</th>
                   <th className="p-2">Rider</th>
                   <th className="p-2">Distance</th>
-                  <th className="p-2">Guest fee</th>
+                  <th className="p-2">Customer fee</th>
                   <th className="p-2">Rider earning</th>
                   <th className="p-2">Status</th>
                   <th className="p-2">Date</th>

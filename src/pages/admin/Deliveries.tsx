@@ -176,7 +176,7 @@ function DeliveryBoard() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search reference, guest or address"
+            placeholder="Search reference, customer or address"
             className="w-64"
           />
           <Select value={filter} onValueChange={setFilter}>
