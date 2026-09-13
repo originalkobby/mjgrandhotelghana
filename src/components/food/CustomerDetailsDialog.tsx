@@ -56,9 +56,10 @@ export default function CustomerDetailsDialog({ open, onOpenChange, onSaved }: P
     }
     setErrors({});
     setSaving(true);
-    await saveCustomer(parsed.data);
+    const details = parsed.data as CustomerDetails;
+    await saveCustomer(details);
     setSaving(false);
-    onSaved(parsed.data);
+    onSaved(details);
   }
 
   return (
