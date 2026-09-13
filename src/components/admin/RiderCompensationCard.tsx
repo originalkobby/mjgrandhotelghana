@@ -144,6 +144,12 @@ export default function RiderCompensationCard({ canEdit }: { canEdit: boolean })
           ))}
         </div>
 
+        <p className="text-xs text-muted-foreground">
+          Peak window:{" "}
+          {peak ? `${pad(peak.start)}–${pad(peak.end)}` : "loading…"} — set once under Pricing and
+          timing above, and used for both the guest peak uplift and this rider bonus.
+        </p>
+
         {canEdit && (
           <div className="flex justify-end">
             <Button onClick={save} disabled={saving}>
