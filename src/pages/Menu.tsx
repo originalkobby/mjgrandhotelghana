@@ -115,8 +115,10 @@ const CompactSection = ({ title, items }: { title: string; items: { name: string
               </div>
             </motion.div>
           </Link>
-        ))}
+          );
+        })}
       </motion.div>
+      {gateDialog}
     </div>
   );
 };
