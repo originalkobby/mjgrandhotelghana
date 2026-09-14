@@ -31,6 +31,19 @@ import {
 import DeliveryLocationPicker, { PickedLocation } from "@/components/delivery/DeliveryLocationPicker";
 import CustomerDetailsDialog from "@/components/food/CustomerDetailsDialog";
 import { getCachedCustomer, getDeviceId, type CustomerDetails } from "@/lib/customerDevice";
+import { usePublicMenu } from "@/hooks/usePublicMenu";
+
+// Categories whose meals never take side orders.
+const NO_SIDES = new Set([
+  "Burgers & Sandwiches",
+  "Pizza",
+  "Desserts",
+  "Salads",
+  "Extras",
+  "Side Orders",
+  "Take Out Packs",
+  "Kids Meals",
+]);
 
 function parsePrice(value: string): number {
   if (!value) return 0;
@@ -68,6 +81,9 @@ export default function FoodOrder() {
   const [roomNumber, setRoomNumber] = useState("");
   const [orderType, setOrderType] = useState<"dine_in" | "room_service" | "takeaway" | "delivery">("dine_in");
   const [notes, setNotes] = useState("");
+
+  // Side orders: name → quantity
+  const [selectedSides, setSelectedSides] = useState<Record<string, number>>({});
 
   const [location, setLocation] = useState<PickedLocation | null>(null);
   const [landmark, setLandmark] = useState("");
