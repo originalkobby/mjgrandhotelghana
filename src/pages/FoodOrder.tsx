@@ -123,6 +123,7 @@ export default function FoodOrder() {
   useEffect(() => {
     setItemName(initialItem);
     setItemPrice(initialPrice);
+    setSelectedSides({});
   }, [initialItem, initialPrice]);
 
   // First-time device: capture details once, otherwise prefill from this device.
@@ -147,9 +148,48 @@ export default function FoodOrder() {
 
   const isDelivery = orderType === "delivery";
   const unitPrice = useMemo(() => parsePrice(itemPrice), [itemPrice]);
-  const subtotal = useMemo(() => unitPrice * quantity, [unitPrice, quantity]);
+
+  // Side orders available for this meal's category (from the live menu).
+  const { data: menuData } = usePublicMenu();
+  const showSides = !NO_SIDES.has(initialCategory);
+  const sideOptions = useMemo(
+    () => (showSides ? menuData?.["Side Orders"] ?? [] : []),
+    [showSides, menuData],
+  );
+  const sidesTotal = useMemo(
+    () =>
+      sideOptions.reduce(
+        (sum, s) => sum + (selectedSides[s.name] ?? 0) * parsePrice(s.price),
+        0,
+      ),
+    [sideOptions, selectedSides],
+  );
+  const chosenSides = useMemo(
+    () => sideOptions.filter((s) => (selectedSides[s.name] ?? 0) > 0),
+    [sideOptions, selectedSides],
+  );
+
+  const subtotal = useMemo(() => unitPrice * quantity + sidesTotal, [unitPrice, quantity, sidesTotal]);
   const deliveryFee = isDelivery && quote?.fee_ghs && !quote.out_of_range ? quote.fee_ghs : 0;
   const total = subtotal + deliveryFee;
+
+  function toggleSide(name: string) {
+    setSelectedSides((prev) => {
+      const next = { ...prev };
+      if (next[name]) delete next[name];
+      else next[name] = 1;
+      return next;
+    });
+  }
+
+  function setSideQty(name: string, qty: number) {
+    setSelectedSides((prev) => {
+      const next = { ...prev };
+      if (qty <= 0) delete next[name];
+      else next[name] = Math.min(20, qty);
+      return next;
+    });
+  }
 
   // Fetch a fresh, server-calculated delivery quote whenever the pin moves.
   useEffect(() => {
