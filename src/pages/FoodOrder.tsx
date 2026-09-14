@@ -433,47 +433,46 @@ export default function FoodOrder() {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label className="text-cream/70 text-sm">Quantity</Label>
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                        className="h-10 w-10 rounded-md border border-cream/10 text-cream hover:bg-cream/10 flex items-center justify-center transition-colors"
-                      >
-                        <Minus className="w-4 h-4" />
-                      </button>
-                      <span className="font-serif text-xl text-cream w-8 text-center">{quantity}</span>
-                      <button
-                        type="button"
-                        onClick={() => setQuantity((q) => q + 1)}
-                        className="h-10 w-10 rounded-md border border-cream/10 text-cream hover:bg-cream/10 flex items-center justify-center transition-colors"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {sideOptions.length > 0 && (
+                  {sideOptions.length > 0 ? (
                     <Collapsible open={sidesOpen} onOpenChange={setSidesOpen} className="space-y-3">
-                      <CollapsibleTrigger asChild>
-                        <button
-                          type="button"
-                          className="flex items-center justify-between w-full px-3 py-2.5 border border-cream/10 bg-charcoal hover:border-cream/25 transition-colors"
-                        >
-                          <span className="flex items-center gap-2 text-sm text-cream/80">
-                            Side orders (optional)
-                            {chosenSides.length > 0 && (
-                              <span className="text-[11px] px-1.5 py-0.5 bg-gold/15 text-gold rounded">
-                                {chosenSides.length} selected
-                              </span>
-                            )}
-                          </span>
-                          <ChevronDown
-                            className={`w-4 h-4 text-cream/50 transition-transform duration-200 ${sidesOpen ? "rotate-180" : ""}`}
-                          />
-                        </button>
-                      </CollapsibleTrigger>
+                      <div className="flex items-center justify-between gap-4">
+                        <CollapsibleTrigger asChild>
+                          <button
+                            type="button"
+                            className="flex items-center gap-2 px-3 py-2.5 border border-cream/10 bg-charcoal hover:border-cream/25 transition-colors"
+                          >
+                            <span className="flex items-center gap-2 text-sm text-cream/80">
+                              Side orders (optional)
+                              {chosenSides.length > 0 && (
+                                <span className="text-[11px] px-1.5 py-0.5 bg-gold/15 text-gold rounded">
+                                  {chosenSides.length} selected
+                                </span>
+                              )}
+                            </span>
+                            <ChevronDown
+                              className={`w-4 h-4 text-cream/50 transition-transform duration-200 ${sidesOpen ? "rotate-180" : ""}`}
+                            />
+                          </button>
+                        </CollapsibleTrigger>
+                        <div className="flex items-center gap-3">
+                          <Label className="text-cream/70 text-sm">Qty</Label>
+                          <button
+                            type="button"
+                            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                            className="h-10 w-10 rounded-md border border-cream/10 text-cream hover:bg-cream/10 flex items-center justify-center transition-colors"
+                          >
+                            <Minus className="w-4 h-4" />
+                          </button>
+                          <span className="font-serif text-xl text-cream w-8 text-center">{quantity}</span>
+                          <button
+                            type="button"
+                            onClick={() => setQuantity((q) => q + 1)}
+                            className="h-10 w-10 rounded-md border border-cream/10 text-cream hover:bg-cream/10 flex items-center justify-center transition-colors"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
                       <CollapsibleContent>
                         <div className="grid sm:grid-cols-2 gap-2 pt-1">
                           {sideOptions.map((side) => {
@@ -523,6 +522,27 @@ export default function FoodOrder() {
                         </div>
                       </CollapsibleContent>
                     </Collapsible>
+                  ) : (
+                    <div className="space-y-2">
+                      <Label className="text-cream/70 text-sm">Quantity</Label>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                          className="h-10 w-10 rounded-md border border-cream/10 text-cream hover:bg-cream/10 flex items-center justify-center transition-colors"
+                        >
+                          <Minus className="w-4 h-4" />
+                        </button>
+                        <span className="font-serif text-xl text-cream w-8 text-center">{quantity}</span>
+                        <button
+                          type="button"
+                          onClick={() => setQuantity((q) => q + 1)}
+                          className="h-10 w-10 rounded-md border border-cream/10 text-cream hover:bg-cream/10 flex items-center justify-center transition-colors"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
                   )}
 
                   <div className="space-y-2">
