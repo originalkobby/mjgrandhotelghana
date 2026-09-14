@@ -31,6 +31,19 @@ import {
 import DeliveryLocationPicker, { PickedLocation } from "@/components/delivery/DeliveryLocationPicker";
 import CustomerDetailsDialog from "@/components/food/CustomerDetailsDialog";
 import { getCachedCustomer, getDeviceId, type CustomerDetails } from "@/lib/customerDevice";
+import { usePublicMenu } from "@/hooks/usePublicMenu";
+
+// Categories whose meals never take side orders.
+const NO_SIDES = new Set([
+  "Burgers & Sandwiches",
+  "Pizza",
+  "Desserts",
+  "Salads",
+  "Extras",
+  "Side Orders",
+  "Take Out Packs",
+  "Kids Meals",
+]);
 
 function parsePrice(value: string): number {
   if (!value) return 0;
@@ -68,6 +81,9 @@ export default function FoodOrder() {
   const [roomNumber, setRoomNumber] = useState("");
   const [orderType, setOrderType] = useState<"dine_in" | "room_service" | "takeaway" | "delivery">("dine_in");
   const [notes, setNotes] = useState("");
+
+  // Side orders: name → quantity
+  const [selectedSides, setSelectedSides] = useState<Record<string, number>>({});
 
   const [location, setLocation] = useState<PickedLocation | null>(null);
   const [landmark, setLandmark] = useState("");
@@ -107,6 +123,7 @@ export default function FoodOrder() {
   useEffect(() => {
     setItemName(initialItem);
     setItemPrice(initialPrice);
+    setSelectedSides({});
   }, [initialItem, initialPrice]);
 
   // First-time device: capture details once, otherwise prefill from this device.
@@ -131,9 +148,48 @@ export default function FoodOrder() {
 
   const isDelivery = orderType === "delivery";
   const unitPrice = useMemo(() => parsePrice(itemPrice), [itemPrice]);
-  const subtotal = useMemo(() => unitPrice * quantity, [unitPrice, quantity]);
+
+  // Side orders available for this meal's category (from the live menu).
+  const { data: menuData } = usePublicMenu();
+  const showSides = !NO_SIDES.has(initialCategory);
+  const sideOptions = useMemo(
+    () => (showSides ? menuData?.["Side Orders"] ?? [] : []),
+    [showSides, menuData],
+  );
+  const sidesTotal = useMemo(
+    () =>
+      sideOptions.reduce(
+        (sum, s) => sum + (selectedSides[s.name] ?? 0) * parsePrice(s.price),
+        0,
+      ),
+    [sideOptions, selectedSides],
+  );
+  const chosenSides = useMemo(
+    () => sideOptions.filter((s) => (selectedSides[s.name] ?? 0) > 0),
+    [sideOptions, selectedSides],
+  );
+
+  const subtotal = useMemo(() => unitPrice * quantity + sidesTotal, [unitPrice, quantity, sidesTotal]);
   const deliveryFee = isDelivery && quote?.fee_ghs && !quote.out_of_range ? quote.fee_ghs : 0;
   const total = subtotal + deliveryFee;
+
+  function toggleSide(name: string) {
+    setSelectedSides((prev) => {
+      const next = { ...prev };
+      if (next[name]) delete next[name];
+      else next[name] = 1;
+      return next;
+    });
+  }
+
+  function setSideQty(name: string, qty: number) {
+    setSelectedSides((prev) => {
+      const next = { ...prev };
+      if (qty <= 0) delete next[name];
+      else next[name] = Math.min(20, qty);
+      return next;
+    });
+  }
 
   // Fetch a fresh, server-calculated delivery quote whenever the pin moves.
   useEffect(() => {
@@ -193,7 +249,14 @@ export default function FoodOrder() {
           order_type: orderType,
           notes: notes.trim(),
           payment_method: isDelivery ? paymentMethod : "cash_on_delivery",
-          items: [{ name: itemName.trim(), price_ghs: unitPrice, quantity }],
+          items: [
+            { name: itemName.trim(), price_ghs: unitPrice, quantity },
+            ...chosenSides.map((s) => ({
+              name: s.name,
+              price_ghs: parsePrice(s.price),
+              quantity: selectedSides[s.name],
+            })),
+          ],
           dest_lat: location?.lat,
           dest_lng: location?.lng,
           delivery_address: location?.address ?? "",
@@ -301,6 +364,11 @@ export default function FoodOrder() {
                   <p>
                     <span className="text-cream/40">Item:</span> {itemName} × {quantity}
                   </p>
+                  {chosenSides.map((s) => (
+                    <p key={s.name}>
+                      <span className="text-cream/40">Side:</span> {s.name} × {selectedSides[s.name]}
+                    </p>
+                  ))}
                   <p>
                     <span className="text-cream/40">Type:</span> {typeLabel[orderType]}
                   </p>
@@ -383,6 +451,58 @@ export default function FoodOrder() {
                     </div>
                   </div>
 
+                  {sideOptions.length > 0 && (
+                    <div className="space-y-3">
+                      <Label className="text-cream/70 text-sm">Side orders (optional)</Label>
+                      <div className="grid sm:grid-cols-2 gap-2">
+                        {sideOptions.map((side) => {
+                          const qty = selectedSides[side.name] ?? 0;
+                          const selected = qty > 0;
+                          return (
+                            <div
+                              key={side.name}
+                              className={`flex items-center justify-between gap-2 px-3 py-2 border transition-colors ${
+                                selected
+                                  ? "border-gold/50 bg-gold/10"
+                                  : "border-cream/10 bg-charcoal hover:border-cream/25"
+                              }`}
+                            >
+                              <button
+                                type="button"
+                                onClick={() => toggleSide(side.name)}
+                                className="flex-1 text-left"
+                              >
+                                <span className={`block text-sm ${selected ? "text-gold" : "text-cream/80"}`}>
+                                  {side.name}
+                                </span>
+                                <span className="block text-[11px] text-cream/40">{side.price}</span>
+                              </button>
+                              {selected && (
+                                <div className="flex items-center gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => setSideQty(side.name, qty - 1)}
+                                    className="h-7 w-7 border border-cream/15 text-cream hover:bg-cream/10 flex items-center justify-center transition-colors"
+                                  >
+                                    <Minus className="w-3 h-3" />
+                                  </button>
+                                  <span className="text-sm text-cream w-5 text-center">{qty}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setSideQty(side.name, qty + 1)}
+                                    className="h-7 w-7 border border-cream/15 text-cream hover:bg-cream/10 flex items-center justify-center transition-colors"
+                                  >
+                                    <Plus className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="space-y-2">
                     <Label className="text-cream/70 text-sm">Order type</Label>
                     <Select value={orderType} onValueChange={(v) => setOrderType(v as any)}>
@@ -463,16 +583,32 @@ export default function FoodOrder() {
 
                   <Separator className="bg-cream/10" />
 
-                  {isDelivery && (
+                  {(isDelivery || chosenSides.length > 0) && (
                     <div className="space-y-1 text-sm">
+                      {chosenSides.length > 0 && (
+                        <>
+                          <div className="flex justify-between text-cream/60">
+                            <span>{itemName || "Dish"} × {quantity}</span>
+                            <span>GH₵ {(unitPrice * quantity).toFixed(2)}</span>
+                          </div>
+                          {chosenSides.map((s) => (
+                            <div key={s.name} className="flex justify-between text-cream/60">
+                              <span>{s.name} × {selectedSides[s.name]}</span>
+                              <span>GH₵ {(parsePrice(s.price) * selectedSides[s.name]).toFixed(2)}</span>
+                            </div>
+                          ))}
+                        </>
+                      )}
                       <div className="flex justify-between text-cream/60">
                         <span>Items subtotal</span>
                         <span>GH₵ {subtotal.toFixed(2)}</span>
                       </div>
-                      <div className="flex justify-between text-cream/60">
-                        <span>Delivery</span>
-                        <span>GH₵ {deliveryFee.toFixed(2)}</span>
-                      </div>
+                      {isDelivery && (
+                        <div className="flex justify-between text-cream/60">
+                          <span>Delivery</span>
+                          <span>GH₵ {deliveryFee.toFixed(2)}</span>
+                        </div>
+                      )}
                     </div>
                   )}
 
