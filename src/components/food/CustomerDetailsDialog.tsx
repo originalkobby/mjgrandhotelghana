@@ -41,6 +41,7 @@ export default function CustomerDetailsDialog({ open, onOpenChange, onSaved }: P
   const [values, setValues] = useState<CustomerDetails>({ full_name: "", email: "", phone: "" });
   const [errors, setErrors] = useState<Partial<Record<keyof CustomerDetails, string>>>({});
   const [saving, setSaving] = useState(false);
+  const [allowClose, setAllowClose] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -59,12 +60,26 @@ export default function CustomerDetailsDialog({ open, onOpenChange, onSaved }: P
     const details = parsed.data as CustomerDetails;
     await saveCustomer(details);
     setSaving(false);
+    setAllowClose(true);
     onSaved(details);
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        // Block every dismissal path until the customer has filled the form
+        // and saved — the X icon, Escape key and backdrop click all funnel here.
+        if (!next && !allowClose) return;
+        onOpenChange(next);
+      }}
+    >
+      <DialogContent
+        className="max-w-md"
+        hideClose
+        onEscapeKeyDown={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="font-serif text-xl">Before you order</DialogTitle>
           <DialogDescription>
