@@ -583,16 +583,32 @@ export default function FoodOrder() {
 
                   <Separator className="bg-cream/10" />
 
-                  {isDelivery && (
+                  {(isDelivery || chosenSides.length > 0) && (
                     <div className="space-y-1 text-sm">
+                      {chosenSides.length > 0 && (
+                        <>
+                          <div className="flex justify-between text-cream/60">
+                            <span>{itemName || "Dish"} × {quantity}</span>
+                            <span>GH₵ {(unitPrice * quantity).toFixed(2)}</span>
+                          </div>
+                          {chosenSides.map((s) => (
+                            <div key={s.name} className="flex justify-between text-cream/60">
+                              <span>{s.name} × {selectedSides[s.name]}</span>
+                              <span>GH₵ {(parsePrice(s.price) * selectedSides[s.name]).toFixed(2)}</span>
+                            </div>
+                          ))}
+                        </>
+                      )}
                       <div className="flex justify-between text-cream/60">
                         <span>Items subtotal</span>
                         <span>GH₵ {subtotal.toFixed(2)}</span>
                       </div>
-                      <div className="flex justify-between text-cream/60">
-                        <span>Delivery</span>
-                        <span>GH₵ {deliveryFee.toFixed(2)}</span>
-                      </div>
+                      {isDelivery && (
+                        <div className="flex justify-between text-cream/60">
+                          <span>Delivery</span>
+                          <span>GH₵ {deliveryFee.toFixed(2)}</span>
+                        </div>
+                      )}
                     </div>
                   )}
 
