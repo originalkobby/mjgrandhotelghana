@@ -30,7 +30,7 @@ import {
 } from "lucide-react";
 import DeliveryLocationPicker, { PickedLocation } from "@/components/delivery/DeliveryLocationPicker";
 import CustomerDetailsDialog from "@/components/food/CustomerDetailsDialog";
-import { getCachedCustomer, type CustomerDetails } from "@/lib/customerDevice";
+import { getCachedCustomer, getDeviceId, type CustomerDetails } from "@/lib/customerDevice";
 
 function parsePrice(value: string): number {
   if (!value) return 0;
@@ -198,6 +198,7 @@ export default function FoodOrder() {
           dest_lng: location?.lng,
           delivery_address: location?.address ?? "",
           delivery_landmark: landmark.trim(),
+          device_id: getDeviceId(),
         },
       });
 
