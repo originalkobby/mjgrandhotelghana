@@ -33,6 +33,7 @@ import DeliveryLocationPicker, { PickedLocation } from "@/components/delivery/De
 import CustomerDetailsDialog from "@/components/food/CustomerDetailsDialog";
 import { getCachedCustomer, getDeviceId, type CustomerDetails } from "@/lib/customerDevice";
 import { usePublicMenu } from "@/hooks/usePublicMenu";
+import { parseSizePrices } from "@/lib/sizePricing";
 
 // Categories whose meals never take side orders.
 const NO_SIDES = new Set([
@@ -150,7 +151,17 @@ export default function FoodOrder() {
   }
 
   const isDelivery = orderType === "delivery";
-  const unitPrice = useMemo(() => parsePrice(itemPrice), [itemPrice]);
+
+  // Multi-size dishes (e.g. "M: GH₵ 150 / L: GH₵ 200") get a size dropdown.
+  const sizeOptions = useMemo(() => parseSizePrices(itemPrice), [itemPrice]);
+  const [selectedSize, setSelectedSize] = useState("");
+  const activeSize =
+    sizeOptions.find((s) => s.key === selectedSize) ?? sizeOptions[0] ?? null;
+  const unitPrice = useMemo(
+    () => (sizeOptions.length > 0 ? activeSize?.price ?? 0 : parsePrice(itemPrice)),
+    [sizeOptions, activeSize, itemPrice],
+  );
+  const displayName = activeSize ? `${itemName.trim()} (${activeSize.label})` : itemName.trim();
 
   // Side orders available for this meal's category (from the live menu).
   const { data: menuData } = usePublicMenu();
@@ -253,7 +264,7 @@ export default function FoodOrder() {
           notes: notes.trim(),
           payment_method: isDelivery ? paymentMethod : "cash_on_delivery",
           items: [
-            { name: itemName.trim(), price_ghs: unitPrice, quantity },
+            { name: displayName, price_ghs: unitPrice, quantity },
             ...chosenSides.map((s) => ({
               name: s.name,
               price_ghs: parsePrice(s.price),
@@ -365,7 +376,7 @@ export default function FoodOrder() {
 
                 <div className="space-y-2 text-sm text-cream/70 mb-6">
                   <p>
-                    <span className="text-cream/40">Item:</span> {itemName} × {quantity}
+                    <span className="text-cream/40">Item:</span> {displayName} × {quantity}
                   </p>
                   {chosenSides.map((s) => (
                     <p key={s.name}>
@@ -423,13 +434,33 @@ export default function FoodOrder() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-cream/70 text-sm">Unit price</Label>
-                      <Input
-                        value={itemPrice}
-                        onChange={(e) => setItemPrice(e.target.value)}
-                        className="bg-charcoal border-cream/10 text-cream"
-                        placeholder="GH₵ 0.00"
-                      />
+                      {sizeOptions.length > 0 ? (
+                        <>
+                          <Label className="text-cream/70 text-sm">Size</Label>
+                          <Select value={activeSize?.key ?? ""} onValueChange={setSelectedSize}>
+                            <SelectTrigger className="bg-charcoal border-cream/10 text-cream rounded-none">
+                              <SelectValue placeholder="Choose a size" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-charcoal border-cream/10 rounded-none">
+                              {sizeOptions.map((s) => (
+                                <SelectItem key={s.key} value={s.key}>
+                                  {s.label} — GH₵ {s.price.toFixed(2)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </>
+                      ) : (
+                        <>
+                          <Label className="text-cream/70 text-sm">Unit price</Label>
+                          <Input
+                            value={itemPrice}
+                            onChange={(e) => setItemPrice(e.target.value)}
+                            className="bg-charcoal border-cream/10 text-cream"
+                            placeholder="GH₵ 0.00"
+                          />
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -635,7 +666,7 @@ export default function FoodOrder() {
                       {chosenSides.length > 0 && (
                         <>
                           <div className="flex justify-between text-cream/60">
-                            <span>{itemName || "Dish"} × {quantity}</span>
+                            <span>{displayName || "Dish"} × {quantity}</span>
                             <span>GH₵ {(unitPrice * quantity).toFixed(2)}</span>
                           </div>
                           {chosenSides.map((s) => (

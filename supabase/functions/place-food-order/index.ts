@@ -24,6 +24,30 @@ function parsePrice(value: unknown): number {
   return Number.isFinite(n) ? n : 0;
 }
 
+// Multi-size price strings, e.g. "M: GH₵ 150 / L: GH₵ 200".
+const SIZE_LABELS: Record<string, string> = { S: "Small", M: "Medium", L: "Large" };
+
+function parseSizePrices(value: string): { key: string; label: string; price: number }[] {
+  const out: { key: string; label: string; price: number }[] = [];
+  const re = /([A-Za-z]+)\s*:\s*GH₵?\s*([\d.]+)/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(value ?? ""))) {
+    const key = m[1].toUpperCase();
+    const price = Number(m[2]);
+    if (Number.isFinite(price) && price > 0) {
+      out.push({ key, label: SIZE_LABELS[key] ?? m[1], price });
+    }
+  }
+  return out.length >= 2 ? out : [];
+}
+
+// Splits "Dish (Medium)" into base name + size label.
+function extractSizeFromName(name: string): { base: string; sizeLabel: string | null } {
+  const m = /^(.*?)\s*\(([^()]+)\)\s*$/.exec(name.trim());
+  if (!m || !m[1].trim()) return { base: name.trim(), sizeLabel: null };
+  return { base: m[1].trim(), sizeLabel: m[2].trim() };
+}
+
 function newRef() {
   return "FO-MJ-" + Math.random().toString(36).substring(2, 6).toUpperCase();
 }
@@ -70,21 +94,48 @@ Deno.serve(async (req) => {
       (menuRows ?? []).map((m: any) => [String(m.name).trim().toLowerCase(), m]),
     );
 
-    const priced = items.map((item) => {
+    const priced = [];
+    for (const item of items) {
       const qty = Math.min(50, Math.max(1, Math.floor(Number(item.quantity) || 1)));
+      const rawName = String(item.name ?? "").trim();
+      const { base, sizeLabel } = extractSizeFromName(rawName);
       const match =
         (item.menu_item_id && byId.get(item.menu_item_id)) ||
-        byName.get(String(item.name ?? "").trim().toLowerCase());
-      const name = match ? match.name : String(item.name ?? "").trim().slice(0, 160);
-      const unit = match ? parsePrice(match.price) : parsePrice(item.price_ghs);
-      return {
+        byName.get(rawName.toLowerCase()) ||
+        (sizeLabel ? byName.get(base.toLowerCase()) : undefined);
+
+      let name = match ? match.name : rawName.slice(0, 160);
+      let unit = match ? parsePrice(match.price) : parsePrice(item.price_ghs);
+
+      if (match) {
+        const sizes = parseSizePrices(String(match.price ?? ""));
+        if (sizes.length > 0) {
+          const picked = sizeLabel
+            ? sizes.find(
+                (s) =>
+                  s.label.toLowerCase() === sizeLabel.toLowerCase() ||
+                  s.key.toLowerCase() === sizeLabel.toLowerCase(),
+              )
+            : undefined;
+          if (!picked) {
+            return json(
+              { error: `Please choose a size for "${match.name}" (${sizes.map((s) => s.label).join(" / ")}).` },
+              400,
+            );
+          }
+          unit = picked.price;
+          name = `${match.name} (${picked.label})`;
+        }
+      }
+
+      priced.push({
         menu_item_id: match ? match.id : null,
         name,
         price_ghs: unit,
         quantity: qty,
         line_total_ghs: Math.round(unit * qty * 100) / 100,
-      };
-    });
+      });
+    }
 
     if (priced.some((p) => !p.name || p.price_ghs <= 0)) {
       return json({ error: "One or more dishes could not be priced. Please reselect them." }, 400);
