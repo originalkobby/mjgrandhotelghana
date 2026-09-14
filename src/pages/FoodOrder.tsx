@@ -28,7 +28,7 @@ import {
   Bike,
   Wallet,
 } from "lucide-react";
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import DeliveryLocationPicker, { PickedLocation } from "@/components/delivery/DeliveryLocationPicker";
 import CustomerDetailsDialog from "@/components/food/CustomerDetailsDialog";
 import { getCachedCustomer, getDeviceId, type CustomerDetails } from "@/lib/customerDevice";
@@ -434,26 +434,79 @@ export default function FoodOrder() {
                   </div>
 
                   {sideOptions.length > 0 ? (
-                    <Collapsible open={sidesOpen} onOpenChange={setSidesOpen} className="space-y-3">
+                    <div className="space-y-3">
                       <div className="flex items-center justify-between gap-4">
-                        <CollapsibleTrigger asChild>
-                          <button
-                            type="button"
-                            className="flex items-center gap-2 px-3 py-2.5 border border-cream/10 bg-charcoal hover:border-cream/25 transition-colors"
+                        <Popover open={sidesOpen} onOpenChange={setSidesOpen}>
+                          <PopoverTrigger asChild>
+                            <button
+                              type="button"
+                              className="flex items-center gap-2 px-3 py-2.5 border border-cream/10 bg-charcoal hover:border-cream/25 transition-colors"
+                            >
+                              <span className="flex items-center gap-2 text-sm text-cream/80">
+                                Side orders (optional)
+                                {chosenSides.length > 0 && (
+                                  <span className="text-[11px] px-1.5 py-0.5 bg-gold/15 text-gold rounded">
+                                    {chosenSides.length} selected
+                                  </span>
+                                )}
+                              </span>
+                              <ChevronDown
+                                className={`w-4 h-4 text-cream/50 transition-transform duration-200 ${sidesOpen ? "rotate-180" : ""}`}
+                              />
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent
+                            align="start"
+                            className="bg-charcoal border-cream/10 rounded-none w-[min(92vw,22rem)] p-0"
                           >
-                            <span className="flex items-center gap-2 text-sm text-cream/80">
-                              Side orders (optional)
-                              {chosenSides.length > 0 && (
-                                <span className="text-[11px] px-1.5 py-0.5 bg-gold/15 text-gold rounded">
-                                  {chosenSides.length} selected
-                                </span>
-                              )}
-                            </span>
-                            <ChevronDown
-                              className={`w-4 h-4 text-cream/50 transition-transform duration-200 ${sidesOpen ? "rotate-180" : ""}`}
-                            />
-                          </button>
-                        </CollapsibleTrigger>
+                            <div className="max-h-72 overflow-y-auto p-1">
+                              {sideOptions.map((side) => {
+                                const qty = selectedSides[side.name] ?? 0;
+                                const selected = qty > 0;
+                                return (
+                                  <div
+                                    key={side.name}
+                                    className={`flex items-center justify-between gap-2 px-3 py-2 border transition-colors ${
+                                      selected
+                                        ? "border-gold/50 bg-gold/10"
+                                        : "border-cream/10 bg-charcoal hover:border-cream/25"
+                                    }`}
+                                  >
+                                    <button
+                                      type="button"
+                                      onClick={() => toggleSide(side.name)}
+                                      className="flex-1 text-left"
+                                    >
+                                      <span className={`block text-sm ${selected ? "text-gold" : "text-cream/80"}`}>
+                                        {side.name}
+                                      </span>
+                                      <span className="block text-[11px] text-cream/40">{side.price}</span>
+                                    </button>
+                                    {selected && (
+                                      <div className="flex items-center gap-1.5">
+                                        <button
+                                          type="button"
+                                          onClick={() => setSideQty(side.name, qty - 1)}
+                                          className="h-7 w-7 border border-cream/15 text-cream hover:bg-cream/10 flex items-center justify-center transition-colors"
+                                        >
+                                          <Minus className="w-3 h-3" />
+                                        </button>
+                                        <span className="text-sm text-cream w-5 text-center">{qty}</span>
+                                        <button
+                                          type="button"
+                                          onClick={() => setSideQty(side.name, qty + 1)}
+                                          className="h-7 w-7 border border-cream/15 text-cream hover:bg-cream/10 flex items-center justify-center transition-colors"
+                                        >
+                                          <Plus className="w-3 h-3" />
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </PopoverContent>
+                        </Popover>
                         <div className="flex items-center gap-3">
                           <Label className="text-cream/70 text-sm">Qty</Label>
                           <button
@@ -473,55 +526,7 @@ export default function FoodOrder() {
                           </button>
                         </div>
                       </div>
-                      <CollapsibleContent>
-                        <div className="grid sm:grid-cols-2 gap-2 pt-1">
-                          {sideOptions.map((side) => {
-                            const qty = selectedSides[side.name] ?? 0;
-                            const selected = qty > 0;
-                            return (
-                              <div
-                                key={side.name}
-                                className={`flex items-center justify-between gap-2 px-3 py-2 border transition-colors ${
-                                  selected
-                                    ? "border-gold/50 bg-gold/10"
-                                    : "border-cream/10 bg-charcoal hover:border-cream/25"
-                                }`}
-                              >
-                                <button
-                                  type="button"
-                                  onClick={() => toggleSide(side.name)}
-                                  className="flex-1 text-left"
-                                >
-                                  <span className={`block text-sm ${selected ? "text-gold" : "text-cream/80"}`}>
-                                    {side.name}
-                                  </span>
-                                  <span className="block text-[11px] text-cream/40">{side.price}</span>
-                                </button>
-                                {selected && (
-                                  <div className="flex items-center gap-1.5">
-                                    <button
-                                      type="button"
-                                      onClick={() => setSideQty(side.name, qty - 1)}
-                                      className="h-7 w-7 border border-cream/15 text-cream hover:bg-cream/10 flex items-center justify-center transition-colors"
-                                    >
-                                      <Minus className="w-3 h-3" />
-                                    </button>
-                                    <span className="text-sm text-cream w-5 text-center">{qty}</span>
-                                    <button
-                                      type="button"
-                                      onClick={() => setSideQty(side.name, qty + 1)}
-                                      className="h-7 w-7 border border-cream/15 text-cream hover:bg-cream/10 flex items-center justify-center transition-colors"
-                                    >
-                                      <Plus className="w-3 h-3" />
-                                    </button>
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
+                    </div>
                   ) : (
                     <div className="space-y-2">
                       <Label className="text-cream/70 text-sm">Quantity</Label>
