@@ -249,7 +249,14 @@ export default function FoodOrder() {
           order_type: orderType,
           notes: notes.trim(),
           payment_method: isDelivery ? paymentMethod : "cash_on_delivery",
-          items: [{ name: itemName.trim(), price_ghs: unitPrice, quantity }],
+          items: [
+            { name: itemName.trim(), price_ghs: unitPrice, quantity },
+            ...chosenSides.map((s) => ({
+              name: s.name,
+              price_ghs: parsePrice(s.price),
+              quantity: selectedSides[s.name],
+            })),
+          ],
           dest_lat: location?.lat,
           dest_lng: location?.lng,
           delivery_address: location?.address ?? "",
@@ -357,6 +364,11 @@ export default function FoodOrder() {
                   <p>
                     <span className="text-cream/40">Item:</span> {itemName} × {quantity}
                   </p>
+                  {chosenSides.map((s) => (
+                    <p key={s.name}>
+                      <span className="text-cream/40">Side:</span> {s.name} × {selectedSides[s.name]}
+                    </p>
+                  ))}
                   <p>
                     <span className="text-cream/40">Type:</span> {typeLabel[orderType]}
                   </p>
