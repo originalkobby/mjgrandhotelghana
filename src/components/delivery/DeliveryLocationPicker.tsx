@@ -205,7 +205,7 @@ export default function DeliveryLocationPicker({ value, onChange }: Props) {
     <div className="space-y-3">
       <div className="relative">
         <div className="flex gap-2">
-          <div className="relative flex-1">
+          <div className="relative min-w-0 flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/40" />
             <Input
               value={query}
@@ -219,10 +219,10 @@ export default function DeliveryLocationPicker({ value, onChange }: Props) {
             variant="outline"
             onClick={useMyLocation}
             disabled={!ready || locating}
-            className="shrink-0 border-gold/40 text-gold hover:bg-gold/10"
+            className="shrink-0 border-gold/40 px-2 text-gold hover:bg-gold/10 sm:px-4"
           >
             {locating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Crosshair className="w-4 h-4" />}
-            <span className="ml-2 hidden sm:inline">My location</span>
+            <span className="ml-1 whitespace-nowrap text-xs sm:ml-2 sm:text-sm">My Current Location</span>
           </Button>
         </div>
 
