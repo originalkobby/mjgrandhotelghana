@@ -14,16 +14,26 @@ type FoodCustomer = {
   id: string;
   full_name: string;
   email: string;
-  phone: string;
+  phone: string | null;
   visit_count: number;
+  source: string | null;
   first_seen_at: string;
   last_seen_at: string;
 };
 
+const SOURCE_LABELS: Record<string, string> = {
+  device: "Device form",
+  order: "Order",
+};
+
+function sourceLabel(source: string | null): string {
+  return SOURCE_LABELS[source ?? "device"] ?? "Device form";
+}
+
 async function fetchCustomers(): Promise<FoodCustomer[]> {
   const { data, error } = await supabase
     .from("food_customers")
-    .select("id, full_name, email, phone, visit_count, first_seen_at, last_seen_at")
+    .select("id, full_name, email, phone, visit_count, source, first_seen_at, last_seen_at")
     .order("last_seen_at", { ascending: false })
     .limit(1000);
   if (error) throw error;
@@ -31,14 +41,15 @@ async function fetchCustomers(): Promise<FoodCustomer[]> {
 }
 
 function toCsv(rows: FoodCustomer[]): string {
-  const header = ["Name", "Email", "Phone", "Visits", "First seen", "Last seen"];
+  const header = ["Name", "Email", "Phone", "Visits", "Source", "First seen", "Last seen"];
   const esc = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
   const lines = rows.map((r) =>
     [
       r.full_name,
       r.email,
-      r.phone,
+      r.phone ?? "",
       r.visit_count,
+      sourceLabel(r.source),
       formatDateTimeGB(r.first_seen_at),
       formatDateTimeGB(r.last_seen_at),
     ]
