@@ -955,37 +955,40 @@ export type Database = {
       food_customers: {
         Row: {
           created_at: string
-          device_id: string
+          device_id: string | null
           email: string
           first_seen_at: string
           full_name: string
           id: string
           last_seen_at: string
           phone: string
+          source: string
           updated_at: string
           visit_count: number
         }
         Insert: {
           created_at?: string
-          device_id: string
+          device_id?: string | null
           email: string
           first_seen_at?: string
           full_name: string
           id?: string
           last_seen_at?: string
           phone: string
+          source?: string
           updated_at?: string
           visit_count?: number
         }
         Update: {
           created_at?: string
-          device_id?: string
+          device_id?: string | null
           email?: string
           first_seen_at?: string
           full_name?: string
           id?: string
           last_seen_at?: string
           phone?: string
+          source?: string
           updated_at?: string
           visit_count?: number
         }
@@ -2029,6 +2032,17 @@ export type Database = {
       }
     }
     Functions: {
+      capture_food_customer: {
+        Args: {
+          _device_id?: string
+          _email: string
+          _full_name: string
+          _phone: string
+          _seen_at?: string
+          _source?: string
+        }
+        Returns: undefined
+      }
       current_rider_id: { Args: never; Returns: string }
       generate_booking_ref: { Args: never; Returns: string }
       get_my_admin_role: { Args: never; Returns: string }
