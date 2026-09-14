@@ -376,7 +376,7 @@ export default function FoodOrder() {
 
                 <div className="space-y-2 text-sm text-cream/70 mb-6">
                   <p>
-                    <span className="text-cream/40">Item:</span> {itemName} × {quantity}
+                    <span className="text-cream/40">Item:</span> {displayName} × {quantity}
                   </p>
                   {chosenSides.map((s) => (
                     <p key={s.name}>
