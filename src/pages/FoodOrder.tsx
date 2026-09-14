@@ -450,44 +450,6 @@ export default function FoodOrder() {
                     </div>
                   )}
 
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-cream/70 text-sm">Your name *</Label>
-                      <Input
-                        value={guestName}
-                        onChange={(e) => setGuestName(e.target.value)}
-                        className="bg-charcoal border-cream/10 text-cream"
-                        placeholder="Full name"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-cream/70 text-sm">Phone {isDelivery && "*"}</Label>
-                      <Input
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        className="bg-charcoal border-cream/10 text-cream"
-                        placeholder="+233..."
-                        required={isDelivery}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-cream/70 text-sm">Email *</Label>
-                    <Input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="bg-charcoal border-cream/10 text-cream"
-                      placeholder="you@example.com"
-                      required
-                    />
-                    <p className="text-[11px] text-cream/40">
-                      We'll send your order updates here.
-                    </p>
-                  </div>
-
                   <div className="space-y-2">
                     <Label className="text-cream/70 text-sm">Notes</Label>
                     <Textarea
