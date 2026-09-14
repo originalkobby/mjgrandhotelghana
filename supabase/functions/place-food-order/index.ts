@@ -175,6 +175,20 @@ Deno.serve(async (req) => {
       throw itemsError;
     }
 
+    // Record (or refresh) the customer behind this order. Never block the order.
+    try {
+      const { error: captureError } = await supabase.rpc("capture_food_customer", {
+        _full_name: guestName,
+        _email: email,
+        _phone: phone || "",
+        _device_id: typeof body.device_id === "string" ? body.device_id.slice(0, 64) : null,
+        _source: "order",
+      });
+      if (captureError) console.error("capture_food_customer failed", captureError);
+    } catch (e) {
+      console.error("capture_food_customer threw", e);
+    }
+
     let trackingToken: string | null = null;
     if (deliveryPayload) {
       const { data: delivery, error: deliveryError } = await supabase

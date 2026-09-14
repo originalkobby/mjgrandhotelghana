@@ -14,16 +14,26 @@ type FoodCustomer = {
   id: string;
   full_name: string;
   email: string;
-  phone: string;
+  phone: string | null;
   visit_count: number;
+  source: string | null;
   first_seen_at: string;
   last_seen_at: string;
 };
 
+const SOURCE_LABELS: Record<string, string> = {
+  device: "Device form",
+  order: "Order",
+};
+
+function sourceLabel(source: string | null): string {
+  return SOURCE_LABELS[source ?? "device"] ?? "Device form";
+}
+
 async function fetchCustomers(): Promise<FoodCustomer[]> {
   const { data, error } = await supabase
     .from("food_customers")
-    .select("id, full_name, email, phone, visit_count, first_seen_at, last_seen_at")
+    .select("id, full_name, email, phone, visit_count, source, first_seen_at, last_seen_at")
     .order("last_seen_at", { ascending: false })
     .limit(1000);
   if (error) throw error;
@@ -31,14 +41,15 @@ async function fetchCustomers(): Promise<FoodCustomer[]> {
 }
 
 function toCsv(rows: FoodCustomer[]): string {
-  const header = ["Name", "Email", "Phone", "Visits", "First seen", "Last seen"];
+  const header = ["Name", "Email", "Phone", "Visits", "Source", "First seen", "Last seen"];
   const esc = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
   const lines = rows.map((r) =>
     [
       r.full_name,
       r.email,
-      r.phone,
+      r.phone ?? "",
       r.visit_count,
+      sourceLabel(r.source),
       formatDateTimeGB(r.first_seen_at),
       formatDateTimeGB(r.last_seen_at),
     ]
@@ -67,7 +78,7 @@ export default function FoodCustomersPanel({ isAdmin }: { isAdmin: boolean }) {
       (c) =>
         c.full_name.toLowerCase().includes(q) ||
         c.email.toLowerCase().includes(q) ||
-        c.phone.toLowerCase().includes(q),
+        (c.phone ?? "").toLowerCase().includes(q),
     );
   }, [customers, search]);
 
@@ -142,6 +153,7 @@ export default function FoodCustomersPanel({ isAdmin }: { isAdmin: boolean }) {
                   <th className="px-4 py-3 font-medium">Email</th>
                   <th className="px-4 py-3 font-medium">Phone</th>
                   <th className="px-4 py-3 font-medium">Visits</th>
+                  <th className="px-4 py-3 font-medium">Source</th>
                   <th className="px-4 py-3 font-medium">First seen</th>
                   <th className="px-4 py-3 font-medium">Last seen</th>
                   {isAdmin && <th className="px-4 py-3 font-medium" />}
@@ -151,7 +163,7 @@ export default function FoodCustomersPanel({ isAdmin }: { isAdmin: boolean }) {
                 {filtered.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={isAdmin ? 7 : 6}
+                      colSpan={isAdmin ? 8 : 7}
                       className="text-center py-16 text-muted-foreground"
                     >
                       No customers captured yet
@@ -164,6 +176,11 @@ export default function FoodCustomersPanel({ isAdmin }: { isAdmin: boolean }) {
                       <td className="px-4 py-3 text-muted-foreground">{c.email}</td>
                       <td className="px-4 py-3 text-muted-foreground tabular-nums">{c.phone}</td>
                       <td className="px-4 py-3 tabular-nums">{c.visit_count}</td>
+                      <td className="px-4 py-3">
+                        <Badge variant="outline" className="text-[11px]">
+                          {sourceLabel(c.source)}
+                        </Badge>
+                      </td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">
                         {formatDateTimeGB(c.first_seen_at)}
                       </td>
