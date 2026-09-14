@@ -153,6 +153,7 @@ export default function FoodCustomersPanel({ isAdmin }: { isAdmin: boolean }) {
                   <th className="px-4 py-3 font-medium">Email</th>
                   <th className="px-4 py-3 font-medium">Phone</th>
                   <th className="px-4 py-3 font-medium">Visits</th>
+                  <th className="px-4 py-3 font-medium">Source</th>
                   <th className="px-4 py-3 font-medium">First seen</th>
                   <th className="px-4 py-3 font-medium">Last seen</th>
                   {isAdmin && <th className="px-4 py-3 font-medium" />}
