@@ -451,6 +451,58 @@ export default function FoodOrder() {
                     </div>
                   </div>
 
+                  {sideOptions.length > 0 && (
+                    <div className="space-y-3">
+                      <Label className="text-cream/70 text-sm">Side orders (optional)</Label>
+                      <div className="grid sm:grid-cols-2 gap-2">
+                        {sideOptions.map((side) => {
+                          const qty = selectedSides[side.name] ?? 0;
+                          const selected = qty > 0;
+                          return (
+                            <div
+                              key={side.name}
+                              className={`flex items-center justify-between gap-2 px-3 py-2 border transition-colors ${
+                                selected
+                                  ? "border-gold/50 bg-gold/10"
+                                  : "border-cream/10 bg-charcoal hover:border-cream/25"
+                              }`}
+                            >
+                              <button
+                                type="button"
+                                onClick={() => toggleSide(side.name)}
+                                className="flex-1 text-left"
+                              >
+                                <span className={`block text-sm ${selected ? "text-gold" : "text-cream/80"}`}>
+                                  {side.name}
+                                </span>
+                                <span className="block text-[11px] text-cream/40">{side.price}</span>
+                              </button>
+                              {selected && (
+                                <div className="flex items-center gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => setSideQty(side.name, qty - 1)}
+                                    className="h-7 w-7 border border-cream/15 text-cream hover:bg-cream/10 flex items-center justify-center transition-colors"
+                                  >
+                                    <Minus className="w-3 h-3" />
+                                  </button>
+                                  <span className="text-sm text-cream w-5 text-center">{qty}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setSideQty(side.name, qty + 1)}
+                                    className="h-7 w-7 border border-cream/15 text-cream hover:bg-cream/10 flex items-center justify-center transition-colors"
+                                  >
+                                    <Plus className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="space-y-2">
                     <Label className="text-cream/70 text-sm">Order type</Label>
                     <Select value={orderType} onValueChange={(v) => setOrderType(v as any)}>
