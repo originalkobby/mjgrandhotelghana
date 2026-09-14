@@ -264,7 +264,7 @@ export default function FoodOrder() {
           notes: notes.trim(),
           payment_method: isDelivery ? paymentMethod : "cash_on_delivery",
           items: [
-            { name: itemName.trim(), price_ghs: unitPrice, quantity },
+            { name: displayName, price_ghs: unitPrice, quantity },
             ...chosenSides.map((s) => ({
               name: s.name,
               price_ghs: parsePrice(s.price),
@@ -434,13 +434,33 @@ export default function FoodOrder() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-cream/70 text-sm">Unit price</Label>
-                      <Input
-                        value={itemPrice}
-                        onChange={(e) => setItemPrice(e.target.value)}
-                        className="bg-charcoal border-cream/10 text-cream"
-                        placeholder="GH₵ 0.00"
-                      />
+                      {sizeOptions.length > 0 ? (
+                        <>
+                          <Label className="text-cream/70 text-sm">Size</Label>
+                          <Select value={activeSize?.key ?? ""} onValueChange={setSelectedSize}>
+                            <SelectTrigger className="bg-charcoal border-cream/10 text-cream rounded-none">
+                              <SelectValue placeholder="Choose a size" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-charcoal border-cream/10 rounded-none">
+                              {sizeOptions.map((s) => (
+                                <SelectItem key={s.key} value={s.key}>
+                                  {s.label} — GH₵ {s.price.toFixed(2)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </>
+                      ) : (
+                        <>
+                          <Label className="text-cream/70 text-sm">Unit price</Label>
+                          <Input
+                            value={itemPrice}
+                            onChange={(e) => setItemPrice(e.target.value)}
+                            className="bg-charcoal border-cream/10 text-cream"
+                            placeholder="GH₵ 0.00"
+                          />
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -646,7 +666,7 @@ export default function FoodOrder() {
                       {chosenSides.length > 0 && (
                         <>
                           <div className="flex justify-between text-cream/60">
-                            <span>{itemName || "Dish"} × {quantity}</span>
+                            <span>{displayName || "Dish"} × {quantity}</span>
                             <span>GH₵ {(unitPrice * quantity).toFixed(2)}</span>
                           </div>
                           {chosenSides.map((s) => (
