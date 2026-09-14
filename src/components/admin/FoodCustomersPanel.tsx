@@ -163,7 +163,7 @@ export default function FoodCustomersPanel({ isAdmin }: { isAdmin: boolean }) {
                 {filtered.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={isAdmin ? 7 : 6}
+                      colSpan={isAdmin ? 8 : 7}
                       className="text-center py-16 text-muted-foreground"
                     >
                       No customers captured yet
@@ -176,6 +176,11 @@ export default function FoodCustomersPanel({ isAdmin }: { isAdmin: boolean }) {
                       <td className="px-4 py-3 text-muted-foreground">{c.email}</td>
                       <td className="px-4 py-3 text-muted-foreground tabular-nums">{c.phone}</td>
                       <td className="px-4 py-3 tabular-nums">{c.visit_count}</td>
+                      <td className="px-4 py-3">
+                        <Badge variant="outline" className="text-[11px]">
+                          {sourceLabel(c.source)}
+                        </Badge>
+                      </td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">
                         {formatDateTimeGB(c.first_seen_at)}
                       </td>
