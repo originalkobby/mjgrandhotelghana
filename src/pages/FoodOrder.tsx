@@ -33,6 +33,7 @@ import DeliveryLocationPicker, { PickedLocation } from "@/components/delivery/De
 import CustomerDetailsDialog from "@/components/food/CustomerDetailsDialog";
 import { getCachedCustomer, getDeviceId, type CustomerDetails } from "@/lib/customerDevice";
 import { usePublicMenu } from "@/hooks/usePublicMenu";
+import { parseSizePrices } from "@/lib/sizePricing";
 
 // Categories whose meals never take side orders.
 const NO_SIDES = new Set([
@@ -150,7 +151,17 @@ export default function FoodOrder() {
   }
 
   const isDelivery = orderType === "delivery";
-  const unitPrice = useMemo(() => parsePrice(itemPrice), [itemPrice]);
+
+  // Multi-size dishes (e.g. "M: GH₵ 150 / L: GH₵ 200") get a size dropdown.
+  const sizeOptions = useMemo(() => parseSizePrices(itemPrice), [itemPrice]);
+  const [selectedSize, setSelectedSize] = useState("");
+  const activeSize =
+    sizeOptions.find((s) => s.key === selectedSize) ?? sizeOptions[0] ?? null;
+  const unitPrice = useMemo(
+    () => (sizeOptions.length > 0 ? activeSize?.price ?? 0 : parsePrice(itemPrice)),
+    [sizeOptions, activeSize, itemPrice],
+  );
+  const displayName = activeSize ? `${itemName.trim()} (${activeSize.label})` : itemName.trim();
 
   // Side orders available for this meal's category (from the live menu).
   const { data: menuData } = usePublicMenu();
