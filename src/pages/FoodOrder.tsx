@@ -85,6 +85,7 @@ export default function FoodOrder() {
 
   // Side orders: name → quantity
   const [selectedSides, setSelectedSides] = useState<Record<string, number>>({});
+  const [sidesOpen, setSidesOpen] = useState(false);
 
   const [location, setLocation] = useState<PickedLocation | null>(null);
   const [landmark, setLandmark] = useState("");
@@ -125,6 +126,7 @@ export default function FoodOrder() {
     setItemName(initialItem);
     setItemPrice(initialPrice);
     setSelectedSides({});
+    setSidesOpen(false);
   }, [initialItem, initialPrice]);
 
   // First-time device: capture details once, otherwise prefill from this device.
