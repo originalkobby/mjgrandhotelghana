@@ -78,7 +78,7 @@ export default function FoodCustomersPanel({ isAdmin }: { isAdmin: boolean }) {
       (c) =>
         c.full_name.toLowerCase().includes(q) ||
         c.email.toLowerCase().includes(q) ||
-        c.phone.toLowerCase().includes(q),
+        (c.phone ?? "").toLowerCase().includes(q),
     );
   }, [customers, search]);
 
