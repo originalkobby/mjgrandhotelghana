@@ -28,7 +28,7 @@ import {
   Bike,
   Wallet,
 } from "lucide-react";
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import DeliveryLocationPicker, { PickedLocation } from "@/components/delivery/DeliveryLocationPicker";
 import CustomerDetailsDialog from "@/components/food/CustomerDetailsDialog";
 import { getCachedCustomer, getDeviceId, type CustomerDetails } from "@/lib/customerDevice";
